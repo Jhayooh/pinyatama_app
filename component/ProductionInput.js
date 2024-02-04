@@ -21,14 +21,35 @@ const SampleData = [
     qnty: '25, 000',
     unit: 'pcs',
     pUnit: '1',
-    total: '25, 000'
+    total: '25, 000',
+    id: 0,
+    child: null
   },
   {
     name: 'Fertilizer',
     qnty: '10',
     unit: 'bags',
     pUnit: '1, 150',
-    total: '11, 500'
+    total: '11, 500',
+    id: 1,
+    child: [
+      {
+        name: '0-0-60',
+        qnty: '5',
+        unit: 'bags',
+        pUnit: 875,
+        total: 4375,
+        id: 0
+      },
+      {
+        name: 'Urea',
+        qnty: '5',
+        unit: 'bags',
+        pUnit: 950,
+        total: 4750,
+        id: 1
+      }
+    ]
   }
 ]
 
@@ -37,13 +58,14 @@ const SampleData = [
 const TableHead = ({ headers }) => {
   return (
     <View style={styles.tableHead}>
+      {headers.forE}
       <View style={{ flex: 3, alignSelf: 'stretch' }}>
         <Text>{headers[0]}</Text>
       </View>
       <View style={{ flex: 2, alignSelf: 'stretch' }}>
         <Text>{headers[1]}</Text>
       </View>
-      <View style={{ flex: 1, alignSelf: 'stretch' }} >
+      <View style={{ flex: 2, alignSelf: 'stretch' }} >
         <Text>{headers[2]}</Text>
       </View>
       <View style={{ flex: 2, alignSelf: 'stretch' }} >
@@ -65,7 +87,7 @@ const TableData = ({ data }) => {
       <View style={{ flex: 2, alignSelf: 'stretch' }}>
         <Text>{data.qnty}</Text>
       </View>
-      <View style={{ flex: 1, alignSelf: 'stretch' }}>
+      <View style={{ flex: 2, alignSelf: 'stretch' }}>
         <Text>{data.unit}</Text>
       </View>
       <View style={{ flex: 2, alignSelf: 'stretch' }}>
@@ -83,7 +105,12 @@ const TableBuilder = ({headers, items}) => {
     <>
     <TableHead headers={headers}/>
     {items.map(data => (
+      <>
       <TableData data={data}/>
+      {data.child && data.child.map(child => (
+        <TableData data={child} />
+      ))}
+      </>
       ))}
     </>
   )
