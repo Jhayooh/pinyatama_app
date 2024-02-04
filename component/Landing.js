@@ -17,7 +17,7 @@ const ButtonContainer = ({ navigation }) => {
                 <TouchableOpacity key={index} style={styles.button} onPress={()=>{
                     switch (index) {
                         case 0:
-                            navigation.navigate('Calculator')
+                            navigation.navigate('Map')
                             break;
                         case 1:
                             navigation.navigate('ProductionInput')
