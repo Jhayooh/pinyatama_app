@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Button } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
+import GetLocation from 'react-native-get-location'
+
 
 const YourMapComponent = () => {
   const [region, setRegion] = useState({
@@ -69,5 +71,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
 });
+
+
 
 export default YourMapComponent;
