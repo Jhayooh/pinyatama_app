@@ -22,10 +22,8 @@ const data = [
   { label: 'Item 8', value: '8' },
 ];
 
-export const Calculator = () => {
+export const Calculator = ({navigation}) => {
   const [value, setValue] = useState(null);
-  const [isFocus, setIsFocus] = useState(false);
-  const [showModal, setShowModal] = useState(false);
 
   return (
     <>
@@ -33,61 +31,12 @@ export const Calculator = () => {
         <View style={{flex: 1, alignItems: 'center',}}>
           <Image source={require('../assets/icon.png')} style={{width: 120, height: 110}} />
           <TouchableOpacity style={styles.touch} onPress={()=>{
-            setShowModal(true)
+            navigation.navigate('ProductionInput')
           }}>
             <Text>Paglagay ng Pagsusuri</Text>
           </TouchableOpacity>
         </View>
       </ImageBackground>
-
-    <Modal animationType='fade' transparent={true} visible={showModal} onRequestClose={() => {
-            Alert.alert('Modal has been closed.');
-            setModalVisible(!modalVisible);
-        }}>
-          <View style={styles.modalBackground}>
-            <View style={styles.modalContainer}>
-
-            <Text>COST AND RETURN ANALYSIS PINEAPPLE PRODUCTION</Text>
-            <View>
-              <Text>PARTICULAR</Text>
-              <Dropdown
-          style={[styles.dropdown, isFocus && { borderColor: 'blue' }]}
-          placeholderStyle={styles.placeholderStyle}
-          selectedTextStyle={styles.selectedTextStyle}
-          inputSearchStyle={styles.inputSearchStyle}
-          iconStyle={styles.iconStyle}
-          data={data}
-          search
-          maxHeight={300}
-          labelField="label"
-          valueField="value"
-          placeholder={!isFocus ? 'Select item' : '...'}
-          searchPlaceholder="Search..."
-          value={value}
-          onFocus={() => setIsFocus(true)}
-          onBlur={() => setIsFocus(false)}
-          onChange={item => {
-            setValue(item.value);
-            setIsFocus(false);
-          }}
-          renderLeftIcon={() => (
-            <AntDesign
-              style={styles.icon}
-              color={isFocus ? 'blue' : 'black'}
-              name="Safety"
-              size={20}
-            />
-          )}
-        />
-        <TouchableOpacity style={styles.touch} onPress={()=>{
-            setShowModal(!showModal)
-          }}>
-            <Text>Magbalik</Text>
-          </TouchableOpacity>
-            </View>
-          </View>
-          </View>
-    </Modal>
     </>
   )
 }
