@@ -1,5 +1,5 @@
-import { collection } from 'firebase/firestore';
-import React from 'react';
+import { addDoc, collection, doc, updateDoc } from 'firebase/firestore';
+import React, { useState, useEffect } from 'react';
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import {
   ActivityIndicator,
@@ -10,6 +10,15 @@ import {
 import { db } from '../firebase/Config';
 import { AddDataRow } from './AddDataRow';
 
+const Total = ({ total, name }) => {
+
+  return (
+    <View style={{...styles.tableData, padding: 12}}>
+      <Text style={{flex: 4, fontWeight: 'bold', fontSize: 18}}>Total {name} Inputs</Text>
+      <Text style={{flex: 1, fontWeight: 'bold', fontSize: 18}}>{total}</Text>
+    </View>
+  )
+}
 
 const TableHead = ({ headers }) => {
   const header = [
@@ -58,6 +67,7 @@ const TableDataChild = ({ path }) => {
   // console.log(path)
   const query = collection(db, path)
   const [docs, loading, error] = useCollectionData(query)
+
   return (
     <>
       {docs?.map(doc => (
@@ -67,14 +77,39 @@ const TableDataChild = ({ path }) => {
   )
 }
 
-
-export const TableBuilder = ({ headers, path }) => {
+export const TableBuilder = ({ name, path }) => {
   const query = collection(db, path);
   const [docs, loading, error] = useCollectionData(query);
 
+  const [total, setTotal] = useState(0)
+
+
+  useEffect(() => {
+    if (docs) {
+      let sum = 0;
+      docs.forEach(doc => {
+        sum += doc.total;
+      });
+      setTotal(sum);
+      updateTotal(sum)
+    }
+    
+  }, [docs]);
+
+  updateTotal = async ({ sum }) => {
+    console.log(total);
+    try {
+      await updateDoc(doc(db, 'particulars', name), {
+        totalInputs: total
+      })
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
   return (
     <View style={{ marginBottom: 6 }} >
-      <TableHead headers={headers} />
+      <TableHead headers={name} />
       {
         loading
           ?
@@ -86,6 +121,7 @@ export const TableBuilder = ({ headers, path }) => {
               <TableDataChild key={doc.id} path={`${path}/${doc.id}/${doc.name}`} />
             </>
           ))}
+      { total !== 0 && <Total total={total} name={name}/> }
       <AddDataRow path={path} />
     </View>
   )

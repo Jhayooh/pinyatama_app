@@ -15,19 +15,7 @@ import {
 import { db } from '../firebase/Config';
 import { TableBuilder } from './TableBuilder';
 import Charts from './Charts';
-
-const BottomButton = ({ setShow }) => {
-  return (
-    <View style={styles.bottomButton}>
-      <TouchableOpacity style={styles.bottomButtonItem} onPress={() => setShow(true)}>
-        <Text>Add</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.bottomButtonItem}>
-        <Text>Save</Text>
-      </TouchableOpacity>
-    </View>
-  )
-}
+import { BottomButton } from './BottomButton';
 
 const ProductionInput = () => {
   const [materials, setMaterials] = useState([])
@@ -76,13 +64,22 @@ const ProductionInput = () => {
                     <ActivityIndicator size='small' color='#3bcd6b' style={{ padding: 64, backgroundColor: '#fff' }} />
                     :
                     docs?.map((doc) => (
-                      <TableBuilder key={doc.name} headers={doc.name} path={`particulars/${doc.name}/${doc.name}`} />
+                      <TableBuilder
+                        key={doc.name}
+                        name={doc.name}
+                        path={`particulars/${doc.name}/${doc.name}`}/>
                     ))}
               </ScrollView>
               <BottomButton setShow={setIsShow} />
-
             </>
             :
+            // <>
+            //   {loading
+            //     ?
+            //     <ActivityIndicator size='small' color='#3bcd6b' style={{ padding: 64, backgroundColor: '#fff' }} />
+            //     :
+            //   }
+            // </>
             <Charts />
           }
         </ImageBackground>
