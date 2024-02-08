@@ -54,10 +54,7 @@ const ProductionInput = () => {
                 <ActivityIndicator size='small' color='#3bcd6b' style={{ padding: 64, backgroundColor: '#fff' }} />
                 :
                 docs?.map((doc) => (
-                  <>
-                  {console.log(doc)}
                   <TableBuilder key={doc.name} headers={doc.name} path={`particulars/${doc.name}/${doc.name}`} />
-                  </>
                 ))}
           </ScrollView>
 
