@@ -68,7 +68,6 @@ const styles = StyleSheet.create({
         resizeMode: 'cover',
     },
     buttonContainer: {
-     
         flexDirection: 'column',
         justifyContent: 'space-between',
         flexWrap: 'wrap',
@@ -88,8 +87,6 @@ const styles = StyleSheet.create({
     buttonText: {
         color: 'white',
         textAlign: 'center',
-       
-        
     },
     button: {
         width: 150,
