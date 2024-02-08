@@ -42,11 +42,12 @@ const ButtonContainer = ({ navigation }) => {
 export const Landing = ({ navigation }) => {
     return (
         <View style={styles.container}>
-            <ImageBackground source={require('../assets/brakrawnd.png')}  style={styles.background}></ImageBackground> 
-           
+            <ImageBackground source={require('../assets/brakrawnd.png')}  style={styles.background}></ImageBackground>           
             <Image source={require('../assets/white.png')}style={styles.overlayImage} />
             <Image source={require('../assets/pik.png')}style={styles.overlayPik} />
             <ButtonContainer navigation={navigation} />
+           
+
             
         </View>
         
@@ -91,11 +92,11 @@ const styles = StyleSheet.create({
         
     },
     button: {
-        width: 180,
+        width: 150,
         height: 130,
         padding: 5,
         backgroundColor:'#1E6738',
-        borderRadius:10,
+        borderRadius:20,
         borderWidth: 1,
         shadowColor: '#1D4927',
         borderColor: '#1D4927',
@@ -124,6 +125,17 @@ const styles = StyleSheet.create({
         zIndex: 2, // ensure the overlay is above the background
         borderTopRightRadius: 20,
         borderTopLeftRadius: 20
+      },
+      overlayOval: {
+        position: 'absolute',
+        top: 100,
+        left: 50,
+        width: '110%', // or specify a fixed width
+        height: '20%', // or specify a fixed height
+  
+        opacity: 0.9, // adjust opacity as needed
+        zIndex: 3, // ensure the overlay is above the background
+      
       },
     label: {
 
