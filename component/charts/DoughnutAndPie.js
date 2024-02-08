@@ -2,7 +2,7 @@ import React from 'react'
 import {
     PieChart
 } from "react-native-chart-kit";
-import { Dimensions, View } from 'react-native';
+import { Dimensions, View, ActivityIndicator } from 'react-native';
 
 const data = [
     {
@@ -63,7 +63,6 @@ export const DoughnutAndPie = () => {
             height={220}
             chartConfig={chartConfig}
             accessor={"population"}
-
         />
     )
 }
