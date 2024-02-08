@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-evenly',
     },
     buttonText: {
-        color: 'white',
+        color: 'black',
         textAlign: 'center',
        
         
