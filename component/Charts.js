@@ -13,8 +13,6 @@ import { Progress } from './charts/Progress'
 
 const Charts = () => {
     return (
-        <>
-            <ImageBackground source={require('../assets/brakrawnd.png')} resizeMode="cover" style={styles.image}>
                 <ScrollView>
                     <DoughnutAndPie />
                     <Line />
@@ -22,8 +20,6 @@ const Charts = () => {
                     <DoughnutAndPie />
                     <Progress />
                 </ScrollView>
-            </ImageBackground>
-        </>
     )
 }
 
