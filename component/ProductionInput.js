@@ -8,18 +8,107 @@ import {
     Button,
     Modal,
     TouchableOpacity,
-    TextInput
+    TextInput,
+    ActivityIndicator
    } from "react-native";
  import { db } from '../firebase/Config'
- import { collection, docs, getDocs, getFirestore, onSnapshot, setDoc, doc } from 'firebase/firestore'
- import { useCollectionData, useCollectionDataOnce } from "react-firebase-hooks/firestore";
+ import { collection, docs, getDocs, getFirestore, onSnapshot, setDoc, doc, addDoc, updateDoc } from 'firebase/firestore'
+ import { useCollectionData } from "react-firebase-hooks/firestore";
 
-const AddDataRow = () => {
+const AddDataRow = ({ path }) => {  
+  const [showRow, setShowRow] = useState(false)
+  const [text, onChangeText] = useState('')
+
+  const [name, setName] = useState('')
+  const [qnty, setQnty] = useState(0)
+  const [unit, setUnit] = useState('')
+  const [pUnit, setPunit] = useState(0)
+
+  const handleAddRow =  async () => {
+    const docRef = collection(db, path)
+    setShowRow(false)
+    try {
+      const addNewDoc = await addDoc(docRef, {
+        name: name,
+        qnty: qnty,
+        unit: unit,
+        pUnit: pUnit,
+        total: calTotal(qnty, pUnit)
+      })
+      setName('')
+      setQnty('')
+      setUnit('')
+      setPunit('')
+      await updateDoc(addNewDoc, {
+        id: addNewDoc.id
+      })
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const calTotal = (numOne, numTwo) => {
+    return numOne * numTwo
+  }
   
   return (
-    <TouchableOpacity style={styles.bottomButtonItem} onPress={() => setIsShow(true)}>
+    <>
+    <TouchableOpacity style={styles.bottomButtonItem} onPress={() => setShowRow(true)}>
       <Text>Add Data</Text>
     </TouchableOpacity>
+
+    <Modal animationType='fade' transparent={true} visible={showRow} onRequestClose={()=>(setShowRow(!showRow))}>
+      <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
+          {/* name */}
+              <Text style={styles.modalTitle}>Add New Table</Text>
+              <Text style={styles.modalLabel}>Name</Text>
+              <TextInput
+                style={styles.input}
+                onChangeText={setName}
+                value={name}
+                placeholder='Name'
+                placeholderTextColor='red'
+              />
+              {/* qnty */}
+              <Text style={styles.modalLabel}>Quantity</Text>
+              <TextInput
+                style={styles.input}
+                onChangeText={setQnty}
+                value={qnty}
+                placeholder='Quantity'
+                placeholderTextColor='red'
+              />
+              {/* unit */}
+              <Text style={styles.modalLabel}>Unit</Text>
+              <TextInput
+                style={styles.input}
+                onChangeText={setUnit}
+                value={unit}
+                placeholder='Unit'
+                placeholderTextColor='red'
+              />
+              {/* pUnit */}
+              <Text style={styles.modalLabel}>Price per unit</Text>
+              <TextInput
+                style={styles.input}
+                onChangeText={setPunit}
+                value={pUnit}
+                placeholder='Price per unit'
+                placeholderTextColor='red'
+              />
+            <View style={styles.bottomButton}>
+              <TouchableOpacity style={styles.bottomButtonItem} onPress={()=> handleAddRow()}>
+                  <Text>Add</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.bottomButtonItem} onPress={()=>setShowRow(!showRow)}>
+                  <Text>Close</Text>
+                </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+    </>
   )
 }
 
@@ -32,7 +121,6 @@ const TableHead = ({ headers }) => {
   ]
 
   header.splice(0,0, headers)
-  console.log(header)
 
   return (
     <View style={styles.tableHead}>
@@ -46,7 +134,6 @@ const TableHead = ({ headers }) => {
 }
 
 const TableData = ({ data }) => {
-  console.log(data)
   return (
     <View style={styles.tableData}>
       <View style={styles.tableHeadLabel3}>
@@ -69,7 +156,7 @@ const TableData = ({ data }) => {
 }
 
 const TableDataChild = ({ path }) => {
-  console.log(path)
+  // console.log(path)
   const query = collection(db, path)
   const [docs, loading, error] = useCollectionData(query)
   return (
@@ -84,17 +171,23 @@ const TableDataChild = ({ path }) => {
 const TableBuilder = ({headers, path}) => {
   const query = collection(db, path);
   const [docs, loading, error] = useCollectionData(query);
-  
   return (
-    <View style={{marginBottom: 24}} >
+    <View style={{marginBottom: 6}} >
+
     <TableHead headers={headers}/>
-    {docs?.map((doc)=>(
-      <>
-      <TableData data={doc} />
-      <TableDataChild path={`${path}/${doc.id}/${doc.name}`}/>
-      </>
-    ))}
-    <AddDataRow />
+    {
+      loading
+      ?
+      <ActivityIndicator size='large' color='#3bcd6b' style={{ padding: 12, backgroundColor: '#fff'}} />
+      :
+      docs?.map((doc)=>(
+        <>
+        <TableData data={doc} />
+        <TableDataChild path={`${path}/${doc.id}/${doc.name}`}/>
+        </>
+      ))}
+
+    <AddDataRow path={path} />
     {/* {items.map(data => (
       <>
       <TableData data={data}/>
@@ -110,23 +203,18 @@ const TableBuilder = ({headers, path}) => {
 const ProductionInput = () => {
   const [materials, setMaterials] = useState([])
   const [isShow, setIsShow] = useState(false)
-  const [text, onChangeText] = React.useState('Useless Text');
-  const [number, onChangeNumber] = React.useState('');
 
-  const [name, setName] = useState('')
-  const [qnty, setQnty] = useState(0)
-  const [unit, setUnit] = useState('')
-  const [pUnit, setPunit] = useState(0)
-  const [total, setTotal] = useState(0)
+  const [text, onChangeText] = useState('');
 
   const collParticular = collection(db, 'particulars')
   const [docs, loading, error] = useCollectionData(collParticular);
 
   const addDocumentWithId = async () => {
+    setIsShow(false)
     try {
-      const documentRef = doc(collParticular, name); // Create a reference to the document with the specified ID
-      await setDoc(documentRef, {name: name}); // Set an empty object as the document data
-      console.log(`Document with ID ${name} added to collection ${collParticular}.`);
+      const documentRef = doc(collParticular, text);
+      await setDoc(documentRef, {name: text});
+      onChangeText('')
     } catch (error) {
       console.error('Error adding document:', error);
     }
@@ -145,9 +233,14 @@ const ProductionInput = () => {
           <Text style={styles.texts}>PARTICULAR</Text>
 
           {/* Table Heads */}
-          {docs?.map((doc) =>(
-            <TableBuilder headers={doc.name} path={`particulars/${doc.name}/${doc.name}`} style={{marginBottom: 24}} />
-          ))}
+          {
+            loading
+            ?
+            <ActivityIndicator size='large' color='#3bcd6b' style={{ padding: 64, backgroundColor: '#fff'}} />
+            :
+            docs?.map((doc) =>(
+              <TableBuilder headers={doc.name} path={`particulars/${doc.name}/${doc.name}`} />
+            ))}
         </ScrollView>
 
         {/* button view */}
@@ -169,8 +262,9 @@ const ProductionInput = () => {
             <Text style={styles.modalTitle}>Add New Table</Text>
             <TextInput
               style={styles.input}
-              onChangeText={setName}
-              value={name}
+              onChangeText={onChangeText}
+              value={text}
+              placeholder='Add Name'
             />
           <View style={styles.bottomButton}>
             <TouchableOpacity style={styles.bottomButtonItem} onPress={()=>addDocumentWithId()}>
@@ -259,7 +353,6 @@ const styles = StyleSheet.create({
   },
   bottomButton: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
     justifyContent: 'space-around',
     gap: 12
   },
@@ -286,6 +379,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
+  },
+  modalLabel: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    marginBottom: 9,
   },
   input: {
     height: 40,
