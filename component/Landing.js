@@ -46,7 +46,8 @@ export const Landing = ({ navigation }) => {
             <Image source={require('../assets/white.png')}style={styles.overlayImage} />
             <Image source={require('../assets/pik.png')}style={styles.overlayPik} />
             <ButtonContainer navigation={navigation} />
-           
+            <Image source={require('../assets/eclipse.png')}style={styles.overlayOval} />
+            <Image source={require('../assets/pinya.png')}style={styles.overlayLogo} />
 
             
         </View>
@@ -95,11 +96,11 @@ const styles = StyleSheet.create({
         width: 150,
         height: 130,
         padding: 5,
-        backgroundColor:'#1E6738',
+        backgroundColor:'#17AF41',
         borderRadius:20,
-        borderWidth: 1,
-        shadowColor: '#1D4927',
-        borderColor: '#1D4927',
+        borderWidth: 3,
+        shadowColor: '#206830',
+        borderColor: '#206830',
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -128,13 +129,21 @@ const styles = StyleSheet.create({
       },
       overlayOval: {
         position: 'absolute',
-        top: 100,
-        left: 50,
-        width: '110%', // or specify a fixed width
-        height: '20%', // or specify a fixed height
-  
-        opacity: 0.9, // adjust opacity as needed
+        top: 200,
+        left: 120,
+        width: '45%', // or specify a fixed width
+        height: '21%', // or specify a fixed height 
+        opacity: 1.0, // adjust opacity as needed
         zIndex: 3, // ensure the overlay is above the background
+      },
+      overlayLogo: {
+        position: 'absolute',
+        top: 230,
+        left: 125,
+        width: '45%', // or specify a fixed width
+        height: '15%', // or specify a fixed height 
+        opacity: 1.0, // adjust opacity as needed
+        zIndex: 4, // ensure the overlay is above the background
       
       },
     label: {
