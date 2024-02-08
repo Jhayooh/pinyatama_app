@@ -1,204 +1,19 @@
-import React, { useState, useEffect } from 'react'
-import { 
-    View,
-    Text,
-    ScrollView,
-    StyleSheet,
-    ImageBackground,
-    Button,
-    Modal,
-    TouchableOpacity,
-    TextInput,
-    ActivityIndicator
-   } from "react-native";
- import { db } from '../firebase/Config'
- import { collection, docs, getDocs, getFirestore, onSnapshot, setDoc, doc, addDoc, updateDoc } from 'firebase/firestore'
- import { useCollectionData } from "react-firebase-hooks/firestore";
-
-const AddDataRow = ({ path }) => {  
-  const [showRow, setShowRow] = useState(false)
-  const [text, onChangeText] = useState('')
-
-  const [name, setName] = useState('')
-  const [qnty, setQnty] = useState(0)
-  const [unit, setUnit] = useState('')
-  const [pUnit, setPunit] = useState(0)
-
-  const handleAddRow =  async () => {
-    const docRef = collection(db, path)
-    setShowRow(false)
-    try {
-      const addNewDoc = await addDoc(docRef, {
-        name: name,
-        qnty: qnty,
-        unit: unit,
-        pUnit: pUnit,
-        total: calTotal(qnty, pUnit)
-      })
-      setName('')
-      setQnty('')
-      setUnit('')
-      setPunit('')
-      await updateDoc(addNewDoc, {
-        id: addNewDoc.id
-      })
-    } catch (error) {
-      console.log(error)
-    }
-  }
-
-  const calTotal = (numOne, numTwo) => {
-    return numOne * numTwo
-  }
-  
-  return (
-    <>
-    <TouchableOpacity style={styles.bottomButtonItem} onPress={() => setShowRow(true)}>
-      <Text>Add Data</Text>
-    </TouchableOpacity>
-
-    <Modal animationType='fade' transparent={true} visible={showRow} onRequestClose={()=>(setShowRow(!showRow))}>
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          {/* name */}
-              <Text style={styles.modalTitle}>Add New Table</Text>
-              <Text style={styles.modalLabel}>Name</Text>
-              <TextInput
-                style={styles.input}
-                onChangeText={setName}
-                value={name}
-                placeholder='Name'
-                placeholderTextColor='red'
-              />
-              {/* qnty */}
-              <Text style={styles.modalLabel}>Quantity</Text>
-              <TextInput
-                style={styles.input}
-                onChangeText={setQnty}
-                value={qnty}
-                placeholder='Quantity'
-                placeholderTextColor='red'
-              />
-              {/* unit */}
-              <Text style={styles.modalLabel}>Unit</Text>
-              <TextInput
-                style={styles.input}
-                onChangeText={setUnit}
-                value={unit}
-                placeholder='Unit'
-                placeholderTextColor='red'
-              />
-              {/* pUnit */}
-              <Text style={styles.modalLabel}>Price per unit</Text>
-              <TextInput
-                style={styles.input}
-                onChangeText={setPunit}
-                value={pUnit}
-                placeholder='Price per unit'
-                placeholderTextColor='red'
-              />
-            <View style={styles.bottomButton}>
-              <TouchableOpacity style={styles.bottomButtonItem} onPress={()=> handleAddRow()}>
-                  <Text>Add</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.bottomButtonItem} onPress={()=>setShowRow(!showRow)}>
-                  <Text>Close</Text>
-                </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    </Modal>
-    </>
-  )
-}
-
-const TableHead = ({ headers }) => { 
-  const header = [
-    'quantity',
-    'unit',
-    'price/unit',
-    'total'
-  ]
-
-  header.splice(0,0, headers)
-
-  return (
-    <View style={styles.tableHead}>
-      {header.map((head, index) => (
-        <View style={index == 0 ? styles.tableHeadLabel3 : styles.tableHeadLabel2 }>
-          <Text style={{alignItems: 'flex-start'}}>{head}</Text>
-        </View>
-      ))}
-    </View>
-  )
-}
-
-const TableData = ({ data }) => {
-  return (
-    <View style={styles.tableData}>
-      <View style={styles.tableHeadLabel3}>
-        <Text>{data.name}</Text>
-      </View>
-      <View style={styles.tableHeadLabel2}>
-        <Text>{data.qnty}</Text>
-      </View>
-      <View style={styles.tableHeadLabel2}>
-        <Text>{data.unit}</Text>
-      </View>
-      <View style={styles.tableHeadLabel2}>
-        <Text>{data.pUnit}</Text>
-      </View>
-      <View style={styles.tableHeadLabel2}>
-        <Text>{data.total}</Text>
-      </View>
-    </View>
-  )
-}
-
-const TableDataChild = ({ path }) => {
-  // console.log(path)
-  const query = collection(db, path)
-  const [docs, loading, error] = useCollectionData(query)
-  return (
-    <>
-    {docs?.map(doc => (
-      <TableData key={doc.id} data={doc} />
-    ))}
-    </>
-  )
-}
-
-const TableBuilder = ({headers, path}) => {
-  const query = collection(db, path);
-  const [docs, loading, error] = useCollectionData(query);
-  return (
-    <View style={{marginBottom: 6}} >
-
-    <TableHead headers={headers}/>
-    {
-      loading
-      ?
-      <ActivityIndicator size='large' color='#3bcd6b' style={{ padding: 12, backgroundColor: '#fff'}} />
-      :
-      docs?.map((doc)=>(
-        <>
-        <TableData data={doc} />
-        <TableDataChild path={`${path}/${doc.id}/${doc.name}`}/>
-        </>
-      ))}
-
-    <AddDataRow path={path} />
-    {/* {items.map(data => (
-      <>
-      <TableData data={data}/>
-      {data.child && data.child.map(child => (
-        <TableData key={child.id} data={child} />
-      ))}
-      </>
-      ))} */}
-    </View>
-  )
-}
+import { collection, doc, setDoc, updateDoc } from 'firebase/firestore';
+import React, { useState } from 'react';
+import { useCollectionData } from "react-firebase-hooks/firestore";
+import {
+  ActivityIndicator,
+  ImageBackground,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from "react-native";
+import { db } from '../firebase/Config';
+import { TableBuilder } from './TableBuilder';
 
 const ProductionInput = () => {
   const [materials, setMaterials] = useState([])
@@ -211,10 +26,10 @@ const ProductionInput = () => {
 
   const addDocumentWithId = async () => {
     setIsShow(false)
+    onChangeText('')
     try {
       const documentRef = doc(collParticular, text);
-      await setDoc(documentRef, {name: text});
-      onChangeText('')
+      await setDoc(documentRef, { name: text });
     } catch (error) {
       console.error('Error adding document:', error);
     }
@@ -222,42 +37,45 @@ const ProductionInput = () => {
 
   return (
     <>
-    <View style={styles.container}> 
-      <ImageBackground source={require('../assets/brakrawnd.png')} resizeMode="cover" style={styles.image}>
-        <Text style={styles.name}>Pangalan ng Bukid</Text>
-        <Text style={styles.loc}>Daet, Camarines Norte</Text>
-        <Text style={styles.label}>Pagsusuri ng Paggastos at Pagbabalik sa Produksiyon ng Pinya</Text>
+      <View style={styles.container}>
+        <ImageBackground source={require('../assets/brakrawnd.png')} resizeMode="cover" style={styles.image}>
+          <Text style={styles.name}>Pangalan ng Bukid</Text>
+          <Text style={styles.loc}>Daet, Camarines Norte</Text>
+          <Text style={styles.label}>Pagsusuri ng Paggastos at Pagbabalik sa Produksiyon ng Pinya</Text>
 
-        {/* Table Container */}
-        <ScrollView style={styles.scrollView}>
-          <Text style={styles.texts}>PARTICULAR</Text>
+          {/* Table Container */}
+          <ScrollView style={styles.scrollView}>
+            <Text style={styles.texts}>PARTICULAR</Text>
 
-          {/* Table Heads */}
-          {
-            loading
-            ?
-            <ActivityIndicator size='large' color='#3bcd6b' style={{ padding: 64, backgroundColor: '#fff'}} />
-            :
-            docs?.map((doc) =>(
-              <TableBuilder headers={doc.name} path={`particulars/${doc.name}/${doc.name}`} />
-            ))}
-        </ScrollView>
+            {/* Table Heads */}
+            {
+              loading
+                ?
+                <ActivityIndicator size='small' color='#3bcd6b' style={{ padding: 64, backgroundColor: '#fff' }} />
+                :
+                docs?.map((doc) => (
+                  <>
+                  {console.log(doc)}
+                  <TableBuilder key={doc.name} headers={doc.name} path={`particulars/${doc.name}/${doc.name}`} />
+                  </>
+                ))}
+          </ScrollView>
 
-        {/* button view */}
-        <View style={styles.bottomButton}>
-          <TouchableOpacity style={styles.bottomButtonItem} onPress={() => setIsShow(true)}>
+          {/* button view */}
+          <View style={styles.bottomButton}>
+            <TouchableOpacity style={styles.bottomButtonItem} onPress={() => setIsShow(true)}>
               <Text>Add</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.bottomButtonItem}>
               <Text>Save</Text>
             </TouchableOpacity>
-        </View>
-      </ImageBackground>
-    </View>
+          </View>
+        </ImageBackground>
+      </View>
 
-    {/* // modal */}
-    <Modal animationType='fade' transparent={true} visible={isShow} onRequestClose={()=>(setIsShow(!isShow))}>
-    <View style={styles.modalContainer}>
+      {/* // modal */}
+      <Modal animationType='fade' transparent={true} visible={isShow} onRequestClose={() => (setIsShow(!isShow))}>
+        <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Add New Table</Text>
             <TextInput
@@ -266,17 +84,17 @@ const ProductionInput = () => {
               value={text}
               placeholder='Add Name'
             />
-          <View style={styles.bottomButton}>
-            <TouchableOpacity style={styles.bottomButtonItem} onPress={()=>addDocumentWithId()}>
+            <View style={styles.bottomButton}>
+              <TouchableOpacity style={styles.bottomButtonItem} onPress={() => addDocumentWithId()}>
                 <Text>Add</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.bottomButtonItem} onPress={()=>setIsShow(false)}>
+              <TouchableOpacity style={styles.bottomButtonItem} onPress={() => setIsShow(false)}>
                 <Text>Close</Text>
               </TouchableOpacity>
-          </View>
+            </View>
           </View>
         </View>
-    </Modal>
+      </Modal>
     </>
   )
 }
