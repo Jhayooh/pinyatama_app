@@ -2,7 +2,7 @@ import React from 'react'
 import {
     ProgressChart
 } from 'react-native-chart-kit';
-import { Dimensions } from 'react-native';
+import { Dimensions, View } from 'react-native';
 
 const data = {
     labels: ["Swim"], // optional
@@ -18,18 +18,20 @@ export const Progress = () => {
         }
     };
     return (
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         <ProgressChart
             style={{
                 marginVertical: 8,
                 ...chartConfig.style
             }}
             data={data}
-            width={screenWidth}
+            width={screenWidth*.94}
             height={220}
             strokeWidth={32}
             radius={64}
             chartConfig={chartConfig}
             hideLegend={false}
         />
+        </View>
     )
 }

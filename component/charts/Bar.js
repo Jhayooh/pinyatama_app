@@ -1,6 +1,6 @@
 import React from 'react'
 import { BarChart } from 'react-native-chart-kit'
-import { Dimensions } from 'react-native';
+import { Dimensions, View } from 'react-native';
 
 const data = {
     labels: ["January", "February", "March", "April", "May", "June"],
@@ -21,17 +21,20 @@ export const Bar = () => {
         }
     };
     return (
-        <BarChart
-            style={{
-                marginVertical: 8,
-                ...chartConfig.style
-            }}
-            data={data}
-            width={screenWidth}
-            height={240}
-            yAxisLabel="$"
-            chartConfig={chartConfig}
-            verticalLabelRotation={30}
-        />
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+            <BarChart
+                style={{
+                    marginVertical: 8,
+                    ...chartConfig.style
+                }}
+                data={data}
+                width={screenWidth * .94}
+                height={250}
+                yAxisLabel="$"
+                chartConfig={chartConfig}
+                verticalLabelRotation={30}
+
+            />
+        </View>
     )
 }
