@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
     View,
     Text,
@@ -22,8 +22,20 @@ const GastosSaPinya = () => {
     )
 }
 
-const Charts = ({}) => {
+const Charts = () => {
+    const query = collection(db, 'particulars')
+    const [docs, loading, error] = useCollectionData(query)
+
+    const [data, setData] = useState([])
+
+    useEffect(() => {
+      docs?.map(doc => {
+        console.log(doc);
+      })
+
+    }, [docs])
     
+
     return (
         <ScrollView>
             <DoughnutAndPie />

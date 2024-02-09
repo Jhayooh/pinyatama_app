@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { Component } from 'react'
 import {
     PieChart
 } from "react-native-chart-kit";
@@ -42,7 +42,7 @@ const data = [
     }
 ];
 
-export const DoughnutAndPie = () => {
+export const DoughnutAndPie = ({ }) => {
     const screenWidth = Dimensions.get('window').width;
 
     const chartConfig = {
@@ -53,16 +53,18 @@ export const DoughnutAndPie = () => {
     };
 
     return (
-        <PieChart
-            style={{
-                marginVertical: 8,
-                ...chartConfig.style
-            }}
-            data={data}
-            width={screenWidth}
-            height={220}
-            chartConfig={chartConfig}
-            accessor={"population"}
-        />
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+            <PieChart
+                style={{
+                    marginVertical: 8,
+                    ...chartConfig.style
+                }}
+                data={data}
+                width={screenWidth*.94}
+                height={220}
+                chartConfig={chartConfig}
+                accessor={"population"}
+            />
+        </View>
     )
 }

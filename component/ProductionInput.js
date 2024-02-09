@@ -67,7 +67,7 @@ const ProductionInput = () => {
                       <TableBuilder
                         key={doc.name}
                         name={doc.name}
-                        path={`particulars/${doc.name}/${doc.name}`}/>
+                        path={`particulars/${doc.name}/${doc.name}`} />
                     ))}
               </ScrollView>
               <BottomButton setShow={setIsShow} />

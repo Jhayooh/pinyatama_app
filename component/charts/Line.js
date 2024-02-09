@@ -2,7 +2,7 @@ import React from 'react'
 import {
     LineChart
 } from "react-native-chart-kit";
-import { Dimensions } from "react-native";
+import { Dimensions, View } from "react-native";
 
 const data = {
     labels: ["January", "February", "March", "April", "May", "June"],
@@ -27,15 +27,17 @@ export const Line = () => {
         }
     };
     return (
-        <LineChart
-            style={{
-                marginVertical: 8,
-                ...chartConfig.style
-            }}
-            data={data}
-            width={screenWidth}
-            height={220}
-            chartConfig={chartConfig}
-        />
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+            <LineChart
+                style={{
+                    marginVertical: 8,
+                    ...chartConfig.style
+                }}
+                data={data}
+                width={screenWidth*.94}
+                height={220}
+                chartConfig={chartConfig}
+            />
+        </View>
     )
 }
