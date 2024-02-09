@@ -1,4 +1,4 @@
-import { collection, doc, setDoc, updateDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, setDoc, updateDoc } from 'firebase/firestore';
 import React, { useState } from 'react';
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import {
@@ -33,7 +33,7 @@ const ProductionInput = () => {
     onChangeText('')
     try {
       const documentRef = doc(collParticular, text);
-      await setDoc(documentRef, { name: text });
+      await setDoc(documentRef, { name: text, totalInputs: 0 });
     } catch (error) {
       console.error('Error adding document:', error);
     }
