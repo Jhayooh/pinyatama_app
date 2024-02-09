@@ -16,7 +16,8 @@ const ButtonContainer = ({ navigation }) => {
                
             </View>
             <View style={styles.row}>
-            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Map')}>
+                
+            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Gallery')}>
                     <Image source={require('../assets/gal.png')}/>
                     <Text style={styles.buttonText}>MGA BUKID NG PINYA</Text>
                 </TouchableOpacity>
@@ -27,7 +28,7 @@ const ButtonContainer = ({ navigation }) => {
 
             </View>
             <View style={styles.row}>
-                <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('About')}>
+                <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Map')}>
                     <Image source={require('../assets/about.png')}/>
                     <Text style={styles.buttonText}>TUNGKOL</Text>
                 </TouchableOpacity>
