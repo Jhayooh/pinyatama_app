@@ -4,8 +4,9 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import ProductionInput from './component/ProductionInput';
 import { Landing } from './component/Landing';
 import { Calculator } from './component/Calculator';
-import  Gallery from './component/Gallery'
-import  Map from './component/Map'
+import  Map from './component/Map';
+import  Gallery from './component/Gallery';
+
 
 const Stack = createNativeStackNavigator();
 
@@ -18,8 +19,9 @@ const App = () => (
             <Stack.Screen name='Landing' component={Landing} />
             <Stack.Screen name='Calculator' component={Calculator} />
             <Stack.Screen name='ProductionInput' component={ProductionInput} />
-            <Stack.Screen name='Gallery' component={Gallery} />
             <Stack.Screen name='Map' component={Map} />
+            <Stack.Screen name='Gallery' component={Gallery} />
+
         </Stack.Navigator>
     </NavigationContainer>
 )
