@@ -4,7 +4,8 @@ import {
     Text,
     ImageBackground,
     StyleSheet,
-    ScrollView
+    ScrollView,
+    ActivityIndicator
 } from 'react-native'
 import { DoughnutAndPie } from './charts/DoughnutAndPie'
 import { Line } from './charts/Line'
@@ -28,22 +29,42 @@ const Charts = () => {
 
     const [data, setData] = useState([])
 
+    const color = ["rgb(0, 255, 0)", "rgb(0, 0, 255)", "rgb(255, 0, 0)"]
+
     useEffect(() => {
-      docs?.map(doc => {
-        console.log(doc);
-      })
+        setData(docs?.map((doc, index) => (
+            {
+                ...doc,
+                color: color[index],
+                legendFontColor: "#7F7F7F",
+                legendFontSize: 15
+            }
+        )))
+
 
     }, [docs])
-    
+
+    console.log(data);
 
     return (
-        <ScrollView>
-            <DoughnutAndPie />
-            <Line />
-            <Bar />
-            <DoughnutAndPie />
-            <Progress />
-        </ScrollView>
+        <>
+
+            <ScrollView>
+                {loading
+                    ?
+                    <ActivityIndicator size='small' color='#3bcd6b' style={{ padding: 64, backgroundColor: '#fff' }} />
+
+                    :
+                    <>
+                        <DoughnutAndPie data={data} />
+                        <Line />
+                        <Bar />
+                        <DoughnutAndPie />
+                        <Progress />
+                    </>
+                }
+            </ScrollView>
+        </>
     )
 }
 
