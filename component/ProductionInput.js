@@ -10,14 +10,18 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import { db } from '../firebase/Config';
 import { TableBuilder } from './TableBuilder';
+import Charts from './Charts';
+import { BottomButton } from './BottomButton';
 
 const ProductionInput = () => {
   const [materials, setMaterials] = useState([])
   const [isShow, setIsShow] = useState(false)
+
+  const [edit, setEdit] = useState(false)
 
   const [text, onChangeText] = useState('');
 
@@ -40,39 +44,46 @@ const ProductionInput = () => {
       <View style={styles.container}>
         <ImageBackground source={require('../assets/brakrawnd.png')} resizeMode="cover" style={styles.image}>
           <Text style={styles.name}>Pangalan ng Bukid</Text>
+          <TouchableOpacity style={{ height: 32, backgroundColor: 'red', alignItems: 'center', justifyContent: 'center' }} onPress={() => setEdit(!edit)}>
+            <Text>Edit</Text>
+          </TouchableOpacity>
           <Text style={styles.loc}>Daet, Camarines Norte</Text>
           <Text style={styles.label}>Pagsusuri ng Paggastos at Pagbabalik sa Produksiyon ng Pinya</Text>
 
-          {/* Table Container */}
-          <ScrollView style={styles.scrollView}>
-            <Text style={styles.texts}>PARTICULAR</Text>
+          {edit
+            ?
+            <>
+              {/* Table Container */}
+              < ScrollView style={styles.scrollView}>
+                <Text style={styles.texts}>PARTICULAR</Text>
 
-            {/* Table Heads */}
-            {
-              loading
-                ?
-                <ActivityIndicator size='small' color='#3bcd6b' style={{ padding: 64, backgroundColor: '#fff' }} />
-                :
-                docs?.map((doc) => (
-                  <>
-                  {console.log(doc)}
-                  <TableBuilder key={doc.name} headers={doc.name} path={`particulars/${doc.name}/${doc.name}`} />
-                  </>
-                ))}
-          </ScrollView>
-
-          {/* button view */}
-          <View style={styles.bottomButton}>
-            <TouchableOpacity style={styles.bottomButtonItem} onPress={() => setIsShow(true)}>
-              <Text>Add</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.bottomButtonItem}>
-              <Text>Save</Text>
-            </TouchableOpacity>
-          </View>
+                {/* Table Heads */}
+                {
+                  loading
+                    ?
+                    <ActivityIndicator size='small' color='#3bcd6b' style={{ padding: 64, backgroundColor: '#fff' }} />
+                    :
+                    docs?.map((doc) => (
+                      <TableBuilder
+                        key={doc.name}
+                        name={doc.name}
+                        path={`particulars/${doc.name}/${doc.name}`}/>
+                    ))}
+              </ScrollView>
+              <BottomButton setShow={setIsShow} />
+            </>
+            :
+            // <>
+            //   {loading
+            //     ?
+            //     <ActivityIndicator size='small' color='#3bcd6b' style={{ padding: 64, backgroundColor: '#fff' }} />
+            //     :
+            //   }
+            // </>
+            <Charts />
+          }
         </ImageBackground>
-      </View>
-
+      </View >
       {/* // modal */}
       <Modal animationType='fade' transparent={true} visible={isShow} onRequestClose={() => (setIsShow(!isShow))}>
         <View style={styles.modalContainer}>
