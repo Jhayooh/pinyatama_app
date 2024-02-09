@@ -13,7 +13,7 @@ const data = {
             strokeWidth: 2 // optional
         }
     ],
-    legend: ["Rainy Days"] // optional
+    legend: ["Pineapple Harvest"] // optional
 };
 
 export const Line = () => {

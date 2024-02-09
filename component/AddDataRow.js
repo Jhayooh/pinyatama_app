@@ -69,7 +69,7 @@ export const AddDataRow = ({ path }) => {
             <TextInput
               style={styles.input}
               onChangeText={setQnty}
-              value={qnty}
+              value={qnty.toString()}
               placeholder='Quantity'
               placeholderTextColor='red'
             />
@@ -87,7 +87,7 @@ export const AddDataRow = ({ path }) => {
             <TextInput
               style={styles.input}
               onChangeText={setPunit}
-              value={pUnit}
+              value={pUnit.toString()}
               placeholder='Price per unit'
               placeholderTextColor='red'
             />
