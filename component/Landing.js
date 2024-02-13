@@ -129,8 +129,8 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 200,
         left: 120,
-        width: '45%', // or specify a fixed width
-        height: '21%', // or specify a fixed height 
+        width: '45.5%', // or specify a fixed width
+        height: '21.5%', // or specify a fixed height 
         opacity: 1.0, // adjust opacity as needed
         zIndex: 3, // ensure the overlay is above the background
       },
