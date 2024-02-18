@@ -24,7 +24,6 @@ export const Bar = () => {
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
             <BarChart
                 style={{
-                    marginVertical: 8,
                     ...chartConfig.style
                 }}
                 data={data}
