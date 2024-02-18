@@ -23,7 +23,6 @@ export const DoughnutAndPie = ({ data }) => {
                 <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
                     <PieChart
                         style={{
-                            marginVertical: 8,
                             ...chartConfig.style
                         }}
                         data={data}

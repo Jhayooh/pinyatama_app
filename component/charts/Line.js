@@ -30,7 +30,6 @@ export const Line = () => {
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
             <LineChart
                 style={{
-                    marginVertical: 8,
                     ...chartConfig.style
                 }}
                 data={data}
