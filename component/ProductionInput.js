@@ -84,6 +84,7 @@ const ProductionInput = () => {
           }
         </ImageBackground>
       </View >
+      
       {/* // modal */}
       <Modal animationType='fade' transparent={true} visible={isShow} onRequestClose={() => (setIsShow(!isShow))}>
         <View style={styles.modalContainer}>
