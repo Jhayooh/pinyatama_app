@@ -21,7 +21,6 @@ export const Progress = () => {
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         <ProgressChart
             style={{
-                marginVertical: 8,
                 ...chartConfig.style
             }}
             data={data}
