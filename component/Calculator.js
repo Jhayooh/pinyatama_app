@@ -8,6 +8,7 @@ import {
   Image,
   ImageBackground,
   FlatList,
+  Button,
   TextInput,
   ScrollView,
   Button,
@@ -15,9 +16,10 @@ import {
 import * as ImagePicker from 'expo-image-picker'
 import { Dropdown } from 'react-native-element-dropdown';
 import { address } from 'addresspinas';
+import MapView, { Marker } from 'react-native-maps';
+import * as Location from 'expo-location';
+
 import DateTimePicker from '@react-native-community/datetimepicker';
-
-
 
 const data = [
   { label: 'Item 1', value: '1' },
@@ -39,7 +41,8 @@ export const Calculator = ({ navigation }) => {
   const [brgyFocus, setBrgyFocus] = useState(false)
   const [munCode, setMunCode] = useState(null)
   const [brgyCode, setBrgyCode] = useState(null)
-
+  const [region, setRegion] = useState(null);
+  const [userLocation, setUserLocation] = useState(null);
   const municipalities = address.getCityMunOfProvince('0516')
   const brgy = address.getBarangaysOfCityMun(munCode)
   console.log(brgy.barangays);
@@ -82,7 +85,43 @@ export const Calculator = ({ navigation }) => {
 
   const addImage = (image, height, width) => {
     setImages(images => [...images, { url: image, height: height, width: width }])
+    
+   
   }
+  useEffect(() => {
+    getLocationAsync();
+  }, []);
+
+  const getLocationAsync = async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission to access location was denied');
+      return;
+    }
+
+    let location = await Location.getCurrentPositionAsync({});
+    setUserLocation(location.coords);
+    setRegion({
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+      latitudeDelta: 0.0922,
+      longitudeDelta: 0.0421,
+    });
+  };
+
+  const handleUpdateLocation = async () => {
+    let location = await Location.getCurrentPositionAsync({});
+    setUserLocation(location.coords);
+    setRegion({
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+      latitudeDelta: 0.0922,
+      longitudeDelta: 0.0421,
+    });
+  
+    console.log("Latitude:", location.coords.latitude);
+    console.log("Longitude:", location.coords.longitude);
+  };
 
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate;
@@ -193,6 +232,24 @@ export const Calculator = ({ navigation }) => {
                 }}
               />
             </View>
+
+            <View style={styles.container1}>
+        <MapView style={styles.map} region={region}>
+          {userLocation && (
+            <Marker
+              coordinate={{
+                latitude: userLocation.latitude,
+                longitude: userLocation.longitude,
+              }}
+              title="Your Location"
+              description="You are here!"
+            />
+          )}
+        </MapView>
+        <View style={styles.buttonContainer}>
+          <Button title="Update Location" onPress={handleUpdateLocation} />
+        </View>
+      </View>
             <View>
               <Button onPress={showDatepicker} title="Petsa ng Pagtanim" />
               <Text>selected: {date.toLocaleString()}</Text>
@@ -265,6 +322,21 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: 'white',
     padding: 16,
+  },
+  
+  container1: {
+    height: 200,
+    width: '100%',
+  },
+  map: {
+    height: 200,
+    width: '100%',
+  },
+  buttonContainer: {
+    position: 'absolute',
+    bottom: 16,
+    left: 16,
+    right: 16,
   },
   dropdown: {
     height: 50,
