@@ -10,13 +10,17 @@ import {
   FlatList,
   Button,
   TextInput,
-  ScrollView
+  ScrollView,
+  Button,
 } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
 import { Dropdown } from 'react-native-element-dropdown';
 import { address } from 'addresspinas';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
+
+import DateTimePicker from '@react-native-community/datetimepicker';
+
 const data = [
   { label: 'Item 1', value: '1' },
   { label: 'Item 2', value: '2' },
@@ -42,6 +46,10 @@ export const Calculator = ({ navigation }) => {
   const municipalities = address.getCityMunOfProvince('0516')
   const brgy = address.getBarangaysOfCityMun(munCode)
   console.log(brgy.barangays);
+
+  const [date, setDate] = useState(new Date(1598051730000));
+  const [mode, setMode] = useState('date');
+  const [show, setShow] = useState(false);
 
   const openGallery = async () => {
     try {
@@ -115,13 +123,27 @@ export const Calculator = ({ navigation }) => {
     console.log("Longitude:", location.coords.longitude);
   };
 
+  const onChange = (event, selectedDate) => {
+    const currentDate = selectedDate;
+    setShow(false);
+    setDate(currentDate);
+  };
+
+  const showMode = (currentMode) => {
+    setShow(true);
+    setMode(currentMode);
+  };
+
+  const showDatepicker = () => {
+    showMode('date');
+  };
   return (
     <>
       <ImageBackground source={require('../assets/brakrawnd.png')} resizeMode="cover" style={styles.image}>
         <View style={{ flex: 1, alignItems: 'center', }}>
           {/* {console.log("from onLoad:", images)} */}
           <Image source={require(`../assets/pinya.png`)} style={{ height: 90, width: 100 }} />
-          <View style={{ flex: 1, alignItems: 'center', width: '100%'}}>
+          <View style={{ flex: 1, alignItems: 'center', width: '100%' }}>
             {/* ImagesGal */}
             <View style={{ marginBottom: 8, width: '100%', height: 206, borderRadius: 6, padding: 4, backgroundColor: '#101010' }}>
               {
@@ -143,9 +165,9 @@ export const Calculator = ({ navigation }) => {
             </View>
             <View style={{ flexDirection: 'row' }}>
               <TouchableOpacity style={styles.touch} onPress={() => {
-                navigation.navigate('ProductionInput')
+                navigation.navigate('DataInputs')
               }}>
-                <Text>Udo</Text>
+                <Text>Palitan</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.touch} onPress={() => {
                 setShowAddImage(true)
@@ -210,6 +232,7 @@ export const Calculator = ({ navigation }) => {
                 }}
               />
             </View>
+
             <View style={styles.container1}>
         <MapView style={styles.map} region={region}>
           {userLocation && (
@@ -227,9 +250,23 @@ export const Calculator = ({ navigation }) => {
           <Button title="Update Location" onPress={handleUpdateLocation} />
         </View>
       </View>
+            <View>
+              <Button onPress={showDatepicker} title="Petsa ng Pagtanim" />
+              <Text>selected: {date.toLocaleString()}</Text>
+              {show && (
+                <DateTimePicker
+                  testID="dateTimepicker"
+                  value={date}
+                  mode={mode}
+                  is24Hour={true}
+                  onChange={onChange}
+                  style={ styles.text}
+                />
+              )}
+            </View>
           </View>
           <TouchableOpacity style={styles.touch} onPress={() => {
-            navigation.navigate('ProductionInput')
+            navigation.navigate('DataInputs')
           }}>
             <Text>Paglagay ng Pagsusuri</Text>
           </TouchableOpacity>
@@ -341,5 +378,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     flexDirection: 'row'
+  },
+  text:{
+ fontSize: 15,
+
   }
 })

@@ -14,10 +14,9 @@ import {
 } from "react-native";
 import { db } from '../firebase/Config';
 import { TableBuilder } from './TableBuilder';
-import Charts from './Charts';
 import { BottomButton } from './BottomButton';
 
-const ProductionInput = ({navigation}) => {
+const DataInputs = ({navigation}) => {
   const [materials, setMaterials] = useState([])
   const [isShow, setIsShow] = useState(false)
 
@@ -38,20 +37,14 @@ const ProductionInput = ({navigation}) => {
       console.error('Error adding document:', error);
     }
   };
-
   return (
     <>
       <View style={styles.container}>
         <ImageBackground source={require('../assets/brakrawnd.png')} resizeMode="cover" style={styles.image}>
           <Text style={styles.name}>Pangalan ng Bukid</Text>
-          <TouchableOpacity style={{ height: 32, backgroundColor: 'red', alignItems: 'center', justifyContent: 'center' }} onPress={() => setEdit(!edit)}>
-            <Text>Edit</Text>
-          </TouchableOpacity>
           <Text style={styles.loc}>Daet, Camarines Norte</Text>
           <Text style={styles.label}>Pagsusuri ng Paggastos at Pagbabalik sa Produksiyon ng Pinya</Text>
 
-          {edit
-            ?
             <>
               {/* Table Container */}
               < ScrollView style={styles.scrollView}>
@@ -67,14 +60,13 @@ const ProductionInput = ({navigation}) => {
                       <TableBuilder
                         key={doc.name}
                         name={doc.name}
-                        path={`particulars/${doc.name}/${doc.name}`} />
+                        path={`particulars/${doc.name}/${doc.name}`} 
+                        />
                     ))}
               </ScrollView>
               <BottomButton setShow={setIsShow} navigation={navigation} />
             </>
-            :
-            <Charts />
-          }
+           
         </ImageBackground>
       </View >
       
@@ -217,4 +209,4 @@ const styles = StyleSheet.create({
   },
 })
 
-export default ProductionInput
+export default DataInputs
