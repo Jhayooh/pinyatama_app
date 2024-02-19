@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Button } from 'react-native';
+import { View, StyleSheet, Button, PermissionsAndroid } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import GetLocation from 'react-native-get-location';
 
@@ -18,25 +18,28 @@ const YourMapComponent = () => {
     // Add more markers as needed
   ]);
 
-  const onRegionChange = (newRegion) => {
-    // Update the region when the user interacts with the map
-    setRegion(newRegion);
-  };
+  useEffect(() => {
+    requestLocationPermission();
+  }, []);
 
-  const increaseZoom = () => {
-    setRegion({
-      ...region,
-      latitudeDelta: region.latitudeDelta / 2,
-      longitudeDelta: region.longitudeDelta / 2,
-    });
-  };
-
-  const decreaseZoom = () => {
-    setRegion({
-      ...region,
-      latitudeDelta: region.latitudeDelta * 2,
-      longitudeDelta: region.longitudeDelta * 2,
-    });
+  const requestLocationPermission = async () => {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        {
+          title: 'Location Permission',
+          message: 'This app needs access to your location to show it on the map.',
+          buttonPositive: 'OK',
+        }
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log('Location permission granted');
+      } else {
+        console.log('Location permission denied');
+      }
+    } catch (err) {
+      console.warn(err);
+    }
   };
 
   const getUserLocation = async () => {
@@ -72,7 +75,7 @@ const YourMapComponent = () => {
 
   return (
     <View style={styles.container}>
-      <MapView style={styles.map} region={region} onRegionChange={onRegionChange}>
+      <MapView style={styles.map} region={region}>
         {userLocation && (
           <Marker
             coordinate={{
@@ -81,7 +84,7 @@ const YourMapComponent = () => {
             }}
             title="Your Location"
             description="You are here!"
-            pinColor="blue" // Customize the pin color if needed
+            pinColor="blue"
           />
         )}
 
@@ -96,8 +99,6 @@ const YourMapComponent = () => {
       </MapView>
       <View style={styles.buttonContainer}>
         <Button title="Get Location" onPress={getUserLocation} />
-        <Button title="Increase Zoom" onPress={increaseZoom} />
-        <Button title="Decrease Zoom" onPress={decreaseZoom} />
       </View>
     </View>
   );
@@ -112,7 +113,8 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'center',
+    alignItems: 'center',
     paddingVertical: 10,
   },
 });

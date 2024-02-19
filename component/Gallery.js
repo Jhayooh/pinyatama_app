@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { SearchBar, Card, Button, Icon } from 'react-native-elements'; 
-import { View, Text, Image, ImageBackground, StyleSheet, Platform} from 'react-native';
-
+import { View, Text, Image, ImageBackground, StyleSheet, Platform ,ScrollView} from 'react-native';
 
 
 const Gallery = ({ navigation }) => {
@@ -28,6 +27,9 @@ const Gallery = ({ navigation }) => {
           containerStyle={styles.searchBarContainer}
           inputContainerStyle={styles.searchBarInputContainer}
         />
+        <ScrollView
+          showsVerticalScrollIndicator={false} 
+        >
         <Card containerStyle={styles.cardContainer}>
           <Card.Image source={require('../assets/brakrawnd.png')} />
           <Text style={styles.cardText}>
@@ -72,7 +74,7 @@ const Gallery = ({ navigation }) => {
             title='Ipakita ang Pagsusuri'titleStyle={{ color: 'black' }}
           />
         </Card>
-        
+        </ScrollView>
       </View>
     </ImageBackground>
     </View>
