@@ -63,19 +63,19 @@ const TableData = ({ data }) => {
   )
 }
 
-const TableDataChild = ({ path }) => {
-  // console.log(path)
-  const query = collection(db, path)
-  const [docs, loading, error] = useCollectionData(query)
+// const TableDataChild = ({ path }) => {
+//   // console.log(path)
+//   const query = collection(db, path)
+//   const [docs, loading, error] = useCollectionData(query)
 
-  return (
-    <>
-      {docs?.map(doc => (
-        <TableData key={doc.id} data={doc} />
-      ))}
-    </>
-  )
-}
+//   return (
+//     <>
+//       {docs?.map(doc => (
+//         <TableData key={doc.id} data={doc} />
+//       ))}
+//     </>
+//   )
+// }
 
 export const TableBuilder = ({ name, path }) => {
   const query = collection(db, path);
@@ -117,7 +117,7 @@ export const TableBuilder = ({ name, path }) => {
           docs?.map((doc) => (
             <View key={doc.id} style={{flex: 1}}>
               <TableData data={doc} />
-              <TableDataChild path={`${path}/${doc.id}/${doc.name}`} />
+              {/* <TableDataChild path={`${path}/${doc.id}/${doc.name}`} /> */}
             </View>
           ))}
       {total !== 0 && <Total total={total} name={name} />}

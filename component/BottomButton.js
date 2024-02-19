@@ -3,12 +3,21 @@ import {
     View,
     TouchableOpacity,
     StyleSheet,
-    Text
+    Text,
+    Alert
 } from "react-native";
 
-export const BottomButton = ({ setShow }) => {
+export const BottomButton = ({ setShow, navigation }) => {
 
     const handleSave = () => {
+        Alert.alert('Data saved successfully',
+        '',
+        [
+            {
+                text: 'OK',
+                onPress: () => navigation.navigate('Landing') 
+            }
+        ]);
 
     }
 

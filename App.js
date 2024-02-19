@@ -8,6 +8,9 @@ import  Map from './component/Map';
 import  Gallery from './component/Gallery';
 import Charts from './component/Charts';
 import { ImageBackground, StyleSheet } from 'react-native';
+import DataInputs from './component/DataInputs';
+import { BottomButton } from './component/BottomButton';
+
 
 const Stack = createNativeStackNavigator();
 
@@ -23,6 +26,8 @@ const App = () => (
             <Stack.Screen name='Map' component={Map} />
             <Stack.Screen name='Gallery' component={Gallery} />
             <Stack.Screen name='Charts' component={Charts} />
+            <Stack.Screen name='DataInputs' component={DataInputs}/>
+            <Stack.Screen name='BottomButton' component={BottomButton}/>
         </Stack.Navigator>
     </NavigationContainer>
 )
