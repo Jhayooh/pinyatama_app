@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { SearchBar, Card, Button, Icon } from 'react-native-elements'; 
-import { View, Text, Image, ImageBackground, StyleSheet, Platform } from 'react-native';
+import { View, Text, Image, ImageBackground, StyleSheet, Platform} from 'react-native';
+
 
 
 const Gallery = ({ navigation }) => {
@@ -9,6 +10,8 @@ const Gallery = ({ navigation }) => {
   const updateSearch = (text) => {
     setSearch(text);
   };
+
+
 
   return (
     <View style={styles.container}>
@@ -69,6 +72,7 @@ const Gallery = ({ navigation }) => {
             title='Ipakita ang Pagsusuri'titleStyle={{ color: 'black' }}
           />
         </Card>
+        
       </View>
     </ImageBackground>
     </View>

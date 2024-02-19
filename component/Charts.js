@@ -5,7 +5,8 @@ import {
     ImageBackground,
     StyleSheet,
     ScrollView,
-    ActivityIndicator
+    ActivityIndicator,
+    Button
 } from 'react-native'
 import { DoughnutAndPie } from './charts/DoughnutAndPie'
 import { Line } from './charts/Line'
@@ -15,12 +16,15 @@ import { collection } from 'firebase/firestore'
 import { db } from '../firebase/Config'
 import { useCollectionData } from 'react-firebase-hooks/firestore'
 import { Calendar } from "react-native-calendars";
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 const GastosSaPinya = () => {
     const [gastos, setGastos] = useState([])
 
     return (
-        <></>
+        <>
+
+        </>
     )
 }
 
@@ -30,6 +34,29 @@ const Charts = () => {
     const [docs, loading, error] = useCollectionData(query)
 
     const [data, setData] = useState([])
+
+    const [date, setDate] = useState(new Date(1598051730000));
+    const [mode, setMode] = useState('date');
+    const [show, setShow] = useState(false);
+
+    const onChange = (event, selectedDate) => {
+        const currentDate = selectedDate;
+        setShow(false);
+        setDate(currentDate);
+    };
+
+    const showMode = (currentMode) => {
+        setShow(true);
+        setMode(currentMode);
+    };
+
+    const showDatepicker = () => {
+        showMode('date');
+    };
+
+    const showTimepicker = () => {
+        showMode('time');
+    };
 
     const color = ["rgb(0, 255, 0)", "rgb(0, 0, 255)", "rgb(255, 0, 0)"]
 
@@ -62,6 +89,20 @@ const Charts = () => {
                         gap: 8,
                         paddingVertical: 8
                     }}>
+                        <View>
+                            <Button onPress={showDatepicker} title="Show date picker!" />
+                            <Button onPress={showTimepicker} title="Show time picker!" />
+                            <Text>selected: {date.toLocaleString()}</Text>
+                            {show && (
+                                <DateTimePicker
+                                    testID="dateTimePicker"
+                                    value={date}
+                                    mode={mode}
+                                    is24Hour={true}
+                                    onChange={onChange}
+                                />
+                            )}
+                        </View>
                         <DoughnutAndPie data={data} />
                         <Line />
                         <Bar />
@@ -71,7 +112,7 @@ const Charts = () => {
                             markingType='period'
                             style={{
                                 borderRadius: 16,
-                                height: 320
+                                height: 380
                             }}
                             onDayPress={day => {
                                 setSelectedDay(day.dateString);
