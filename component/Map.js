@@ -105,7 +105,11 @@ const YourMapComponent = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    ...StyleSheet.absoluteFillObject,
+    height: 540, // you can customize this
+    width: 400,  // you can customize this
+    alignItems: "center"
+  
   },
   map: {
     flex: 1,
