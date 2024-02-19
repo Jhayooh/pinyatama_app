@@ -1,76 +1,45 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Button, PermissionsAndroid } from 'react-native';
+import { View, StyleSheet, Button, Alert } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
-import GetLocation from 'react-native-get-location';
+import * as Location from 'expo-location';
 
-const YourMapComponent = () => {
-  const [region, setRegion] = useState({
-    latitude: 14.1390,
-    longitude: 122.7633,
-    latitudeDelta: 0.0922,
-    longitudeDelta: 0.0421,
-  });
-
+const MapComponent = () => {
+  const [region, setRegion] = useState(null);
   const [userLocation, setUserLocation] = useState(null);
 
-  const [markers, setMarkers] = useState([
-    { latlng: { latitude: 14.1349, longitude: 122.6194 }, title: 'Marker 1', description: 'Description 1' },
-    // Add more markers as needed
-  ]);
-
   useEffect(() => {
-    requestLocationPermission();
+    getLocationAsync();
   }, []);
 
-  const requestLocationPermission = async () => {
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-        {
-          title: 'Location Permission',
-          message: 'This app needs access to your location to show it on the map.',
-          buttonPositive: 'OK',
-        }
-      );
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        console.log('Location permission granted');
-      } else {
-        console.log('Location permission denied');
-      }
-    } catch (err) {
-      console.warn(err);
+  const getLocationAsync = async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission to access location was denied');
+      return;
     }
+
+    let location = await Location.getCurrentPositionAsync({});
+    setUserLocation(location.coords);
+    setRegion({
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+      latitudeDelta: 0.0922,
+      longitudeDelta: 0.0421,
+    });
   };
 
-  const getUserLocation = async () => {
-    try {
-      const location = await GetLocation.getCurrentPosition({
-        enableHighAccuracy: true,
-        timeout: 60000,
-      });
-
-      setUserLocation(location);
-
-      // Add a new marker at the user's location
-      setMarkers((prevMarkers) => [
-        ...prevMarkers,
-        {
-          latlng: { latitude: location.latitude, longitude: location.longitude },
-          title: 'Your Location',
-          description: 'You are here!',
-        },
-      ]);
-
-      // Update the region to focus on the user's location
-      setRegion({
-        latitude: location.latitude,
-        longitude: location.longitude,
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421,
-      });
-    } catch (error) {
-      console.error('Error getting current location:', error.message);
-    }
+  const handleUpdateLocation = async () => {
+    let location = await Location.getCurrentPositionAsync({});
+    setUserLocation(location.coords);
+    setRegion({
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+      latitudeDelta: 0.0922,
+      longitudeDelta: 0.0421,
+    });
+  
+    console.log("Latitude:", location.coords.latitude);
+    console.log("Longitude:", location.coords.longitude);
   };
 
   return (
@@ -84,21 +53,11 @@ const YourMapComponent = () => {
             }}
             title="Your Location"
             description="You are here!"
-            pinColor="blue"
           />
         )}
-
-        {markers.map((marker, index) => (
-          <Marker
-            key={index}
-            coordinate={marker.latlng}
-            title={marker.title}
-            description={marker.description}
-          />
-        ))}
       </MapView>
       <View style={styles.buttonContainer}>
-        <Button title="Get Location" onPress={getUserLocation} />
+        <Button title="Update Location" onPress={handleUpdateLocation} />
       </View>
     </View>
   );
@@ -112,11 +71,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 10,
+    position: 'absolute',
+    bottom: 16,
+    left: 16,
+    right: 16,
   },
 });
 
-export default YourMapComponent;
+export default MapComponent;
