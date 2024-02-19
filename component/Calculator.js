@@ -11,7 +11,7 @@ import {
   Button,
   TextInput,
   ScrollView,
-  Button,
+  
 } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
 import { Dropdown } from 'react-native-element-dropdown';
