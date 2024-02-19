@@ -10,6 +10,8 @@ const Gallery = ({ navigation }) => {
     setSearch(text);
   };
 
+
+
   return (
     <View style={styles.container}>
     <ImageBackground 

@@ -8,17 +8,37 @@ import {
   Image,
   ImageBackground,
   FlatList,
-  TouchableHighlight,
-  Alert
+  TextInput,
+  ScrollView
 } from 'react-native'
-import Carousel from 'react-native-snap-carousel'
-import FastImage from 'react-native-fast-image';
 import * as ImagePicker from 'expo-image-picker'
+import { Dropdown } from 'react-native-element-dropdown';
+import { address } from 'addresspinas';
+
+const data = [
+  { label: 'Item 1', value: '1' },
+  { label: 'Item 2', value: '2' },
+  { label: 'Item 3', value: '3' },
+  { label: 'Item 4', value: '4' },
+  { label: 'Item 5', value: '5' },
+  { label: 'Item 6', value: '6' },
+  { label: 'Item 7', value: '7' },
+  { label: 'Item 8', value: '8' },
+];
 
 export const Calculator = ({ navigation }) => {
-  const [value, setValue] = useState(null);
+  const [value, setValue] = useState(null)
   const [showAddImage, setShowAddImage] = useState(false)
   const [images, setImages] = useState([])
+
+  const [munFocus, setMunFocus] = useState(false)
+  const [brgyFocus, setBrgyFocus] = useState(false)
+  const [munCode, setMunCode] = useState(null)
+  const [brgyCode, setBrgyCode] = useState(null)
+
+  const municipalities = address.getCityMunOfProvince('0516')
+  const brgy = address.getBarangaysOfCityMun(munCode)
+  console.log(brgy.barangays);
 
   const openGallery = async () => {
     try {
@@ -60,42 +80,98 @@ export const Calculator = ({ navigation }) => {
     <>
       <ImageBackground source={require('../assets/brakrawnd.png')} resizeMode="cover" style={styles.image}>
         <View style={{ flex: 1, alignItems: 'center', }}>
-          {console.log("from onLoad:", images)}
-          <Image source={require(`../assets/pinya.png`)} style={{height: 90, width: 100}}/>
+          {/* {console.log("from onLoad:", images)} */}
+          <Image source={require(`../assets/pinya.png`)} style={{ height: 90, width: 100 }} />
+          <View style={{ flex: 1, alignItems: 'center', width: '100%'}}>
+            {/* ImagesGal */}
+            <View style={{ marginBottom: 8, width: '100%', height: 206, borderRadius: 6, padding: 4, backgroundColor: '#101010' }}>
+              {
+                images &&
+                <FlatList
+                  data={images}
+                  numColumns={3}
+                  renderItem={({ item }) => (
+                    <View style={{ flex: 1 }}>
+                      <Image style={{ width: '100%', height: 100, borderRadius: 5 }} source={{ uri: item.url }} />
+                    </View>
+                  )}
+                  columnWrapperStyle={{
+                    gap: 2,
+                    marginBottom: 2
+                  }}
+                />
+              }
+            </View>
+            <View style={{ flexDirection: 'row' }}>
+              <TouchableOpacity style={styles.touch} onPress={() => {
+                navigation.navigate('ProductionInput')
+              }}>
+                <Text>Udo</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.touch} onPress={() => {
+                setShowAddImage(true)
+              }}>
+                <Text>Add Image</Text>
+              </TouchableOpacity>
+            </View>
 
-          {/* ImagesGal */}
-          <View style={{ marginBottom: 8, width: '100%', height: 206,  borderRadius: 6, padding: 4, backgroundColor: '#101010' }}>
-            {
-              images &&
-              <FlatList
-                data={images}
-                numColumns={3}
-                renderItem={({ item }) => (
-                  <View style={{ flex: 1 }}>
-                    <Image style={{ width: '100%', height: 100, borderRadius: 5 }} source={{ uri: item.url }} />
-                  </View>
-                )}
-                columnWrapperStyle={{
-                  gap: 2,
-                  marginBottom: 2
+            {/* FarmLoc */}
+            <View style={{
+              width: '100%',
+              flexDirection: 'column',
+              gap: 8,
+              paddingVertical: 8,
+            }}>
+              <TextInput
+                editable
+                maxLength={40}
+                onChangeText={text => onChangeText(text)}
+                placeholder='Enter Farm Name'
+                value={value}
+                style={styles.dropdown}
+              />
+              <Dropdown
+                style={[styles.dropdown, munFocus && { borderColor: 'blue' }]}
+                placeholderStyle={styles.placeholderStyle}
+                selectedTextStyle={styles.selectedTextStyle}
+                inputSearchStyle={styles.inputSearchStyle}
+                data={municipalities.cityAndMun}
+                search
+                maxHeight={220}
+                labelField="name"
+                valueField="mun_code"
+                placeholder={!munFocus ? 'Select Municipalities' : '...'}
+                searchPlaceholder="Search..."
+                value={munCode}
+                onFocus={() => setMunFocus(true)}
+                onBlur={() => setMunFocus(false)}
+                onChange={item => {
+                  setMunCode(item.mun_code);
+                  setMunFocus(false);
                 }}
               />
-            }
+              <Dropdown
+                style={[styles.dropdown, brgyFocus && { borderColor: 'blue' }]}
+                placeholderStyle={styles.placeholderStyle}
+                selectedTextStyle={styles.selectedTextStyle}
+                inputSearchStyle={styles.inputSearchStyle}
+                data={brgy.barangays}
+                search
+                maxHeight={220}
+                labelField="name"
+                valueField="name"
+                placeholder={!brgyFocus ? 'Select Barangay' : '...'}
+                searchPlaceholder="Search..."
+                value={brgyCode}
+                onFocus={() => setBrgyFocus(true)}
+                onBlur={() => setBrgyFocus(false)}
+                onChange={item => {
+                  setBrgyCode(item.name);
+                  setBrgyFocus(false);
+                }}
+              />
+            </View>
           </View>
-          <View style={{ flexDirection: 'row' }}>
-            <TouchableOpacity style={styles.touch} onPress={() => {
-              navigation.navigate('ProductionInput')
-            }}>
-              <Text>Udo</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.touch} onPress={() => {
-              setShowAddImage(true)
-            }}>
-              <Text>Add Image</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* FarmLoc */}
           <TouchableOpacity style={styles.touch} onPress={() => {
             navigation.navigate('ProductionInput')
           }}>
@@ -160,6 +236,7 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     borderRadius: 8,
     paddingHorizontal: 8,
+    backgroundColor: 'white'
   },
   icon: {
     marginRight: 5,
@@ -193,5 +270,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     flexDirection: 'row'
-  },
+  }
 })
