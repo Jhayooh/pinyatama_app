@@ -144,27 +144,34 @@ export const Calculator = ({ navigation }) => {
           
           {/* {console.log("from onLoad:", images)} */}
           <Image source={require(`../assets/pinya.png`)} style={{ height: 90, width: 100 }} />
+          <ScrollView style={{ flex: 1, width: '100%'}}>
           <View style={{ flex: 1, alignItems: 'center', width: '100%' }}>
             {/* ImagesGal */}
-            <View style={{ marginBottom: 8, width: '100%', height: 206, borderRadius: 6, padding: 4, backgroundColor: '#101010' }}>
+            <View style={{ marginBottom: 8, width: '100%', height: 180, borderRadius: 6, padding: 4, backgroundColor: '#101010' }}>
               {
                 images &&
                 <FlatList
                   data={images}
-                  numColumns={3}
+                  // numColumns={3}
+                  horizontal={true}
                   renderItem={({ item }) => (
                     <View style={{ flex: 1 }}>
-                      <Image style={{ width: '100%', height: 100, borderRadius: 5 }} source={{ uri: item.url }} />
+                      <Image style={{height: '100%', width: 240, borderRadius: 6 }} source={{ uri: item.url }} />
                     </View>
                   )}
-                  columnWrapperStyle={{
-                    gap: 2,
-                    marginBottom: 2
-                  }}
+                  ItemSeparatorComponent={()=>
+                    <View style={{width: 4, height: '100%'}}></View>
+                  }
+                  // columnWrapperStyle={{
+                  //   gap: 2,
+                  //   marginBottom: 2
+                  // }}
                 />
               }
             </View>
             <View style={{ flexDirection: 'row' }}>
+              <TouchableOpacity style={styles.touch} onPress={() => {      
+                navigation.navigate('ProductionInput')
               <TouchableOpacity style={styles.touch} onPress={() => {
                 navigation.navigate('DataInputs')
               }}>
@@ -233,6 +240,8 @@ export const Calculator = ({ navigation }) => {
                 }}
               />
             </View>
+            
+          </ScrollView>
 
             <View style={styles.container1}>
         <MapView style={styles.map} region={region}>
