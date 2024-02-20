@@ -11,7 +11,7 @@ import {
   Button,
   TextInput,
   ScrollView,
-  
+
 } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
 import { Dropdown } from 'react-native-element-dropdown';
@@ -85,8 +85,8 @@ export const Calculator = ({ navigation }) => {
 
   const addImage = (image, height, width) => {
     setImages(images => [...images, { url: image, height: height, width: width }])
-    
-   
+
+
   }
   useEffect(() => {
     getLocationAsync();
@@ -118,7 +118,7 @@ export const Calculator = ({ navigation }) => {
       latitudeDelta: 0.0922,
       longitudeDelta: 0.0421,
     });
-  
+
     console.log("Latitude:", location.coords.latitude);
     console.log("Longitude:", location.coords.longitude);
   };
@@ -143,8 +143,7 @@ export const Calculator = ({ navigation }) => {
         <View style={{ flex: 1, alignItems: 'center', }}>
           {/* {console.log("from onLoad:", images)} */}
           <Image source={require(`../assets/pinya.png`)} style={{ height: 90, width: 100 }} />
-          <ScrollView style={{ flex: 1, width: '100%'}}>
-          <View style={{ flex: 1, alignItems: 'center', width: '100%' }}>
+          <ScrollView style={{ flex: 1, width: '100%' }}>
             {/* ImagesGal */}
             <View style={{ marginBottom: 8, width: '100%', height: 180, borderRadius: 6, padding: 4, backgroundColor: '#101010' }}>
               {
@@ -155,23 +154,21 @@ export const Calculator = ({ navigation }) => {
                   horizontal={true}
                   renderItem={({ item }) => (
                     <View style={{ flex: 1 }}>
-                      <Image style={{height: '100%', width: 240, borderRadius: 6 }} source={{ uri: item.url }} />
+                      <Image style={{ height: '100%', width: 240, borderRadius: 6 }} source={{ uri: item.url }} />
                     </View>
                   )}
-                  ItemSeparatorComponent={()=>
-                    <View style={{width: 4, height: '100%'}}></View>
+                  ItemSeparatorComponent={() =>
+                    <View style={{ width: 4, height: '100%' }}></View>
                   }
-                  // columnWrapperStyle={{
-                  //   gap: 2,
-                  //   marginBottom: 2
-                  // }}
+                // columnWrapperStyle={{
+                //   gap: 2,
+                //   marginBottom: 2
+                // }}
                 />
               }
             </View>
             <View style={{ flexDirection: 'row' }}>
-              <TouchableOpacity style={styles.touch} onPress={() => {      
-                navigation.navigate('ProductionInput')
-              <TouchableOpacity style={styles.touch} onPress={() => {
+              < TouchableOpacity style={styles.touch} onPress={() => {
                 navigation.navigate('DataInputs')
               }}>
                 <Text>Palitan</Text>
@@ -239,47 +236,46 @@ export const Calculator = ({ navigation }) => {
                 }}
               />
             </View>
-            
+
           </ScrollView>
 
-            <View style={styles.container1}>
-        <MapView style={styles.map} region={region}>
-          {userLocation && (
-            <Marker
-              coordinate={{
-                latitude: userLocation.latitude,
-                longitude: userLocation.longitude,
-              }}
-              title="Your Location"
-              description="You are here!"
-            />
-          )}
-        </MapView>
-        <View style={styles.buttonContainer}>
-          <Button title="Update Location" onPress={handleUpdateLocation} />
-        </View>
-      </View>
-            <View>
-              <Button onPress={showDatepicker} title="Petsa ng Pagtanim" />
-              <Text>selected: {date.toLocaleString()}</Text>
-              {show && (
-                <DateTimePicker
-                  testID="dateTimepicker"
-                  value={date}
-                  mode={mode}
-                  is24Hour={true}
-                  onChange={onChange}
-                  style={ styles.text}
+          <View style={styles.container1}>
+            <MapView style={styles.map} region={region}>
+              {userLocation && (
+                <Marker
+                  coordinate={{
+                    latitude: userLocation.latitude,
+                    longitude: userLocation.longitude,
+                  }}
+                  title="Your Location"
+                  description="You are here!"
                 />
               )}
+            </MapView>
+            <View style={styles.buttonContainer}>
+              <Button title="Update Location" onPress={handleUpdateLocation} />
             </View>
           </View>
-          <TouchableOpacity style={styles.touch} onPress={() => {
-            navigation.navigate('DataInputs')
-          }}>
-            <Text>Paglagay ng Pagsusuri</Text>
-          </TouchableOpacity>
-        </View>
+          <View>
+            <Button onPress={showDatepicker} title="Petsa ng Pagtanim" />
+            <Text>selected: {date.toLocaleString()}</Text>
+            {show && (
+              <DateTimePicker
+                testID="dateTimepicker"
+                value={date}
+                mode={mode}
+                is24Hour={true}
+                onChange={onChange}
+                style={styles.text}
+              />
+            )}
+          </View>
+        </View >
+        <TouchableOpacity style={styles.touch} onPress={() => {
+          navigation.navigate('DataInputs')
+        }}>
+          <Text>Paglagay ng Pagsusuri</Text>
+        </TouchableOpacity>
       </ImageBackground >
 
       <Modal animationType='fade' visible={showAddImage} transparent={true}>
@@ -332,7 +328,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     padding: 16,
   },
-  
+
   container1: {
     height: 200,
     width: '100%',
@@ -388,8 +384,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     flexDirection: 'row'
   },
-  text:{
- fontSize: 15,
+  text: {
+    fontSize: 15,
 
   }
 })
