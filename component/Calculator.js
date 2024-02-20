@@ -237,10 +237,7 @@ export const Calculator = ({ navigation }) => {
                 }}
               />
             </View>
-
-          </ScrollView>
-
-          <View style={styles.container1}>
+                          <View style={styles.container1}>
             <MapView style={styles.map} region={region}>
               {userLocation && (
                 <Marker
@@ -271,6 +268,8 @@ export const Calculator = ({ navigation }) => {
               />
             )}
           </View>
+
+          </ScrollView>
         </View >
         <TouchableOpacity style={styles.touch} onPress={() => {
           navigation.navigate('DataInputs')
