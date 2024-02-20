@@ -4,6 +4,8 @@ import { Text, View, Button, StyleSheet, ImageBackground, TouchableOpacity, Imag
 import { auth } from '../firebase/Config';
 
 import { useAuthState } from 'react-firebase-hooks/auth';
+import { Text, View, Button, StyleSheet, ImageBackground, TouchableOpacity , Image} from 'react-native'
+import { BottomButton } from './BottomButton';
 
 const ButtonContainer = ({ navigation }) => {
     const [user] = useAuthState(auth)
@@ -47,6 +49,10 @@ const ButtonContainer = ({ navigation }) => {
     );
 };
 export const Landing = ({ navigation }) => {
+    const handleShow = () => {
+        // Logic for showing something
+    };
+
     return (
         <View style={styles.container}>
             <ImageBackground source={require('../assets/brakrawnd.png')} style={styles.background}></ImageBackground>
@@ -55,8 +61,6 @@ export const Landing = ({ navigation }) => {
             <ButtonContainer navigation={navigation} />
             <Image source={require('../assets/eclipse.png')} style={styles.overlayOval} />
             <Image source={require('../assets/pinya.png')} style={styles.overlayLogo} />
-
-
         </View>
 
     );

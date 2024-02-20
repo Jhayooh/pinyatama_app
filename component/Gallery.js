@@ -26,7 +26,9 @@ const Gallery = ({ navigation }) => {
             Location
           </Text>
           <Button
-            buttonStyle={styles.cardButton}
+            buttonStyle={styles.cardButton} onPress={()  => {
+              navigation.navigate('ProductionInput')
+            }}
             title='Ipakita ang Pagsusuri'
             titleStyle={{ color: 'black' }}
           />

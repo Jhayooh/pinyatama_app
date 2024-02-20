@@ -8,12 +8,18 @@ import {
   Image,
   ImageBackground,
   FlatList,
+  Button,
   TextInput,
-  ScrollView
+  ScrollView,
+  
 } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
 import { Dropdown } from 'react-native-element-dropdown';
 import { address } from 'addresspinas';
+import MapView, { Marker } from 'react-native-maps';
+import * as Location from 'expo-location';
+
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 const data = [
   { label: 'Item 1', value: '1' },
@@ -35,10 +41,15 @@ export const Calculator = ({ navigation }) => {
   const [brgyFocus, setBrgyFocus] = useState(false)
   const [munCode, setMunCode] = useState(null)
   const [brgyCode, setBrgyCode] = useState(null)
-
+  const [region, setRegion] = useState(null);
+  const [userLocation, setUserLocation] = useState(null);
   const municipalities = address.getCityMunOfProvince('0516')
   const brgy = address.getBarangaysOfCityMun(munCode)
   console.log(brgy.barangays);
+
+  const [date, setDate] = useState(new Date(1598051730000));
+  const [mode, setMode] = useState('date');
+  const [show, setShow] = useState(false);
 
   const openGallery = async () => {
     try {
@@ -74,8 +85,58 @@ export const Calculator = ({ navigation }) => {
 
   const addImage = (image, height, width) => {
     setImages(images => [...images, { url: image, height: height, width: width }])
+    
+   
   }
+  useEffect(() => {
+    getLocationAsync();
+  }, []);
 
+  const getLocationAsync = async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission to access location was denied');
+      return;
+    }
+
+    let location = await Location.getCurrentPositionAsync({});
+    setUserLocation(location.coords);
+    setRegion({
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+      latitudeDelta: 0.0922,
+      longitudeDelta: 0.0421,
+    });
+  };
+
+  const handleUpdateLocation = async () => {
+    let location = await Location.getCurrentPositionAsync({});
+    setUserLocation(location.coords);
+    setRegion({
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+      latitudeDelta: 0.0922,
+      longitudeDelta: 0.0421,
+    });
+  
+    console.log("Latitude:", location.coords.latitude);
+    console.log("Longitude:", location.coords.longitude);
+  };
+
+  const onChange = (event, selectedDate) => {
+    const currentDate = selectedDate;
+    setShow(false);
+    setDate(currentDate);
+  };
+
+  const showMode = (currentMode) => {
+    setShow(true);
+    setMode(currentMode);
+  };
+
+  const showDatepicker = () => {
+    showMode('date');
+  };
   return (
     <>
       <ImageBackground source={require('../assets/brakrawnd.png')} resizeMode="cover" style={styles.image}>
@@ -83,6 +144,7 @@ export const Calculator = ({ navigation }) => {
           {/* {console.log("from onLoad:", images)} */}
           <Image source={require(`../assets/pinya.png`)} style={{ height: 90, width: 100 }} />
           <ScrollView style={{ flex: 1, width: '100%'}}>
+          <View style={{ flex: 1, alignItems: 'center', width: '100%' }}>
             {/* ImagesGal */}
             <View style={{ marginBottom: 8, width: '100%', height: 180, borderRadius: 6, padding: 4, backgroundColor: '#101010' }}>
               {
@@ -109,8 +171,10 @@ export const Calculator = ({ navigation }) => {
             <View style={{ flexDirection: 'row' }}>
               <TouchableOpacity style={styles.touch} onPress={() => {      
                 navigation.navigate('ProductionInput')
+              <TouchableOpacity style={styles.touch} onPress={() => {
+                navigation.navigate('DataInputs')
               }}>
-                <Text>Udo</Text>
+                <Text>Palitan</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.touch} onPress={() => {
                 setShowAddImage(true)
@@ -177,8 +241,41 @@ export const Calculator = ({ navigation }) => {
             </View>
             
           </ScrollView>
+
+            <View style={styles.container1}>
+        <MapView style={styles.map} region={region}>
+          {userLocation && (
+            <Marker
+              coordinate={{
+                latitude: userLocation.latitude,
+                longitude: userLocation.longitude,
+              }}
+              title="Your Location"
+              description="You are here!"
+            />
+          )}
+        </MapView>
+        <View style={styles.buttonContainer}>
+          <Button title="Update Location" onPress={handleUpdateLocation} />
+        </View>
+      </View>
+            <View>
+              <Button onPress={showDatepicker} title="Petsa ng Pagtanim" />
+              <Text>selected: {date.toLocaleString()}</Text>
+              {show && (
+                <DateTimePicker
+                  testID="dateTimepicker"
+                  value={date}
+                  mode={mode}
+                  is24Hour={true}
+                  onChange={onChange}
+                  style={ styles.text}
+                />
+              )}
+            </View>
+          </View>
           <TouchableOpacity style={styles.touch} onPress={() => {
-            navigation.navigate('ProductionInput')
+            navigation.navigate('DataInputs')
           }}>
             <Text>Paglagay ng Pagsusuri</Text>
           </TouchableOpacity>
@@ -235,6 +332,21 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     padding: 16,
   },
+  
+  container1: {
+    height: 200,
+    width: '100%',
+  },
+  map: {
+    height: 200,
+    width: '100%',
+  },
+  buttonContainer: {
+    position: 'absolute',
+    bottom: 16,
+    left: 16,
+    right: 16,
+  },
   dropdown: {
     height: 50,
     borderColor: 'gray',
@@ -275,5 +387,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     flexDirection: 'row'
+  },
+  text:{
+ fontSize: 15,
+
   }
 })
