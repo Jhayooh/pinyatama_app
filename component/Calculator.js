@@ -1,4 +1,8 @@
 import React, { useState, useEffect } from 'react'
+import { db, auth } from '../firebase/Config';
+import { useCollectionData } from 'react-firebase-hooks/firestore';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { collection, GeoPoint } from 'firebase/firestore';
 import {
   Text,
   Modal,
@@ -33,21 +37,31 @@ const data = [
 ];
 
 export const Calculator = ({ navigation }) => {
-  const [value, setValue] = useState(null)
+  const collFarms = collection(db, 'farms')
+  const [docs, loading, error] = useCollectionData(collFarms);
   const [showAddImage, setShowAddImage] = useState(false)
-  const [images, setImages] = useState([])
+
+  const [user] = useAuthState(auth)
 
   const [munFocus, setMunFocus] = useState(false)
   const [brgyFocus, setBrgyFocus] = useState(false)
-  const [munCode, setMunCode] = useState(null)
+
+  // data natin
   const [brgyCode, setBrgyCode] = useState(null)
-  const [region, setRegion] = useState(null);
   const [userLocation, setUserLocation] = useState(null);
+  const [images, setImages] = useState([])
+  const [municipality, setMunicipality] = useState('')
+  const [farmName, setFarmName] = useState('')
+  const [date, setDate] = useState(null);
+  // end ng data natin
+
+  const [munCode, setMunCode] = useState(null)
+  const [region, setRegion] = useState(null);
+
   const municipalities = address.getCityMunOfProvince('0516')
   const brgy = address.getBarangaysOfCityMun(munCode)
-  console.log(brgy.barangays);
+  console.log('display muni', munCode);
 
-  const [date, setDate] = useState(new Date(1598051730000));
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
 
@@ -85,9 +99,23 @@ export const Calculator = ({ navigation }) => {
 
   const addImage = (image, height, width) => {
     setImages(images => [...images, { url: image, height: height, width: width }])
-
-
   }
+
+  const saveInputs = async () => {
+    try {
+      await addDoc(collFarms, {
+        brgy: brgyCode,
+        geopoint: userLocation,
+        muni: municipality,
+        name: farmName,
+        prov: 'Camarines Norte',
+        uid: user.uid
+      });
+    } catch (e) {
+      console.log("Saving Error: ", e);
+    }
+  }
+
   useEffect(() => {
     getLocationAsync();
   }, []);
@@ -100,7 +128,10 @@ export const Calculator = ({ navigation }) => {
     }
 
     let location = await Location.getCurrentPositionAsync({});
-    setUserLocation(location.coords);
+    const lat = location.coords.latitude
+    const long = location.coords.latitude
+    setUserLocation(new GeoPoint(lat, long));
+    // console.log(location.coords);
     setRegion({
       latitude: location.coords.latitude,
       longitude: location.coords.longitude,
@@ -137,6 +168,7 @@ export const Calculator = ({ navigation }) => {
   const showDatepicker = () => {
     showMode('date');
   };
+
   return (
     <>
       <ImageBackground source={require('../assets/brakrawnd.png')} resizeMode="cover" style={styles.image}>
@@ -190,9 +222,9 @@ export const Calculator = ({ navigation }) => {
               <TextInput
                 editable
                 maxLength={40}
-                onChangeText={text => onChangeText(text)}
+                onChangeText={text => setFarmName(text)}
                 placeholder='Enter Farm Name'
-                value={value}
+                value={farmName}
                 style={styles.dropdown}
               />
               <Dropdown
@@ -212,6 +244,7 @@ export const Calculator = ({ navigation }) => {
                 onBlur={() => setMunFocus(false)}
                 onChange={item => {
                   setMunCode(item.mun_code);
+                  setMunicipality(item.name)
                   setMunFocus(false);
                 }}
               />
@@ -236,43 +269,48 @@ export const Calculator = ({ navigation }) => {
                 }}
               />
             </View>
-
-          </ScrollView>
-
-          <View style={styles.container1}>
-            <MapView style={styles.map} region={region}>
-              {userLocation && (
-                <Marker
-                  coordinate={{
-                    latitude: userLocation.latitude,
-                    longitude: userLocation.longitude,
-                  }}
-                  title="Your Location"
-                  description="You are here!"
+            <View style={styles.container1}>
+              <MapView style={styles.map} region={region}>
+                {userLocation && (
+                  <Marker
+                    coordinate={{
+                      latitude: userLocation.latitude,
+                      longitude: userLocation.longitude,
+                    }}
+                    title="Your Location"
+                    description="You are here!"
+                  />
+                )}
+              </MapView>
+              <View style={styles.buttonContainer}>
+                <Button title="Update Location" onPress={handleUpdateLocation} />
+              </View>
+            </View>
+            <View>
+              <Button onPress={showDatepicker} title="Petsa ng Pagtanim" />
+              <Text>selected: {date.toLocaleString()}</Text>
+              {show && (
+                <DateTimePicker
+                  testID="dateTimepicker"
+                  value={date}
+                  mode={mode}
+                  is24Hour={true}
+                  onChange={onChange}
+                  style={styles.text}
                 />
               )}
-            </MapView>
-            <View style={styles.buttonContainer}>
-              <Button title="Update Location" onPress={handleUpdateLocation} />
             </View>
-          </View>
-          <View>
-            <Button onPress={showDatepicker} title="Petsa ng Pagtanim" />
-            <Text>selected: {date.toLocaleString()}</Text>
-            {show && (
-              <DateTimePicker
-                testID="dateTimepicker"
-                value={date}
-                mode={mode}
-                is24Hour={true}
-                onChange={onChange}
-                style={styles.text}
-              />
-            )}
-          </View>
+          </ScrollView>
         </View >
         <TouchableOpacity style={styles.touch} onPress={() => {
-          navigation.navigate('DataInputs')
+          saveInputs()
+          navigation.navigate('DataInputs', {
+            brgyCode,
+            userLocation,
+            images,
+            municipality,
+            farmName
+          })
         }}>
           <Text>Paglagay ng Pagsusuri</Text>
         </TouchableOpacity>

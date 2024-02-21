@@ -15,8 +15,10 @@ import {
 import { db } from '../firebase/Config';
 import { TableBuilder } from './TableBuilder';
 import { BottomButton } from './BottomButton';
+import { auth } from '../firebase/Config';
+import { useAuthState } from 'react-firebase-hooks/auth';
 
-const DataInputs = ({navigation}) => {
+const DataInputs = ({ navigation, route }) => {
   const [materials, setMaterials] = useState([])
   const [isShow, setIsShow] = useState(false)
 
@@ -26,13 +28,13 @@ const DataInputs = ({navigation}) => {
 
   const collParticular = collection(db, 'particulars')
   const [docs, loading, error] = useCollectionData(collParticular);
+  const [user] = useAuthState(auth)
 
   const addDocumentWithId = async () => {
     setIsShow(false)
     onChangeText('')
     try {
-      const documentRef = doc(collParticular, text);
-      await setDoc(documentRef, { name: text, totalInputs: 0 });
+      await addDoc(collParticular, { name: text, totalInputs: 0, uid: user.uid });
     } catch (error) {
       console.error('Error adding document:', error);
     }
@@ -45,31 +47,31 @@ const DataInputs = ({navigation}) => {
           <Text style={styles.loc}>Daet, Camarines Norte</Text>
           <Text style={styles.label}>Pagsusuri ng Paggastos at Pagbabalik sa Produksiyon ng Pinya</Text>
 
-            <>
-              {/* Table Container */}
-              < ScrollView style={styles.scrollView}>
-                <Text style={styles.texts}>PARTICULAR</Text>
+          <>
+            {/* Table Container */}
+            < ScrollView style={styles.scrollView}>
+              <Text style={styles.texts}>PARTICULAR</Text>
 
-                {/* Table Heads */}
-                {
-                  loading
-                    ?
-                    <ActivityIndicator size='small' color='#3bcd6b' style={{ padding: 64, backgroundColor: '#fff' }} />
-                    :
-                    docs?.map((doc) => (
-                      <TableBuilder
-                        key={doc.name}
-                        name={doc.name}
-                        path={`particulars/${doc.name}/${doc.name}`} 
-                        />
-                    ))}
-              </ScrollView>
-              <BottomButton setShow={setIsShow} navigation={navigation} />
-            </>
-           
+              {/* Table Heads */}
+              {
+                loading
+                  ?
+                  <ActivityIndicator size='small' color='#3bcd6b' style={{ padding: 64, backgroundColor: '#fff' }} />
+                  :
+                  docs?.map((doc) => (
+                    <TableBuilder
+                      key={doc.name}
+                      name={doc.name}
+                      path={`particulars/${doc.name}/${doc.name}`}
+                    />
+                  ))}
+            </ScrollView>
+            <BottomButton setShow={setIsShow} navigation={navigation} />
+          </>
+
         </ImageBackground>
       </View >
-      
+
       {/* // modal */}
       <Modal animationType='fade' transparent={true} visible={isShow} onRequestClose={() => (setIsShow(!isShow))}>
         <View style={styles.modalContainer}>
