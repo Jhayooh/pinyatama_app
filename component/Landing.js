@@ -13,8 +13,8 @@ import {
 } from 'react-native'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { auth } from '../firebase/Config';
-
 import { useAuthState } from 'react-firebase-hooks/auth';
+
 import { BottomButton } from './BottomButton';
 
 const ButtonContainer = ({ navigation }) => {
