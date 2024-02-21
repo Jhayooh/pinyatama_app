@@ -1,53 +1,120 @@
-import React from 'react'
-import { Text, View, Button, StyleSheet, ImageBackground, TouchableOpacity, Image } from 'react-native'
-
+import React, { useState, useEffect } from 'react'
+import {
+    Text,
+    View,
+    Button,
+    StyleSheet,
+    ImageBackground,
+    TouchableOpacity,
+    Image,
+    KeyboardAvoidingView,
+    Modal,
+    TextInput
+} from 'react-native'
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { auth } from '../firebase/Config';
 
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { Text, View, Button, StyleSheet, ImageBackground, TouchableOpacity , Image} from 'react-native'
 import { BottomButton } from './BottomButton';
 
 const ButtonContainer = ({ navigation }) => {
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
+    const [showModal, setShowModal] = useState(false)
+
     const [user] = useAuthState(auth)
-    
+    console.log(user);
+
+    useEffect(() => {
+        const unsubscribe = auth.onAuthStateChanged(user => {
+            if (user) {
+                setShowModal(false)
+            }
+        })
+
+        return unsubscribe
+    }, [])
+
+    const handleSignUp = () => {
+        createUserWithEmailAndPassword(auth, email, password)
+            .then(userCredentials => {
+                console.log('Registered with:', userCredentials.user.email);
+            })
+            .catch(error => alert(error.message))
+    }
+
+    const handleLogin = () => {
+        signInWithEmailAndPassword(auth, email, password)
+            .then(userCredentials => {
+                console.log('Logged in with:', userCredentials.user.email);
+            })
+            .catch(error => alert(error.message))
+    }
+
+    const handleSignOut = () => {
+        signOut(auth)
+            .then(() => {
+                console.log('Signed Out');
+            })
+            .catch(e => alert(e.message))
+
+    }
+
+
     return (
-        <View style={styles.buttonContainer}>
-            <View style={styles.row}>
-                <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Calculator')}>
-                    <Image source={require('../assets/calcu.png')} />
-                    <Text style={styles.buttonText}>CALCULATOR NG GASTOS</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('ProductionInput')}>
-                    <Image source={require('../assets/yield.png')} />
-                    <Text style={styles.buttonText}>TAGAPAG-UKIT NG ANI</Text>
-                </TouchableOpacity>
+        <>
+            <View style={styles.buttonContainer}>
+                <View style={styles.row}>
+                    <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Calculator')}>
+                        <Image source={require('../assets/calcu.png')} />
+                        <Text style={styles.buttonText}>CALCULATOR NG GASTOS</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('ProductionInput')}>
+                        <Image source={require('../assets/yield.png')} />
+                        <Text style={styles.buttonText}>TAGAPAG-UKIT NG ANI</Text>
+                    </TouchableOpacity>
 
-            </View>
-            <View style={styles.row}>
+                </View>
+                <View style={styles.row}>
 
-                <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Gallery')}>
-                    <Image source={require('../assets/gal.png')} />
-                    <Text style={styles.buttonText}>MGA BUKID NG PINYA</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Charts')}>
-                    <Image source={require('../assets/video.png')} />
-                    <Text style={styles.buttonText}>BIDYO</Text>
-                </TouchableOpacity>
+                    <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Gallery')}>
+                        <Image source={require('../assets/gal.png')} />
+                        <Text style={styles.buttonText}>MGA BUKID NG PINYA</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Gallery')}>
+                        <Image source={require('../assets/video.png')} />
+                        <Text style={styles.buttonText}>BIDYO</Text>
+                    </TouchableOpacity>
 
+                </View>
+                <View style={styles.row}>
+                    <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Tungkol')}>
+                        <Image source={require('../assets/about.png')} />
+                        <Text style={styles.buttonText}>TUNGKOL</Text>
+                    </TouchableOpacity>
+
+                    {
+                        user
+                            ?
+                            <TouchableOpacity style={styles.button} onPress={() => handleSignOut()}>
+                                <Image source={require('../assets/login.png')} />
+                                <Text style={styles.buttonText}>LOG OUT</Text>
+                            </TouchableOpacity>
+                            :
+                            <TouchableOpacity style={styles.button} onPress={() => setShowModal(true)}>
+                                <Image source={require('../assets/login.png')} />
+                                <Text style={styles.buttonText}>LOG IN</Text>
+                            </TouchableOpacity>
+                    }
+                </View>
             </View>
-            <View style={styles.row}>
-                <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Map')}>
-                    <Image source={require('../assets/about.png')} />
-                    <Text style={styles.buttonText}>TUNGKOL</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.button} onPress={()=>null}>
-                    <Image source={require('../assets/login.png')} />
-                    <Text style={styles.buttonText}>LOG IN</Text>
-                </TouchableOpacity>
-            </View>
-        </View>
+
+            <Modal animationType='fade' transparent={true} visible={showModal} onRequestClose={() => (setShowModal(!showModal))}>
+            </Modal>
+        </>
     );
 };
+
 export const Landing = ({ navigation }) => {
     const handleShow = () => {
         // Logic for showing something
@@ -154,8 +221,11 @@ const styles = StyleSheet.create({
         zIndex: 4, // ensure the overlay is above the background
 
     },
-    label: {
-
-    }
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
+    },
 }
 )
