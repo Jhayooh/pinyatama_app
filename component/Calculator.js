@@ -52,7 +52,7 @@ export const Calculator = ({ navigation }) => {
   const [images, setImages] = useState([])
   const [municipality, setMunicipality] = useState('')
   const [farmName, setFarmName] = useState('')
-  const [date, setDate] = useState(null);
+  const [date, setDate] = useState('');
   // end ng data natin
 
   const [munCode, setMunCode] = useState(null)
@@ -173,7 +173,6 @@ export const Calculator = ({ navigation }) => {
     <>
       <ImageBackground source={require('../assets/brakrawnd.png')} resizeMode="cover" style={styles.image}>
         <View style={{ flex: 1, alignItems: 'center', }}>
-
           {/* {console.log("from onLoad:", images)} */}
           <Image source={require(`../assets/pinya.png`)} style={{ height: 90, width: 100 }} />
           <ScrollView style={{ flex: 1, width: '100%' }}>
