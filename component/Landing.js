@@ -1,22 +1,22 @@
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "firebase/auth";
-import React, { useEffect, useState } from 'react';
-import { useAuthState } from 'react-firebase-hooks/auth';
+import React, { useState, useEffect } from 'react'
 import {
-    Image,
-    ImageBackground,
-    Modal,
-    StyleSheet,
     Text,
+    View,
+    Button,
+    StyleSheet,
+    ImageBackground,
     TouchableOpacity,
-    View
-} from 'react-native';
+    Image,
+    Modal,
+    TextInput
+} from 'react-native'
+import { signOut } from "firebase/auth";
 import { auth } from '../firebase/Config';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { BottomButton } from './BottomButton';
+import Login from './Login';
 
 const ButtonContainer = ({ navigation }) => {
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
     const [showModal, setShowModal] = useState(false)
 
     const [user] = useAuthState(auth)
@@ -32,22 +32,6 @@ const ButtonContainer = ({ navigation }) => {
         return unsubscribe
     }, [])
 
-    const handleSignUp = () => {
-        createUserWithEmailAndPassword(auth, email, password)
-            .then(userCredentials => {
-                console.log('Registered with:', userCredentials.user.email);
-            })
-            .catch(error => alert(error.message))
-    }
-
-    const handleLogin = () => {
-        signInWithEmailAndPassword(auth, email, password)
-            .then(userCredentials => {
-                console.log('Logged in with:', userCredentials.user.email);
-            })
-            .catch(error => alert(error.message))
-    }
-
     const handleSignOut = () => {
         signOut(auth)
             .then(() => {
@@ -56,7 +40,6 @@ const ButtonContainer = ({ navigation }) => {
             .catch(e => alert(e.message))
 
     }
-
 
     return (
         <>
@@ -70,10 +53,8 @@ const ButtonContainer = ({ navigation }) => {
                         <Image source={require('../assets/yield.png')} />
                         <Text style={styles.buttonText}>TAGAPAG-UKIT NG ANI</Text>
                     </TouchableOpacity>
-
                 </View>
                 <View style={styles.row}>
-
                     <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Gallery')}>
                         <Image source={require('../assets/gal.png')} />
                         <Text style={styles.buttonText}>MGA BUKID NG PINYA</Text>
@@ -82,14 +63,12 @@ const ButtonContainer = ({ navigation }) => {
                         <Image source={require('../assets/video.png')} />
                         <Text style={styles.buttonText}>BIDYO</Text>
                     </TouchableOpacity>
-
                 </View>
                 <View style={styles.row}>
                     <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Tungkol')}>
                         <Image source={require('../assets/about.png')} />
                         <Text style={styles.buttonText}>TUNGKOL</Text>
                     </TouchableOpacity>
-
                     {
                         user
                             ?
@@ -107,7 +86,7 @@ const ButtonContainer = ({ navigation }) => {
             </View>
 
             <Modal animationType='fade' transparent={true} visible={showModal} onRequestClose={() => (setShowModal(!showModal))}>
-                {/* login */}
+                <Login showModal={showModal} setShowModal={setShowModal} />
             </Modal>
         </>
     );
@@ -150,11 +129,11 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
         marginTop: 400,
         position: 'absolute',
-        width: '100%', 
-        height: '50%', 
+        width: '100%', // or specify a fixed width
+        height: '50%', // or specify a fixed height
         resizeMode: 'cover',
-        opacity: 0.9,
-        zIndex: 2, 
+        opacity: 0.9, // adjust opacity as needed
+        zIndex: 2, // ensure the overlay is above the background
 
     },
     row: {
@@ -181,22 +160,22 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 60,
         left: 10,
-        width: '95%', 
-        height: '90%',
+        width: '95%', // or specify a fixed width
+        height: '90%', // or specify a fixed height
         resizeMode: 'cover',
-        opacity: 1.0, 
-        zIndex: 1, 
+        opacity: 1.0, // adjust opacity as needed
+        zIndex: 1, // ensure the overlay is above the background
         borderRadius: 20,
     },
     overlayPik: {
         position: 'absolute',
         top: 60,
         left: 10,
-        width: '95%', 
-        height: '30%', 
+        width: '95%', // or specify a fixed width
+        height: '30%', // or specify a fixed height
         resizeMode: 'cover',
-        opacity: 0.9,
-        zIndex: 2, 
+        opacity: 0.9, // adjust opacity as needed
+        zIndex: 2, // ensure the overlay is above the background
         borderTopRightRadius: 20,
         borderTopLeftRadius: 20
     },
@@ -204,26 +183,26 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 200,
         left: 120,
-        width: '45.5%', 
-        height: '21.5%',
-        opacity: 1.0, 
-        zIndex: 3, 
+        width: '45.5%', // or specify a fixed width
+        height: '21.5%', // or specify a fixed height 
+        opacity: 1.0, // adjust opacity as needed
+        zIndex: 3, // ensure the overlay is above the background
     },
     overlayLogo: {
         position: 'absolute',
         top: 230,
         left: 125,
-        width: '45%', 
-        height: '15%', 
-        opacity: 1.0, 
-        zIndex: 4, 
+        width: '45%', // or specify a fixed width
+        height: '15%', // or specify a fixed height 
+        opacity: 1.0, // adjust opacity as needed
+        zIndex: 4, // ensure the overlay is above the background
 
     },
     modalContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)', 
+        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
     },
 }
 )
