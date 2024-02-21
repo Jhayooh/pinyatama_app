@@ -1,15 +1,16 @@
-import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import ProductionInput from './component/ProductionInput';
-import { Landing } from './component/Landing';
-import { Calculator } from './component/Calculator';
-import  Map from './component/Map';
-import  Gallery from './component/Gallery';
-import Charts from './component/Charts';
-import { ImageBackground, StyleSheet } from 'react-native';
-import DataInputs from './component/DataInputs';
+import React from 'react';
+import { StyleSheet } from 'react-native';
 import { BottomButton } from './component/BottomButton';
+import { Calculator } from './component/Calculator';
+import Charts from './component/Charts';
+import DataInputs from './component/DataInputs';
+import Gallery from './component/Gallery';
+import { Landing } from './component/Landing';
+import Login from './component/Login';
+import Map from './component/Map';
+import ProductionInput from './component/ProductionInput';
 
 
 const Stack = createNativeStackNavigator();
@@ -28,6 +29,7 @@ const App = () => (
             <Stack.Screen name='Charts' component={Charts} />
             <Stack.Screen name='DataInputs' component={DataInputs}/>
             <Stack.Screen name='BottomButton' component={BottomButton}/>
+            <Stack.Screen name='Login' component={Login}/>
         </Stack.Navigator>
     </NavigationContainer>
 )

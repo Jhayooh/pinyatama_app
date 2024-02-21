@@ -1,21 +1,17 @@
-import React, { useState, useEffect } from 'react'
-import {
-    Text,
-    View,
-    Button,
-    StyleSheet,
-    ImageBackground,
-    TouchableOpacity,
-    Image,
-    KeyboardAvoidingView,
-    Modal,
-    TextInput
-} from 'react-native'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "firebase/auth";
-import { auth } from '../firebase/Config';
+import React, { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
+import {
+    Image,
+    ImageBackground,
+    Modal,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
+} from 'react-native';
+import { auth } from '../firebase/Config';
 
-import { BottomButton } from './BottomButton';
 
 const ButtonContainer = ({ navigation }) => {
     const [email, setEmail] = useState('')
@@ -110,6 +106,7 @@ const ButtonContainer = ({ navigation }) => {
             </View>
 
             <Modal animationType='fade' transparent={true} visible={showModal} onRequestClose={() => (setShowModal(!showModal))}>
+                {/* login */}
             </Modal>
         </>
     );
@@ -152,11 +149,11 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
         marginTop: 400,
         position: 'absolute',
-        width: '100%', // or specify a fixed width
-        height: '50%', // or specify a fixed height
+        width: '100%', 
+        height: '50%', 
         resizeMode: 'cover',
-        opacity: 0.9, // adjust opacity as needed
-        zIndex: 2, // ensure the overlay is above the background
+        opacity: 0.9,
+        zIndex: 2, 
 
     },
     row: {
@@ -183,22 +180,22 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 60,
         left: 10,
-        width: '95%', // or specify a fixed width
-        height: '90%', // or specify a fixed height
+        width: '95%', 
+        height: '90%',
         resizeMode: 'cover',
-        opacity: 1.0, // adjust opacity as needed
-        zIndex: 1, // ensure the overlay is above the background
+        opacity: 1.0, 
+        zIndex: 1, 
         borderRadius: 20,
     },
     overlayPik: {
         position: 'absolute',
         top: 60,
         left: 10,
-        width: '95%', // or specify a fixed width
-        height: '30%', // or specify a fixed height
+        width: '95%', 
+        height: '30%', 
         resizeMode: 'cover',
-        opacity: 0.9, // adjust opacity as needed
-        zIndex: 2, // ensure the overlay is above the background
+        opacity: 0.9,
+        zIndex: 2, 
         borderTopRightRadius: 20,
         borderTopLeftRadius: 20
     },
@@ -206,26 +203,26 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 200,
         left: 120,
-        width: '45.5%', // or specify a fixed width
-        height: '21.5%', // or specify a fixed height 
-        opacity: 1.0, // adjust opacity as needed
-        zIndex: 3, // ensure the overlay is above the background
+        width: '45.5%', 
+        height: '21.5%',
+        opacity: 1.0, 
+        zIndex: 3, 
     },
     overlayLogo: {
         position: 'absolute',
         top: 230,
         left: 125,
-        width: '45%', // or specify a fixed width
-        height: '15%', // or specify a fixed height 
-        opacity: 1.0, // adjust opacity as needed
-        zIndex: 4, // ensure the overlay is above the background
+        width: '45%', 
+        height: '15%', 
+        opacity: 1.0, 
+        zIndex: 4, 
 
     },
     modalContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
+        backgroundColor: 'rgba(0, 0, 0, 0.5)', 
     },
 }
 )
