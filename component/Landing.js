@@ -11,7 +11,8 @@ import {
     View
 } from 'react-native';
 import { auth } from '../firebase/Config';
-
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { BottomButton } from './BottomButton';
 
 const ButtonContainer = ({ navigation }) => {
     const [email, setEmail] = useState('')
