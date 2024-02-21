@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { SearchBar, Card, Button, Icon } from 'react-native-elements';
-import { View, Text, Image, ImageBackground, StyleSheet, Platform, ScrollView } from 'react-native';
+import { ImageBackground, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Button, Card, SearchBar } from 'react-native-elements';
 
 const Gallery = ({ navigation }) => {
   const [search, setSearch] = useState('');
