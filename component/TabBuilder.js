@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 const TabHead = ({ headers }) => {
   const defaultHeaders = [
@@ -33,9 +33,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#eee',
   },
   tabHeadLabel2: {
-    flex: 1,
+    
+  },flex: 1,
     alignItems: 'center',
-  },
   tabHeadLabel3: {
     flex: 1.5,
     alignItems: 'center',
