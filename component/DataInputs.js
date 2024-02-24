@@ -21,14 +21,15 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 const DataInputs = ({ navigation, route }) => {
   const [materials, setMaterials] = useState([])
   const [isShow, setIsShow] = useState(false)
+  const [user] = useAuthState(auth)
 
   const [edit, setEdit] = useState(false)
 
   const [text, onChangeText] = useState('');
 
-  const collParticular = collection(db, 'particulars')
+  const collParticular = collection(db, `farms/${user.uid}/particulars`)
   const [docs, loading, error] = useCollectionData(collParticular);
-  const [user] = useAuthState(auth)
+  console.log("laman ng docs: ", docs);
 
   const addDocumentWithId = async () => {
     setIsShow(false)
@@ -62,7 +63,7 @@ const DataInputs = ({ navigation, route }) => {
                     <TableBuilder
                       key={doc.name}
                       name={doc.name}
-                      path={`particulars/${doc.name}/${doc.name}`}
+                      path={`${collParticular}/${doc.name}/${doc.name}`}
                     />
                   ))}
             </ScrollView>

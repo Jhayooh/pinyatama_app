@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
-import { db, auth } from '../firebase/Config';
+import { db, auth, storage } from '../firebase/Config';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { collection, GeoPoint } from 'firebase/firestore';
+import { addDoc, collection, GeoPoint, doc, setDoc } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL, uploadBytesResumable } from "firebase/storage";
 import {
   Text,
   Modal,
@@ -41,6 +42,7 @@ export const Calculator = ({ navigation }) => {
   const [showAddImage, setShowAddImage] = useState(false)
 
   const [user] = useAuthState(auth)
+  console.log(user.uid);
 
   const [munFocus, setMunFocus] = useState(false)
   const [brgyFocus, setBrgyFocus] = useState(false)
@@ -49,9 +51,10 @@ export const Calculator = ({ navigation }) => {
   const [brgyCode, setBrgyCode] = useState(null)
   const [userLocation, setUserLocation] = useState(null);
   const [images, setImages] = useState([])
+  const [uploadedImg, setUploadedImg] = useState([])
   const [municipality, setMunicipality] = useState('')
   const [farmName, setFarmName] = useState('')
-  const [date, setDate] = useState('');
+  const [date, setDate] = useState(new Date());
   // end ng data natin
 
   const [munCode, setMunCode] = useState(null)
@@ -59,7 +62,6 @@ export const Calculator = ({ navigation }) => {
 
   const municipalities = address.getCityMunOfProvince('0516')
   const brgy = address.getBarangaysOfCityMun(munCode)
-  console.log('display muni', munCode);
 
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
@@ -69,7 +71,7 @@ export const Calculator = ({ navigation }) => {
 
       let result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.All,
-        quality: 1,
+        quality: .6,
       });
 
       if (!result.canceled) {
@@ -85,7 +87,7 @@ export const Calculator = ({ navigation }) => {
       await ImagePicker.requestCameraPermissionsAsync();
       let result = await ImagePicker.launchCameraAsync({
         cameraType: ImagePicker.CameraType.back,
-        quality: 1
+        quality: .6
       })
 
       if (!result.canceled) {
@@ -99,20 +101,61 @@ export const Calculator = ({ navigation }) => {
   const addImage = (image, height, width) => {
     setImages(images => [...images, { url: image, height: height, width: width }])
   }
+  console.log("image added", images);
+
+  const uploadImages = async (uri, fileType) => {
+    try {
+      const response = await fetch(uri);
+      const blob = await response.blob();
+      const filename = uri.substring(uri.lastIndexOf('/') + 1);
+
+      const storageRef = ref(storage, `FarmImages/${user.uid}/${filename}`);
+      const uploadTask = uploadBytesResumable(storageRef, blob);
+
+      uploadTask.on('state_changed',
+        (snapshot) => {
+          // Handle progress
+        },
+        (error) => {
+          console.error("Error uploading image: ", error);
+        },
+        () => {
+          // Upload completed successfully, get download URL
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            console.log('File available at', downloadURL);
+            setUploadedImg((uImg) => [...uImg, { url: downloadURL, uid: user.uid }]);
+          }).catch((error) => {
+            console.error("Error getting download URL: ", error);
+          });
+        }
+      );
+    } catch (error) {
+      console.error("Error uploading image: ", error);
+    }
+  };
+
 
   const saveInputs = async () => {
+    console.log("udooooo!!!");
     try {
-      await addDoc(collFarms, {
+      const uploadPromises = images.map(img => uploadImages(img.url, "Image"));
+      // Wait for all images to upload
+      await Promise.all(uploadPromises);
+
+      await setDoc(doc(db, 'farms', user.uid), {
         brgy: brgyCode,
         geopoint: userLocation,
         muni: municipality,
         name: farmName,
         prov: 'Camarines Norte',
-        uid: user.uid
-      });
+        uid: user.uid,
+        images: uploadedImg
+      })
     } catch (e) {
       console.log("Saving Error: ", e);
     }
+    setImages([])
+    setUploadedImg([])
   }
 
   useEffect(() => {
