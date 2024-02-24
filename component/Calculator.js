@@ -201,12 +201,12 @@ export const Calculator = ({ navigation }) => {
               < TouchableOpacity style={styles.touch} onPress={() => {
                 navigation.navigate('DataInputs')
               }}>
-                <Text >I-edit</Text>
+                <Text style={styles.text}>I-edit</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.touch} onPress={() => {
                 setShowAddImage(true)
               }}>
-                <Text>Add Image</Text>
+                <Text style={styles.text}>Add Image</Text>
               </TouchableOpacity>
             </View>
 
@@ -310,7 +310,7 @@ export const Calculator = ({ navigation }) => {
             farmName
           })
         }}>
-          <Text>Paglagay ng Pagsusuri</Text>
+          <Text style={styles.text}>Paglagay ng Pagsusuri</Text>
         </TouchableOpacity>
       </ImageBackground >
 
@@ -319,17 +319,17 @@ export const Calculator = ({ navigation }) => {
           <TouchableOpacity style={styles.touch} onPress={() => {
             openGallery()
           }}>
-            <Text>Gallery</Text>
+            <Text style={styles.text}>Gallery</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.touch} onPress={() => {
             openCamera()
           }}>
-            <Text>Camera</Text>
+            <Text style={styles.text}>Camera</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.touch} onPress={() => {
             setShowAddImage(!showAddImage)
           }}>
-            <Text>Close</Text>
+            <Text style={styles.text}>Close</Text>
           </TouchableOpacity>
         </View>
       </Modal>
@@ -351,7 +351,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#206830',
     flex:1,
-    alignItems:'center'
+    alignItems:'center',
+    
   },
   touch2: {
     paddingHorizontal: 24,
@@ -365,7 +366,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 1,
     borderColor: '#206830',
-
+ 
     alignItems:'center'
   },
   modalBackground: {
@@ -446,6 +447,8 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 15,
-
+    fontFamily:'serif',
+    fontWeight:'bold',
+    color:'white'
   }
 })

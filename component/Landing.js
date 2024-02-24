@@ -152,6 +152,7 @@ const styles = StyleSheet.create({
         color: '#fff',
         textAlign: 'center',
         fontSize: 18,
+        fontFamily:'serif'
     },
     button: {
         marginTop: 10,
