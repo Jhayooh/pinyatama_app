@@ -20,6 +20,7 @@ export const AddDataRow = ({ path }) => {
 
   const handleAddRow = async () => {
     const docRef = collection(db, path)
+    console.log("addDataRow path: -------->>>>>", path);
     setShowRow(false)
     try {
       const addNewDoc = await addDoc(docRef, {

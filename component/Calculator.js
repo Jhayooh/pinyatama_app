@@ -2,7 +2,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { address } from 'addresspinas';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
-import { GeoPoint, collection } from 'firebase/firestore';
+import { GeoPoint, collection, storage, doc, ref, setDoc } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
@@ -23,17 +23,6 @@ import { Dropdown } from 'react-native-element-dropdown';
 import MapView, { Marker } from 'react-native-maps';
 import { auth, db } from '../firebase/Config';
 
-const data = [
-  { label: 'Item 1', value: '1' },
-  { label: 'Item 2', value: '2' },
-  { label: 'Item 3', value: '3' },
-  { label: 'Item 4', value: '4' },
-  { label: 'Item 5', value: '5' },
-  { label: 'Item 6', value: '6' },
-  { label: 'Item 7', value: '7' },
-  { label: 'Item 8', value: '8' },
-];
-
 export const Calculator = ({ navigation }) => {
   const collFarms = collection(db, 'farms')
   const [docs, loading, error] = useCollectionData(collFarms);
@@ -53,6 +42,7 @@ export const Calculator = ({ navigation }) => {
   const [municipality, setMunicipality] = useState('')
   const [farmName, setFarmName] = useState('')
   const [date, setDate] = useState(new Date());
+  const [range, setRange] = useState(0)
   // end ng data natin
 
   const [munCode, setMunCode] = useState(null)
@@ -138,11 +128,11 @@ export const Calculator = ({ navigation }) => {
 
   const saveInputs = async () => {
     console.log("udooooo!!!");
+    const path = `farms/${user.uid}/actDates`
     try {
       const uploadPromises = images.map(img => uploadImages(img.url, "Image"));
       // Wait for all images to upload
       await Promise.all(uploadPromises);
-
       await setDoc(doc(db, 'farms', user.uid), {
         brgy: brgyCode,
         geopoint: userLocation,
@@ -151,6 +141,13 @@ export const Calculator = ({ navigation }) => {
         prov: 'Camarines Norte',
         uid: user.uid,
         images: uploadedImg
+      })
+
+      await setDoc(doc(db, path, 'pagtatanim'), {
+        name: 'pagtatanim',
+        starDate: date,
+        endDate: moment(date).add(range, day),
+        uid: user.uid
       })
     } catch (e) {
       console.log("Saving Error: ", e);
@@ -332,8 +329,15 @@ export const Calculator = ({ navigation }) => {
               </View>
             </View>
             <View>
-              <Button onPress={showDatepicker} title="Petsa ng Pagtanim" />
-              <Text>selected: {date.toLocaleString()}</Text>
+              <Button onPress={showDatepicker} title="Petsa ng Pagtanim" style={{ marginVertical: 12 }} />
+              <TextInput
+                editable
+                maxLength={40}
+                onChangeText={r => setRange(r)}
+                placeholder='Enter Days'
+                value={range}
+                style={styles.dropdown}
+              />
               {show && (
                 <DateTimePicker
                   testID="dateTimepicker"
@@ -389,7 +393,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 16,
     alignItems: 'center',
-    textAlign:'center',
+    textAlign: 'center',
     shadowOpacity: 0.37,
     shadowRadius: 7.49,
     elevation: 12,
@@ -397,15 +401,15 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 1,
     borderColor: '#206830',
-    flex:1,
-    alignItems:'center',
-    
+    flex: 1,
+    alignItems: 'center',
+
   },
   touch2: {
     paddingHorizontal: 24,
     paddingVertical: 16,
     alignItems: 'center',
-    textAlign:'center',
+    textAlign: 'center',
     shadowOpacity: 0.37,
     shadowRadius: 7.49,
     elevation: 12,
@@ -413,8 +417,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 1,
     borderColor: '#206830',
- 
-    alignItems:'center'
+
+    alignItems: 'center'
   },
   modalBackground: {
     backgroundColor: '#00000060',
@@ -494,8 +498,8 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 15,
-    fontFamily:'serif',
-    fontWeight:'bold',
-    color:'white'
+    fontFamily: 'serif',
+    fontWeight: 'bold',
+    color: 'white'
   }
 })
