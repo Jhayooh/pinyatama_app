@@ -68,7 +68,7 @@ const ButtonContainer = ({ navigation }) => {
                         <Image source={require('../assets/gal.png')} />
                         <Text style={styles.buttonText}>MGA BUKID NG PINYA</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Gallery')}>
+                    <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Video')}>
                         <Image source={require('../assets/video.png')} />
                         <Text style={styles.buttonText}>MGA BIDYO</Text>
                     </TouchableOpacity>
