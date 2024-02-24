@@ -80,7 +80,7 @@ const TableData = ({ data }) => {
 export const TableBuilder = ({ name, path }) => {
   const query = collection(db, path);
   const [docs, loading, error] = useCollectionData(query);
-  const docRef = doc(db, 'particulars', name)
+  const docRef = doc(db, path, name)
 
   const [total, setTotal] = useState(0)  
 

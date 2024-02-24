@@ -1,25 +1,27 @@
-import React, { useState, useEffect } from 'react'
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { address } from 'addresspinas';
+import * as ImagePicker from 'expo-image-picker';
+import * as Location from 'expo-location';
+import { GeoPoint, collection } from 'firebase/firestore';
+import React, { useEffect, useState } from 'react';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { useCollectionData } from 'react-firebase-hooks/firestore';
 import {
-  Text,
-  Modal,
-  StyleSheet,
-  TouchableOpacity,
-  View,
+  Button,
+  FlatList,
   Image,
   ImageBackground,
-  FlatList,
-  Button,
-  TextInput,
+  Modal,
   ScrollView,
-
-} from 'react-native'
-import * as ImagePicker from 'expo-image-picker'
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
-import { address } from 'addresspinas';
 import MapView, { Marker } from 'react-native-maps';
-import * as Location from 'expo-location';
-
-import DateTimePicker from '@react-native-community/datetimepicker';
+import { auth, db } from '../firebase/Config';
 
 const data = [
   { label: 'Item 1', value: '1' },
@@ -33,21 +35,32 @@ const data = [
 ];
 
 export const Calculator = ({ navigation }) => {
-  const [value, setValue] = useState(null)
+  const collFarms = collection(db, 'farms')
+  const [docs, loading, error] = useCollectionData(collFarms);
   const [showAddImage, setShowAddImage] = useState(false)
-  const [images, setImages] = useState([])
+
+  const [user] = useAuthState(auth)
+  console.log(user.uid);
 
   const [munFocus, setMunFocus] = useState(false)
   const [brgyFocus, setBrgyFocus] = useState(false)
-  const [munCode, setMunCode] = useState(null)
+
+  // data natin
   const [brgyCode, setBrgyCode] = useState(null)
-  const [region, setRegion] = useState(null);
   const [userLocation, setUserLocation] = useState(null);
+  const [images, setImages] = useState([])
+  const [uploadedImg, setUploadedImg] = useState([])
+  const [municipality, setMunicipality] = useState('')
+  const [farmName, setFarmName] = useState('')
+  const [date, setDate] = useState(new Date());
+  // end ng data natin
+
+  const [munCode, setMunCode] = useState(null)
+  const [region, setRegion] = useState(null);
+
   const municipalities = address.getCityMunOfProvince('0516')
   const brgy = address.getBarangaysOfCityMun(munCode)
-  console.log(brgy.barangays);
 
-  const [date, setDate] = useState(new Date(1598051730000));
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
 
@@ -56,7 +69,7 @@ export const Calculator = ({ navigation }) => {
 
       let result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.All,
-        quality: 1,
+        quality: .6,
       });
 
       if (!result.canceled) {
@@ -72,7 +85,7 @@ export const Calculator = ({ navigation }) => {
       await ImagePicker.requestCameraPermissionsAsync();
       let result = await ImagePicker.launchCameraAsync({
         cameraType: ImagePicker.CameraType.back,
-        quality: 1
+        quality: .6
       })
 
       if (!result.canceled) {
@@ -85,9 +98,64 @@ export const Calculator = ({ navigation }) => {
 
   const addImage = (image, height, width) => {
     setImages(images => [...images, { url: image, height: height, width: width }])
-
-
   }
+  console.log("image added", images);
+
+  const uploadImages = async (uri, fileType) => {
+    try {
+      const response = await fetch(uri);
+      const blob = await response.blob();
+      const filename = uri.substring(uri.lastIndexOf('/') + 1);
+
+      const storageRef = ref(storage, `FarmImages/${user.uid}/${filename}`);
+      const uploadTask = uploadBytesResumable(storageRef, blob);
+
+      uploadTask.on('state_changed',
+        (snapshot) => {
+          // Handle progress
+        },
+        (error) => {
+          console.error("Error uploading image: ", error);
+        },
+        () => {
+          // Upload completed successfully, get download URL
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            console.log('File available at', downloadURL);
+            setUploadedImg((uImg) => [...uImg, { url: downloadURL, uid: user.uid }]);
+          }).catch((error) => {
+            console.error("Error getting download URL: ", error);
+          });
+        }
+      );
+    } catch (error) {
+      console.error("Error uploading image: ", error);
+    }
+  };
+
+
+  const saveInputs = async () => {
+    console.log("udooooo!!!");
+    try {
+      const uploadPromises = images.map(img => uploadImages(img.url, "Image"));
+      // Wait for all images to upload
+      await Promise.all(uploadPromises);
+
+      await setDoc(doc(db, 'farms', user.uid), {
+        brgy: brgyCode,
+        geopoint: userLocation,
+        muni: municipality,
+        name: farmName,
+        prov: 'Camarines Norte',
+        uid: user.uid,
+        images: uploadedImg
+      })
+    } catch (e) {
+      console.log("Saving Error: ", e);
+    }
+    setImages([])
+    setUploadedImg([])
+  }
+
   useEffect(() => {
     getLocationAsync();
   }, []);
@@ -100,7 +168,10 @@ export const Calculator = ({ navigation }) => {
     }
 
     let location = await Location.getCurrentPositionAsync({});
-    setUserLocation(location.coords);
+    const lat = location.coords.latitude
+    const long = location.coords.latitude
+    setUserLocation(new GeoPoint(lat, long));
+    // console.log(location.coords);
     setRegion({
       latitude: location.coords.latitude,
       longitude: location.coords.longitude,
@@ -137,11 +208,11 @@ export const Calculator = ({ navigation }) => {
   const showDatepicker = () => {
     showMode('date');
   };
+
   return (
     <>
       <ImageBackground source={require('../assets/brakrawnd.png')} resizeMode="cover" style={styles.image}>
         <View style={{ flex: 1, alignItems: 'center', }}>
-          
           {/* {console.log("from onLoad:", images)} */}
           <Image source={require(`../assets/pinya.png`)} style={{ height: 90, width: 100 }} />
           <ScrollView style={{ flex: 1, width: '100%' }}>
@@ -172,12 +243,12 @@ export const Calculator = ({ navigation }) => {
               < TouchableOpacity style={styles.touch} onPress={() => {
                 navigation.navigate('DataInputs')
               }}>
-                <Text>Palitan</Text>
+                <Text style={styles.text}>I-edit</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.touch} onPress={() => {
                 setShowAddImage(true)
               }}>
-                <Text>Add Image</Text>
+                <Text style={styles.text}>Add Image</Text>
               </TouchableOpacity>
             </View>
 
@@ -191,9 +262,9 @@ export const Calculator = ({ navigation }) => {
               <TextInput
                 editable
                 maxLength={40}
-                onChangeText={text => onChangeText(text)}
+                onChangeText={text => setFarmName(text)}
                 placeholder='Enter Farm Name'
-                value={value}
+                value={farmName}
                 style={styles.dropdown}
               />
               <Dropdown
@@ -213,6 +284,7 @@ export const Calculator = ({ navigation }) => {
                 onBlur={() => setMunFocus(false)}
                 onChange={item => {
                   setMunCode(item.mun_code);
+                  setMunicipality(item.name)
                   setMunFocus(false);
                 }}
               />
@@ -237,44 +309,50 @@ export const Calculator = ({ navigation }) => {
                 }}
               />
             </View>
-                          <View style={styles.container1}>
-            <MapView style={styles.map} region={region}>
-              {userLocation && (
-                <Marker
-                  coordinate={{
-                    latitude: userLocation.latitude,
-                    longitude: userLocation.longitude,
-                  }}
-                  title="Your Location"
-                  description="You are here!"
+            <View style={styles.container1}>
+              <MapView style={styles.map} region={region}>
+                {userLocation && (
+                  <Marker
+                    coordinate={{
+                      latitude: userLocation.latitude,
+                      longitude: userLocation.longitude,
+                    }}
+                    title="Your Location"
+                    description="You are here!"
+                  />
+                )}
+              </MapView>
+              <View style={styles.buttonContainer}>
+                <Button title="Update Location" onPress={handleUpdateLocation} />
+              </View>
+            </View>
+            <View>
+              <Button onPress={showDatepicker} title="Petsa ng Pagtanim" />
+              <Text>selected: {date.toLocaleString()}</Text>
+              {show && (
+                <DateTimePicker
+                  testID="dateTimepicker"
+                  value={date}
+                  mode={mode}
+                  is24Hour={true}
+                  onChange={onChange}
+                  style={styles.text}
                 />
               )}
-            </MapView>
-            <View style={styles.buttonContainer}>
-              <Button title="Update Location" onPress={handleUpdateLocation} />
             </View>
-          </View>
-          <View>
-            <Button onPress={showDatepicker} title="Petsa ng Pagtanim" />
-            <Text>selected: {date.toLocaleString()}</Text>
-            {show && (
-              <DateTimePicker
-                testID="dateTimepicker"
-                value={date}
-                mode={mode}
-                is24Hour={true}
-                onChange={onChange}
-                style={styles.text}
-              />
-            )}
-          </View>
-
           </ScrollView>
         </View >
-        <TouchableOpacity style={styles.touch} onPress={() => {
-          navigation.navigate('DataInputs')
+        <TouchableOpacity style={styles.touch2} onPress={() => {
+          saveInputs()
+          navigation.navigate('DataInputs', {
+            brgyCode,
+            userLocation,
+            images,
+            municipality,
+            farmName
+          })
         }}>
-          <Text>Paglagay ng Pagsusuri</Text>
+          <Text style={styles.text}>Paglagay ng Pagsusuri</Text>
         </TouchableOpacity>
       </ImageBackground >
 
@@ -283,17 +361,17 @@ export const Calculator = ({ navigation }) => {
           <TouchableOpacity style={styles.touch} onPress={() => {
             openGallery()
           }}>
-            <Text>Gallery</Text>
+            <Text style={styles.text}>Gallery</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.touch} onPress={() => {
             openCamera()
           }}>
-            <Text>Camera</Text>
+            <Text style={styles.text}>Camera</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.touch} onPress={() => {
             setShowAddImage(!showAddImage)
           }}>
-            <Text>Close</Text>
+            <Text style={styles.text}>Close</Text>
           </TouchableOpacity>
         </View>
       </Modal>
@@ -305,8 +383,33 @@ const styles = StyleSheet.create({
   touch: {
     paddingHorizontal: 24,
     paddingVertical: 16,
-    backgroundColor: '#206830',
-    alignItems: 'center'
+    alignItems: 'center',
+    textAlign:'center',
+    shadowOpacity: 0.37,
+    shadowRadius: 7.49,
+    elevation: 12,
+    backgroundColor: '#17AF41',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#206830',
+    flex:1,
+    alignItems:'center',
+    
+  },
+  touch2: {
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    alignItems: 'center',
+    textAlign:'center',
+    shadowOpacity: 0.37,
+    shadowRadius: 7.49,
+    elevation: 12,
+    backgroundColor: '#17AF41',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#206830',
+ 
+    alignItems:'center'
   },
   modalBackground: {
     backgroundColor: '#00000060',
@@ -386,6 +489,8 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 15,
-
+    fontFamily:'serif',
+    fontWeight:'bold',
+    color:'white'
   }
 })
