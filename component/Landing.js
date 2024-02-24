@@ -47,11 +47,11 @@ const ButtonContainer = ({ navigation }) => {
 
     return (
         <>
-
-
             <View style={styles.buttonContainer}>
                 <View style={styles.row}>
-                    <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Calculator')}>
+                    <TouchableOpacity style={styles.button} onPress={() =>
+                        user ? navigation.navigate('Calculator') : setShowModal(true)
+                    }>
                         <Image source={require('../assets/calcu.png')} />
                         <Text style={styles.buttonText}>CALCULATOR NG GASTOS</Text>
                     </TouchableOpacity>
@@ -90,11 +90,9 @@ const ButtonContainer = ({ navigation }) => {
                     }
                 </View>
             </View>
-
             <Modal animationType='fade' transparent={true} visible={showModal} onRequestClose={() => (setShowModal(!showModal))}>
                 <Login showModal={showModal} setShowModal={setShowModal} />
             </Modal>
-
         </>
     );
 };
@@ -152,7 +150,7 @@ const styles = StyleSheet.create({
         color: '#fff',
         textAlign: 'center',
         fontSize: 18,
-        fontFamily:'serif'
+        fontFamily: 'serif'
     },
     button: {
         marginTop: 10,
@@ -221,8 +219,8 @@ const styles = StyleSheet.create({
         zIndex: 3,
         shadowOpacity: 10.0,
         shadowRadius: 10.0,
-        
-        
+
+
     },
     overlayLogo: {
         position: 'absolute',
@@ -236,8 +234,8 @@ const styles = StyleSheet.create({
         zIndex: 4,
         shadowOpacity: 0.37,
         shadowRadius: 7.49,
-        
+
     },
-    
+
 });
 

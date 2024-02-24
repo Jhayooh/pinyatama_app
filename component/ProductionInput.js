@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     marginTop: 6
   },
   label: {
-    flex: 'row',
+    // flex: 'row',
     backgroundColor: "#E3E55A",
     fontSize: 16,
     alignSelf: "center",

@@ -2,7 +2,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { address } from 'addresspinas';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
-import { GeoPoint, collection } from 'firebase/firestore';
+import { GeoPoint, collection, storage, doc, ref, setDoc } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
@@ -22,17 +22,6 @@ import {
 import { Dropdown } from 'react-native-element-dropdown';
 import MapView, { Marker } from 'react-native-maps';
 import { auth, db } from '../firebase/Config';
-
-const data = [
-  { label: 'Item 1', value: '1' },
-  { label: 'Item 2', value: '2' },
-  { label: 'Item 3', value: '3' },
-  { label: 'Item 4', value: '4' },
-  { label: 'Item 5', value: '5' },
-  { label: 'Item 6', value: '6' },
-  { label: 'Item 7', value: '7' },
-  { label: 'Item 8', value: '8' },
-];
 
 export const Calculator = ({ navigation }) => {
   const collFarms = collection(db, 'farms')
@@ -139,7 +128,6 @@ export const Calculator = ({ navigation }) => {
       const uploadPromises = images.map(img => uploadImages(img.url, "Image"));
       // Wait for all images to upload
       await Promise.all(uploadPromises);
-
       await setDoc(doc(db, 'farms', user.uid), {
         brgy: brgyCode,
         geopoint: userLocation,
