@@ -1,4 +1,4 @@
-import { addDoc, collection, doc, setDoc, updateDoc } from 'firebase/firestore';
+import { collection, doc, setDoc } from 'firebase/firestore';
 import React, { useState } from 'react';
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import {
@@ -13,9 +13,9 @@ import {
   View,
 } from "react-native";
 import { db } from '../firebase/Config';
-import { TableBuilder } from './TableBuilder';
-import Charts from './Charts';
 import { BottomButton } from './BottomButton';
+import Charts from './Charts';
+import { TableBuilder } from './TableBuilder';
 
 const ProductionInput = ({navigation}) => {
   const [materials, setMaterials] = useState([])
@@ -106,14 +106,12 @@ const ProductionInput = ({navigation}) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#206830',
+    flex: 1, 
   },
   image: {
     flex: 1,
-    opacity: .8,
-    paddingVertical: 36,
-    paddingHorizontal: 12,
+    opacity: .5,
+    
   },
   name: {
     fontSize: 32,
@@ -127,14 +125,16 @@ const styles = StyleSheet.create({
     marginTop: 6
   },
   label: {
+    flex: 'row',
     backgroundColor: "#E3E55A",
-    fontSize: 11,
+    fontSize: 16,
     alignSelf: "center",
     paddingVertical: 8,
     paddingHorizontal: 2,
     marginTop: 18,
     fontWeight: 'bold',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    fontFamily:'serif'
 
   },
   scrollView: {
@@ -174,17 +174,7 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
     flexDirection: 'row'
   },
-  bottomButton: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    gap: 12
-  },
-  bottomButtonItem: {
-    backgroundColor: '#3bcd6b',
-    flex: 1,
-    padding: 12,
-    alignItems: 'center'
-  },
+ 
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
