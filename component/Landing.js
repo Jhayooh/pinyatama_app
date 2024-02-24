@@ -44,13 +44,16 @@ const ButtonContainer = ({ navigation }) => {
             .catch(e => alert(e.message))
 
     }
-
     return (
         <>
             <View style={styles.buttonContainer}>
                 <View style={styles.row}>
                     <TouchableOpacity style={styles.button} onPress={() =>
-                        user ? navigation.navigate('Calculator') : setShowModal(true)
+                        user
+                            ?
+                            navigation.navigate('Calculator')
+                            :
+                            setShowModal(true)
                     }>
                         <Image source={require('../assets/calcu.png')} />
                         <Text style={styles.buttonText}>CALCULATOR NG GASTOS</Text>
