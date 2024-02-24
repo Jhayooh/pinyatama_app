@@ -67,7 +67,7 @@ const ButtonContainer = ({ navigation }) => {
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Gallery')}>
                         <Image source={require('../assets/video.png')} />
-                        <Text style={styles.buttonText}>BIDYO</Text>
+                        <Text style={styles.buttonText}>MGA BIDYO</Text>
                     </TouchableOpacity>
                 </View>
                 <View style={styles.row}>
@@ -149,19 +149,39 @@ const styles = StyleSheet.create({
         gap: 12,
     },
     buttonText: {
-        color: 'black',
+        color: '#fff',
         textAlign: 'center',
+        fontSize: 18,
+        fontFamily:'serif'
     },
     button: {
+        marginTop: 10,
+        marginBottom: 5,
         width: 150,
         height: 130,
-        marginTop: 10,
         padding: 5,
+        borderRadius: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#17AF41',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 6,
+        },
+        shadowOpacity: 0.37,
+        shadowRadius: 7.49,
+        elevation: 12,
+        // Background Gradient
         backgroundColor: '#17AF41',
         borderRadius: 20,
         borderWidth: 3,
-        shadowColor: '#206830',
         borderColor: '#206830',
+        overflow: 'hidden',
+    },
+    gradient: {
+        width: '100%',
+        height: '100%',
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -175,15 +195,15 @@ const styles = StyleSheet.create({
         opacity: 1.0,
         zIndex: 1,
         borderRadius: 20,
-        marginLeft: -((windowWidth * 0.95) / 2), 
+        marginLeft: -((windowWidth * 0.95) / 2),
         marginTop: -((windowHeight * 0.9) / 2),
     },
     overlayPik: {
-       position: 'absolute',
-        top: windowHeight * 0.06, 
+        position: 'absolute',
+        top: windowHeight * 0.06,
         left: '2.5%',
-        width: windowWidth * 0.95, 
-        height: windowHeight * 0.3, 
+        width: windowWidth * 0.95,
+        height: windowHeight * 0.3,
         opacity: 0.9,
         zIndex: 2,
         borderTopRightRadius: 20,
@@ -195,10 +215,14 @@ const styles = StyleSheet.create({
         left: '50%',
         width: windowWidth * 0.455,
         height: windowHeight * 0.225,
-        marginLeft: -((windowWidth * 0.455) / 2), 
+        marginLeft: -((windowWidth * 0.455) / 2),
         marginTop: -((windowHeight * 0.215) / 2),
-        opacity: 1.0, 
-        zIndex: 3, 
+        opacity: 1.0,
+        zIndex: 3,
+        shadowOpacity: 10.0,
+        shadowRadius: 10.0,
+        
+        
     },
     overlayLogo: {
         position: 'absolute',
@@ -208,9 +232,12 @@ const styles = StyleSheet.create({
         height: windowHeight * 0.15,
         marginLeft: -((windowWidth * 0.45) / 2),
         marginTop: -((windowHeight * 0.15) / 2),
-        opacity: 1.0, 
-        zIndex: 4, 
-
+        opacity: 1.0,
+        zIndex: 4,
+        shadowOpacity: 0.37,
+        shadowRadius: 7.49,
+        
     },
+    
 });
 

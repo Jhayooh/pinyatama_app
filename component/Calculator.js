@@ -1,28 +1,27 @@
-import React, { useState, useEffect } from 'react'
-import { db, auth } from '../firebase/Config';
-import { useCollectionData } from 'react-firebase-hooks/firestore';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { address } from 'addresspinas';
+import * as ImagePicker from 'expo-image-picker';
+import * as Location from 'expo-location';
+import { GeoPoint, collection } from 'firebase/firestore';
+import React, { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { collection, GeoPoint } from 'firebase/firestore';
+import { useCollectionData } from 'react-firebase-hooks/firestore';
 import {
-  Text,
-  Modal,
-  StyleSheet,
-  TouchableOpacity,
-  View,
+  Button,
+  FlatList,
   Image,
   ImageBackground,
-  FlatList,
-  Button,
-  TextInput,
+  Modal,
   ScrollView,
-
-} from 'react-native'
-import * as ImagePicker from 'expo-image-picker'
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
-import { address } from 'addresspinas';
 import MapView, { Marker } from 'react-native-maps';
-import * as Location from 'expo-location';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import { auth, db } from '../firebase/Config';
 
 const data = [
   { label: 'Item 1', value: '1' },
@@ -202,12 +201,12 @@ export const Calculator = ({ navigation }) => {
               < TouchableOpacity style={styles.touch} onPress={() => {
                 navigation.navigate('DataInputs')
               }}>
-                <Text>Palitan</Text>
+                <Text style={styles.text}>I-edit</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.touch} onPress={() => {
                 setShowAddImage(true)
               }}>
-                <Text>Add Image</Text>
+                <Text style={styles.text}>Add Image</Text>
               </TouchableOpacity>
             </View>
 
@@ -301,7 +300,7 @@ export const Calculator = ({ navigation }) => {
             </View>
           </ScrollView>
         </View >
-        <TouchableOpacity style={styles.touch} onPress={() => {
+        <TouchableOpacity style={styles.touch2} onPress={() => {
           saveInputs()
           navigation.navigate('DataInputs', {
             brgyCode,
@@ -311,7 +310,7 @@ export const Calculator = ({ navigation }) => {
             farmName
           })
         }}>
-          <Text>Paglagay ng Pagsusuri</Text>
+          <Text style={styles.text}>Paglagay ng Pagsusuri</Text>
         </TouchableOpacity>
       </ImageBackground >
 
@@ -320,17 +319,17 @@ export const Calculator = ({ navigation }) => {
           <TouchableOpacity style={styles.touch} onPress={() => {
             openGallery()
           }}>
-            <Text>Gallery</Text>
+            <Text style={styles.text}>Gallery</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.touch} onPress={() => {
             openCamera()
           }}>
-            <Text>Camera</Text>
+            <Text style={styles.text}>Camera</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.touch} onPress={() => {
             setShowAddImage(!showAddImage)
           }}>
-            <Text>Close</Text>
+            <Text style={styles.text}>Close</Text>
           </TouchableOpacity>
         </View>
       </Modal>
@@ -342,8 +341,33 @@ const styles = StyleSheet.create({
   touch: {
     paddingHorizontal: 24,
     paddingVertical: 16,
-    backgroundColor: '#206830',
-    alignItems: 'center'
+    alignItems: 'center',
+    textAlign:'center',
+    shadowOpacity: 0.37,
+    shadowRadius: 7.49,
+    elevation: 12,
+    backgroundColor: '#17AF41',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#206830',
+    flex:1,
+    alignItems:'center',
+    
+  },
+  touch2: {
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    alignItems: 'center',
+    textAlign:'center',
+    shadowOpacity: 0.37,
+    shadowRadius: 7.49,
+    elevation: 12,
+    backgroundColor: '#17AF41',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#206830',
+ 
+    alignItems:'center'
   },
   modalBackground: {
     backgroundColor: '#00000060',
@@ -423,6 +447,8 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 15,
-
+    fontFamily:'serif',
+    fontWeight:'bold',
+    color:'white'
   }
 })
