@@ -79,6 +79,9 @@ export const Calculator = ({ navigation }) => {
       console.log(e);
     }
   }
+  const handleMapPress = (e) => {
+    setUserLocation(e.nativeEvent.coordinate);
+  };
 
   const openCamera = async () => {
     try {
@@ -310,18 +313,20 @@ export const Calculator = ({ navigation }) => {
               />
             </View>
             <View style={styles.container1}>
-              <MapView style={styles.map} region={region}>
-                {userLocation && (
-                  <Marker
-                    coordinate={{
-                      latitude: userLocation.latitude,
-                      longitude: userLocation.longitude,
-                    }}
-                    title="Your Location"
-                    description="You are here!"
-                  />
-                )}
-              </MapView>
+            <MapView style={styles.map} region={region} onPress={handleMapPress}>
+  {userLocation && (
+    <Marker
+      coordinate={{
+        latitude: userLocation.latitude,
+        longitude: userLocation.longitude,
+      }}
+      title="Your Location"
+      description="You are here!"
+      draggable
+      onDragEnd={(e) => setUserLocation(e.nativeEvent.coordinate)}
+    />
+  )}
+</MapView>
               <View style={styles.buttonContainer}>
                 <Button title="Update Location" onPress={handleUpdateLocation} />
               </View>
