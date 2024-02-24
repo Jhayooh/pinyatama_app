@@ -20,13 +20,10 @@ import { TableBuilder } from './TableBuilder';
 const ProductionInput = ({navigation}) => {
   const [materials, setMaterials] = useState([])
   const [isShow, setIsShow] = useState(false)
-
   const [edit, setEdit] = useState(false)
-
   const [text, onChangeText] = useState('');
-
   const collParticular = collection(db, 'particulars')
-  const [docs, loading, error] = useCollectionData(collParticular);
+  const [docs, loading, error] = useCollectionData(collParticular)
 
   const addDocumentWithId = async () => {
     setIsShow(false)
@@ -125,7 +122,7 @@ const styles = StyleSheet.create({
     marginTop: 6
   },
   label: {
-    flex: 'row',
+    // flex: 'row',
     backgroundColor: "#E3E55A",
     fontSize: 16,
     alignSelf: "center",

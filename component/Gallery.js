@@ -1,9 +1,60 @@
 import React, { useState } from 'react';
 import { ImageBackground, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Button, Card, SearchBar } from 'react-native-elements';
+import { TabView, SceneMap } from 'react-native-tab-view';
+
+function FarmGal() {
+  return (
+    <View>
+      
+    </View>
+  )
+}
+
+function Lahat() {
+
+}
+
+function Buwan0() {
+
+}
+
+function Buwan6() {
+
+}
+
+function Buwan12(params) {
+
+}
+
+function Buwan18(params) {
+
+}
+
+function Aanihin() {
+
+}
+
+const renderScene = SceneMap({
+  lahat: Lahat,
+  buwan0: Buwan0,
+  buwan6: Buwan6,
+  buwan12: Buwan12,
+  buwan18: Buwan18,
+  aanihin: Aanihin,
+});
+
 
 const Gallery = ({ navigation }) => {
   const [search, setSearch] = useState('');
+  const [index, setIndex] = React.useState(0);
+  const [routes] = useState([
+    { key: 'lahat', title: 'Lahat' },
+    { key: 'buwan0', title: 'Buwan0' },
+    { key: 'buwan6', title: 'Buwan6' },
+    { key: 'buwan12', title: 'Buwan12' },
+    { key: 'buwan18', title: 'Buwan18' },
+    { key: 'aanihin', title: 'Aanihin' },
+  ]);
 
   const updateSearch = (text) => {
     setSearch(text);
@@ -15,65 +66,12 @@ const Gallery = ({ navigation }) => {
       <ImageBackground
         source={require('../assets/brakrawnd.png')}
         style={styles.backgroundImage}
-        blurRadius={5}
       >
-        <View style={styles.overlay}>
-          <SearchBar
-            placeholder="Maghanap"
-            onChangeText={updateSearch}
-            value={search}
-            containerStyle={styles.searchBarInputContainer}
-            inputContainerStyle={styles.searchBarInputContainer}
-          />
-         <View>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-      >
-        <Card containerStyle={styles.cardContainer}>
-          <Card.Image source={require('../assets/brakrawnd.png')} />
-          <Text style={styles.cardText}>
-            Pangalan ng Bukid
-          </Text>
-          <Text style={styles.cardText}>
-            Location
-          </Text>
-          <Button
-            buttonStyle={styles.cardButton}
-            title='Ipakita ang Pagsusuri'
-            titleStyle={{ color: 'black' }}
-          />
-        </Card>
-        <Card containerStyle={styles.cardContainer}>
-          <Card.Image source={require('../assets/brakrawnd.png')} />
-          <Text style={styles.cardText}>
-            Pangalan ng Bukid
-          </Text>
-          <Text style={styles.cardText}>
-            Location
-          </Text>
-          <Button
-            buttonStyle={styles.cardButton}
-            title='Ipakita ang Pagsusuri'
-            titleStyle={{ color: 'black' }}
-          />
-        </Card>
-        <Card containerStyle={styles.cardContainer}>
-          <Card.Image source={require('../assets/brakrawnd.png')} />
-          <Text style={styles.cardText}>
-            Pangalan ng Bukid
-          </Text>
-          <Text style={styles.cardText}>
-            Location
-          </Text>
-          <Button
-            buttonStyle={styles.cardButton}
-            title='Ipakita ang Pagsusuri'
-            titleStyle={{ color: 'black' }}
-          />
-        </Card>
-      </ScrollView>
-    </View>
-        </View>
+        <TabView
+          navigationState={{ index, routes }}
+          renderScene={renderScene}
+          onIndexChange={setIndex}
+        />
       </ImageBackground>
     </View>
   );
@@ -92,7 +90,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent', // Adjust the opacity here
     padding: 20,
   },
-  
+
   searchBarInputContainer: {
     backgroundColor: 'white',
   },

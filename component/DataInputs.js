@@ -26,16 +26,19 @@ const DataInputs = ({ navigation, route }) => {
   const [edit, setEdit] = useState(false)
 
   const [text, onChangeText] = useState('');
+  const path = `farms/${user.uid}/particulars`
 
-  const collParticular = collection(db, `farms/${user.uid}/particulars`)
+  const collParticular = collection(db, path)
   const [docs, loading, error] = useCollectionData(collParticular);
   console.log("laman ng docs: ", docs);
+  console.log(collParticular);
+  console.log(user.uid);
 
   const addDocumentWithId = async () => {
     setIsShow(false)
     onChangeText('')
     try {
-      await addDoc(collParticular, { name: text, totalInputs: 0, uid: user.uid });
+      await setDoc(doc(collParticular, text), { name: text, totalInputs: 0, uid: user.uid });
     } catch (error) {
       console.error('Error adding document:', error);
     }
@@ -63,7 +66,7 @@ const DataInputs = ({ navigation, route }) => {
                     <TableBuilder
                       key={doc.name}
                       name={doc.name}
-                      path={`${collParticular}/${doc.name}/${doc.name}`}
+                      path={`${path}/${doc.name}/${doc.name}`}
                     />
                   ))}
             </ScrollView>

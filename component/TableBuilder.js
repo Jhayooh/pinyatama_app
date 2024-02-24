@@ -33,7 +33,11 @@ const TableHead = ({ headers }) => {
   return (
     <View style={styles.tableHead}>
       {header.map((head, index) => (
-        <View key={index} style={index == 0 ? styles.tableHeadLabel3 : styles.tableHeadLabel2}>
+        <View key={index} style={index == 0
+          ?
+          styles.tableHeadLabel3
+          :
+          styles.tableHeadLabel2}>
           <Text style={{ alignItems: 'flex-start' }}>{head}</Text>
         </View>
       ))}
@@ -81,8 +85,9 @@ export const TableBuilder = ({ name, path }) => {
   const query = collection(db, path);
   const [docs, loading, error] = useCollectionData(query);
   const docRef = doc(db, path, name)
+  console.log('tablebuilder docs: ', docs);
 
-  const [total, setTotal] = useState(0)  
+  const [total, setTotal] = useState(0)
 
   const updateTotalInputs = async (newTotal) => {
     try {
@@ -115,7 +120,7 @@ export const TableBuilder = ({ name, path }) => {
           <ActivityIndicator size='small' color='#3bcd6b' style={{ padding: 12, backgroundColor: '#fff' }} />
           :
           docs?.map((doc) => (
-            <View key={doc.id} style={{flex: 1}}>
+            <View key={doc.id} style={{ flex: 1 }}>
               <TableData data={doc} />
               {/* <TableDataChild path={`${path}/${doc.id}/${doc.name}`} /> */}
             </View>
