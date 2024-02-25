@@ -43,7 +43,6 @@ export const Calculator = ({ navigation }) => {
   const [municipality, setMunicipality] = useState('')
   const [farmName, setFarmName] = useState('')
   const [date, setDate] = useState(new Date());
-  const [range, setRange] = useState(5)
   // end ng data natin
 
   const [munCode, setMunCode] = useState(null)
@@ -55,9 +54,7 @@ export const Calculator = ({ navigation }) => {
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
 
-  console.log("range datea dd: ", typeof(moment(date).add(parseInt(range), 'day')));
   console.log("date value: ", date);
-  console.log("date added value: ", moment(date).add(range, 'day').toDate());
 
   const openGallery = async () => {
     try {
@@ -77,7 +74,6 @@ export const Calculator = ({ navigation }) => {
   const handleMapPress = (e) => {
     setUserLocation(e.nativeEvent.coordinate);
   };
-
   const openCamera = async () => {
     try {
       await ImagePicker.requestCameraPermissionsAsync();
@@ -133,7 +129,7 @@ export const Calculator = ({ navigation }) => {
 
   const saveInputs = async () => {
     console.log("udooooo!!!");
-    const path = `farms/${user.uid}/actDates`
+    const path = `farms/${user.uid}/phases`
     try {
       const uploadPromises = images.map(img => uploadImages(img.url, "Image"));
       // Wait for all images to upload
@@ -151,7 +147,6 @@ export const Calculator = ({ navigation }) => {
       await setDoc(doc(db, path, 'pagtatanim'), {
         name: 'pagtatanim',
         starDate: Timestamp.fromDate(date),
-        endDate: Timestamp.fromDate(moment(date).add(parseInt(range), 'day').toDate()),
         uid: user.uid
       })
     } catch (e) {
