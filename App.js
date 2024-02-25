@@ -11,6 +11,7 @@ import { Landing } from './component/Landing';
 import Login from './component/Login';
 import Map from './component/Map';
 import ProductionInput from './component/ProductionInput';
+import Video from './component/Video';
 
 
 const Stack = createNativeStackNavigator();
@@ -30,6 +31,7 @@ const App = () => (
             <Stack.Screen name='DataInputs' component={DataInputs}/>
             <Stack.Screen name='BottomButton' component={BottomButton}/>
             <Stack.Screen name='Login' component={Login}/>
+            <Stack.Screen name='Video' component={Video}/>
         </Stack.Navigator>
     </NavigationContainer>
 )

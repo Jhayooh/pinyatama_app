@@ -2,11 +2,12 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { address } from 'addresspinas';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
-import { GeoPoint, collection, storage, doc, ref, setDoc } from 'firebase/firestore';
+import { GeoPoint, Timestamp, collection, doc, ref, setDoc, storage } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
 import {
+  ActivityIndicator,
   Button,
   FlatList,
   Image,
@@ -22,6 +23,8 @@ import {
 import { Dropdown } from 'react-native-element-dropdown';
 import MapView, { Marker } from 'react-native-maps';
 import { auth, db } from '../firebase/Config';
+import { AddButton } from './AddButton';
+import { TableBuilder } from './TableBuilder';
 
 export const Calculator = ({ navigation }) => {
   const collFarms = collection(db, 'farms')
@@ -30,6 +33,13 @@ export const Calculator = ({ navigation }) => {
 
   const [user] = useAuthState(auth)
   console.log(user.uid);
+  const [isShow, setIsShow] = useState(false)
+  const [edit, setEdit] = useState(false)
+  const [text, onChangeText] = useState('');
+
+  const pathParticular = `farms/${user.uid}/particulars`
+  const collParticular = collection(db, pathParticular)
+  const [docsParticular, loadingParticular, errorParticular] = useCollectionData(collParticular)
 
   const [munFocus, setMunFocus] = useState(false)
   const [brgyFocus, setBrgyFocus] = useState(false)
@@ -42,7 +52,6 @@ export const Calculator = ({ navigation }) => {
   const [municipality, setMunicipality] = useState('')
   const [farmName, setFarmName] = useState('')
   const [date, setDate] = useState(new Date());
-  const [range, setRange] = useState(0)
   // end ng data natin
 
   const [munCode, setMunCode] = useState(null)
@@ -53,6 +62,20 @@ export const Calculator = ({ navigation }) => {
 
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
+
+  console.log("date value: ", date);
+
+  
+  const addDocumentWithId = async () => {
+    setIsShow(false)
+    onChangeText('')
+    try {
+      const documentRef = doc(collParticular, text);
+      await setDoc(documentRef, { name: text, totalInputs: 0 });
+    } catch (error) {
+      console.error('Error adding document:', error);
+    }
+  };
 
   const openGallery = async () => {
     try {
@@ -72,7 +95,6 @@ export const Calculator = ({ navigation }) => {
   const handleMapPress = (e) => {
     setUserLocation(e.nativeEvent.coordinate);
   };
-
   const openCamera = async () => {
     try {
       await ImagePicker.requestCameraPermissionsAsync();
@@ -128,7 +150,7 @@ export const Calculator = ({ navigation }) => {
 
   const saveInputs = async () => {
     console.log("udooooo!!!");
-    const path = `farms/${user.uid}/actDates`
+    const path = `farms/${user.uid}/phases`
     try {
       const uploadPromises = images.map(img => uploadImages(img.url, "Image"));
       // Wait for all images to upload
@@ -145,8 +167,7 @@ export const Calculator = ({ navigation }) => {
 
       await setDoc(doc(db, path, 'pagtatanim'), {
         name: 'pagtatanim',
-        starDate: date,
-        endDate: moment(date).add(range, day),
+        starDate: Timestamp.fromDate(date),
         uid: user.uid
       })
     } catch (e) {
@@ -215,154 +236,191 @@ export const Calculator = ({ navigation }) => {
         <View style={{ flex: 1, alignItems: 'center', }}>
           {/* {console.log("from onLoad:", images)} */}
           <Image source={require(`../assets/pinya.png`)} style={{ height: 90, width: 100 }} />
-          <ScrollView style={{ flex: 1, width: '100%' }}>
-            {/* ImagesGal */}
-            <View style={{ marginBottom: 8, width: '100%', height: 180, borderRadius: 6, padding: 4, backgroundColor: '#101010' }}>
-              {
-                images &&
-                <FlatList
-                  data={images}
-                  // numColumns={3}
-                  horizontal={true}
-                  renderItem={({ item }) => (
-                    <View style={{ flex: 1 }}>
-                      <Image style={{ height: '100%', width: 240, borderRadius: 6 }} source={{ uri: item.url }} />
-                    </View>
-                  )}
-                  ItemSeparatorComponent={() =>
-                    <View style={{ width: 4, height: '100%' }}></View>
-                  }
-                // columnWrapperStyle={{
-                //   gap: 2,
-                //   marginBottom: 2
-                // }}
-                />
-              }
-            </View>
-            <View style={{ flexDirection: 'row' }}>
-              < TouchableOpacity style={styles.touch} onPress={() => {
-                navigation.navigate('DataInputs')
-              }}>
-                <Text style={styles.text}>I-edit</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.touch} onPress={() => {
-                setShowAddImage(true)
-              }}>
-                <Text style={styles.text}>Add Image</Text>
-              </TouchableOpacity>
-            </View>
+          <ScrollView
+            showsVerticalScrollIndicator={false} style={{ flex: 1, width: '100%' }}
+          >
+            {/* Date  */}
 
-            {/* FarmLoc */}
-            <View style={{
-              width: '100%',
-              flexDirection: 'column',
-              gap: 8,
-              paddingVertical: 8,
-            }}>
-              <TextInput
-                editable
-                maxLength={40}
-                onChangeText={text => setFarmName(text)}
-                placeholder='Enter Farm Name'
-                value={farmName}
-                style={styles.dropdown}
-              />
-              <Dropdown
-                style={[styles.dropdown, munFocus && { borderColor: 'blue' }]}
-                placeholderStyle={styles.placeholderStyle}
-                selectedTextStyle={styles.selectedTextStyle}
-                inputSearchStyle={styles.inputSearchStyle}
-                data={municipalities.cityAndMun}
-                search
-                maxHeight={220}
-                labelField="name"
-                valueField="mun_code"
-                placeholder={!munFocus ? 'Select Municipalities' : '...'}
-                searchPlaceholder="Search..."
-                value={munCode}
-                onFocus={() => setMunFocus(true)}
-                onBlur={() => setMunFocus(false)}
-                onChange={item => {
-                  setMunCode(item.mun_code);
-                  setMunicipality(item.name)
-                  setMunFocus(false);
-                }}
-              />
-              <Dropdown
-                style={[styles.dropdown, brgyFocus && { borderColor: 'blue' }]}
-                placeholderStyle={styles.placeholderStyle}
-                selectedTextStyle={styles.selectedTextStyle}
-                inputSearchStyle={styles.inputSearchStyle}
-                data={brgy.barangays}
-                search
-                maxHeight={220}
-                labelField="name"
-                valueField="name"
-                placeholder={!brgyFocus ? 'Select Barangay' : '...'}
-                searchPlaceholder="Search..."
-                value={brgyCode}
-                onFocus={() => setBrgyFocus(true)}
-                onBlur={() => setBrgyFocus(false)}
-                onChange={item => {
-                  setBrgyCode(item.name);
-                  setBrgyFocus(false);
-                }}
-              />
+            < View style={styles.category_container}>
+              <>
+                <Text style={styles.head}>1. Farm Activities</Text>
+                <Button onPress={showDatepicker} title="1. Petsa ng Pagtanim" style={{ marginVertical: 12 }} />
+                {show && (
+                  <DateTimePicker
+                    testID="dateTimepicker"
+                    value={date}
+                    mode={mode}
+                    is24Hour={true}
+                    onChange={onChange}
+                    style={styles.text}
+                  />
+                )}
+                {
+                  loadingParticular
+                    ?
+                    <ActivityIndicator size='small' color='#3bcd6b' style={{ padding: 64, backgroundColor: '#fff' }} />
+                    :
+                    docsParticular?.map((doc) => (
+                      <TableBuilder
+                        key={doc.name}
+                        name={doc.name}
+                        path={`${pathParticular}/${doc.name}/${doc.name}`} />
+                    ))}
+                <AddButton setShow={setIsShow} navigation={navigation} />
+                {/* // modal */}
+                <Modal animationType='fade' transparent={true} visible={isShow} onRequestClose={() => (setIsShow(!isShow))}>
+                  <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                      <Text style={styles.modalTitle}>Add New Table</Text>
+                      <TextInput
+                        style={styles.input}
+                        onChangeText={onChangeText}
+                        value={text}
+                        placeholder='Add Name'
+                      />
+                      <View style={styles.bottomButton}>
+                        <TouchableOpacity style={styles.bottomButtonItem} onPress={() => addDocumentWithId()}>
+                          <Text>Add</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.bottomButtonItem} onPress={() => setIsShow(false)}>
+                          <Text>Close</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  </View>
+                </Modal>
+              </>
+
             </View>
-            <View style={styles.container1}>
-            <MapView style={styles.map} region={region} onPress={handleMapPress}>
-  {userLocation && (
-    <Marker
-      coordinate={{
-        latitude: userLocation.latitude,
-        longitude: userLocation.longitude,
-      }}
-      title="Your Location"
-      description="You are here!"
-      draggable
-      onDragEnd={(e) => setUserLocation(e.nativeEvent.coordinate)}
-    />
-  )}
-</MapView>
-              <View style={styles.buttonContainer}>
-                <Button title="Update Location" onPress={handleUpdateLocation} />
+            {/* FarmLoc */}
+            <View style={styles.category_container}>
+              <Text style={styles.head}>1. Input Farm Location</Text>
+              <View style={{
+                width: '100%',
+                flexDirection: 'column',
+                gap: 8,
+                paddingVertical: 8,
+              }}>
+                <TextInput
+                  editable
+                  maxLength={40}
+                  onChangeText={text => setFarmName(text)}
+                  placeholder='Enter Farm Name'
+                  value={farmName}
+                  style={styles.dropdown}
+                />
+                <Dropdown
+                  style={[styles.dropdown, munFocus && { borderColor: 'blue' }]}
+                  placeholderStyle={styles.placeholderStyle}
+                  selectedTextStyle={styles.selectedTextStyle}
+                  inputSearchStyle={styles.inputSearchStyle}
+                  data={municipalities.cityAndMun}
+                  search
+                  maxHeight={220}
+                  labelField="name"
+                  valueField="mun_code"
+                  placeholder={!munFocus ? 'Select Municipalities' : '...'}
+                  searchPlaceholder="Search..."
+                  value={munCode}
+                  onFocus={() => setMunFocus(true)}
+                  onBlur={() => setMunFocus(false)}
+                  onChange={item => {
+                    setMunCode(item.mun_code);
+                    setMunicipality(item.name)
+                    setMunFocus(false);
+                  }}
+                />
+                <Dropdown
+                  style={[styles.dropdown, brgyFocus && { borderColor: 'blue' }]}
+                  placeholderStyle={styles.placeholderStyle}
+                  selectedTextStyle={styles.selectedTextStyle}
+                  inputSearchStyle={styles.inputSearchStyle}
+                  data={brgy.barangays}
+                  search
+                  maxHeight={220}
+                  labelField="name"
+                  valueField="name"
+                  placeholder={!brgyFocus ? 'Select Barangay' : '...'}
+                  searchPlaceholder="Search..."
+                  value={brgyCode}
+                  onFocus={() => setBrgyFocus(true)}
+                  onBlur={() => setBrgyFocus(false)}
+                  onChange={item => {
+                    setBrgyCode(item.name);
+                    setBrgyFocus(false);
+                  }}
+                />
+              </View>
+              <View style={styles.container1}>
+                <MapView style={styles.map} region={region} onPress={handleMapPress}>
+                  {userLocation && (
+                    <Marker
+                      coordinate={{
+                        latitude: userLocation.latitude,
+                        longitude: userLocation.longitude,
+                      }}
+                      title="Your Location"
+                      description="You are here!"
+                      draggable
+                      onDragEnd={(e) => setUserLocation(e.nativeEvent.coordinate)}
+                    />
+                  )}
+                </MapView>
+                <View style={styles.buttonContainer}>
+                  <Button title="Update Location" onPress={handleUpdateLocation} />
+                </View>
               </View>
             </View>
-            <View>
-              <Button onPress={showDatepicker} title="Petsa ng Pagtanim" style={{ marginVertical: 12 }} />
-              <TextInput
-                editable
-                maxLength={40}
-                onChangeText={r => setRange(r)}
-                placeholder='Enter Days'
-                value={range}
-                style={styles.dropdown}
-              />
-              {show && (
-                <DateTimePicker
-                  testID="dateTimepicker"
-                  value={date}
-                  mode={mode}
-                  is24Hour={true}
-                  onChange={onChange}
-                  style={styles.text}
-                />
-              )}
+            {/* ImagesGal */}
+            <View style={styles.category_container}>
+              <Text style={styles.head}>1. Upload Farm Images</Text>
+              <View style={{ marginBottom: 8, width: '100%', height: 180, borderRadius: 6, padding: 4, backgroundColor: '#101010' }}>
+                {
+                  images &&
+                  <FlatList
+                    data={images}
+                    // numColumns={3}
+                    horizontal={true}
+                    renderItem={({ item }) => (
+                      <View style={{ flex: 1 }}>
+                        <Image style={{ height: '100%', width: 240, borderRadius: 6 }} source={{ uri: item.url }} />
+                      </View>
+                    )}
+                    ItemSeparatorComponent={() =>
+                      <View style={{ width: 4, height: '100%' }}></View>
+                    }
+                  // columnWrapperStyle={{
+                  //   gap: 2,
+                  //   marginBottom: 2
+                  // }}
+                  />
+                }
+              </View>
+              <View style={{ flexDirection: 'row' }}>
+                <TouchableOpacity style={styles.touch} onPress={() => {
+                  setShowAddImage(true)
+                }}>
+                  <Text style={styles.text}>Add Image</Text>
+                </TouchableOpacity>
+              </View>
             </View>
+
+            <TouchableOpacity style={styles.touch2} onPress={() => {
+              saveInputs()
+              navigation.navigate('DataInputs', {
+                brgyCode,
+                userLocation,
+                images,
+                municipality,
+                farmName
+              })
+            }}>
+              <Text style={styles.text1}>Paglagay ng Pagsusuri</Text>
+            </TouchableOpacity>
+
           </ScrollView>
         </View >
-        <TouchableOpacity style={styles.touch2} onPress={() => {
-          saveInputs()
-          navigation.navigate('DataInputs', {
-            brgyCode,
-            userLocation,
-            images,
-            municipality,
-            farmName
-          })
-        }}>
-          <Text style={styles.text}>Paglagay ng Pagsusuri</Text>
-        </TouchableOpacity>
+
       </ImageBackground >
 
       <Modal animationType='fade' visible={showAddImage} transparent={true}>
@@ -403,28 +461,35 @@ const styles = StyleSheet.create({
     borderColor: '#206830',
     flex: 1,
     alignItems: 'center',
-
   },
   touch2: {
-    paddingHorizontal: 24,
     paddingVertical: 16,
     alignItems: 'center',
     textAlign: 'center',
     shadowOpacity: 0.37,
     shadowRadius: 7.49,
-    elevation: 12,
-    backgroundColor: '#17AF41',
-    borderRadius: 20,
+    elevation: 20,
+    backgroundColor: 'white',
+    elevation: 20,
+    backgroundColor: 'white',
     borderWidth: 1,
     borderColor: '#206830',
-
+    marginTop: 20,
+    marginTop: 20,
     alignItems: 'center'
   },
   modalBackground: {
     backgroundColor: '#00000060',
     padding: 20,
     justifyContent: 'center',
-    flex: 1
+    flex: 1,
+    fontFamily: 'serif',
+    fontWeight: 'bold',
+    color: 'white',
+    flex: 1,
+    fontFamily: 'serif',
+    fontWeight: 'bold',
+    color: 'white'
   },
   modalContainer: {
     backgroundColor: '#fff',
@@ -440,7 +505,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     padding: 16,
   },
-
   container1: {
     height: 200,
     width: '100%',
@@ -501,5 +565,77 @@ const styles = StyleSheet.create({
     fontFamily: 'serif',
     fontWeight: 'bold',
     color: 'white'
-  }
-})
+  },
+  text1: {
+    fontSize: 15,
+    fontFamily: 'serif',
+    fontWeight: 'bold',
+    color: 'black'
+  },
+  category_container: {
+    backgroundColor: '#247027',
+    width: 'auto',
+    padding: 20,
+    marginTop: 20,
+    opacity: 1.0,
+  },
+  head: {
+    fontSize: 20,
+    fontFamily: 'serif',
+    fontWeight: 'bold',
+    color: 'white',
+    marginBottom: 10,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    width: 280,
+    padding: 20,
+    borderRadius: 10,
+    elevation: 5, // Android shadow
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  modalLabel: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    marginBottom: 9,
+  },
+  input: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 10,
+    paddingHorizontal: 10,
+  },
+  bottomButton: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    gap: 12
+},
+bottomButtonItem: {
+    flex: 1,
+    padding: 12,
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    textAlign: 'center',
+    shadowOpacity: 0.37,
+    shadowRadius: 7.49,
+    elevation: 20,
+    backgroundColor: '#17AF41',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#206830',
+},
+});
+
+
