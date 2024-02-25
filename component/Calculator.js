@@ -7,6 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
 import {
+  ActivityIndicator,
   Button,
   FlatList,
   Image,
@@ -22,6 +23,8 @@ import {
 import { Dropdown } from 'react-native-element-dropdown';
 import MapView, { Marker } from 'react-native-maps';
 import { auth, db } from '../firebase/Config';
+import { AddButton } from './AddButton';
+import { TableBuilder } from './TableBuilder';
 
 export const Calculator = ({ navigation }) => {
   const collFarms = collection(db, 'farms')
@@ -30,6 +33,13 @@ export const Calculator = ({ navigation }) => {
 
   const [user] = useAuthState(auth)
   console.log(user.uid);
+  const [isShow, setIsShow] = useState(false)
+  const [edit, setEdit] = useState(false)
+  const [text, onChangeText] = useState('');
+
+  const pathParticular = `farms/${user.uid}/particulars`
+  const collParticular = collection(db, pathParticular)
+  const [docsParticular, loadingParticular, errorParticular] = useCollectionData(collParticular)
 
   const [munFocus, setMunFocus] = useState(false)
   const [brgyFocus, setBrgyFocus] = useState(false)
@@ -54,6 +64,18 @@ export const Calculator = ({ navigation }) => {
   const [show, setShow] = useState(false);
 
   console.log("date value: ", date);
+
+  
+  const addDocumentWithId = async () => {
+    setIsShow(false)
+    onChangeText('')
+    try {
+      const documentRef = doc(collParticular, text);
+      await setDoc(documentRef, { name: text, totalInputs: 0 });
+    } catch (error) {
+      console.error('Error adding document:', error);
+    }
+  };
 
   const openGallery = async () => {
     try {
@@ -219,32 +241,56 @@ export const Calculator = ({ navigation }) => {
           >
             {/* Date  */}
 
-            <View style={styles.category_container}>
+            < View style={styles.category_container}>
               <>
-              <Text style={styles.head}>1. Farm Activities</Text>
-              <Button onPress={showDatepicker} title="1. Petsa ng Pagtanim" style={{ marginVertical: 12 }} />
-              {show && (
-                <DateTimePicker
-                  testID="dateTimepicker"
-                  value={date}
-                  mode={mode}
-                  is24Hour={true}
-                  onChange={onChange}
-                  style={styles.text}
-                />   
-              )}
-              <Button onPress={showDatepicker} title="2. Petsa ng Pamumunga" style={{ marginVertical: 12,  }} />
-              {show && (
-                <DateTimePicker
-                  testID="dateTimepicker"
-                  value={date}
-                  mode={mode}
-                  is24Hour={true}
-                  onChange={onChange}
-                  style={styles.text}
-                />
-              )}
+                <Text style={styles.head}>1. Farm Activities</Text>
+                <Button onPress={showDatepicker} title="1. Petsa ng Pagtanim" style={{ marginVertical: 12 }} />
+                {show && (
+                  <DateTimePicker
+                    testID="dateTimepicker"
+                    value={date}
+                    mode={mode}
+                    is24Hour={true}
+                    onChange={onChange}
+                    style={styles.text}
+                  />
+                )}
+                {
+                  loadingParticular
+                    ?
+                    <ActivityIndicator size='small' color='#3bcd6b' style={{ padding: 64, backgroundColor: '#fff' }} />
+                    :
+                    docsParticular?.map((doc) => (
+                      <TableBuilder
+                        key={doc.name}
+                        name={doc.name}
+                        path={`${pathParticular}/${doc.name}/${doc.name}`} />
+                    ))}
+                <AddButton setShow={setIsShow} navigation={navigation} />
+                {/* // modal */}
+                <Modal animationType='fade' transparent={true} visible={isShow} onRequestClose={() => (setIsShow(!isShow))}>
+                  <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                      <Text style={styles.modalTitle}>Add New Table</Text>
+                      <TextInput
+                        style={styles.input}
+                        onChangeText={onChangeText}
+                        value={text}
+                        placeholder='Add Name'
+                      />
+                      <View style={styles.bottomButton}>
+                        <TouchableOpacity style={styles.bottomButtonItem} onPress={() => addDocumentWithId()}>
+                          <Text>Add</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.bottomButtonItem} onPress={() => setIsShow(false)}>
+                          <Text>Close</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  </View>
+                </Modal>
               </>
+
             </View>
             {/* FarmLoc */}
             <View style={styles.category_container}>
@@ -358,6 +404,7 @@ export const Calculator = ({ navigation }) => {
                 </TouchableOpacity>
               </View>
             </View>
+
             <TouchableOpacity style={styles.touch2} onPress={() => {
               saveInputs()
               navigation.navigate('DataInputs', {
@@ -423,8 +470,11 @@ const styles = StyleSheet.create({
     shadowRadius: 7.49,
     elevation: 20,
     backgroundColor: 'white',
+    elevation: 20,
+    backgroundColor: 'white',
     borderWidth: 1,
     borderColor: '#206830',
+    marginTop: 20,
     marginTop: 20,
     alignItems: 'center'
   },
@@ -432,6 +482,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#00000060',
     padding: 20,
     justifyContent: 'center',
+    flex: 1,
+    fontFamily: 'serif',
+    fontWeight: 'bold',
+    color: 'white',
     flex: 1,
     fontFamily: 'serif',
     fontWeight: 'bold',
@@ -523,7 +577,7 @@ const styles = StyleSheet.create({
     width: 'auto',
     padding: 20,
     marginTop: 20,
-    opacity:1.0,
+    opacity: 1.0,
   },
   head: {
     fontSize: 20,
@@ -531,6 +585,57 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'white',
     marginBottom: 10,
-  }
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    width: 280,
+    padding: 20,
+    borderRadius: 10,
+    elevation: 5, // Android shadow
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  modalLabel: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    marginBottom: 9,
+  },
+  input: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 10,
+    paddingHorizontal: 10,
+  },
+  bottomButton: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    gap: 12
+},
+bottomButtonItem: {
+    flex: 1,
+    padding: 12,
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    textAlign: 'center',
+    shadowOpacity: 0.37,
+    shadowRadius: 7.49,
+    elevation: 20,
+    backgroundColor: '#17AF41',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#206830',
+},
 });
+
 
