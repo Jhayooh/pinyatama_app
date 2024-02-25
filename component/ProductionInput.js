@@ -12,18 +12,28 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { db } from '../firebase/Config';
+import { db, auth } from '../firebase/Config';
 import { BottomButton } from './BottomButton';
 import Charts from './Charts';
 import { TableBuilder } from './TableBuilder';
+import { useAuthState } from 'react-firebase-hooks/auth';
 
 const ProductionInput = ({navigation}) => {
+  const [user] = useAuthState(auth)
+
   const [materials, setMaterials] = useState([])
   const [isShow, setIsShow] = useState(false)
   const [edit, setEdit] = useState(false)
   const [text, onChangeText] = useState('');
-  const collParticular = collection(db, 'particulars')
+  const pathParticular = `farms/${user.uid}/particulars`
+  const collParticular = collection(db, pathParticular)
   const [docs, loading, error] = useCollectionData(collParticular)
+  const pathPhases = `farms/${user.uid}/phases`
+  const collPhases = collection(db, pathPhases)
+  const [phaseDoc, phaseLoading, phasesError] = useCollectionData(collPhases)
+  const pathActivities = `farms/${user.uid}/activities`
+
+  console.log("phaseDoc:", phaseDoc);
 
   const addDocumentWithId = async () => {
     setIsShow(false)
@@ -64,13 +74,13 @@ const ProductionInput = ({navigation}) => {
                       <TableBuilder
                         key={doc.name}
                         name={doc.name}
-                        path={`particulars/${doc.name}/${doc.name}`} />
+                        path={`${pathParticular}/${doc.name}/${doc.name}`} />
                     ))}
               </ScrollView>
               <BottomButton setShow={setIsShow} navigation={navigation} />
             </>
             :
-            <Charts />
+            <Charts pathParticular={pathParticular} pathPhases={pathPhases} pathActivities={pathActivities} />
           }
         </ImageBackground>
       </View >
@@ -107,7 +117,8 @@ const styles = StyleSheet.create({
   },
   image: {
     flex: 1,
-    opacity: .5,
+    // opacity: .5,
+    padding: 12
     
   },
   name: {
