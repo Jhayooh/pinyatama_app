@@ -118,36 +118,40 @@ export const Landing = ({ navigation }) => {
                 </View>
             </ScrollView>
         </KeyboardAvoidingView>
-
     );
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#206830',
         justifyContent: 'center',
         alignItems: 'center',
+        
     },
     background: {
-        width: '100%',
-        height: '100%',
+        flex:1,
+        padding: 300,
         resizeMode: 'cover',
     },
     buttonContainer: {
-        justifyContent: 'space-between',
-        position: 'absolute',
-        width: '100%',
-        height: '50%',
-        opacity: 0.9,
-        zIndex: 2,
-        marginTop: 300,
-        paddingVertical: windowHeight * 0.20,
+        flex:1,
+        justifyContent:'center',
+        alignItems:'center',
+        position:'absolute',
+        zIndex:2,
+        paddingTop:350,
+        // justifyContent: 'space-between',
+        // position: 'absolute',
+        // paddingTop:500,
+        // opacity: 0.9,
+        // zIndex: 2,
+        // marginTop: 300,
+        // paddingVertical: windowHeight * 0.20,
     },
     row: {
         flexDirection: 'row',
         justifyContent: 'space-around',
-        gap: 12,
+        gap: 20
     },
     buttonText: {
         color: '#fff',
@@ -156,8 +160,7 @@ const styles = StyleSheet.create({
         fontFamily: 'serif'
     },
     button: {
-        marginTop: 10,
-        marginBottom: 5,
+        marginBottom: 3,
         width: 150,
         height: 130,
         padding: 5,
@@ -188,16 +191,14 @@ const styles = StyleSheet.create({
     },
     overlayImage: {
         position: 'absolute',
-        top: '50%',
-        left: '50%',
-        width: windowWidth * 0.95,
-        height: windowHeight * 0.9,
         resizeMode: 'cover',
         opacity: 1.0,
         zIndex: 1,
-        borderRadius: 20,
-        marginLeft: -((windowWidth * 0.95) / 2),
-        marginTop: -((windowHeight * 0.9) / 2),
+        borderRadius:20,
+        top:'10%',
+        left: '3%',
+        width: 400,
+        height: 780
     },
     overlayPik: {
         position: 'absolute',
@@ -205,7 +206,7 @@ const styles = StyleSheet.create({
         left: '2.5%',
         width: windowWidth * 0.95,
         height: windowHeight * 0.3,
-        opacity: 0.9,
+        opacity: 1.0,
         zIndex: 2,
         borderTopRightRadius: 20,
         borderTopLeftRadius: 20,
