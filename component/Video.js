@@ -20,7 +20,7 @@ const VideoCard = ({ title, videoId }) => {
     return (
         <View style={styles.card}>
             <Text style={styles.title}>{title}</Text>
-            {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
+            {/* {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>} */}
             <YoutubePlayer height={300} videoId={videoId} />
         </View>
     );

@@ -58,7 +58,7 @@ const ButtonContainer = ({ navigation }) => {
                         <Image source={require('../assets/calcu.png')} />
                         <Text style={styles.buttonText}>CALCULATOR NG GASTOS</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('ProductionInput')}>
+                    <TouchableOpacity style={styles.button} onPress={() => null}>
                         <Image source={require('../assets/yield.png')} />
                         <Text style={styles.buttonText}>TAGAPAG-UKIT NG ANI</Text>
                     </TouchableOpacity>
