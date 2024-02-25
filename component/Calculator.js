@@ -1,8 +1,7 @@
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { address } from 'addresspinas';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
-import { GeoPoint, collection, storage, doc, ref, setDoc } from 'firebase/firestore';
+import { GeoPoint, collection, doc, ref, setDoc, storage } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
@@ -215,154 +214,166 @@ export const Calculator = ({ navigation }) => {
         <View style={{ flex: 1, alignItems: 'center', }}>
           {/* {console.log("from onLoad:", images)} */}
           <Image source={require(`../assets/pinya.png`)} style={{ height: 90, width: 100 }} />
-          <ScrollView style={{ flex: 1, width: '100%' }}>
-            {/* ImagesGal */}
-            <View style={{ marginBottom: 8, width: '100%', height: 180, borderRadius: 6, padding: 4, backgroundColor: '#101010' }}>
-              {
-                images &&
-                <FlatList
-                  data={images}
-                  // numColumns={3}
-                  horizontal={true}
-                  renderItem={({ item }) => (
-                    <View style={{ flex: 1 }}>
-                      <Image style={{ height: '100%', width: 240, borderRadius: 6 }} source={{ uri: item.url }} />
-                    </View>
-                  )}
-                  ItemSeparatorComponent={() =>
-                    <View style={{ width: 4, height: '100%' }}></View>
-                  }
-                // columnWrapperStyle={{
-                //   gap: 2,
-                //   marginBottom: 2
-                // }}
+          <ScrollView
+            showsVerticalScrollIndicator={false} style={{ flex: 1, width: '100%' }}
+          >
+            {/* Date  */}
+
+            <View style={styles.category_container}>
+                <Text style={styles.head}>1. Date</Text>
+                <Button onPress={showDatepicker} title="Petsa ng Pagtanim" />
+                <TextInput
+                  editable
+                  maxLength={40}
+                  onChangeText={r => setRange(r)}
+                  placeholder='Enter Days'
+                  value={range}
+                  style={styles.dropdown}
                 />
-              }
-            </View>
-            <View style={{ flexDirection: 'row' }}>
-              < TouchableOpacity style={styles.touch} onPress={() => {
-                navigation.navigate('DataInputs')
-              }}>
-                <Text style={styles.text}>I-edit</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.touch} onPress={() => {
-                setShowAddImage(true)
-              }}>
-                <Text style={styles.text}>Add Image</Text>
-              </TouchableOpacity>
+
+                {show && (
+                  <DateTimePicker
+                    testID="dateTimepicker"
+                    value={date}
+                    mode={mode}
+                    is24Hour={true}
+                    onChange={onChange}
+                    style={styles.text}
+                  />
+                )}
             </View>
 
             {/* FarmLoc */}
-            <View style={{
-              width: '100%',
-              flexDirection: 'column',
-              gap: 8,
-              paddingVertical: 8,
-            }}>
-              <TextInput
-                editable
-                maxLength={40}
-                onChangeText={text => setFarmName(text)}
-                placeholder='Enter Farm Name'
-                value={farmName}
-                style={styles.dropdown}
-              />
-              <Dropdown
-                style={[styles.dropdown, munFocus && { borderColor: 'blue' }]}
-                placeholderStyle={styles.placeholderStyle}
-                selectedTextStyle={styles.selectedTextStyle}
-                inputSearchStyle={styles.inputSearchStyle}
-                data={municipalities.cityAndMun}
-                search
-                maxHeight={220}
-                labelField="name"
-                valueField="mun_code"
-                placeholder={!munFocus ? 'Select Municipalities' : '...'}
-                searchPlaceholder="Search..."
-                value={munCode}
-                onFocus={() => setMunFocus(true)}
-                onBlur={() => setMunFocus(false)}
-                onChange={item => {
-                  setMunCode(item.mun_code);
-                  setMunicipality(item.name)
-                  setMunFocus(false);
-                }}
-              />
-              <Dropdown
-                style={[styles.dropdown, brgyFocus && { borderColor: 'blue' }]}
-                placeholderStyle={styles.placeholderStyle}
-                selectedTextStyle={styles.selectedTextStyle}
-                inputSearchStyle={styles.inputSearchStyle}
-                data={brgy.barangays}
-                search
-                maxHeight={220}
-                labelField="name"
-                valueField="name"
-                placeholder={!brgyFocus ? 'Select Barangay' : '...'}
-                searchPlaceholder="Search..."
-                value={brgyCode}
-                onFocus={() => setBrgyFocus(true)}
-                onBlur={() => setBrgyFocus(false)}
-                onChange={item => {
-                  setBrgyCode(item.name);
-                  setBrgyFocus(false);
-                }}
-              />
-            </View>
-            <View style={styles.container1}>
-            <MapView style={styles.map} region={region} onPress={handleMapPress}>
-  {userLocation && (
-    <Marker
-      coordinate={{
-        latitude: userLocation.latitude,
-        longitude: userLocation.longitude,
-      }}
-      title="Your Location"
-      description="You are here!"
-      draggable
-      onDragEnd={(e) => setUserLocation(e.nativeEvent.coordinate)}
-    />
-  )}
-</MapView>
-              <View style={styles.buttonContainer}>
+            <View style={styles.category_container}>
+            <Text style={styles.head}>2. Input Farm Location</Text>
+              <View style={{
+                width: '100%',
+                flexDirection: 'column',
+                gap: 8,
+                paddingVertical: 8,
+              }}>
+                <TextInput
+                  editable
+                  maxLength={40}
+                  onChangeText={text => setFarmName(text)}
+                  placeholder='Enter Farm Name'
+                  value={farmName}
+                  style={styles.dropdown}
+                />
+                <Dropdown
+                  style={[styles.dropdown, munFocus && { borderColor: 'blue' }]}
+                  placeholderStyle={styles.placeholderStyle}
+                  selectedTextStyle={styles.selectedTextStyle}
+                  inputSearchStyle={styles.inputSearchStyle}
+                  data={municipalities.cityAndMun}
+                  search
+                  maxHeight={220}
+                  labelField="name"
+                  valueField="mun_code"
+                  placeholder={!munFocus ? 'Select Municipalities' : '...'}
+                  searchPlaceholder="Search..."
+                  value={munCode}
+                  onFocus={() => setMunFocus(true)}
+                  onBlur={() => setMunFocus(false)}
+                  onChange={item => {
+                    setMunCode(item.mun_code);
+                    setMunicipality(item.name)
+                    setMunFocus(false);
+                  }}
+                />
+                <Dropdown
+                  style={[styles.dropdown, brgyFocus && { borderColor: 'blue' }]}
+                  placeholderStyle={styles.placeholderStyle}
+                  selectedTextStyle={styles.selectedTextStyle}
+                  inputSearchStyle={styles.inputSearchStyle}
+                  data={brgy.barangays}
+                  search
+                  maxHeight={220}
+                  labelField="name"
+                  valueField="name"
+                  placeholder={!brgyFocus ? 'Select Barangay' : '...'}
+                  searchPlaceholder="Search..."
+                  value={brgyCode}
+                  onFocus={() => setBrgyFocus(true)}
+                  onBlur={() => setBrgyFocus(false)}
+                  onChange={item => {
+                    setBrgyCode(item.name);
+                    setBrgyFocus(false);
+                  }}
+                />
+              </View>
+              <View style={styles.container1}>
+                <MapView style={styles.map} region={region} onPress={handleMapPress}>
+                  {userLocation && (
+                    <Marker
+                      coordinate={{
+                        latitude: userLocation.latitude,
+                        longitude: userLocation.longitude,
+                      }}
+                      title="Your Location"
+                      description="You are here!"
+                      draggable
+                      onDragEnd={(e) => setUserLocation(e.nativeEvent.coordinate)}
+                    />
+                  )}
+                </MapView>
                 <Button title="Update Location" onPress={handleUpdateLocation} />
               </View>
             </View>
-            <View>
-              <Button onPress={showDatepicker} title="Petsa ng Pagtanim" style={{ marginVertical: 12 }} />
-              <TextInput
-                editable
-                maxLength={40}
-                onChangeText={r => setRange(r)}
-                placeholder='Enter Days'
-                value={range}
-                style={styles.dropdown}
-              />
-              {show && (
-                <DateTimePicker
-                  testID="dateTimepicker"
-                  value={date}
-                  mode={mode}
-                  is24Hour={true}
-                  onChange={onChange}
-                  style={styles.text}
-                />
-              )}
+
+            {/* ImagesGal */}
+            <View style={styles.category_container}>
+            <Text style={styles.head}>3. Upload Farm Images</Text>
+              <View style={{ marginBottom: 8, width: '100%', height: 180, borderRadius: 6, padding: 5, backgroundColor: '#101010' }}>
+                {
+                  images &&
+                  <FlatList
+                    data={images}
+                    // numColumns={3}
+                    horizontal={true}
+                    renderItem={({ item }) => (
+                      <View style={{ flex: 1 }}>
+                        <Image style={{ height: '100%', width: 240, borderRadius: 6 }} source={{ uri: item.url }} />
+                      </View>
+                    )}
+                    ItemSeparatorComponent={() =>
+                      <View style={{ width: 4, height: '100%' }}></View>
+                    }
+                  // columnWrapperStyle={{
+                  //   gap: 2,
+                  //   marginBottom: 2
+                  // }}
+                  />
+                }
+              </View>
+              <View style={{ flexDirection: 'row' }}>
+                < TouchableOpacity style={styles.touch} onPress={() => {
+                  navigation.navigate('DataInputs')
+                }}>
+                  <Text style={styles.text}>I-edit</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.touch} onPress={() => {
+                  setShowAddImage(true)
+                }}>
+                  <Text style={styles.text}>Add Image</Text>
+                </TouchableOpacity>
+              </View>
             </View>
+            <TouchableOpacity style={styles.touch2} onPress={() => {
+              saveInputs()
+              navigation.navigate('DataInputs', {
+                brgyCode,
+                userLocation,
+                images,
+                municipality,
+                farmName
+              })
+            }}>
+              <Text style={styles.text1}>Paglagay ng Pagsusuri</Text>
+            </TouchableOpacity>
           </ScrollView>
         </View >
-        <TouchableOpacity style={styles.touch2} onPress={() => {
-          saveInputs()
-          navigation.navigate('DataInputs', {
-            brgyCode,
-            userLocation,
-            images,
-            municipality,
-            farmName
-          })
-        }}>
-          <Text style={styles.text}>Paglagay ng Pagsusuri</Text>
-        </TouchableOpacity>
+
       </ImageBackground >
 
       <Modal animationType='fade' visible={showAddImage} transparent={true}>
@@ -406,18 +417,16 @@ const styles = StyleSheet.create({
 
   },
   touch2: {
-    paddingHorizontal: 24,
     paddingVertical: 16,
     alignItems: 'center',
     textAlign: 'center',
     shadowOpacity: 0.37,
     shadowRadius: 7.49,
-    elevation: 12,
-    backgroundColor: '#17AF41',
-    borderRadius: 20,
+    elevation: 20,
+    backgroundColor: 'white',
     borderWidth: 1,
     borderColor: '#206830',
-
+    marginTop: 20,
     alignItems: 'center'
   },
   modalBackground: {
@@ -501,5 +510,25 @@ const styles = StyleSheet.create({
     fontFamily: 'serif',
     fontWeight: 'bold',
     color: 'white'
+  },
+  text1: {
+    fontSize: 15,
+    fontFamily: 'serif',
+    fontWeight: 'bold',
+    color: 'black'
+  },
+  category_container: {
+    backgroundColor: '#247027',
+    width: 'auto',
+    padding: 20,
+    marginTop: 20,
+  },
+  head:{
+    fontSize: 20,
+    fontFamily: 'serif',
+    fontWeight: 'bold',
+    color: 'white',
+    marginBottom:10,
+    
   }
 })

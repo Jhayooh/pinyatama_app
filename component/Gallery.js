@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { ImageBackground, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { TabView, SceneMap } from 'react-native-tab-view';
+import { Button, ImageBackground, Keyboard, Platform, StyleSheet, TextInput, View } from 'react-native';
+import { SceneMap, TabView } from 'react-native-tab-view';
 
 function FarmGal() {
   return (
@@ -47,6 +47,7 @@ const renderScene = SceneMap({
 const Gallery = ({ navigation }) => {
   const [search, setSearch] = useState('');
   const [index, setIndex] = React.useState(0);
+  const [clicked,setCLicked]=useState(false);
   const [routes] = useState([
     { key: 'lahat', title: 'Lahat' },
     { key: 'buwan0', title: 'Buwan0' },
@@ -64,9 +65,11 @@ const Gallery = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <ImageBackground
+      
         source={require('../assets/brakrawnd.png')}
         style={styles.backgroundImage}
       >
+        <SearchBar navigation={navigation} />
         <TabView
           navigationState={{ index, routes }}
           renderScene={renderScene}
@@ -76,7 +79,48 @@ const Gallery = ({ navigation }) => {
     </View>
   );
 };
-
+const SearchBar = ({clicked, searchPhrase, setSearchPhrase, setCLicked, navigation}) => {
+  return (
+    <View style={styles.searchcontainer}>
+      <View
+        style={
+          clicked
+            ? styles.searchBar__clicked
+            : styles.searchBar__unclicked
+        }
+      >
+        {/* Input field */}
+        <TextInput
+          style={styles.input}
+          placeholder="Search"
+          value={searchPhrase}
+          onChangeText={setSearchPhrase}
+          onFocus={() => {
+            setClicked(true);
+          }}
+        />
+        {/* cross Icon, depending on whether the search bar is clicked or not */}
+        {clicked && (
+          <Entypo name="cross" size={20} color="black" style={{ padding: 1 }} onPress={() => {
+              setSearchPhrase("")
+          }}/>
+        )}
+      </View>
+      {/* cancel button, depending on whether the search bar is clicked or not */}
+      {clicked && (
+        <View>
+          <Button
+            title="Cancel"
+            onPress={() => {
+              Keyboard.dismiss();
+              setClicked(false);
+            }}
+          ></Button>
+        </View>
+      )}
+    </View>
+  );
+};
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -112,6 +156,35 @@ const styles = StyleSheet.create({
     marginBottom: 0,
     backgroundColor: 'white',
   },
+  searchcontainer:{
+    margin: 20,
+    justifyContent: "flex-start",
+    alignItems: "center",
+    flexDirection: "row",
+    width: "90%",
+  },
+    searchBar__unclicked: {
+      padding: 10,
+      flexDirection: "row",
+      width: "95%",
+      backgroundColor: "#d9dbda",
+      borderRadius: 15,
+      alignItems: "center",
+    },
+    searchBar__clicked: {
+      padding: 10,
+      flexDirection: "row",
+      width: "80%",
+      backgroundColor: "#d9dbda",
+      borderRadius: 15,
+      alignItems: "center",
+      justifyContent: "space-evenly",
+    },
+    input: {
+      fontSize: 20,
+      marginLeft: 10,
+      width: "90%",
+    },
 
 });
 
