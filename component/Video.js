@@ -1,5 +1,5 @@
 import React from 'react';
-import { ImageBackground, ScrollView, StyleSheet, Text, View, subtitle } from 'react-native';
+import { ImageBackground, ScrollView, StyleSheet, Text, View, } from 'react-native';
 import YoutubePlayer from 'react-native-youtube-iframe';
 
 const Video = ({ navigation }) => {
@@ -7,9 +7,9 @@ const Video = ({ navigation }) => {
         <ImageBackground source={require('../assets/brakrawnd.png')} style={styles.background} >
             <ScrollView showsVerticalScrollIndicator={false}>
                 <View style={styles.videoContainer}>
-                    <VideoCard title="Pagaani ng Pinya sa Labo, Camarines Norte "  subtitle="This is a subtitle" videoId="oS5xvukokSw" />
-                    <VideoCard title="Semilya ng Pinya, Daet, Camarines Norte" subtitle="This is a subtitle" videoId="K9WfCeUL4AM" />
-                    <VideoCard title="The sweetest Pineapple in Camarines Norte"  subtitle="This is a subtitle" videoId="gCCu6xwi2f4" />
+                    <VideoCard title="Pagaani ng Pinya sa Labo, Camarines Norte "  videoId="oS5xvukokSw" />
+                    <VideoCard title="Semilya ng Pinya, Daet, Camarines Norte" videoId="K9WfCeUL4AM" />
+                    <VideoCard title="The sweetest Pineapple in Camarines Norte"   videoId="gCCu6xwi2f4" />
                 </View>
             </ScrollView>
         </ImageBackground>
@@ -46,11 +46,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 10,
     },
-    subtitle: {
-        fontSize: 16,
-        color: '#555',
-        marginBottom: 5,
-    },
+ 
 });
 
 export default Video;
