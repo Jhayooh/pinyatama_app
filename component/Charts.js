@@ -12,10 +12,11 @@ import { DoughnutAndPie } from './charts/DoughnutAndPie'
 import { Line } from './charts/Line'
 import { Bar } from './charts/Bar'
 import { Progress } from './charts/Progress'
-import { collection } from 'firebase/firestore'
+import { collection, getDocs } from 'firebase/firestore'
 import { db } from '../firebase/Config'
 import { useCollectionData } from 'react-firebase-hooks/firestore'
-import { Calendar } from "react-native-calendars";
+import { Calendar, Agenda } from "react-native-calendars";
+import moment from 'moment'
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 const GastosSaPinya = () => {
@@ -28,16 +29,30 @@ const GastosSaPinya = () => {
     )
 }
 
-const Charts = () => {
+const Charts = ({ pathParticular, pathPhases, pathActivities }) => {
     const [selectedDay, setSelectedDay] = useState('')
-    const query = collection(db, 'particulars')
+    const query = collection(db, pathParticular)
     const [docs, loading, error] = useCollectionData(query)
-
     const [data, setData] = useState([])
 
     const [date, setDate] = useState(new Date(1598051730000));
     const [mode, setMode] = useState('date');
     const [show, setShow] = useState(false);
+    const [maxMonth, setMaxMonth] = useState('')
+    const schedQue = collection(db, pathPhases)
+    const [schedDoc, schedLoading, schedError] = useCollectionData(schedQue)
+    const [sched, setSched] = useState({
+
+    })
+    const actQuery = collection(db, pathActivities)
+    const [actDoc, actLoading, actError] = useCollectionData(actQuery)
+    const [activities, setActivities] = useState({})
+
+    const [startDate, setStartDate] = useState('')
+
+    const getMaxSched = ({ date }) => {
+        return moment(date).add(2, 'month')
+    }
 
     const onChange = (event, selectedDate) => {
         const currentDate = selectedDate;
@@ -58,26 +73,94 @@ const Charts = () => {
         showMode('time');
     };
 
+    const formatDate = (toFormatDate) => {
+        return toFormatDate.toDate().toISOString().split('T')[0];
+    }
+
+    const checkCollection = async (collPath) => {
+        try {
+            const collectionRef = collection(db, collPath);
+            const snapshot = await getDocs(collectionRef);
+            return !snapshot.empty;
+        } catch (error) {
+            console.error('Error checking collection:', error);
+            return false;
+        }
+    };
+
+    const generateDateRange = (startDate, endDate) => {
+        console.log("start:", startDate);
+        console.log("end:", endDate);
+        const dates = {};
+        let currentDate = moment(startDate);
+        const formattedEndDate = moment(endDate);
+
+        while (currentDate <= formattedEndDate) {
+            const formattedDate = currentDate.format('YYYY-MM-DD');
+            dates[formattedDate] = {
+                color: '#50cebb',
+                textColor: 'white',
+            };
+            currentDate = currentDate.add(1, 'days');
+        }
+        return dates;
+    };
+
     const color = ["rgb(0, 255, 0)", "rgb(0, 0, 255)", "rgb(255, 0, 0)"]
-
     useEffect(() => {
-        setData(docs?.map((doc, index) => (
-            {
-                ...doc,
-                color: color[index],
-                legendFontColor: "#7F7F7F",
-                legendFontSize: 15
-            }
-        )))
+        setData(
+            docs?.map((doc, index) => (
+                {
+                    ...doc,
+                    color: color[index],
+                    legendFontColor: "#7F7F7F",
+                    legendFontSize: 15
+                }
+            ))
+        )
+        if (schedDoc) {
+            const newSched = schedDoc.reduce((acc, doc) => {
+                console.log("pa print po ng doc:", doc);
+                console.log("tingin ng subcollection", checkCollection(`${pathPhases}/${doc.name}/activities`));
+                const startDate = doc.starDate;
+                const formattedDate = formatDate(startDate)
+                acc[formattedDate] = {
+                    startingDay: true,
+                    color: '#50cebb',
+                    textColor: 'white',
+                };
+                if (doc.name === 'pagtatanim') {
+                    setMaxMonth(formatDate(getMaxSched(startDate)))
+                    setStartDate(formattedDate)
+                }
+                return acc;
+            }, {});
+            setSched(prevSched => ({ ...prevSched, ...newSched }));
+        }
 
+        if (actDoc) {
+            const newAct = actDoc.reduce((acc, doc) => {
+                const createdDate = doc.createdDate;
+                const formattedDate = formatDate(createdDate)
+                console.log("this is my docact", formattedDate);
+                acc[formattedDate] = {
+                    marked: true,
+                    dotColor: 'black'
+                };
+                return acc;
+            }, {});
+            setActivities(prevActs => ({ ...prevActs, ...newAct }));
+        }
+        
+    }, [docs, schedDoc, actDoc])
 
-    }, [docs])
-
+    console.log("schedDoc: ", schedDoc);
+    console.log("act lang", activities);
     console.log(data);
+    console.log("max month", maxMonth);
 
     return (
         <>
-
             <ScrollView>
                 {loading
                     ?
@@ -89,25 +172,6 @@ const Charts = () => {
                         gap: 8,
                         paddingVertical: 8
                     }}>
-                        <View>
-                            <Button onPress={showDatepicker} title="Show date picker!" />
-                            <Button onPress={showTimepicker} title="Show time picker!" />
-                            <Text>selected: {date.toLocaleString()}</Text>
-                            {show && (
-                                <DateTimePicker
-                                    testID="dateTimePicker"
-                                    value={date}
-                                    mode={mode}
-                                    is24Hour={true}
-                                    onChange={onChange}
-                                />
-                            )}
-                        </View>
-                        <DoughnutAndPie data={data} />
-                        <Line />
-                        <Bar />
-                        <DoughnutAndPie />
-                        <Progress />
                         <Calendar
                             markingType='period'
                             style={{
@@ -115,18 +179,21 @@ const Charts = () => {
                                 height: 380
                             }}
                             onDayPress={day => {
+                                
+                                alert(day.dateString)
                                 setSelectedDay(day.dateString);
                             }}
                             markedDates={{
-                                '2024-02-15': { marked: true, dotColor: '#50cebb' },
-                                '2024-02-16': { marked: true, dotColor: '#50cebb' },
-                                '2024-02-17': { startingDay: true, color: '#50cebb', textColor: 'white' },
-                                '2024-02-18': { color: '#70d7c7', textColor: 'white' },
-                                '2024-02-19': { color: '#70d7c7', textColor: 'white', marked: true, dotColor: 'white' },
-                                '2024-02-20': { color: '#70d7c7', textColor: 'white' },
-                                '2024-02-21': { endingDay: true, color: '#50cebb', textColor: 'white' }
+                                ...activities,
+                                // ...generateDateRange(startDate, maxMonth),
+                                // [maxMonth]: { endingDay: true, color: '#50cebb', textColor: 'white' },
                             }}
                         />
+                        <DoughnutAndPie data={data} />
+                        <Line />
+                        <Bar />
+                        <DoughnutAndPie />
+                        <Progress />
                     </View>
                 }
             </ScrollView>

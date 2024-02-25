@@ -1,10 +1,11 @@
 import { address } from 'addresspinas';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
-import { GeoPoint, collection, doc, ref, setDoc, storage } from 'firebase/firestore';
+import { GeoPoint, collection, storage, doc, ref, setDoc, Timestamp } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
+import moment from 'moment';
 import {
   Button,
   FlatList,
@@ -41,7 +42,6 @@ export const Calculator = ({ navigation }) => {
   const [municipality, setMunicipality] = useState('')
   const [farmName, setFarmName] = useState('')
   const [date, setDate] = useState(new Date());
-  const [range, setRange] = useState(0)
   // end ng data natin
 
   const [munCode, setMunCode] = useState(null)
@@ -52,6 +52,8 @@ export const Calculator = ({ navigation }) => {
 
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
+
+  console.log("date value: ", date);
 
   const openGallery = async () => {
     try {
@@ -71,7 +73,6 @@ export const Calculator = ({ navigation }) => {
   const handleMapPress = (e) => {
     setUserLocation(e.nativeEvent.coordinate);
   };
-
   const openCamera = async () => {
     try {
       await ImagePicker.requestCameraPermissionsAsync();
@@ -127,7 +128,7 @@ export const Calculator = ({ navigation }) => {
 
   const saveInputs = async () => {
     console.log("udooooo!!!");
-    const path = `farms/${user.uid}/actDates`
+    const path = `farms/${user.uid}/phases`
     try {
       const uploadPromises = images.map(img => uploadImages(img.url, "Image"));
       // Wait for all images to upload
@@ -144,8 +145,7 @@ export const Calculator = ({ navigation }) => {
 
       await setDoc(doc(db, path, 'pagtatanim'), {
         name: 'pagtatanim',
-        starDate: date,
-        endDate: moment(date).add(range, day),
+        starDate: Timestamp.fromDate(date),
         uid: user.uid
       })
     } catch (e) {
@@ -242,122 +242,94 @@ export const Calculator = ({ navigation }) => {
                   />
                 )}
             </View>
-
             {/* FarmLoc */}
-            <View style={styles.category_container}>
-            <Text style={styles.head}>2. Input Farm Location</Text>
-              <View style={{
-                width: '100%',
-                flexDirection: 'column',
-                gap: 8,
-                paddingVertical: 8,
-              }}>
-                <TextInput
-                  editable
-                  maxLength={40}
-                  onChangeText={text => setFarmName(text)}
-                  placeholder='Enter Farm Name'
-                  value={farmName}
-                  style={styles.dropdown}
-                />
-                <Dropdown
-                  style={[styles.dropdown, munFocus && { borderColor: 'blue' }]}
-                  placeholderStyle={styles.placeholderStyle}
-                  selectedTextStyle={styles.selectedTextStyle}
-                  inputSearchStyle={styles.inputSearchStyle}
-                  data={municipalities.cityAndMun}
-                  search
-                  maxHeight={220}
-                  labelField="name"
-                  valueField="mun_code"
-                  placeholder={!munFocus ? 'Select Municipalities' : '...'}
-                  searchPlaceholder="Search..."
-                  value={munCode}
-                  onFocus={() => setMunFocus(true)}
-                  onBlur={() => setMunFocus(false)}
-                  onChange={item => {
-                    setMunCode(item.mun_code);
-                    setMunicipality(item.name)
-                    setMunFocus(false);
-                  }}
-                />
-                <Dropdown
-                  style={[styles.dropdown, brgyFocus && { borderColor: 'blue' }]}
-                  placeholderStyle={styles.placeholderStyle}
-                  selectedTextStyle={styles.selectedTextStyle}
-                  inputSearchStyle={styles.inputSearchStyle}
-                  data={brgy.barangays}
-                  search
-                  maxHeight={220}
-                  labelField="name"
-                  valueField="name"
-                  placeholder={!brgyFocus ? 'Select Barangay' : '...'}
-                  searchPlaceholder="Search..."
-                  value={brgyCode}
-                  onFocus={() => setBrgyFocus(true)}
-                  onBlur={() => setBrgyFocus(false)}
-                  onChange={item => {
-                    setBrgyCode(item.name);
-                    setBrgyFocus(false);
-                  }}
-                />
-              </View>
-              <View style={styles.container1}>
-                <MapView style={styles.map} region={region} onPress={handleMapPress}>
-                  {userLocation && (
-                    <Marker
-                      coordinate={{
-                        latitude: userLocation.latitude,
-                        longitude: userLocation.longitude,
-                      }}
-                      title="Your Location"
-                      description="You are here!"
-                      draggable
-                      onDragEnd={(e) => setUserLocation(e.nativeEvent.coordinate)}
-                    />
-                  )}
-                </MapView>
+            <View style={{
+              width: '100%',
+              flexDirection: 'column',
+              gap: 8,
+              paddingVertical: 8,
+            }}>
+              <TextInput
+                editable
+                maxLength={40}
+                onChangeText={text => setFarmName(text)}
+                placeholder='Enter Farm Name'
+                value={farmName}
+                style={styles.dropdown}
+              />
+              <Dropdown
+                style={[styles.dropdown, munFocus && { borderColor: 'blue' }]}
+                placeholderStyle={styles.placeholderStyle}
+                selectedTextStyle={styles.selectedTextStyle}
+                inputSearchStyle={styles.inputSearchStyle}
+                data={municipalities.cityAndMun}
+                search
+                maxHeight={220}
+                labelField="name"
+                valueField="mun_code"
+                placeholder={!munFocus ? 'Select Municipalities' : '...'}
+                searchPlaceholder="Search..."
+                value={munCode}
+                onFocus={() => setMunFocus(true)}
+                onBlur={() => setMunFocus(false)}
+                onChange={item => {
+                  setMunCode(item.mun_code);
+                  setMunicipality(item.name)
+                  setMunFocus(false);
+                }}
+              />
+              <Dropdown
+                style={[styles.dropdown, brgyFocus && { borderColor: 'blue' }]}
+                placeholderStyle={styles.placeholderStyle}
+                selectedTextStyle={styles.selectedTextStyle}
+                inputSearchStyle={styles.inputSearchStyle}
+                data={brgy.barangays}
+                search
+                maxHeight={220}
+                labelField="name"
+                valueField="name"
+                placeholder={!brgyFocus ? 'Select Barangay' : '...'}
+                searchPlaceholder="Search..."
+                value={brgyCode}
+                onFocus={() => setBrgyFocus(true)}
+                onBlur={() => setBrgyFocus(false)}
+                onChange={item => {
+                  setBrgyCode(item.name);
+                  setBrgyFocus(false);
+                }}
+              />
+            </View>
+            <View style={styles.container1}>
+              <MapView style={styles.map} region={region} onPress={handleMapPress}>
+                {userLocation && (
+                  <Marker
+                    coordinate={{
+                      latitude: userLocation.latitude,
+                      longitude: userLocation.longitude,
+                    }}
+                    title="Your Location"
+                    description="You are here!"
+                    draggable
+                    onDragEnd={(e) => setUserLocation(e.nativeEvent.coordinate)}
+                  />
+                )}
+              </MapView>
+              <View style={styles.buttonContainer}>
                 <Button title="Update Location" onPress={handleUpdateLocation} />
               </View>
             </View>
-
-            {/* ImagesGal */}
-            <View style={styles.category_container}>
-            <Text style={styles.head}>3. Upload Farm Images</Text>
-              <View style={{ marginBottom: 8, width: '100%', height: 180, borderRadius: 6, padding: 5, backgroundColor: '#101010' }}>
-                {
-                  images &&
-                  <FlatList
-                    data={images}
-                    // numColumns={3}
-                    horizontal={true}
-                    renderItem={({ item }) => (
-                      <View style={{ flex: 1 }}>
-                        <Image style={{ height: '100%', width: 240, borderRadius: 6 }} source={{ uri: item.url }} />
-                      </View>
-                    )}
-                    ItemSeparatorComponent={() =>
-                      <View style={{ width: 4, height: '100%' }}></View>
-                    }
-                  // columnWrapperStyle={{
-                  //   gap: 2,
-                  //   marginBottom: 2
-                  // }}
-                  />
-                }
-              </View>
-              <View style={{ flexDirection: 'row' }}>
-                < TouchableOpacity style={styles.touch} onPress={() => {
-                  navigation.navigate('DataInputs')
-                }}>
-                  <Text style={styles.text}>I-edit</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.touch} onPress={() => {
-                  setShowAddImage(true)
-                }}>
-                  <Text style={styles.text}>Add Image</Text>
-                </TouchableOpacity>
-              </View>
+            <View>
+              <Button onPress={showDatepicker} title="Petsa ng Pagtanim" style={{ marginVertical: 12 }} />
+              {show && (
+                <DateTimePicker
+                  testID="dateTimepicker"
+                  value={date}
+                  mode={mode}
+                  is24Hour={true}
+                  onChange={onChange}
+                  style={styles.text}
+                />
+              )}
             </View>
             <TouchableOpacity style={styles.touch2} onPress={() => {
               saveInputs()
