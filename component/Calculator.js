@@ -2,10 +2,11 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { address } from 'addresspinas';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
-import { GeoPoint, collection, storage, doc, ref, setDoc } from 'firebase/firestore';
+import { GeoPoint, collection, storage, doc, ref, setDoc, Timestamp } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
+import moment from 'moment';
 import {
   Button,
   FlatList,
@@ -42,7 +43,7 @@ export const Calculator = ({ navigation }) => {
   const [municipality, setMunicipality] = useState('')
   const [farmName, setFarmName] = useState('')
   const [date, setDate] = useState(new Date());
-  const [range, setRange] = useState(0)
+  const [range, setRange] = useState(5)
   // end ng data natin
 
   const [munCode, setMunCode] = useState(null)
@@ -53,6 +54,10 @@ export const Calculator = ({ navigation }) => {
 
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
+
+  console.log("range datea dd: ", typeof(moment(date).add(parseInt(range), 'day')));
+  console.log("date value: ", date);
+  console.log("date added value: ", moment(date).add(range, 'day').toDate());
 
   const openGallery = async () => {
     try {
@@ -145,8 +150,8 @@ export const Calculator = ({ navigation }) => {
 
       await setDoc(doc(db, path, 'pagtatanim'), {
         name: 'pagtatanim',
-        starDate: date,
-        endDate: moment(date).add(range, day),
+        starDate: Timestamp.fromDate(date),
+        endDate: Timestamp.fromDate(moment(date).add(parseInt(range), 'day').toDate()),
         uid: user.uid
       })
     } catch (e) {
@@ -251,7 +256,6 @@ export const Calculator = ({ navigation }) => {
                 <Text style={styles.text}>Add Image</Text>
               </TouchableOpacity>
             </View>
-
             {/* FarmLoc */}
             <View style={{
               width: '100%',
@@ -310,34 +314,26 @@ export const Calculator = ({ navigation }) => {
               />
             </View>
             <View style={styles.container1}>
-            <MapView style={styles.map} region={region} onPress={handleMapPress}>
-  {userLocation && (
-    <Marker
-      coordinate={{
-        latitude: userLocation.latitude,
-        longitude: userLocation.longitude,
-      }}
-      title="Your Location"
-      description="You are here!"
-      draggable
-      onDragEnd={(e) => setUserLocation(e.nativeEvent.coordinate)}
-    />
-  )}
-</MapView>
+              <MapView style={styles.map} region={region} onPress={handleMapPress}>
+                {userLocation && (
+                  <Marker
+                    coordinate={{
+                      latitude: userLocation.latitude,
+                      longitude: userLocation.longitude,
+                    }}
+                    title="Your Location"
+                    description="You are here!"
+                    draggable
+                    onDragEnd={(e) => setUserLocation(e.nativeEvent.coordinate)}
+                  />
+                )}
+              </MapView>
               <View style={styles.buttonContainer}>
                 <Button title="Update Location" onPress={handleUpdateLocation} />
               </View>
             </View>
             <View>
               <Button onPress={showDatepicker} title="Petsa ng Pagtanim" style={{ marginVertical: 12 }} />
-              <TextInput
-                editable
-                maxLength={40}
-                onChangeText={r => setRange(r)}
-                placeholder='Enter Days'
-                value={range}
-                style={styles.dropdown}
-              />
               {show && (
                 <DateTimePicker
                   testID="dateTimepicker"
