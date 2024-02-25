@@ -20,6 +20,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+
 import { Dropdown } from 'react-native-element-dropdown';
 import MapView, { Marker } from 'react-native-maps';
 import { auth, db } from '../firebase/Config';
@@ -65,7 +66,7 @@ export const Calculator = ({ navigation }) => {
 
   console.log("date value: ", date);
 
-  
+
   const addDocumentWithId = async () => {
     setIsShow(false)
     onChangeText('')
@@ -267,6 +268,18 @@ export const Calculator = ({ navigation }) => {
                         path={`${pathParticular}/${doc.name}/${doc.name}`} />
                     ))}
                 <AddButton setShow={setIsShow} navigation={navigation} />
+                <TouchableOpacity style={styles.touch2} onPress={() => {
+                  saveInputs()
+                  navigation.navigate('DataInputs', {
+                    brgyCode,
+                    userLocation,
+                    images,
+                    municipality,
+                    farmName
+                  })
+                }}>
+                  <Text style={styles.text1}>Paglagay ng Pagsusuri</Text>
+                </TouchableOpacity>
                 {/* // modal */}
                 <Modal animationType='fade' transparent={true} visible={isShow} onRequestClose={() => (setIsShow(!isShow))}>
                   <View style={styles.modalContainer}>
@@ -289,12 +302,41 @@ export const Calculator = ({ navigation }) => {
                     </View>
                   </View>
                 </Modal>
+
               </>
 
             </View>
+            {/*Pineapple Details*/}
+            <View style={styles.category_container}>
+              <Text style={styles.head}>2. Input Pineapple Details</Text>
+              <TextInput
+                editable
+                maxLength={40}
+                onChangeText={text => setFarmName(text)}
+                placeholder='Input Variety of Pineapple'
+                value={farmName}
+                style={styles.dropdown}
+              />
+              <TextInput
+                editable
+                maxLength={40}
+                onChangeText={text => setFarmName(text)}
+                placeholder='Expected quantity of harvest (bags)'
+                value={farmName}
+                style={styles.dropdown}
+              />
+              <TextInput
+                editable
+                maxLength={40}
+                onChangeText={text => setFarmName(text)}
+                placeholder='Date of expected harvest'
+                value={farmName}
+                style={styles.dropdown}
+              />
+            </View>
             {/* FarmLoc */}
             <View style={styles.category_container}>
-              <Text style={styles.head}>1. Input Farm Location</Text>
+              <Text style={styles.head}>3. Input Farm Location</Text>
               <View style={{
                 width: '100%',
                 flexDirection: 'column',
@@ -373,7 +415,7 @@ export const Calculator = ({ navigation }) => {
             </View>
             {/* ImagesGal */}
             <View style={styles.category_container}>
-              <Text style={styles.head}>1. Upload Farm Images</Text>
+              <Text style={styles.head}>4. Upload Farm Images</Text>
               <View style={{ marginBottom: 8, width: '100%', height: 180, borderRadius: 6, padding: 4, backgroundColor: '#101010' }}>
                 {
                   images &&
@@ -405,18 +447,7 @@ export const Calculator = ({ navigation }) => {
               </View>
             </View>
 
-            <TouchableOpacity style={styles.touch2} onPress={() => {
-              saveInputs()
-              navigation.navigate('DataInputs', {
-                brgyCode,
-                userLocation,
-                images,
-                municipality,
-                farmName
-              })
-            }}>
-              <Text style={styles.text1}>Paglagay ng Pagsusuri</Text>
-            </TouchableOpacity>
+
 
           </ScrollView>
         </View >
@@ -469,13 +500,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.37,
     shadowRadius: 7.49,
     elevation: 20,
-    backgroundColor: 'white',
-    elevation: 20,
+   
     backgroundColor: 'white',
     borderWidth: 1,
     borderColor: '#206830',
-    marginTop: 20,
-    marginTop: 20,
+    marginTop: 10,
     alignItems: 'center'
   },
   modalBackground: {
@@ -615,13 +644,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 10,
     paddingHorizontal: 10,
+    marginBottom:10
   },
   bottomButton: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     gap: 12
-},
-bottomButtonItem: {
+  },
+  bottomButtonItem: {
     flex: 1,
     padding: 12,
     alignItems: 'center',
@@ -635,7 +665,7 @@ bottomButtonItem: {
     borderRadius: 20,
     borderWidth: 1,
     borderColor: '#206830',
-},
+  },
 });
 
 
