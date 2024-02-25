@@ -145,20 +145,13 @@ const Charts = ({ pathParticular, pathPhases, pathActivities }) => {
                 console.log("this is my docact", formattedDate);
                 acc[formattedDate] = {
                     marked: true,
-                    dotColor: 'black'
+                    dotColor: 'red'
                 };
                 return acc;
             }, {});
             setActivities(prevActs => ({ ...prevActs, ...newAct }));
         }
-        
     }, [docs, schedDoc, actDoc])
-
-    console.log("schedDoc: ", schedDoc);
-    console.log("act lang", activities);
-    console.log(data);
-    console.log("max month", maxMonth);
-
     return (
         <>
             <ScrollView>
