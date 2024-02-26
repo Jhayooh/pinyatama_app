@@ -11,6 +11,7 @@ import { Landing } from './component/Landing';
 import Login from './component/Login';
 import Map from './component/Map';
 import ProductionInput from './component/ProductionInput';
+import Register from './component/Register';
 import Video from './component/Video';
 
 
@@ -32,6 +33,7 @@ const App = () => (
             <Stack.Screen name='BottomButton' component={BottomButton}/>
             <Stack.Screen name='Login' component={Login}/>
             <Stack.Screen name='Video' component={Video}/>
+            <Stack.Screen name='Register' component={Register}/>
         </Stack.Navigator>
     </NavigationContainer>
 )

@@ -140,28 +140,19 @@ export default function Gallery({navigation}) {
       <Tab.Screen
         name="Profile"
         component={Video}
-        options={{ tabBarLabel: '0 buwan' }}
+        options={{ tabBarLabel: 'Vegetative' }}
       />
       <Tab.Screen
         name="Notif"
         component={TabView}
-        options={{ tabBarLabel: '6 buwan' }}
+        options={{ tabBarLabel: 'Flowering' }}
       />
       <Tab.Screen
         name="Prof"
         component={Video}
-        options={{ tabBarLabel: '12 buwan' }}
+        options={{ tabBarLabel: 'Fruiting' }}
       />
-      <Tab.Screen
-        name="Notification"
-        component={TabView}
-        options={{ tabBarLabel: '18 buwan' }}
-      />
-      <Tab.Screen
-        name="Pro"
-        component={Video}
-        options={{ tabBarLabel: 'Aanihin' }}
-      />
+      
     </Tab.Navigator>
   );
 }
