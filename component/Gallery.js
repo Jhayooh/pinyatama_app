@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
-import { Button, ImageBackground, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React from 'react';
 // import { TabView, SceneMap } from 'react-native-tab-view';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import Video from './Video'
 import TabView from './TabView';
+import Video from './Video';
 // function FarmGal({ navigation }) {
 //   return (
 //     <View style={{ flex: 1, height: 320 }}>
@@ -91,7 +90,7 @@ import TabView from './TabView';
 //   },
 //   overlay: {
 //     flex: 1,
-//     backgroundColor: 'transparent', // Adjust the opacity here
+//     backgroundColor: 'transparent', 
 //     padding: 20,
 //   },
 
@@ -136,13 +135,24 @@ export default function Gallery({navigation}) {
       <Tab.Screen
         name="Notifications"
         component={TabView}
-        options={{ tabBarLabel: 'Updates' }}
+        options={{ tabBarLabel: 'Lahat' }}
       />
       <Tab.Screen
         name="Profile"
         component={Video}
-        options={{ tabBarLabel: 'Profile' }}
+        options={{ tabBarLabel: 'Vegetative' }}
       />
+      <Tab.Screen
+        name="Notif"
+        component={TabView}
+        options={{ tabBarLabel: 'Flowering' }}
+      />
+      <Tab.Screen
+        name="Prof"
+        component={Video}
+        options={{ tabBarLabel: 'Fruiting' }}
+      />
+      
     </Tab.Navigator>
   );
 }
