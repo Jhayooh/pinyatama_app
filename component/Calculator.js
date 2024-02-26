@@ -2,7 +2,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { address } from 'addresspinas';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
-import { GeoPoint, Timestamp, collection, doc, ref, setDoc, storage } from 'firebase/firestore';
+import { GeoPoint, Timestamp, addDoc, collection, doc, ref, setDoc, storage } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
@@ -42,6 +42,8 @@ export const Calculator = ({ navigation }) => {
   const collParticular = collection(db, pathParticular)
   const [docsParticular, loadingParticular, errorParticular] = useCollectionData(collParticular)
 
+  // const pathActivities = `farms/${user.uid}/activities`
+
   const [munFocus, setMunFocus] = useState(false)
   const [brgyFocus, setBrgyFocus] = useState(false)
 
@@ -71,8 +73,8 @@ export const Calculator = ({ navigation }) => {
     setIsShow(false)
     onChangeText('')
     try {
-      const documentRef = doc(collParticular, text);
-      await setDoc(documentRef, { name: text, totalInputs: 0 });
+      const docParticular = doc(collParticular, text);
+      await setDoc(docParticular, { name: text, totalInputs: 0 });
     } catch (error) {
       console.error('Error adding document:', error);
     }
