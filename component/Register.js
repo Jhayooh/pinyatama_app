@@ -1,16 +1,32 @@
 import * as ImagePicker from 'expo-image-picker';
-import React, { useState } from 'react';
-import { Button, Image, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { Image, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { auth } from '../firebase/Config';
 
-const Register = ({ visible, onClose }) => {
+const Register = ({ visible, onClose ,showModal,setShowModal}) => {
     const [avatar, setAvatar] = useState(null);
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [baranggay, setBaranggay] = useState('');
     const [city, setCity] = useState('');
     const [province, setProvince] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
+    const [showRegisterModal, setShowRegisterModal] = useState(false);
+
+    const [user] = useAuthState(auth)
+    console.log(user);
+
+    useEffect(() => {
+        const unsubscribe = auth.onAuthStateChanged(user => {
+            if (user) {
+                setShowModal(false)
+            }
+        })
+
+        return unsubscribe
+    }, [])
 
     const pickImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
@@ -102,8 +118,15 @@ const Register = ({ visible, onClose }) => {
                             secureTextEntry
                         />
                     </View>
-
-                    <Button title="Register" onPress={handleRegister} />
+                    <View style={styles.bottomButton}>
+                        <TouchableOpacity style={styles.bottomButtonItem}  onPress={handleRegister} > 
+                            <Text style={styles.btnText}>Register</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.bottomButtonItem} onPress={() => setShowModal(!showModal)}>
+                            <Text style={styles.btnText}>Close</Text>
+                        </TouchableOpacity>
+                    </View>
+                    {/* <Button title="Register" onPress={handleRegister} /> */}
                 </View>
             </View>
         </Modal >
@@ -162,6 +185,21 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'center',
         gap: 20
+    },
+    bottomButtonItem: {
+        flex: 1,
+        padding: 12,
+        alignItems: 'center',
+        paddingHorizontal: 24,
+        paddingVertical: 16,
+        textAlign: 'center',
+        shadowOpacity: 0.37,
+        shadowRadius: 7.49,
+        elevation: 20,
+        backgroundColor: '#17AF41',
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: '#206830',
     },
 });
 
