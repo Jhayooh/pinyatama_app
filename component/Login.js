@@ -3,10 +3,12 @@ import React, { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { KeyboardAvoidingView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { auth } from '../firebase/Config';
+import Register from './Register';
 
 const Login = ({ showModal, setShowModal }) => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    const [showRegisterModal, setShowRegisterModal] = useState(false);
 
     const [user] = useAuthState(auth)
     console.log(user);
@@ -44,8 +46,8 @@ const Login = ({ showModal, setShowModal }) => {
                     behavior="padding"
                 >
                     <View>
-                    <Text style={{color:'black', textAlign:'center',  marginBottom: 5,fontSize: 20, fontWeight:'bold'}}>MALIGAYANG PAGDATING</Text>
-                    <Text style={{color:'#E3E55A',textAlign:'center',  marginBottom: 10,}}>Mag login sa iyong account</Text>
+                        <Text style={{ color: 'black', textAlign: 'center', marginBottom: 5, fontSize: 20, fontWeight: 'bold' }}>MALIGAYANG PAGDATING</Text>
+                        <Text style={{ color: '#E3E55A', textAlign: 'center', marginBottom: 10, }}>Mag login sa iyong account</Text>
                     </View>
                     <View >
                         <TextInput style={styles.modalLabel}
@@ -68,17 +70,17 @@ const Login = ({ showModal, setShowModal }) => {
                         </TouchableOpacity>
                     </View>
                     <View style={styles.bottomButton}>
-                        <TouchableOpacity
-                            onPress={handleSignUp}
-                        >
-                            <Text >Register</Text>
+                        <TouchableOpacity style={styles.bottomButtonItem} onPress={() => setShowRegisterModal(true)}>
+                            <Text style={styles.btnText}>Register</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity
-                            onPress={() => setShowModal(!showModal)}
-                        >
-                            <Text >Close</Text>
+                        <TouchableOpacity style={styles.bottomButtonItem} onPress={() => setShowModal(!showModal)}>
+                            <Text style={styles.btnText}>Close</Text>
                         </TouchableOpacity>
                     </View>
+                    <Register
+                        visible={showRegisterModal}
+                        onClose={() => setShowRegisterModal(false)}
+                    />
                 </KeyboardAvoidingView>
             </View>
         </View>
@@ -115,14 +117,36 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         backgroundColor: '#E3E55A',
         textAlign: 'center',
-        textAlignVertical:'center',
-        fontSize: 16
+        textAlignVertical: 'center',
+        fontSize: 16,
+
+    },
+    btnText: {
+        color: 'white',
+        fontSize: 12,
+        fontWeight: 'bold',
+        fontFamily:'serif'
 
     },
     bottomButton: {
         flexDirection: 'row',
         justifyContent: 'space-around',
         gap: 12,
+    },
+    bottomButtonItem: {
+        flex: 1,
+        padding: 12,
+        alignItems: 'center',
+        paddingHorizontal: 24,
+        paddingVertical: 16,
+        textAlign: 'center',
+        shadowOpacity: 0.37,
+        shadowRadius: 7.49,
+        elevation: 20,
+        backgroundColor: '#17AF41',
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: '#206830',
     },
 
 });

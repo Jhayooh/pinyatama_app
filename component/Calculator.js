@@ -2,7 +2,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { address } from 'addresspinas';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
-import { GeoPoint, Timestamp, addDoc, collection, doc, ref, setDoc, storage } from 'firebase/firestore';
+import { GeoPoint, Timestamp, collection, doc, ref, setDoc, storage } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
