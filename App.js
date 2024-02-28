@@ -15,6 +15,7 @@ import Register from './component/Register';
 import Video from './component/Video';
 
 
+
 const Stack = createNativeStackNavigator();
 
 const App = () => (
@@ -34,6 +35,7 @@ const App = () => (
             <Stack.Screen name='Login' component={Login}/>
             <Stack.Screen name='Video' component={Video}/>
             <Stack.Screen name='Register' component={Register}/>
+         
         </Stack.Navigator>
     </NavigationContainer>
 )
