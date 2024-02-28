@@ -1,64 +1,99 @@
-import React, { useState } from 'react';
-import { ImageBackground, Platform, StyleSheet, View } from 'react-native'; // Added Image import
+import React from 'react';
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-export default function TabView({ navigation }) {
-  const [search, setSearch] = useState('');
-
-  const updateSearch = (text) => {
-    setSearch(text);
+const CardView = ({ imageSource, title, description, onPress }) => {
+  return (
+    <TouchableOpacity onPress={onPress} style={styles.card}>
+      <Image source={{ uri: imageSource }} style={styles.cardImage} />
+      <View style={styles.cardContent}>
+        <Text style={styles.cardTitle}>{title}</Text>
+        <Text style={styles.cardDescription}>{description}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+};
+const TabView = ({ navigation }) => {
+  const handleCardPress = () => {
+    console.log('Card pressed!');
   };
 
   return (
-    <View style={styles.container}>
-      <ImageBackground
-        source={require('../assets/brakrawnd.png')}
-        style={styles.backgroundImage}
-        blurRadius={5} />
-        <TabView
-           navigationState={{ index, routes }}
-           renderScene={(props) => renderScene({ ...props, navigation })}
-           onIndexChange={setIndex}
-       />
-        
-      
-    </View>
+    <ScrollView showsVerticalScrollIndicator={false}>
+      <View style={styles.container}>
+
+        <Image source='brakrawnd.png' style={styles.cardImage}/>
+        <CardView
+          title="Card Title"
+          description="This is the example of React Native Card view. This is the easiest way to adding a card view on your screen."
+          onPress={handleCardPress}
+        />
+        <CardView
+          imageSource="pinya.png"
+          title="Card Title"
+          description="This is the example of React Native Card view. This is the easiest way to adding a card view on your screen."
+          onPress={handleCardPress}
+        />
+        <CardView
+          imageSource="pinya.png"
+          title="Card Title"
+          description="This is the example of React Native Card view. This is the easiest way to adding a card view on your screen."
+          onPress={handleCardPress}
+        />
+        <CardView
+          imageSource="pinya.png"
+          title="Card Title"
+          description="This is the example of React Native Card view. This is the easiest way to adding a card view on your screen."
+          onPress={handleCardPress}
+        />
+      </View>
+    </ScrollView>
+
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  card: {
+    margin: 20,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    width: '90%',
+    alignItems: 'center',
+    borderColor: '#206830'
+  },
+  cardImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginRight: 20,
+    marginTop: 10,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  cardDescription: {
+    fontSize: 16,
+    lineHeight: 24,
   },
   backgroundImage: {
     flex: 1,
     resizeMode: 'cover',
   },
-  overlay: {
-    flex: 1,
-    backgroundColor: 'transparent',
-  },
-  searchBarInputContainer: {
-    backgroundColor: 'white',
-  },
-  cardContainer: {
-    backgroundColor: 'rgba(0, 0, 0, 0)',
-    borderRadius: 10,
-  },
-  cardImage: {
-    height: 200, // Adjust height as needed
-    resizeMode: 'cover',
-    borderRadius: 10,
-  },
-  cardText: {
-    marginBottom: 10,
-    color: 'black',
-    fontFamily: Platform.OS === 'android' ? 'Roboto' : undefined,
-  },
-  cardButton: {
-    borderRadius: 0,
-    marginLeft: 50,
-    marginRight: 0,
-    marginBottom: 0,
-    backgroundColor: 'white',
-  },
+
 });
+export default TabView

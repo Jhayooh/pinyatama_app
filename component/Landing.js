@@ -138,8 +138,6 @@ const styles = StyleSheet.create({
     },
     gradient:{
         position: 'absolute',
-        
-       
         alignItems: "center", 
         justifyContent: 'center',
         width:'100%',
@@ -178,7 +176,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         position: 'absolute',
         zIndex: 2,
-       
         paddingTop: windowHeight * 0.9,
         elevation: 50,
     }
@@ -190,6 +187,7 @@ const styles = StyleSheet.create({
         padding: windowWidth * 0.02,
         alignItems: 'center',
         justifyContent: 'center',
+        opacity:1,
         shadowColor: '#171717',
         shadowOffset: {
             width: 0,
@@ -200,7 +198,8 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         borderRadius: windowWidth * 0.05,
         borderWidth: windowWidth * 0.01,
-        borderColor: '#008B00',
+        borderColor:'white',
+        // borderColor: '#008B00',
         overflow: 'hidden',
     },
     buttonImage: {
