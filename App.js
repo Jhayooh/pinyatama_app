@@ -7,6 +7,7 @@ import { Calculator } from './component/Calculator';
 import Charts from './component/Charts';
 import DataInputs from './component/DataInputs';
 import Gallery from './component/Gallery';
+import Inputs from './component/Inputs';
 import { Landing } from './component/Landing';
 import Login from './component/Login';
 import Map from './component/Map';
@@ -30,12 +31,12 @@ const App = () => (
             <Stack.Screen name='Map' component={Map} />
             <Stack.Screen name='Gallery' component={Gallery} />
             <Stack.Screen name='Charts' component={Charts} />
-            <Stack.Screen name='DataInputs' component={DataInputs}/>
-            <Stack.Screen name='BottomButton' component={BottomButton}/>
-            <Stack.Screen name='Login' component={Login}/>
-            <Stack.Screen name='Video' component={Video}/>
-            <Stack.Screen name='Register' component={Register}/>
-         
+            <Stack.Screen name='DataInputs' component={DataInputs} />
+            <Stack.Screen name='BottomButton' component={BottomButton} />
+            <Stack.Screen name='Login' component={Login} />
+            <Stack.Screen name='Video' component={Video} />
+            <Stack.Screen name='Register' component={Register} />
+            <Stack.Screen name='Inputs' component={Inputs} />
         </Stack.Navigator>
     </NavigationContainer>
 )

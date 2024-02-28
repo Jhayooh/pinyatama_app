@@ -75,7 +75,7 @@ const ButtonContainer = ({ navigation }) => {
                     </TouchableOpacity>
                 </View>
                 <View style={styles.row}>
-                    <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Tungkol')}>
+                    <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Inputs')}>
                         <Image source={require('../assets/info.png')} style={{ width: 80, height: 80 }} />
                         <Text style={styles.buttonText}>Tungkol</Text>
                     </TouchableOpacity>
