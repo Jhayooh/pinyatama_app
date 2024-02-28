@@ -2,9 +2,10 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import React, { useState } from 'react';
 import { ImageBackground, StyleSheet } from 'react-native';
 import { SearchBar } from 'react-native-elements';
-import Login from './Login';
+import Flowering from './Flowering';
+import Fruiting from './Fruiting';
 import TabView from './TabView';
-import Video from './Video';
+import Vegetitive from './Vegetitive';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -42,18 +43,18 @@ export default function Gallery({ navigation }) {
           options={{ tabBarLabel: 'Lahat' }}
         />
         <Tab.Screen
-          name="Profile"
-          component={Video}
+          name="Vegetitive"
+          component={Vegetitive}
           options={{ tabBarLabel: 'Vegetative' }}
         />
         <Tab.Screen
-          name="Notif"
-          component={Video}
+          name="Flowering"
+          component={Flowering}
           options={{ tabBarLabel: 'Flowering' }}
         />
         <Tab.Screen
-          name="Prof"
-          component={Login}
+          name="Fruiting"
+          component={Fruiting}
           options={{ tabBarLabel: 'Fruiting' }}
         />
       </Tab.Navigator>
@@ -67,16 +68,17 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },
   searchContainer: {
-    backgroundColor: 'white',
+    backgroundColor: 'green',
     borderBottomColor: 'transparent',
     borderTopColor: 'transparent',
-    marginTop: 10,
+    padding:20
    
     
   },
   searchInputContainer: {
     backgroundColor: '#f2f2f2',
     borderRadius: 20,
+    borderColor: 'green'
    
   },
   searchInput: {
