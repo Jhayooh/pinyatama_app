@@ -1,5 +1,6 @@
 import { collection, doc, setDoc } from 'firebase/firestore';
 import React, { useState } from 'react';
+import { useAuthState } from 'react-firebase-hooks/auth';
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import {
   ActivityIndicator,
@@ -12,11 +13,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { db, auth } from '../firebase/Config';
+import { auth, db } from '../firebase/Config';
 import { BottomButton } from './BottomButton';
 import Charts from './Charts';
 import { TableBuilder } from './TableBuilder';
-import { useAuthState } from 'react-firebase-hooks/auth';
 
 const ProductionInput = ({ navigation }) => {
   const [user] = useAuthState(auth)
