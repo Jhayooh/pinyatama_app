@@ -1,5 +1,6 @@
 import { collection, doc, setDoc } from 'firebase/firestore';
 import React, { useState } from 'react';
+import { useAuthState } from 'react-firebase-hooks/auth';
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import {
   ActivityIndicator,
@@ -12,13 +13,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { db, auth } from '../firebase/Config';
+import { auth, db } from '../firebase/Config';
 import { BottomButton } from './BottomButton';
 import Charts from './Charts';
 import { TableBuilder } from './TableBuilder';
-import { useAuthState } from 'react-firebase-hooks/auth';
 
-const ProductionInput = ({navigation}) => {
+const ProductionInput = ({ navigation }) => {
   const [user] = useAuthState(auth)
 
   const [materials, setMaterials] = useState([])
@@ -84,7 +84,7 @@ const ProductionInput = ({navigation}) => {
           }
         </ImageBackground>
       </View >
-      
+
       {/* // modal */}
       <Modal animationType='fade' transparent={true} visible={isShow} onRequestClose={() => (setIsShow(!isShow))}>
         <View style={styles.modalContainer}>
@@ -113,13 +113,13 @@ const ProductionInput = ({navigation}) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1, 
+    flex: 1,
   },
   image: {
     flex: 1,
     // opacity: .5,
     padding: 12
-    
+
   },
   name: {
     fontSize: 32,
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
     marginTop: 18,
     fontWeight: 'bold',
     justifyContent: 'center',
-    fontFamily:'serif'
+    fontFamily: 'serif'
 
   },
   scrollView: {
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
     flexDirection: 'row'
   },
- 
+
   modalContainer: {
     flex: 1,
     justifyContent: 'center',

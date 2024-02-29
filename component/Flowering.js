@@ -12,7 +12,7 @@ const CardView = ({ imageSource, title, description, onPress }) => {
     </TouchableOpacity>
   );
 };
-const TabView = ({ navigation }) => {
+const Flowering = ({ navigation }) => {
   const handleCardPress = () => {
     console.log('Card pressed!');
   };
@@ -21,7 +21,6 @@ const TabView = ({ navigation }) => {
     <ScrollView showsVerticalScrollIndicator={false}>
       <View style={styles.container}>
         <CardView
-          imageSource='../assets/brakrawnd.png'
           title="Card Title"
           description="This is the example of React Native Card view. This is the easiest way to adding a card view on your screen."
           onPress={handleCardPress}
@@ -57,7 +56,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   card: {
-    marginTop:20,
+    marginTop: 20,
     backgroundColor: '#fff',
     borderRadius: 10,
     padding: 20,
@@ -74,7 +73,7 @@ const styles = StyleSheet.create({
     borderColor: '#206830'
   },
   cardImage: {
-    width:80,
+    width: 80,
     height: 80,
     borderRadius: 40,
     marginRight: 20,
@@ -95,4 +94,4 @@ const styles = StyleSheet.create({
   },
 
 });
-export default TabView
+export default Flowering

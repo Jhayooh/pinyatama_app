@@ -6,7 +6,8 @@ import {
     StyleSheet,
     ScrollView,
     ActivityIndicator,
-    Button
+    Button,
+    Modal
 } from 'react-native'
 import { DoughnutAndPie } from './charts/DoughnutAndPie'
 import { Line } from './charts/Line'
@@ -30,6 +31,7 @@ const GastosSaPinya = () => {
 }
 
 const Charts = ({ pathParticular, pathPhases, pathActivities }) => {
+    const [isShow, setIsShow] = useState(false)
     const [selectedDay, setSelectedDay] = useState('')
     const query = collection(db, pathParticular)
     const [docs, loading, error] = useCollectionData(query)
@@ -144,6 +146,7 @@ const Charts = ({ pathParticular, pathPhases, pathActivities }) => {
                 const formattedDate = formatDate(createdDate)
                 console.log("this is my docact", formattedDate);
                 acc[formattedDate] = {
+                    ...doc,
                     marked: true,
                     dotColor: 'red'
                 };
@@ -152,6 +155,10 @@ const Charts = ({ pathParticular, pathPhases, pathActivities }) => {
             setActivities(prevActs => ({ ...prevActs, ...newAct }));
         }
     }, [docs, schedDoc, actDoc])
+
+    console.log("laman ng activities:", activities);
+    console.log("is there??", activities.hasOwnProperty(selectedDay));
+
     return (
         <>
             <ScrollView>
@@ -172,15 +179,10 @@ const Charts = ({ pathParticular, pathPhases, pathActivities }) => {
                                 height: 380
                             }}
                             onDayPress={day => {
-                                
-                                alert(day.dateString)
+                                setIsShow(true)
                                 setSelectedDay(day.dateString);
                             }}
-                            markedDates={{
-                                ...activities,
-                                // ...generateDateRange(startDate, maxMonth),
-                                // [maxMonth]: { endingDay: true, color: '#50cebb', textColor: 'white' },
-                            }}
+                            markedDates={activities}
                         />
                         <DoughnutAndPie data={data} />
                         <Line />
@@ -190,6 +192,18 @@ const Charts = ({ pathParticular, pathPhases, pathActivities }) => {
                     </View>
                 }
             </ScrollView>
+
+            <Modal animationType='fade' transparent={true} visible={isShow} onRequestClose={() => (setIsShow(!isShow))}>
+                <View style={styles.modalContainer}>
+                    {
+                        activities.hasOwnProperty(selectedDay) ?
+                            <Text>Meron akong actibidades</Text> :
+                            <Text>No activity</Text>
+                    }
+
+                    <Button title='isarado mo ako' onPress={() => setIsShow(!isShow)} />
+                </View>
+            </Modal>
         </>
     )
 }
@@ -198,7 +212,14 @@ const styles = StyleSheet.create({
     image: {
         flex: 1,
         resizeMode: 'cover',
-    }
+    },
+    modalContainer: {
+        flex: 1,
+        backgroundColor: '#ccc',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 24,
+    },
 })
 
 export default Charts
