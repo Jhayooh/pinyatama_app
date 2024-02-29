@@ -1,118 +1,87 @@
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import React, { useState } from 'react';
-import { ImageBackground, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { TabView, SceneMap } from 'react-native-tab-view';
+import { ImageBackground, StyleSheet } from 'react-native';
+import { SearchBar } from 'react-native-elements';
+import Flowering from './Flowering';
+import Fruiting from './Fruiting';
+import TabView from './TabView';
+import Vegetitive from './Vegetitive';
 
-function FarmGal() {
-  return (
-    <View>
-      
-    </View>
-  )
-}
+const Tab = createMaterialTopTabNavigator();
 
-function Lahat() {
-
-}
-
-function Buwan0() {
-
-}
-
-function Buwan6() {
-
-}
-
-function Buwan12(params) {
-
-}
-
-function Buwan18(params) {
-
-}
-
-function Aanihin() {
-
-}
-
-const renderScene = SceneMap({
-  lahat: Lahat,
-  buwan0: Buwan0,
-  buwan6: Buwan6,
-  buwan12: Buwan12,
-  buwan18: Buwan18,
-  aanihin: Aanihin,
-});
-
-
-const Gallery = ({ navigation }) => {
+export default function Gallery({ navigation }) {
   const [search, setSearch] = useState('');
-  const [index, setIndex] = React.useState(0);
-  const [routes] = useState([
-    { key: 'lahat', title: 'Lahat' },
-    { key: 'buwan0', title: 'Buwan0' },
-    { key: 'buwan6', title: 'Buwan6' },
-    { key: 'buwan12', title: 'Buwan12' },
-    { key: 'buwan18', title: 'Buwan18' },
-    { key: 'aanihin', title: 'Aanihin' },
-  ]);
 
   const updateSearch = (text) => {
     setSearch(text);
+    // Perform search-related actions here, such as filtering data
+    console.log('Search:', text);
   };
 
-
   return (
-    <View style={styles.container}>
-      <ImageBackground
-        source={require('../assets/brakrawnd.png')}
-        style={styles.backgroundImage}
+    <ImageBackground style={styles.background} >
+      <SearchBar
+        placeholder="Search"
+        onChangeText={updateSearch}
+        value={search}
+        containerStyle={styles.searchContainer}
+        inputContainerStyle={styles.searchInputContainer}
+        inputStyle={styles.searchInput}
+      />
+      <Tab.Navigator 
+        initialRouteName="Notifications"
+        tabBarOptions={{
+          activeTintColor: 'green',
+          labelStyle: { fontSize: 11 },
+          style: { backgroundColor: 'white' },
+          fontWeight: 'bold',
+        }}
       >
-        <TabView
-          navigationState={{ index, routes }}
-          renderScene={renderScene}
-          onIndexChange={setIndex}
+        <Tab.Screen
+          name="Notifications"
+          component={TabView}
+          options={{ tabBarLabel: 'Lahat' }}
         />
-      </ImageBackground>
-    </View>
+        <Tab.Screen
+          name="Vegetitive"
+          component={Vegetitive}
+          options={{ tabBarLabel: 'Vegetative' }}
+        />
+        <Tab.Screen
+          name="Flowering"
+          component={Flowering}
+          options={{ tabBarLabel: 'Flowering' }}
+        />
+        <Tab.Screen
+          name="Fruiting"
+          component={Fruiting}
+          options={{ tabBarLabel: 'Fruiting' }}
+        />
+      </Tab.Navigator>
+    </ImageBackground>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  container: {
+  background: {
     flex: 1,
-  },
-  backgroundImage: {
-    flex: 1,
-    resizeMode: 'cover',
-  },
-  overlay: {
-    flex: 1,
-    backgroundColor: 'transparent', // Adjust the opacity here
-    padding: 20,
-  },
-
-  searchBarInputContainer: {
     backgroundColor: 'white',
   },
-  cardContainer: {
-    backgroundColor: 'rgba(0, 0, 0, 0)',
-    borderRadius: 10,
-
+  searchContainer: {
+    backgroundColor: 'green',
+    borderBottomColor: 'transparent',
+    borderTopColor: 'transparent',
+    padding:20
+   
+    
   },
-  cardText: {
-    marginBottom: 10,
-    color: 'black',
-    fontFamily: Platform.OS === 'android' ? 'Roboto' : undefined,
-
+  searchInputContainer: {
+    backgroundColor: '#f2f2f2',
+    borderRadius: 20,
+    borderColor: 'green'
+   
   },
-  cardButton: {
-    borderRadius: 0,
-    marginLeft: 50,
-    marginRight: 0,
-    marginBottom: 0,
-    backgroundColor: 'white',
+  searchInput: {
+    fontSize: 16,
   },
-
 });
-
-export default Gallery;

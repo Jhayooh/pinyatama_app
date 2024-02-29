@@ -1,5 +1,6 @@
 import { collection, doc, setDoc } from 'firebase/firestore';
 import React, { useState } from 'react';
+import { useAuthState } from 'react-firebase-hooks/auth';
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import {
   ActivityIndicator,
@@ -12,18 +13,27 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { db } from '../firebase/Config';
+import { auth, db } from '../firebase/Config';
 import { BottomButton } from './BottomButton';
 import Charts from './Charts';
 import { TableBuilder } from './TableBuilder';
 
-const ProductionInput = ({navigation}) => {
+const ProductionInput = ({ navigation }) => {
+  const [user] = useAuthState(auth)
+
   const [materials, setMaterials] = useState([])
   const [isShow, setIsShow] = useState(false)
   const [edit, setEdit] = useState(false)
   const [text, onChangeText] = useState('');
-  const collParticular = collection(db, 'particulars')
+  const pathParticular = `farms/${user.uid}/particulars`
+  const collParticular = collection(db, pathParticular)
   const [docs, loading, error] = useCollectionData(collParticular)
+  const pathPhases = `farms/${user.uid}/phases`
+  const collPhases = collection(db, pathPhases)
+  const [phaseDoc, phaseLoading, phasesError] = useCollectionData(collPhases)
+  const pathActivities = `farms/${user.uid}/activities`
+
+  console.log("phaseDoc:", phaseDoc);
 
   const addDocumentWithId = async () => {
     setIsShow(false)
@@ -64,17 +74,17 @@ const ProductionInput = ({navigation}) => {
                       <TableBuilder
                         key={doc.name}
                         name={doc.name}
-                        path={`particulars/${doc.name}/${doc.name}`} />
+                        path={`${pathParticular}/${doc.name}/${doc.name}`} />
                     ))}
               </ScrollView>
               <BottomButton setShow={setIsShow} navigation={navigation} />
             </>
             :
-            <Charts />
+            <Charts pathParticular={pathParticular} pathPhases={pathPhases} pathActivities={pathActivities} />
           }
         </ImageBackground>
       </View >
-      
+
       {/* // modal */}
       <Modal animationType='fade' transparent={true} visible={isShow} onRequestClose={() => (setIsShow(!isShow))}>
         <View style={styles.modalContainer}>
@@ -103,12 +113,13 @@ const ProductionInput = ({navigation}) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1, 
+    flex: 1,
   },
   image: {
     flex: 1,
-    opacity: .5,
-    
+    // opacity: .5,
+    padding: 12
+
   },
   name: {
     fontSize: 32,
@@ -131,7 +142,7 @@ const styles = StyleSheet.create({
     marginTop: 18,
     fontWeight: 'bold',
     justifyContent: 'center',
-    fontFamily:'serif'
+    fontFamily: 'serif'
 
   },
   scrollView: {
@@ -171,7 +182,7 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
     flexDirection: 'row'
   },
- 
+
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
