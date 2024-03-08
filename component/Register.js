@@ -1,11 +1,12 @@
 import * as ImagePicker from 'expo-image-picker';
 import React, { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { Image, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { FlatList, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { auth } from '../firebase/Config';
 
-const Register = ({ visible, onClose ,showModal,setShowModal}) => {
+const Register = ({ visible, onClose, showModal, setShowModal }) => {
     const [avatar, setAvatar] = useState(null);
+    const [images, setImages] = useState([])
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [baranggay, setBaranggay] = useState('');
@@ -13,7 +14,7 @@ const Register = ({ visible, onClose ,showModal,setShowModal}) => {
     const [province, setProvince] = useState('');
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
-    const [showRegisterModal, setShowRegisterModal] = useState(false);
+    const [showAddImage, setShowAddImage] = useState(false)
 
     const [user] = useAuthState(auth)
     console.log(user);
@@ -28,18 +29,75 @@ const Register = ({ visible, onClose ,showModal,setShowModal}) => {
         return unsubscribe
     }, [])
 
-    const pickImage = async () => {
-        let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            aspect: [1, 1],
-            quality: 1,
-        });
+    const openGallery = async () => {
+        try {
 
-        if (!result.cancelled) {
-            setAvatar(result.uri);
+            let result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.All,
+                quality: .6,
+            });
+
+            if (!result.canceled) {
+                addImage(result.assets[0].uri, result.assets[0].height, result.assets[0].width)
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    }
+    const handleMapPress = (e) => {
+        setUserLocation(e.nativeEvent.coordinate);
+    };
+    const openCamera = async () => {
+        try {
+            await ImagePicker.requestCameraPermissionsAsync();
+            let result = await ImagePicker.launchCameraAsync({
+                cameraType: ImagePicker.CameraType.back,
+                quality: .6
+            })
+
+            if (!result.canceled) {
+                addImage(result.assets[0].uri, result.assets[0].height, result.assets[0].width)
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    }
+    const addImage = (image, height, width) => {
+        setImages(images => [...images, { url: image, height: height, width: width }])
+    }
+    console.log("image added", images);
+
+    const uploadImages = async (uri, fileType) => {
+        try {
+            const response = await fetch(uri);
+            const blob = await response.blob();
+            const filename = uri.substring(uri.lastIndexOf('/') + 1);
+
+            const storageRef = ref(storage, `FarmImages/${user.uid}/${filename}`);
+            const uploadTask = uploadBytesResumable(storageRef, blob);
+
+            uploadTask.on('state_changed',
+                (snapshot) => {
+                    // Handle progress
+                },
+                (error) => {
+                    console.error("Error uploading image: ", error);
+                },
+                () => {
+                    // Upload completed successfully, get download URL
+                    getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+                        console.log('File available at', downloadURL);
+                        setUploadedImg((uImg) => [...uImg, { url: downloadURL, uid: user.uid }]);
+                    }).catch((error) => {
+                        console.error("Error getting download URL: ", error);
+                    });
+                }
+            );
+        } catch (error) {
+            console.error("Error uploading image: ", error);
         }
     };
+
 
     const handleRegister = () => {
         // Handle registration logic here
@@ -62,13 +120,33 @@ const Register = ({ visible, onClose ,showModal,setShowModal}) => {
         >
             <View style={styles.modalContainer}>
                 <View style={styles.modalContent}>
-                    <View>
-                        <Text style={{ color: 'black', textAlign: 'center', marginBottom: 5, fontSize: 20, fontWeight: 'bold' }}>MALIGAYANG PAGDATING</Text>
-                        <Text style={{ color: '#E3E55A', textAlign: 'center', marginBottom: 10, }}>I- register ang iyong account</Text>
+                    <View style={{ marginBottom: 8, width: '100%', height: 180, borderRadius: 6, padding: 4, backgroundColor: '#101010' }}>
+                        {
+                            images &&
+                            <FlatList
+                                data={images}
+                                // numColumns={3}
+                                horizontal={true}
+                                renderItem={({ item }) => (
+                                    <View style={{ flex: 1 }}>
+                                        <Image style={{ height: '100%', width: 240, borderRadius: 100 }} source={{ uri: item.url }} />
+                                    </View>
+                                )}
+                                ItemSeparatorComponent={() =>
+                                    <View style={{ width: 4, height: '100%' }}></View>
+                                }
+                            // columnWrapperStyle={{
+                            //   gap: 2,
+                            //   marginBottom: 2
+                            // }}
+                            />
+                        }
                     </View>
-                    <View style={styles.avatarContainer}>
-                        <TouchableOpacity onPress={pickImage}>
-                            {avatar ? <Image source={{ uri: avatar }} style={styles.avatar} /> : <Text>Upload Profile</Text>}
+                    <View style={{ flexDirection: 'row' }}>
+                        <TouchableOpacity style={styles.touch} onPress={() => {
+                            setShowAddImage(true)
+                        }}>
+                            <Text style={styles.text}>Add Image</Text>
                         </TouchableOpacity>
                     </View>
 
@@ -119,7 +197,7 @@ const Register = ({ visible, onClose ,showModal,setShowModal}) => {
                         />
                     </View>
                     <View style={styles.bottomButton}>
-                        <TouchableOpacity style={styles.bottomButtonItem}  onPress={handleRegister} > 
+                        <TouchableOpacity style={styles.bottomButtonItem} onPress={handleRegister} >
                             <Text style={styles.btnText}>Register</Text>
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.bottomButtonItem} onPress={() => setShowModal(!showModal)}>
@@ -128,6 +206,25 @@ const Register = ({ visible, onClose ,showModal,setShowModal}) => {
                     </View>
                     {/* <Button title="Register" onPress={handleRegister} /> */}
                 </View>
+                <Modal animationType='fade' visible={showAddImage} transparent={true}>
+                    <View style={styles.addImage}>
+                        <TouchableOpacity style={styles.touch} onPress={() => {
+                            openGallery()
+                        }}>
+                            <Text style={styles.text}>Gallery</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.touch} onPress={() => {
+                            openCamera()
+                        }}>
+                            <Text style={styles.text}>Camera</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.touch} onPress={() => {
+                            setShowAddImage(!showAddImage)
+                        }}>
+                            <Text style={styles.text}>Close</Text>
+                        </TouchableOpacity>
+                    </View>
+                </Modal>
             </View>
         </Modal >
     );
@@ -151,12 +248,12 @@ const styles = StyleSheet.create({
     avatarContainer: {
         alignItems: 'center',
         marginBottom: 20,
-        backgroundColor:'#fff',
-        width:100,
-        height:100,
-        borderRadius:100,
-        justifyContent:'center',
-        alignContent:'center'
+        backgroundColor: '#fff',
+        width: 100,
+        height: 100,
+        borderRadius: 100,
+        justifyContent: 'center',
+        alignContent: 'center'
     },
     avatar: {
         width: 100,
@@ -201,6 +298,27 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#206830',
     },
+    touch: {
+        paddingHorizontal: 24,
+        paddingVertical: 16,
+        alignItems: 'center',
+        textAlign: 'center',
+        shadowOpacity: 0.37,
+        shadowRadius: 7.49,
+        elevation: 12,
+        backgroundColor: '#17AF41',
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: '#206830',
+        flex: 1,
+        alignItems: 'center',
+      },
+      text: {
+        fontSize: 15,
+        fontFamily: 'serif',
+        fontWeight: 'bold',
+        color: 'white'
+      },
 });
 
 export default Register;
