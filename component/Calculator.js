@@ -1,4 +1,3 @@
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { address } from 'addresspinas';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
@@ -7,8 +6,6 @@ import React, { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
 import {
-  ActivityIndicator,
-  Button,
   FlatList,
   Image,
   ImageBackground,
@@ -18,14 +15,11 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 
 import { Dropdown } from 'react-native-element-dropdown';
-import MapView, { Marker } from 'react-native-maps';
 import { auth, db } from '../firebase/Config';
-import { AddButton } from './AddButton';
-import { TableBuilder } from './TableBuilder';
 
 export const Calculator = ({ navigation }) => {
   const collFarms = collection(db, 'farms')
@@ -235,18 +229,31 @@ export const Calculator = ({ navigation }) => {
 
   return (
     <>
-      <ImageBackground source={require('../assets/brakrawnd.png')} resizeMode="cover" style={styles.image}>
+      <ImageBackground  resizeMode="cover" style={styles.image}>
         <View style={{ flex: 1, alignItems: 'center', }}>
           {/* {console.log("from onLoad:", images)} */}
-          <Image source={require(`../assets/pinya.png`)} style={{ height: 90, width: 100 }} />
+          {/* <Image source={require(`../assets/logo.png`)} style={{ height: 50, width: 50 }} /> */}
+          
           <ScrollView
             showsVerticalScrollIndicator={false} style={{ flex: 1, width: '100%' }}
           >
-            {/* Date  */}
+            {/* Particulars  */}
+            <View style={styles.category_container}>
+              <Text style={styles.head}>1. Land Area</Text>
+              <TextInput
+                editable
+                maxLength={40}
+                onChangeText={text => setFarmName(text)}
+                placeholder='No. of plants'
+                value={farmName}
+                style={styles.dropdown}
+              />
+            </View>
+            {/* Date 
 
             < View style={styles.category_container}>
               <>
-                <Text style={styles.head}>1. Farm Activities</Text>
+                <Text style={styles.head}>1. Farm Details</Text>
                 <Button onPress={showDatepicker} title="1. Petsa ng Pagtanim" style={{ marginVertical: 12 }} />
                 {show && (
                   <DateTimePicker
@@ -283,7 +290,7 @@ export const Calculator = ({ navigation }) => {
                   <Text style={styles.text1}>Paglagay ng Pagsusuri</Text>
                 </TouchableOpacity>
                 {/* // modal */}
-                <Modal animationType='fade' transparent={true} visible={isShow} onRequestClose={() => (setIsShow(!isShow))}>
+                {/* <Modal animationType='fade' transparent={true} visible={isShow} onRequestClose={() => (setIsShow(!isShow))}>
                   <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
                       <Text style={styles.modalTitle}>Add New Table</Text>
@@ -307,33 +314,34 @@ export const Calculator = ({ navigation }) => {
 
               </>
 
-            </View>
+            </View> */} 
+            
             {/*Pineapple Details*/}
             <View style={styles.category_container}>
-              <Text style={styles.head}>2. Input Pineapple Details</Text>
+              <Text style={styles.head}>2. QP Farm Details</Text>
               <TextInput
                 editable
                 maxLength={40}
                 onChangeText={text => setFarmName(text)}
-                placeholder='Input Variety of Pineapple'
+                placeholder='Date of Planting'
                 value={farmName}
-                style={styles.dropdown}
+                style={styles.textinput}
               />
               <TextInput
                 editable
                 maxLength={40}
                 onChangeText={text => setFarmName(text)}
-                placeholder='Expected quantity of harvest (bags)'
+                placeholder='Stage of Crops'
                 value={farmName}
-                style={styles.dropdown}
+                style={styles.textinput}
               />
               <TextInput
                 editable
                 maxLength={40}
                 onChangeText={text => setFarmName(text)}
-                placeholder='Date of expected harvest'
+                placeholder='Date of Harvest'
                 value={farmName}
-                style={styles.dropdown}
+                style={styles.textinput}
               />
             </View>
             {/* FarmLoc */}
@@ -395,7 +403,27 @@ export const Calculator = ({ navigation }) => {
                   }}
                 />
               </View>
-              <View style={styles.container1}>
+              </View>
+              <View style={styles.category_container}>
+              <Text style={styles.head}>4. Farmer Details</Text>
+              <TextInput
+                editable
+                maxLength={40}
+                onChangeText={text => setFarmName(text)}
+                placeholder='Name of Farmer'
+                value={farmName}
+                style={styles.textinput}
+              />
+              <TextInput
+                editable
+                maxLength={40}
+                onChangeText={text => setFarmName(text)}
+                placeholder='Sex'
+                value={farmName}
+                style={styles.textinput}
+              />
+            </View>
+              {/* <View style={styles.container1}>
                 <MapView style={styles.map} region={region} onPress={handleMapPress}>
                   {userLocation && (
                     <Marker
@@ -413,8 +441,8 @@ export const Calculator = ({ navigation }) => {
                 <View style={styles.buttonContainer}>
                   <Button title="Update Location" onPress={handleUpdateLocation} />
                 </View>
-              </View>
-            </View>
+              </View> */}
+          
             {/* ImagesGal */}
             <View style={styles.category_container}>
               <Text style={styles.head}>4. Upload Farm Images</Text>
@@ -502,7 +530,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.37,
     shadowRadius: 7.49,
     elevation: 20,
-   
+
     backgroundColor: 'white',
     borderWidth: 1,
     borderColor: '#206830',
@@ -531,6 +559,7 @@ const styles = StyleSheet.create({
     opacity: .8,
     paddingVertical: 36,
     paddingHorizontal: 12,
+    backgroundColor:'#f9fafb'
   },
   container: {
     backgroundColor: 'white',
@@ -604,11 +633,12 @@ const styles = StyleSheet.create({
     color: 'black'
   },
   category_container: {
-    backgroundColor: '#247027',
+    backgroundColor: '#22b14c',
     width: 'auto',
     padding: 20,
     marginTop: 20,
     opacity: 1.0,
+    borderRadius: 10
   },
   head: {
     fontSize: 20,
@@ -646,7 +676,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 10,
     paddingHorizontal: 10,
-    marginBottom:10
+    marginBottom: 10
   },
   bottomButton: {
     flexDirection: 'row',
@@ -668,6 +698,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#206830',
   },
+  textinput:{
+    marginBottom: 5,
+    height: 50,
+    borderColor: 'gray',
+    borderWidth: 0.5,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    backgroundColor: '#fff'
+  }
 });
 
 

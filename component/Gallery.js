@@ -2,10 +2,7 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import React, { useState } from 'react';
 import { ImageBackground, StyleSheet } from 'react-native';
 import { SearchBar } from 'react-native-elements';
-import Flowering from './Flowering';
-import Fruiting from './Fruiting';
 import TabView from './TabView';
-import Vegetitive from './Vegetitive';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -44,17 +41,17 @@ export default function Gallery({ navigation }) {
         />
         <Tab.Screen
           name="Vegetitive"
-          component={Vegetitive}
+          component={TabView}
           options={{ tabBarLabel: 'Vegetative' }}
         />
         <Tab.Screen
           name="Flowering"
-          component={Flowering}
+          component={TabView}
           options={{ tabBarLabel: 'Flowering' }}
         />
         <Tab.Screen
           name="Fruiting"
-          component={Fruiting}
+          component={TabView}
           options={{ tabBarLabel: 'Fruiting' }}
         />
       </Tab.Navigator>

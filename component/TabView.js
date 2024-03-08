@@ -21,6 +21,7 @@ const TabView = ({ navigation }) => {
     <ScrollView showsVerticalScrollIndicator={false}>
       <View style={styles.container}>
         <CardView
+        
           imageSource='../assets/brakrawnd.png'
           title="Card Title"
           description="This is the example of React Native Card view. This is the easiest way to adding a card view on your screen."
