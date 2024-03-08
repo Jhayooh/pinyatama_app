@@ -3,6 +3,7 @@ import { signOut } from "firebase/auth";
 import React, { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import {
+    Button,
     Dimensions,
     Image,
     ImageBackground,
@@ -12,16 +13,26 @@ import {
     ScrollView,
     StyleSheet,
     Text,
+    TouchableHighlight,
     TouchableOpacity,
     View
 } from 'react-native';
 import { auth } from '../firebase/Config';
 import Login from './Login';
 
+// logo
+import appLogo from '../assets/pinyatamap-logo.png'
+import calcLogo from '../assets/calc2.png'
+import yieldLogo from '../assets/yield2.png'
+import galleryLogo from '../assets/gal2.png'
+import videoLogo from '../assets/vid2.png'
+import aboutLogo from '../assets/info2.png'
+import logonLogo from '../assets/user2.png'
+
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
-const ButtonContainer = ({ navigation }) => {
+export const Landing = ({ navigation }) => {
     const [showModal, setShowModal] = useState(false)
 
     const [user] = useAuthState(auth)
@@ -43,175 +54,188 @@ const ButtonContainer = ({ navigation }) => {
                 console.log('Signed Out');
             })
             .catch(e => alert(e.message))
-
     }
     return (
         <>
-            <View style={styles.buttonContainer}>
-                <View style={styles.row}>
-                    <TouchableOpacity style={styles.button} onPress={() =>
-                        user
-                            ?
-                            navigation.navigate('Calculator')
-                            :
-                            setShowModal(true)
-                    }>
-                        <Image source={require('../assets/calc.png')} style={{ width: 60, height: 80 }} />
-                        <Text style={styles.buttonText}>Kalkulador ng gastos</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.button} onPress={() => null}>
-                        <Image source={require('../assets/yield.png')} style={styles.buttonImage} />
-                        <Text style={styles.buttonText}>Tagapagukit ng ani</Text>
-                    </TouchableOpacity>
+            <View style={styles.bgOut}>
+                <View style={styles.logoBg} >
+                    <Text style={styles.appTitle} >Queen Pineapple Farming</Text>
                 </View>
-                <View style={styles.row}>
-                    <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Gallery')}>
-                        <Image source={require('../assets/gal.png')} style={styles.buttonImage} />
-                        <Text style={styles.buttonText}>Mga bukid ng pinya</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Video')}>
-                        <Image source={require('../assets/vid.png')} style={{ width: 60, height: 80 }} />
-                        <Text style={styles.buttonText}>Mga Bidyo</Text>
-                    </TouchableOpacity>
-                </View>
-                <View style={styles.row}>
-                    <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Inputs')}>
-                        <Image source={require('../assets/info.png')} style={{ width: 80, height: 80 }} />
-                        <Text style={styles.buttonText}>Tungkol</Text>
-                    </TouchableOpacity>
-                    {
-                        user
-                            ?
-                            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Register')}>
-                                <Image source={require('../assets/user.png')} style={{ width: 70, height: 80 }} />
-                                <Text style={styles.buttonText}>Logout</Text>
-                            </TouchableOpacity>
-                            :
-                            <TouchableOpacity style={styles.button} onPress={() => setShowModal(true)}>
-                                <Image source={require('../assets/user.png')} style={{ width: 70, height: 80 }} />
-                                <Text style={styles.buttonText}>Login</Text>
-                            </TouchableOpacity>
-                    }
+                <View style={styles.btnBg}>
+                    <Image source={appLogo} style={styles.appLogo} />
+                    <View style={styles.btnContainer}>
+                        <View style={styles.btnRow}>
+                            <TouchableHighlight style={styles.btnbtn} onPress={() =>
+                                user
+                                    ?
+                                    navigation.navigate('Calculator')
+                                    :
+                                    setShowModal(true)
+                            }>
+                                <View style={styles.btnbtnChild}>
+                                    <Image source={calcLogo} style={styles.btnImage} />
+                                    <Text style={styles.buttonText}>Kalkulador ng gastos</Text>
+                                </View>
+                            </TouchableHighlight>
+                            <TouchableHighlight style={styles.btnbtn}>
+                                <View style={styles.btnbtnChild}>
+                                    <Image source={yieldLogo} style={styles.btnImage} />
+                                    <Text style={styles.buttonText}>Tagapagukit ng Pinya</Text>
+                                </View>
+                            </TouchableHighlight>
+                        </View>
+                        <View style={styles.btnRow}>
+                            <TouchableHighlight style={styles.btnbtn} onPress={() => navigation.navigate('Gallery')}>
+                                <View style={styles.btnbtnChild}>
+                                    <Image source={galleryLogo} style={styles.btnImage} />
+                                    <Text style={styles.buttonText}>Mga Bukid ng Pinya</Text>
+                                </View>
+                            </TouchableHighlight>
+                            <TouchableHighlight style={styles.btnbtn} onPress={() => navigation.navigate('Video')}>
+                                <View style={styles.btnbtnChild}>
+                                    <Image source={videoLogo} style={styles.btnImage} />
+                                    <Text style={styles.buttonText}>Mga Bidyo</Text>
+                                </View>
+                            </TouchableHighlight>
+                        </View>
+                        <View style={styles.btnRow}>
+                            <TouchableHighlight style={styles.btnbtn} onPress={() => navigation.navigate('Inputs')}>
+                                <View style={styles.btnbtnChild}>
+                                    <Image source={aboutLogo} style={styles.btnImage} />
+                                    <Text style={styles.buttonText}>Tungkol</Text>
+                                </View>
+                            </TouchableHighlight>
+                            <TouchableHighlight style={styles.btnbtn} onPress={() => setShowModal(true)}>
+                                {user
+                                    ?
+                                    <View style={styles.btnbtnChild2}>
+                                        <Image source={logonLogo} style={styles.btnImage} />
+                                        <Text style={{...styles.buttonText, color: '#fff'}}>Log out</Text>
+                                    </View>
+                                    :
+                                    <View style={styles.btnbtnChild}>
+                                        <Image source={logonLogo} style={styles.btnImage} />
+                                        <Text style={styles.buttonText}>Log in</Text>
+                                    </View>
+                                }
+
+                            </TouchableHighlight>
+                        </View>
+                    </View>
                 </View>
             </View>
+
             <Modal animationType='fade' transparent={true} visible={showModal} onRequestClose={() => (setShowModal(!showModal))}>
                 <Login showModal={showModal} setShowModal={setShowModal} />
             </Modal>
         </>
     );
-};
-
-export const Landing = ({ navigation }) => {
-    const handleShow = () => {
-        // Logic for showing something
-    };
-
-    return (
-        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'android' ? 'padding' : 'height'}>
-            <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-                <View style={styles.container}>
-                <ImageBackground source={require('../assets/brakrawnd.png')}style={styles.imgBackground}> 
-                    <LinearGradient
-                        colors={["#48F10E", "#078716", "#093203"]}
-                        style={styles.gradient}
-                    >
-                    <Image source={require('../assets/pinya.png')} style={styles.logo} />
-                    <Text style={styles.text}>Queen Pineapple Farming</Text>
-                    <ButtonContainer navigation={navigation} />
-                    </LinearGradient>
-                    </ImageBackground>
-                    {/* <Image source={require('../assets/eclipse.png')} style={styles.overlayOval} />
-                        <Image source={require('../assets/pinya.png')} style={styles.overlayLogo} /> */}
-
-                </View>
-            </ScrollView>
-        </KeyboardAvoidingView>
-    );
-};
+}
 
 const styles = StyleSheet.create({
-    container: {
-        flex:1,
-        alignItems: 'center',
-        justifyContent:'center',
-        backgroundColor: '#fff',
-    },
-    gradient:{
-        position: 'absolute',
-        alignItems: "center", 
-        justifyContent: 'center',
-        width:'100%',
-        height:'40%',
-        opacity:0.95,
-        borderBottomLeftRadius: windowWidth * 0.3,
-        borderBottomRightRadius: windowWidth * 0.3,
-    },
-    imgBackground: {
+    bgOut: {
         flex: 1,
-        width: "100%",
-        alignItems: "center",
-      },
-    logo: {
-        width: windowWidth * 0.2,
-        height: windowWidth * 0.2,
-        marginTop: windowHeight * 0.01,
+        backgroundColor: '#22b14c',
+        justifyContent: 'space-between'
     },
-    text: {
-        color: 'white',
-        fontFamily: 'serif',
-        textAlign: 'center',
-        fontSize: windowWidth * 0.1,
-
-        marginTop: windowHeight * 0.,
-    },
-    row: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        gap: windowWidth * 0.05
-    },
-    buttonContainer: {
-        marginTop: windowHeight * 0.1,
-        flex: 1,
-        justifyContent: 'center',
+    btnBg: {
+        backgroundColor: '#f9fafb',
+        height: '65%',
+        width: '100%',
+        borderTopLeftRadius: 32,
+        borderTopRightRadius: 32,
         alignItems: 'center',
-        position: 'absolute',
-        zIndex: 2,
-        paddingTop: windowHeight * 0.9,
-        elevation: 50,
-    }
-    ,
-    button: {
-        marginBottom: windowWidth * 0.02,
-        width: windowWidth * 0.4,
-        height: windowHeight * 0.2,
-        padding: windowWidth * 0.02,
-        alignItems: 'center',
-        justifyContent: 'center',
-        opacity:1,
-        shadowColor: '#171717',
+        justifyContent: 'flex-end',
+        shadowColor: "#000000",
         shadowOffset: {
             width: 0,
-            height: windowWidth * 0.03,
+            height: 18,
         },
-        shadowOpacity: 0.37,
-        shadowRadius: windowWidth * 0.05,
-        backgroundColor: 'white',
-        borderRadius: windowWidth * 0.05,
-        borderWidth: windowWidth * 0.01,
-        borderColor:'white',
-        // borderColor: '#008B00',
-        overflow: 'hidden',
+        shadowOpacity: 0.25,
+        shadowRadius: 32,
+        elevation: 24
     },
-    buttonImage: {
-        width: '50%',
-        height: '50%'
+    logoBg: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
-    buttonText: {
-        color: '#206830',
-        textAlign: 'center',
-        fontSize: 18,
-        fontFamily: 'serif',
-        fontStyle: 'italic',
+    appLogo: {
+        width: 128,
+        height: 128,
+        padding: 12,
+        position: 'absolute',
+        top: -64
+    },
+    appTitle: {
+        fontSize: 48,
+        color: '#fff',
+        fontWeight: '600',
+        textAlign: 'center'
+    },
+    btnContainer: {
+        flex: 1,
+        marginTop: 72,
+        width: '100%',
+        padding: 12,
+        paddingHorizontal: 24,
+        flexDirection: 'column',
+        gap: 12,
+        marginBottom: 12,
 
     },
-});
+    btnRow: {
+        flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'space-evenly',
+        // backgroundColor: 'blue',
+        gap: 12
+    },
+    btnbtn: {
+        flex: 1,
+
+    },
+    btnbtnChild: {
+        backgroundColor: '#fff',
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 12,
+        shadowColor: "#000000",
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.16,
+        shadowRadius: 1.51,
+        elevation: 1,
+        borderRadius: 12,
+        color: '#000',
+    },
+    btnbtnChild2: {
+        backgroundColor: '#22b14c',
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 12,
+        shadowColor: "#000000",
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.16,
+        shadowRadius: 1.51,
+        elevation: 1,
+        borderRadius: 12,
+    },
+    btnImage: {
+        width: 64,
+        height: 64
+    },
+    buttonText: {
+        fontSize: 18,
+        textAlign: 'center',
+        fontFamily: 'serif',
+        fontStyle: 'italic',
+    }
+})
