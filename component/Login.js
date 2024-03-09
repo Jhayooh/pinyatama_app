@@ -42,8 +42,7 @@ const Login = ({ showModal, setShowModal }) => {
     return (
         <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
-                <KeyboardAvoidingView
-                    behavior="padding"
+                <View
                 >
                     <View>
                         <Text style={{ color: 'black', textAlign: 'center', marginBottom: 5, fontSize: 20, fontWeight: 'bold' }}>MALIGAYANG PAGDATING</Text>
@@ -81,7 +80,7 @@ const Login = ({ showModal, setShowModal }) => {
                         visible={showRegisterModal}
                         onClose={() => setShowRegisterModal(false)}
                     />
-                </KeyboardAvoidingView>
+                </View>
             </View>
         </View>
 
@@ -125,7 +124,7 @@ const styles = StyleSheet.create({
         color: 'white',
         fontSize: 12,
         fontWeight: 'bold',
-        fontFamily:'serif'
+        fontFamily: 'serif'
 
     },
     bottomButton: {
