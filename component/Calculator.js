@@ -1,7 +1,7 @@
 import { address } from 'addresspinas';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
-import { GeoPoint, Timestamp, collection, doc, ref, setDoc, storage } from 'firebase/firestore';
+import { GeoPoint, Timestamp, collection, doc, ref, setDoc, storage, query, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
@@ -15,11 +15,13 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
+  ActivityIndicator
 } from 'react-native';
 
 import { Dropdown } from 'react-native-element-dropdown';
 import { auth, db } from '../firebase/Config';
+import { TableBuilder } from './TableBuilder';
 
 export const Calculator = ({ navigation }) => {
   const collFarms = collection(db, 'farms')
@@ -30,7 +32,7 @@ export const Calculator = ({ navigation }) => {
   console.log(user.uid);
   const [isShow, setIsShow] = useState(false)
   const [edit, setEdit] = useState(false)
-  const [text, onChangeText] = useState('');
+  const [text, onChangeText] = useState(0);
 
   const pathParticular = `farms/${user.uid}/particulars`
   const collParticular = collection(db, pathParticular)
@@ -51,11 +53,23 @@ export const Calculator = ({ navigation }) => {
   const [date, setDate] = useState(new Date());
   // end ng data natin
 
+  const [base, setBase] = useState('')
+
   const [munCode, setMunCode] = useState(null)
   const [region, setRegion] = useState(null);
 
   const municipalities = address.getCityMunOfProvince('0516')
   const brgy = address.getBarangaysOfCityMun(munCode)
+
+  const [dataParti, setDataParti] = useState([])
+  const queryParti = collection(db, 'particulars');
+  const [qParti, lParti, eParti] = useCollectionData(queryParti)
+
+  useEffect(() => {
+    if (qParti) {
+      setDataParti([...qParti])
+    }
+  }, [qParti]);
 
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
@@ -227,13 +241,18 @@ export const Calculator = ({ navigation }) => {
     showMode('date');
   };
 
+  function getHectare({ numPlants }) {
+    return numPlants / 30000
+  }
+
+  console.log("data particular:", dataParti);
+
   return (
     <>
-      <ImageBackground  resizeMode="cover" style={styles.image}>
+      <ImageBackground resizeMode="cover" style={styles.image}>
         <View style={{ flex: 1, alignItems: 'center', }}>
           {/* {console.log("from onLoad:", images)} */}
           {/* <Image source={require(`../assets/logo.png`)} style={{ height: 50, width: 50 }} /> */}
-          
           <ScrollView
             showsVerticalScrollIndicator={false} style={{ flex: 1, width: '100%' }}
           >
@@ -243,12 +262,18 @@ export const Calculator = ({ navigation }) => {
               <TextInput
                 editable
                 maxLength={40}
-                onChangeText={text => setFarmName(text)}
+                onChangeText={(base) => { setBase(base) }}
                 placeholder='No. of plants'
-                value={farmName}
+                keyboardType='numeric'
+                value={base}
                 style={styles.dropdown}
+                disabled
               />
+              {
+                base !== '' && qParti ? <TableBuilder data={dataParti} input={base}/> : <></>
+              }
             </View>
+
             {/* Date 
 
             < View style={styles.category_container}>
@@ -290,7 +315,7 @@ export const Calculator = ({ navigation }) => {
                   <Text style={styles.text1}>Paglagay ng Pagsusuri</Text>
                 </TouchableOpacity>
                 {/* // modal */}
-                {/* <Modal animationType='fade' transparent={true} visible={isShow} onRequestClose={() => (setIsShow(!isShow))}>
+            {/* <Modal animationType='fade' transparent={true} visible={isShow} onRequestClose={() => (setIsShow(!isShow))}>
                   <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
                       <Text style={styles.modalTitle}>Add New Table</Text>
@@ -314,8 +339,8 @@ export const Calculator = ({ navigation }) => {
 
               </>
 
-            </View> */} 
-            
+            </View> */}
+
             {/*Pineapple Details*/}
             <View style={styles.category_container}>
               <Text style={styles.head}>2. QP Farm Details</Text>
@@ -403,8 +428,8 @@ export const Calculator = ({ navigation }) => {
                   }}
                 />
               </View>
-              </View>
-              <View style={styles.category_container}>
+            </View>
+            <View style={styles.category_container}>
               <Text style={styles.head}>4. Farmer Details</Text>
               <TextInput
                 editable
@@ -423,7 +448,7 @@ export const Calculator = ({ navigation }) => {
                 style={styles.textinput}
               />
             </View>
-              {/* <View style={styles.container1}>
+            {/* <View style={styles.container1}>
                 <MapView style={styles.map} region={region} onPress={handleMapPress}>
                   {userLocation && (
                     <Marker
@@ -442,7 +467,7 @@ export const Calculator = ({ navigation }) => {
                   <Button title="Update Location" onPress={handleUpdateLocation} />
                 </View>
               </View> */}
-          
+
             {/* ImagesGal */}
             <View style={styles.category_container}>
               <Text style={styles.head}>4. Upload Farm Images</Text>
@@ -559,7 +584,7 @@ const styles = StyleSheet.create({
     opacity: .8,
     paddingVertical: 36,
     paddingHorizontal: 12,
-    backgroundColor:'#f9fafb'
+    backgroundColor: '#f9fafb'
   },
   container: {
     backgroundColor: 'white',
@@ -698,7 +723,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#206830',
   },
-  textinput:{
+  textinput: {
     marginBottom: 5,
     height: 50,
     borderColor: 'gray',
