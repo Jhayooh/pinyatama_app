@@ -1,4 +1,4 @@
-import { addDoc, collection, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc, updateDoc, query } from 'firebase/firestore';
 import React, { useState, useEffect } from 'react';
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import {
@@ -16,31 +16,6 @@ const Total = ({ total, name }) => {
     <View style={{ ...styles.tableData, padding: 12 }}>
       <Text style={{ flex: 4, fontWeight: 'bold', fontSize: 18 }}>Total {name} Inputs</Text>
       <Text style={{ flex: 1, fontWeight: 'bold', fontSize: 18 }}>{total}</Text>
-    </View>
-  )
-}
-
-const TableHead = ({ headers }) => {
-  const header = [
-    'quantity',
-    'unit',
-    'price/unit',
-    'total'
-  ]
-
-  header.splice(0, 0, headers)
-
-  return (
-    <View style={styles.tableHead}>
-      {header.map((head, index) => (
-        <View key={index} style={index == 0
-          ?
-          styles.tableHeadLabel3
-          :
-          styles.tableHeadLabel2}>
-          <Text style={{ alignItems: 'flex-start' }}>{head}</Text>
-        </View>
-      ))}
     </View>
   )
 }
@@ -67,74 +42,183 @@ const TableData = ({ data }) => {
   )
 }
 
-// const TableDataChild = ({ path }) => {
-//   // console.log(path)
-//   const query = collection(db, path)
-//   const [docs, loading, error] = useCollectionData(query)
+export const TableBuilder = ({ data, input }) => {
+  console.log("data tablebuilder:", data);
+  const [Hectares, setHectares] = useState(0)
+  const plantingMaterials = data.find(item => item.name === "Planting Materials");
+  const ferZero = data.find(item => item.name === "0-0-60");
+  const ferUrea = data.find(item => item.name === "Urea");
+  const Diuron = data.find(item => item.name === "Diuron");
+  const Sticker = data.find(item => item.name === "Sticker");
 
-//   return (
-//     <>
-//       {docs?.map(doc => (
-//         <TableData key={doc.id} data={doc} />
-//       ))}
-//     </>
-//   )
-// }
 
-export const TableBuilder = ({ name, path }) => {
-  const query = collection(db, path);
-  const [docs, loading, error] = useCollectionData(query);
-  const docRef = doc(db, path, name)
-  console.log('tablebuilder docs: ', docs);
+  const [totalPrice, setTotalPrice] = useState(0)
 
-  const [total, setTotal] = useState(0)
+  // const docRef = doc(db, path, name)
 
-  const updateTotalInputs = async (newTotal) => {
-    try {
-      await updateDoc(docRef, {
-        totalInputs: newTotal
-      });
-    } catch (error) {
-      console.error("Error updating totalInputs:", error);
-    }
-  };
+  // const [total, setTotal] = useState(0)
+  // const [totalCost, setTotalCost] = useState(0)
+  // const updateTotalInputs = async (newTotal) => {
+  //   try {
+  //     await updateDoc(docRef, {
+  //       totalInputs: newTotal
+  //     });
+  //   } catch (error) {
+  //     console.error("Error updating totalInputs:", error);
+  //   }
+  // };
 
+  // useEffect(() => {
+  //   if (docs) {
+  //     let sum = 0
+  //     docs.forEach(doc => {
+  //       sum += doc.total;
+  //     });
+  //     setTotal(sum);
+  //     updateTotalInputs(sum)
+  //   }
+  // }, [docs]);
+
+  const getMult = (numOne, numTwo) => {
+    const num = numOne * numTwo
+    return parseFloat(num.toFixed(0))
+  }
+
+  const TableData = ({ name, qnty, unit, price, totalPrice }) => {
+    console.log(name, qnty, unit, price, totalPrice);
+    // const totalPrice = calcTotalPrice(data.qnty, data.pUnit)
+    return (
+      <View style={styles.tableData}>
+        <View style={{ ...styles.tableHeadLabel3, alignItems: 'flex-start' }}>
+          <Text>{name}</Text>
+        </View>
+        <View style={{ ...styles.tableHeadLabel2, alignItems: 'center' }}>
+          <Text>{qnty.toLocaleString()}</Text>
+        </View>
+        <View style={{ ...styles.tableHeadLabel2, alignItems: 'center' }}>
+          <Text>{unit}</Text>
+        </View>
+        <View style={{ ...styles.tableHeadLabel2, alignItems: 'flex-end' }}>
+          <Text>{price.toLocaleString()}</Text>
+        </View>
+        <View style={{ ...styles.tableHeadLabel2, alignItems: 'flex-end' }}>
+          {/* {setTotal(total + totalPrice)} */}
+          <Text>{totalPrice.toLocaleString()}</Text>
+        </View>
+      </View>
+    )
+  }
   useEffect(() => {
-    if (docs) {
-      let sum = 0
-      docs.forEach(doc => {
-        sum += doc.total;
-      });
-      setTotal(sum);
+    const number = input / 30000
+    setHectares(number)
+  }, [input])
 
-      updateTotalInputs(sum)
-    }
-  }, [docs]);
+  console.log(plantingMaterials);
+
+  const pmQnty = getMult(Hectares, 30000)
+  const fZeroQnty = getMult(Hectares, 5)
+  const fUreaQnty = getMult(Hectares, 5)
+  const dQnty = getMult(Hectares, 2)
+  const sQnty = getMult(Hectares, 1)
 
   return (
-    <View style={{ marginBottom: 6 }} >
-      <TableHead headers={name} />
-      {
-        loading
-          ?
-          <ActivityIndicator size='small' color='#3bcd6b' style={{ padding: 12, backgroundColor: '#fff' }} />
-          :
-          docs?.map((doc) => (
-            <View key={doc.id} style={{ flex: 1 }}>
-              <TableData data={doc} />
-              {/* <TableDataChild path={`${path}/${doc.id}/${doc.name}`} /> */}
+    <>
+      <View style={{ ...styles.container, minHeight: 300, marginTop: 12, borderRadius: 10 }}>
+        <View style={{ flex: 1, alignItems: 'center', margin: 8 }}>
+          <Text style={{ backgroundColor: '#3bcd6b', padding: 8, alignItems: 'center', textAlign: 'center' }}>COST AND RETURN ANALYSIS {Hectares.toFixed(2)} HA PINEAPPLE PRODUCTION</Text>
+        </View>
+        <View style={{ flex: 1, marginTop: 6, marginHorizontal: 12 }}>
+          {/* Header */}
+          <View style={{ ...styles.tableHead, borderBottomWidth: 2, borderColor: '#000', }}>
+            <View style={{ ...styles.tableHeadLabel3, alignItems: 'center' }}>
+              <Text>PARTICULARS</Text>
             </View>
-          ))}
-      {total !== 0 && <Total total={total} name={name} />}
-      <AddDataRow path={path} />
-    </View>
+            <View style={{ ...styles.tableHeadLabel2, alignItems: 'center' }}>
+              <Text>QUANTITY</Text>
+            </View>
+            <View style={{ ...styles.tableHeadLabel2, alignItems: 'center' }}>
+              <Text>UNIT</Text>
+            </View>
+            <View style={{ ...styles.tableHeadLabel2, alignItems: 'center' }}>
+              <Text>PRICE/UNIT</Text>
+            </View>
+            <View style={{ ...styles.tableHeadLabel2, alignItems: 'flex-end' }}>
+              <Text>TOTAL PRICE</Text>
+            </View>
+          </View>
+
+          {/* Body */}
+          <View style={{ ...styles.tableHead }}>
+            <View>
+              <Text styles={{ fontWeight: 'bold' }}>Materials Inputs:</Text>
+            </View>
+          </View>
+          <TableData
+            name={plantingMaterials.name}
+            qnty={pmQnty}
+            unit={plantingMaterials.unit}
+            price={plantingMaterials.price}
+            totalPrice={getMult(pmQnty, plantingMaterials.price)}
+          />
+          <View style={{ ...styles.tableHead }}>
+            <View>
+              <Text styles={{ fontWeight: 'bold' }}>Fertilizer</Text>
+            </View>
+          </View>
+          <TableData
+            name={ferZero.name}
+            qnty={fZeroQnty}
+            unit={ferZero.unit}
+            price={ferZero.price}
+            totalPrice={getMult(fZeroQnty, ferZero.price)}
+          />
+          <TableData
+            name={ferUrea.name}
+            qnty={fUreaQnty}
+            unit={ferUrea.unit}
+            price={ferUrea.price}
+            totalPrice={getMult(fUreaQnty, ferUrea.price)}
+          />
+          <TableData
+            name={Diuron.name + " (2x)"}
+            qnty={dQnty}
+            unit={Diuron.unit}
+            price={Diuron.price}
+            totalPrice={getMult(dQnty, Diuron.price)}
+          />
+          <TableData
+            name={Sticker.name}
+            qnty={sQnty}
+            unit={Sticker.unit}
+            price={Sticker.price}
+            totalPrice={getMult(sQnty, Sticker.price)}
+          />
+          <View style={{ ...styles.tableHead, borderTopWidth: 2, borderBottomWidth: 2 }}>
+            <View style={{ flex: 4 }}>
+              <Text styles={{ fontWeight: 'bold' }}>Total Material Input: </Text>
+            </View>
+            <View style={{ flex: 1, alignItems: 'flex-end' }}>
+              <Text styles={{ fontWeight: 'bold' }}>{
+                (
+                  getMult(pmQnty, plantingMaterials.price) +
+                  getMult(fUreaQnty, ferUrea.price) +
+                  getMult(fZeroQnty, ferZero.price) +
+                  getMult(dQnty, Diuron.price) +
+                  getMult(sQnty, Sticker.price)
+                ).toLocaleString()
+              }</Text>
+            </View>
+          </View>
+        </View>
+      </View>
+    </>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#206830',
+    backgroundColor: '#fff',
   },
   image: {
     flex: 1,
@@ -175,12 +259,10 @@ const styles = StyleSheet.create({
   },
   tableHead: {
     flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderColor: '#ddd',
-    padding: 6,
-    backgroundColor: '#3bcd6b',
+    // padding: 6,
+    // backgroundColor: '#3bcd6b',
     alignSelf: 'stretch',
-    marginBottom: '16'
+    // marginBottom: '16'
   },
   tableHeadLabel2: {
     flex: 2,
@@ -193,11 +275,11 @@ const styles = StyleSheet.create({
   tableData: {
     alignItems: 'center',
     justifyContent: 'center',
-    borderBottomWidth: 1,
-    borderColor: '#ddd',
-    padding: 6,
-    backgroundColor: '#fff',
-    flex: 1,
+    marginTop: 8,
+    // borderBottomWidth: 1,
+    // borderColor: '#ddd',
+    // padding: 6,
+    // backgroundColor: '#fff',
     alignSelf: 'stretch',
     flexDirection: 'row'
   },
