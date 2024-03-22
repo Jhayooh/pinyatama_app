@@ -53,6 +53,8 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         borderWidth: 1,
         borderColor: '#206830',
+        
+        
     },
     text: {
         color: 'white',

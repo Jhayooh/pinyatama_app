@@ -1,10 +1,11 @@
 import { address } from 'addresspinas';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
-import { GeoPoint, Timestamp, collection, doc, ref, setDoc, storage, query, where } from 'firebase/firestore';
+import { GeoPoint, Timestamp, collection, doc, ref, setDoc, storage } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
+
 import {
   FlatList,
   Image,
@@ -15,9 +16,9 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View,
-  ActivityIndicator
+  View
 } from 'react-native';
+import { BottomButton } from './BottomButton';
 
 import { Dropdown } from 'react-native-element-dropdown';
 import { auth, db } from '../firebase/Config';
@@ -249,7 +250,7 @@ export const Calculator = ({ navigation }) => {
 
   return (
     <>
-      <ImageBackground resizeMode="cover" style={styles.image}>
+      <ImageBackground source={require('../assets/p1.jpg')} resizeMode="cover" style={styles.image}>
         <View style={{ flex: 1, alignItems: 'center', }}>
           {/* {console.log("from onLoad:", images)} */}
           {/* <Image source={require(`../assets/logo.png`)} style={{ height: 50, width: 50 }} /> */}
@@ -270,16 +271,19 @@ export const Calculator = ({ navigation }) => {
                 disabled
               />
               {
-                base !== '' && qParti ? <TableBuilder data={dataParti} input={base}/> : <></>
+                base !== '' && qParti ? <TableBuilder data={dataParti} input={base} /> : <></>
               }
-            </View>
+              <Text style={styles.head}>2. QP Farm Details</Text>
+              <TextInput
+                editable
+                maxLength={40}
+                onChangeText={text => setFarmName(text)}
+                placeholder='Stage of Crops'
+                value={farmName}
+                style={styles.dropdown}
 
-            {/* Date 
-
-            < View style={styles.category_container}>
-              <>
-                <Text style={styles.head}>1. Farm Details</Text>
-                <Button onPress={showDatepicker} title="1. Petsa ng Pagtanim" style={{ marginVertical: 12 }} />
+              />
+              {/* <Button onPress={showDatepicker} title="Date of Planting" style={{marginBottom:20 }} />
                 {show && (
                   <DateTimePicker
                     testID="dateTimepicker"
@@ -289,88 +293,35 @@ export const Calculator = ({ navigation }) => {
                     onChange={onChange}
                     style={styles.text}
                   />
-                )}
-                {
-                  loadingParticular
-                    ?
-                    <ActivityIndicator size='small' color='#3bcd6b' style={{ padding: 64, backgroundColor: '#fff' }} />
-                    :
-                    docsParticular?.map((doc) => (
-                      <TableBuilder
-                        key={doc.name}
-                        name={doc.name}
-                        path={`${pathParticular}/${doc.name}/${doc.name}`} />
-                    ))}
-                <AddButton setShow={setIsShow} navigation={navigation} />
-                <TouchableOpacity style={styles.touch2} onPress={() => {
-                  saveInputs()
-                  navigation.navigate('DataInputs', {
-                    brgyCode,
-                    userLocation,
-                    images,
-                    municipality,
-                    farmName
-                  })
-                }}>
-                  <Text style={styles.text1}>Paglagay ng Pagsusuri</Text>
-                </TouchableOpacity>
-                {/* // modal */}
-            {/* <Modal animationType='fade' transparent={true} visible={isShow} onRequestClose={() => (setIsShow(!isShow))}>
-                  <View style={styles.modalContainer}>
-                    <View style={styles.modalContent}>
-                      <Text style={styles.modalTitle}>Add New Table</Text>
-                      <TextInput
-                        style={styles.input}
-                        onChangeText={onChangeText}
-                        value={text}
-                        placeholder='Add Name'
-                      />
-                      <View style={styles.bottomButton}>
-                        <TouchableOpacity style={styles.bottomButtonItem} onPress={() => addDocumentWithId()}>
-                          <Text>Add</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.bottomButtonItem} onPress={() => setIsShow(false)}>
-                          <Text>Close</Text>
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                  </View>
-                </Modal>
-
-              </>
-
-            </View> */}
-
-            {/*Pineapple Details*/}
-            <View style={styles.category_container}>
-              <Text style={styles.head}>2. QP Farm Details</Text>
+                  )}
+                   <Button onPress={showDatepicker} title="Date of Harvest" style={{ marginVertical: 12 }} />
+                {show && (
+                  <DateTimePicker
+                    testID="dateTimepicker"
+                    value={date}
+                    mode={mode}
+                    is24Hour={true}
+                    onChange={onChange}
+                    style={styles.text}
+                  /> )}*/}
+                  
               <TextInput
                 editable
                 maxLength={40}
                 onChangeText={text => setFarmName(text)}
                 placeholder='Date of Planting'
                 value={farmName}
-                style={styles.textinput}
-              />
-              <TextInput
-                editable
-                maxLength={40}
-                onChangeText={text => setFarmName(text)}
-                placeholder='Stage of Crops'
-                value={farmName}
-                style={styles.textinput}
-              />
+                style={styles.dropdown}
+                
+              /> 
               <TextInput
                 editable
                 maxLength={40}
                 onChangeText={text => setFarmName(text)}
                 placeholder='Date of Harvest'
                 value={farmName}
-                style={styles.textinput}
-              />
-            </View>
-            {/* FarmLoc */}
-            <View style={styles.category_container}>
+                style={styles.dropdown}
+              /> 
               <Text style={styles.head}>3. Input Farm Location</Text>
               <View style={{
                 width: '100%',
@@ -427,28 +378,127 @@ export const Calculator = ({ navigation }) => {
                     setBrgyFocus(false);
                   }}
                 />
+
+                <Text style={styles.head}>4. Farmer Details</Text>
+                <TextInput
+                  editable
+                  maxLength={40}
+                  onChangeText={text => setFarmName(text)}
+                  placeholder='Name of Farmer'
+                  value={farmName}
+                  style={styles.dropdown}
+                />
+                <TextInput
+                  editable
+                  maxLength={40}
+                  onChangeText={text => setFarmName(text)}
+                  placeholder='Sex'
+                  value={farmName}
+                  style={styles.dropdown}
+                />
+                <Text style={styles.head}>4. Upload Farm Images</Text>
+                <View style={{ marginBottom: 8, width: '100%', height: 180, borderRadius: 6, padding: 4, backgroundColor: '#101010' }}>
+                  {
+                    images &&
+                    <FlatList
+                      data={images}
+                      // numColumns={3}
+                      horizontal={true}
+                      renderItem={({ item }) => (
+                        <View style={{ flex: 1 }}>
+                          <Image style={{ height: '100%', width: 240, borderRadius: 6 }} source={{ uri: item.url }} />
+                        </View>
+                      )}
+                      ItemSeparatorComponent={() =>
+                        <View style={{ width: 4, height: '100%' }}></View>
+                      }
+                    // columnWrapperStyle={{
+                    //   gap: 2,
+                    //   marginBottom: 2
+                    // }}
+                    />
+                  }
+                  <View style={{ flexDirection: 'row' }}>
+                    <TouchableOpacity style={styles.touch} onPress={() => {
+                      setShowAddImage(true)
+                    }}>
+                      <Text style={styles.text}>Add Image</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
               </View>
-            </View>
-            <View style={styles.category_container}>
-              <Text style={styles.head}>4. Farmer Details</Text>
-              <TextInput
-                editable
-                maxLength={40}
-                onChangeText={text => setFarmName(text)}
-                placeholder='Name of Farmer'
-                value={farmName}
-                style={styles.textinput}
-              />
-              <TextInput
-                editable
-                maxLength={40}
-                onChangeText={text => setFarmName(text)}
-                placeholder='Sex'
-                value={farmName}
-                style={styles.textinput}
-              />
-            </View>
-            {/* <View style={styles.container1}>
+
+              {/* Date 
+
+            < View style={styles.category_container}>
+              <>
+                <Text style={styles.head}>1. Farm Details</Text>
+                <Button onPress={showDatepicker} title="1. Petsa ng Pagtanim" style={{ marginVertical: 12 }} />
+                {show && (
+                  <DateTimePicker
+                    testID="dateTimepicker"
+                    value={date}
+                    mode={mode}
+                    is24Hour={true}
+                    onChange={onChange}
+                    style={styles.text}
+                  />
+                )}
+                {
+                  loadingParticular
+                    ?
+                    <ActivityIndicator size='small' color='#3bcd6b' style={{ padding: 64, backgroundColor: '#fff' }} />
+                    :
+                    docsParticular?.map((doc) => (
+                      <TableBuilder
+                        key={doc.name}
+                        name={doc.name}
+                        path={`${pathParticular}/${doc.name}/${doc.name}`} />
+                    ))}
+                <AddButton setShow={setIsShow} navigation={navigation} />
+                <TouchableOpacity style={styles.touch2} onPress={() => {
+                  saveInputs()
+                  navigation.navigate('DataInputs', {
+                    brgyCode,
+                    userLocation,
+                    images,
+                    municipality,
+                    farmName
+                  })
+                }}>
+                  <Text style={styles.text1}>Paglagay ng Pagsusuri</Text>
+                </TouchableOpacity>
+                {/* // modal */}
+              {/* <Modal animationType='fade' transparent={true} visible={isShow} onRequestClose={() => (setIsShow(!isShow))}>
+                  <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                      <Text style={styles.modalTitle}>Add New Table</Text>
+                      <TextInput
+                        style={styles.input}
+                        onChangeText={onChangeText}
+                        value={text}
+                        placeholder='Add Name'
+                      />
+                      <View style={styles.bottomButton}>
+                        <TouchableOpacity style={styles.bottomButtonItem} onPress={() => addDocumentWithId()}>
+                          <Text>Add</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.bottomButtonItem} onPress={() => setIsShow(false)}>
+                          <Text>Close</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  </View>
+                </Modal>
+
+              </>
+
+            </View> */}
+
+
+
+              {/* <View style={styles.container1}>
                 <MapView style={styles.map} region={region} onPress={handleMapPress}>
                   {userLocation && (
                     <Marker
@@ -468,43 +518,11 @@ export const Calculator = ({ navigation }) => {
                 </View>
               </View> */}
 
-            {/* ImagesGal */}
-            <View style={styles.category_container}>
-              <Text style={styles.head}>4. Upload Farm Images</Text>
-              <View style={{ marginBottom: 8, width: '100%', height: 180, borderRadius: 6, padding: 4, backgroundColor: '#101010' }}>
-                {
-                  images &&
-                  <FlatList
-                    data={images}
-                    // numColumns={3}
-                    horizontal={true}
-                    renderItem={({ item }) => (
-                      <View style={{ flex: 1 }}>
-                        <Image style={{ height: '100%', width: 240, borderRadius: 6 }} source={{ uri: item.url }} />
-                      </View>
-                    )}
-                    ItemSeparatorComponent={() =>
-                      <View style={{ width: 4, height: '100%' }}></View>
-                    }
-                  // columnWrapperStyle={{
-                  //   gap: 2,
-                  //   marginBottom: 2
-                  // }}
-                  />
-                }
-              </View>
-              <View style={{ flexDirection: 'row' }}>
-                <TouchableOpacity style={styles.touch} onPress={() => {
-                  setShowAddImage(true)
-                }}>
-                  <Text style={styles.text}>Add Image</Text>
-                </TouchableOpacity>
-              </View>
+              {/* ImagesGal */}
             </View>
 
-
-
           </ScrollView>
+          <BottomButton />
         </View >
 
       </ImageBackground >
@@ -546,94 +564,42 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#206830',
     flex: 1,
-    alignItems: 'center',
   },
-  touch2: {
-    paddingVertical: 16,
-    alignItems: 'center',
-    textAlign: 'center',
-    shadowOpacity: 0.37,
-    shadowRadius: 7.49,
-    elevation: 20,
 
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: '#206830',
-    marginTop: 10,
-    alignItems: 'center'
-  },
-  modalBackground: {
-    backgroundColor: '#00000060',
-    padding: 20,
-    justifyContent: 'center',
-    flex: 1,
-    fontFamily: 'serif',
-    fontWeight: 'bold',
-    color: 'white',
-    flex: 1,
-    fontFamily: 'serif',
-    fontWeight: 'bold',
-    color: 'white'
-  },
-  modalContainer: {
-    backgroundColor: '#fff',
-    padding: 24,
-  },
   image: {
     flex: 1,
-    opacity: .8,
+    opacity: 1.0,
     paddingVertical: 36,
     paddingHorizontal: 12,
-    backgroundColor: '#f9fafb'
+    // backgroundColor: '#22b14c',
+
   },
-  container: {
-    backgroundColor: 'white',
-    padding: 16,
-  },
-  container1: {
-    height: 200,
-    width: '100%',
-  },
+
   map: {
     height: 200,
     width: '100%',
   },
-  buttonContainer: {
-    position: 'absolute',
-    bottom: 16,
-    left: 16,
-    right: 16,
-  },
+
   dropdown: {
     height: 50,
-    borderColor: 'gray',
-    borderWidth: 0.5,
+    opacity: 1.0,
+    borderColor: 'green',
+    borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 8,
-    backgroundColor: 'white'
-  },
-  icon: {
-    marginRight: 5,
-  },
-  label: {
-    position: 'absolute',
     backgroundColor: 'white',
-    left: 22,
-    top: 8,
-    zIndex: 999,
-    paddingHorizontal: 8,
-    fontSize: 14,
+    marginBottom: 10,
+    color: 'black'
   },
+
+
   placeholderStyle: {
     fontSize: 16,
   },
   selectedTextStyle: {
     fontSize: 16,
   },
-  iconStyle: {
-    width: 20,
-    height: 20,
-  },
+
   inputSearchStyle: {
     height: 40,
     fontSize: 16,
@@ -658,26 +624,24 @@ const styles = StyleSheet.create({
     color: 'black'
   },
   category_container: {
-    backgroundColor: '#22b14c',
-    width: 'auto',
-    padding: 20,
-    marginTop: 20,
+    padding: 10,
+    margin: 20,
     opacity: 1.0,
-    borderRadius: 10
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    elevation: 5
+
+
   },
   head: {
     fontSize: 20,
     fontFamily: 'serif',
     fontWeight: 'bold',
-    color: 'white',
+    color: 'green',
     marginBottom: 10,
+
   },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
-  },
+
   modalContent: {
     backgroundColor: 'white',
     width: 280,
@@ -695,43 +659,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 9,
   },
-  input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    marginBottom: 10,
-    paddingHorizontal: 10,
-    marginBottom: 10
+  verifyButton: {
+    position: 'absolute',
+    alignSelf: 'center',
+    right: 0,
   },
-  bottomButton: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    gap: 12
-  },
-  bottomButtonItem: {
-    flex: 1,
-    padding: 12,
-    alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    textAlign: 'center',
-    shadowOpacity: 0.37,
-    shadowRadius: 7.49,
-    elevation: 20,
-    backgroundColor: '#17AF41',
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#206830',
-  },
-  textinput: {
-    marginBottom: 5,
-    height: 50,
-    borderColor: 'gray',
-    borderWidth: 0.5,
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    backgroundColor: '#fff'
-  }
+
 });
 
 
