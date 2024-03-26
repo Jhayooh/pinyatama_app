@@ -4,24 +4,24 @@ import YoutubePlayer from 'react-native-youtube-iframe';
 
 const Video = ({ navigation }) => {
     return (
-        <ImageBackground source={require('../assets/brakrawnd.png')} style={styles.background} >
+        <ImageBackground source={require('../assets/p1.jpg')} style={styles.background} >
             <ScrollView showsVerticalScrollIndicator={false}>
                 <View style={styles.videoContainer}>
-                    <VideoCard title="Pagaani ng Pinya sa Labo, Camarines Norte "  videoId="oS5xvukokSw" />
+                    <VideoCard title="Pagaani ng Pinya sa Labo, Camarines Norte " subtitle='loremipsum hahaaha' videoId="oS5xvukokSw" />
                     <VideoCard title="Semilya ng Pinya, Daet, Camarines Norte" videoId="K9WfCeUL4AM" />
-                    <VideoCard title="The sweetest Pineapple in Camarines Norte"   videoId="gCCu6xwi2f4" />
+                    <VideoCard title="The sweetest Pineapple in Camarines Norte" videoId="gCCu6xwi2f4" />
                 </View>
             </ScrollView>
         </ImageBackground>
     );
 };
 
-const VideoCard = ({ title, videoId }) => {
+const VideoCard = ({ title, videoId, subtitle }) => {
     return (
         <View style={styles.card}>
+            <YoutubePlayer height={250} videoId={videoId} />
             <Text style={styles.title}>{title}</Text>
-            {/* {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>} */}
-            <YoutubePlayer height={300} videoId={videoId} />
+            <Text style={styles.subtitle}>{subtitle}</Text>
         </View>
     );
 };
@@ -29,24 +29,38 @@ const VideoCard = ({ title, videoId }) => {
 const styles = StyleSheet.create({
     background: {
         flex: 1,
-        backgroundColor: '#247027',
+        resizeMode: 'cover',
     },
     videoContainer: {
         padding: 20,
+        marginTop:20
         
     },
     card: {
-        marginBottom: 20, 
+        marginBottom: 20,
         backgroundColor: '#fff',
         borderRadius: 10,
         padding: 10,
+        shadowColor: 'green',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+
     },
     title: {
         fontSize: 18,
         fontWeight: 'bold',
         marginBottom: 10,
+      
     },
- 
+    subtitle: {
+        fontSize: 10,
+    }
+
 });
 
 export default Video;

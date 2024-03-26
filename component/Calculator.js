@@ -5,8 +5,8 @@ import { GeoPoint, Timestamp, collection, doc, ref, setDoc, storage } from 'fire
 import React, { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
-
 import {
+  Button,
   FlatList,
   Image,
   ImageBackground,
@@ -18,6 +18,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { BottomButton } from './BottomButton';
 
 import { Dropdown } from 'react-native-element-dropdown';
@@ -28,6 +29,29 @@ export const Calculator = ({ navigation }) => {
   const collFarms = collection(db, 'farms')
   const [docs, loading, error] = useCollectionData(collFarms);
   const [showAddImage, setShowAddImage] = useState(false)
+
+
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+
+  const showDatePicker = () => {
+    setDatePickerVisibility(true);
+  };
+
+  const hideDatePicker = () => {
+    setDatePickerVisibility(false);
+  };
+
+  const handleConfirm = (date) => {
+    setDate(date);
+    hideDatePicker();
+  };
+
+  const getDate = () => {
+    let tempDate = date.toString().split(' ');
+    return date !== ''
+      ? `${tempDate[0]} ${tempDate[1]} ${tempDate[2]} ${tempDate[3]}`
+      : '';
+  };
 
   const [user] = useAuthState(auth)
   console.log(user.uid);
@@ -304,24 +328,35 @@ export const Calculator = ({ navigation }) => {
                     onChange={onChange}
                     style={styles.text}
                   /> )}*/}
-                  
+
               <TextInput
-                editable
-                maxLength={40}
-                onChangeText={text => setFarmName(text)}
-                placeholder='Date of Planting'
-                value={farmName}
                 style={styles.dropdown}
-                
-              /> 
-              <TextInput
-                editable
-                maxLength={40}
-                onChangeText={text => setFarmName(text)}
-                placeholder='Date of Harvest'
-                value={farmName}
+                value={getDate()}
+                placeholder="Date of Planting"
+              />
+              <Button onPress={showDatePicker} title="Date of Planting" />
+
+              <DateTimePickerModal
+                isVisible={isDatePickerVisible}
+                mode="date"
+                onConfirm={handleConfirm}
+                onCancel={hideDatePicker}
+                style={{marginBottom:10}}
+              />
+             <TextInput
                 style={styles.dropdown}
-              /> 
+                value={getDate()}
+                placeholder="Date of Harvest"
+              />
+              <Button onPress={showDatePicker} title="Date of Harvest" />
+
+              <DateTimePickerModal
+                isVisible={isDatePickerVisible}
+                mode="date"
+                onConfirm={handleConfirm}
+                onCancel={hideDatePicker}
+                style={{marginBottom:10}}
+              />
               <Text style={styles.head}>3. Input Farm Location</Text>
               <View style={{
                 width: '100%',
@@ -429,74 +464,6 @@ export const Calculator = ({ navigation }) => {
 
               </View>
 
-              {/* Date 
-
-            < View style={styles.category_container}>
-              <>
-                <Text style={styles.head}>1. Farm Details</Text>
-                <Button onPress={showDatepicker} title="1. Petsa ng Pagtanim" style={{ marginVertical: 12 }} />
-                {show && (
-                  <DateTimePicker
-                    testID="dateTimepicker"
-                    value={date}
-                    mode={mode}
-                    is24Hour={true}
-                    onChange={onChange}
-                    style={styles.text}
-                  />
-                )}
-                {
-                  loadingParticular
-                    ?
-                    <ActivityIndicator size='small' color='#3bcd6b' style={{ padding: 64, backgroundColor: '#fff' }} />
-                    :
-                    docsParticular?.map((doc) => (
-                      <TableBuilder
-                        key={doc.name}
-                        name={doc.name}
-                        path={`${pathParticular}/${doc.name}/${doc.name}`} />
-                    ))}
-                <AddButton setShow={setIsShow} navigation={navigation} />
-                <TouchableOpacity style={styles.touch2} onPress={() => {
-                  saveInputs()
-                  navigation.navigate('DataInputs', {
-                    brgyCode,
-                    userLocation,
-                    images,
-                    municipality,
-                    farmName
-                  })
-                }}>
-                  <Text style={styles.text1}>Paglagay ng Pagsusuri</Text>
-                </TouchableOpacity>
-                {/* // modal */}
-              {/* <Modal animationType='fade' transparent={true} visible={isShow} onRequestClose={() => (setIsShow(!isShow))}>
-                  <View style={styles.modalContainer}>
-                    <View style={styles.modalContent}>
-                      <Text style={styles.modalTitle}>Add New Table</Text>
-                      <TextInput
-                        style={styles.input}
-                        onChangeText={onChangeText}
-                        value={text}
-                        placeholder='Add Name'
-                      />
-                      <View style={styles.bottomButton}>
-                        <TouchableOpacity style={styles.bottomButtonItem} onPress={() => addDocumentWithId()}>
-                          <Text>Add</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.bottomButtonItem} onPress={() => setIsShow(false)}>
-                          <Text>Close</Text>
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                  </View>
-                </Modal>
-
-              </>
-
-            </View> */}
-
-
 
               {/* <View style={styles.container1}>
                 <MapView style={styles.map} region={region} onPress={handleMapPress}>
@@ -559,13 +526,18 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.37,
     shadowRadius: 7.49,
     elevation: 12,
-    backgroundColor: '#17AF41',
+    backgroundColor: 'green',
     borderRadius: 20,
     borderWidth: 1,
     borderColor: '#206830',
     flex: 1,
   },
-
+  textInput: {
+    borderWidth: 1,
+    borderColor: 'black',
+    marginBottom: 5,
+    padding: 10,
+},
   image: {
     flex: 1,
     opacity: 1.0,

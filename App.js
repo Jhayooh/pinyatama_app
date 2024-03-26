@@ -2,6 +2,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
 import { StyleSheet } from 'react-native';
+import About from './component/About';
 import { BottomButton } from './component/BottomButton';
 import { Calculator } from './component/Calculator';
 import Charts from './component/Charts';
@@ -14,7 +15,6 @@ import Map from './component/Map';
 import ProductionInput from './component/ProductionInput';
 import Register from './component/Register';
 import Video from './component/Video';
-
 
 
 const Stack = createNativeStackNavigator();
@@ -37,7 +37,9 @@ const App = () => (
             <Stack.Screen name='Video' component={Video} />
             <Stack.Screen name='Register' component={Register} />
             <Stack.Screen name='Inputs' component={Inputs} />
-        </Stack.Navigator>
+            <Stack.Screen name = 'About' component={About}  />
+          
+            </Stack.Navigator>
     </NavigationContainer>
 )
 
