@@ -99,7 +99,7 @@ export const Landing = ({ navigation }) => {
                             </TouchableHighlight>
                         </View>
                         <View style={styles.btnRow}>
-                            <TouchableHighlight style={styles.btnbtn} onPress={() => navigation.navigate('Inputs')}>
+                            <TouchableHighlight style={styles.btnbtn} onPress={() => null}>
                                 <View style={styles.btnbtnChild}>
                                     <Image source={aboutLogo} style={styles.btnImage} />
                                     <Text style={styles.buttonText}>Tungkol</Text>

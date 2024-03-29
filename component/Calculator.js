@@ -65,6 +65,8 @@ export const Calculator = ({ navigation }) => {
   const queryParti = collection(db, 'particulars');
   const [qParti, lParti, eParti] = useCollectionData(queryParti)
 
+  console.log("lParti: ", lParti);
+
   useEffect(() => {
     if (qParti) {
       setDataParti([...qParti])
@@ -125,7 +127,6 @@ export const Calculator = ({ navigation }) => {
   const addImage = (image, height, width) => {
     setImages(images => [...images, { url: image, height: height, width: width }])
   }
-  console.log("image added", images);
 
   const uploadImages = async (uri, fileType) => {
     try {
@@ -158,9 +159,7 @@ export const Calculator = ({ navigation }) => {
     }
   };
 
-
   const saveInputs = async () => {
-    console.log("udooooo!!!");
     const path = `farms/${user.uid}/phases`
     try {
       const uploadPromises = images.map(img => uploadImages(img.url, "Image"));
@@ -258,19 +257,25 @@ export const Calculator = ({ navigation }) => {
           >
             {/* Particulars  */}
             <View style={styles.category_container}>
-              <Text style={styles.head}>1. Land Area</Text>
-              <TextInput
-                editable
-                maxLength={40}
-                onChangeText={(base) => { setBase(base) }}
-                placeholder='No. of plants'
-                keyboardType='numeric'
-                value={base}
-                style={styles.dropdown}
-                disabled
-              />
               {
-                base !== '' && qParti ? <TableBuilder data={dataParti} input={base}/> : <></>
+                lParti
+                  ?
+                  <ActivityIndicator />
+                  :
+                  <>
+                    <Text style={styles.head}>1. Land Area</Text>
+                    <TextInput
+                      editable
+                      maxLength={40}
+                      onChangeText={(base) => { setBase(base) }}
+                      placeholder='No. of plants'
+                      keyboardType='numeric'
+                      value={base}
+                      style={styles.dropdown}
+                      disabled
+                    />
+                    {base !== '' && <TableBuilder data={dataParti} input={base} />}
+                  </>
               }
             </View>
 
