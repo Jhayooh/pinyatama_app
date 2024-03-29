@@ -6,7 +6,6 @@ import {
     TouchableOpacity,
     View
 } from "react-native";
-
 export const BottomButton = ({ setShow, navigation }) => {
 
     const handleSave = () => {
@@ -23,9 +22,6 @@ export const BottomButton = ({ setShow, navigation }) => {
 
     return (
         <View style={styles.bottomButton}>
-            <TouchableOpacity style={styles.bottomButtonItem} onPress={() => setShow(true)}>
-                <Text style={styles.text}>ADD </Text>
-            </TouchableOpacity>
             <TouchableOpacity style={styles.bottomButtonItem} onPress={() => { handleSave() }}>
                 <Text style={styles.text}>SAVE</Text>
             </TouchableOpacity>
@@ -49,10 +45,12 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.37,
         shadowRadius: 7.49,
         elevation: 20,
-        backgroundColor: '#17AF41',
+        backgroundColor: 'green',
         borderRadius: 20,
         borderWidth: 1,
         borderColor: '#206830',
+        
+        
     },
     text: {
         color: 'white',
