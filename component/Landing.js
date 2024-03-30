@@ -1,29 +1,32 @@
-import { LinearGradient } from 'expo-linear-gradient';
+import { LinearGradient } from "expo-linear-gradient";
 import { signOut } from "firebase/auth";
 import React, { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 
 import {
+    Button,
     Dimensions,
     Image,
+    ImageBackground,
+    KeyboardAvoidingView,
     Modal,
     StyleSheet,
     Text,
     TouchableHighlight,
-    View
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { auth } from '../firebase/Config';
 import Login from './Login';
 
-
 // logo
-import calcLogo from '../assets/calc2.png';
-import galleryLogo from '../assets/gal2.png';
-import aboutLogo from '../assets/info2.png';
-import appLogo from '../assets/pinyatamap-logo.png';
-import logonLogo from '../assets/user2.png';
-import videoLogo from '../assets/vid2.png';
-import yieldLogo from '../assets/yield2.png';
+import appLogo from '../assets/pinyatamap-logo.png'
+import calcLogo from '../assets/calc2.png'
+import yieldLogo from '../assets/yield2.png'
+import galleryLogo from '../assets/gal2.png'
+import videoLogo from '../assets/vid2.png'
+import aboutLogo from '../assets/info2.png'
+import logonLogo from '../assets/user2.png'
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -53,14 +56,10 @@ export const Landing = ({ navigation }) => {
     }
     return (
         <>
-             <LinearGradient
-                colors={['green', '#4caf50','yellow','orange','yellow' ]}
-                style={styles.bgOut}
-            >
+            <View style={styles.bgOut}>
                 <View style={styles.logoBg} >
                     <Text style={styles.appTitle} >Queen Pineapple Farming</Text>
                 </View>
-                
                 <View style={styles.btnBg}>
                     <Image source={appLogo} style={styles.appLogo} />
                     <View style={styles.btnContainer}>
@@ -84,7 +83,6 @@ export const Landing = ({ navigation }) => {
                                 </View>
                             </TouchableHighlight>
                         </View>
-                        
                         <View style={styles.btnRow}>
                             <TouchableHighlight style={styles.btnbtn} onPress={() => navigation.navigate('Gallery')}>
                                 <View style={styles.btnbtnChild}>
@@ -100,7 +98,7 @@ export const Landing = ({ navigation }) => {
                             </TouchableHighlight>
                         </View>
                         <View style={styles.btnRow}>
-                            <TouchableHighlight style={styles.btnbtn} onPress={() => navigation.navigate('About')}>
+                            <TouchableHighlight style={styles.btnbtn} onPress={() => null}>
                                 <View style={styles.btnbtnChild}>
                                     <Image source={aboutLogo} style={styles.btnImage} />
                                     <Text style={styles.buttonText}>Tungkol</Text>
@@ -119,11 +117,12 @@ export const Landing = ({ navigation }) => {
                                         <Text style={styles.buttonText}>Log in</Text>
                                     </View>
                                 }
+
                             </TouchableHighlight>
                         </View>
                     </View>
                 </View>
-                </LinearGradient>
+            </View>
 
             <Modal animationType='fade' transparent={true} visible={showModal} onRequestClose={() => (setShowModal(!showModal))}>
                 <Login showModal={showModal} setShowModal={setShowModal} />
@@ -134,7 +133,8 @@ export const Landing = ({ navigation }) => {
 
 const styles = StyleSheet.create({
     bgOut: {
-        flex: 1, 
+        flex: 1,
+        backgroundColor: '#22b14c',
         justifyContent: 'space-between'
     },
     btnBg: {
@@ -170,8 +170,7 @@ const styles = StyleSheet.create({
         fontSize: 48,
         color: '#fff',
         fontWeight: '600',
-        textAlign: 'center',
-        fontFamily:'serif'
+        textAlign: 'center'
     },
     btnContainer: {
         flex: 1,
@@ -193,27 +192,12 @@ const styles = StyleSheet.create({
     },
     btnbtn: {
         flex: 1,
+
     },
     btnbtnChild: {
         backgroundColor: '#fff',
         flex: 1,
         alignItems: 'center',
-        justifyContent: 'center',
-        padding: 12,
-        shadowColor: "green",
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.16,
-        shadowRadius: 1.51,
-        elevation: 1,
-        color: 'white',
-        borderColor:'green'
-    },
-    btnbtnChild2: {
-        backgroundColor: '#22b14c',
-        flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
         padding: 12,
@@ -223,9 +207,29 @@ const styles = StyleSheet.create({
             height: 1,
         },
         shadowOpacity: 0.16,
-      
+        shadowRadius: 1.51,
         elevation: 1,
-        
+        borderRadius: 12,
+        color: '#000',
+    },
+    btnbtnChild2: {
+        backgroundColor: '#22b14c',
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 12,
+        shadowColor: "#000000",
+        padding: 12,
+        shadowColor: "#000000",
+        shadowOffset: {
+            width: 0,
+            height: 1,
+            height: 1,
+        },
+        shadowOpacity: 0.16,
+        shadowRadius: 1.51,
+        elevation: 1,
+        borderRadius: 12,
     },
     btnImage: {
         width: 64,

@@ -4,10 +4,9 @@
     "slug": "Pinyatama",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/pinyatamap-logo.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -15,20 +14,26 @@
       "**/*"
     ],
     "ios": {
+      
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
+      },
+      "package": "com.jhayooh.Pinyatama"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "2815b92d-bfb2-4fa4-bade-95fd0afafad5"
       }
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/2815b92d-bfb2-4fa4-bade-95fd0afafad5"
     }
-    
-  }}
-    
-    
-  
-
+  }
+}
