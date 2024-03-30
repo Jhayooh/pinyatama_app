@@ -1,11 +1,12 @@
 import { address } from 'addresspinas';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
-import { GeoPoint, Timestamp, collection, doc, ref, setDoc, storage, query, where } from 'firebase/firestore';
+import { GeoPoint, Timestamp, collection, doc, ref, setDoc, updateDoc, addDoc, storage } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
 import {
+  Button,
   FlatList,
   Image,
   ImageBackground,
@@ -16,44 +17,54 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  ActivityIndicator
+  ActivityIndicator,
+  Alert
 } from 'react-native';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 import { Dropdown } from 'react-native-element-dropdown';
 import { auth, db } from '../firebase/Config';
 import { TableBuilder } from './TableBuilder';
 
 export const Calculator = ({ navigation }) => {
-  const collFarms = collection(db, 'farms')
-  const [docs, loading, error] = useCollectionData(collFarms);
+  const farmsColl = collection(db, 'farms')
+  const [farmsData, farmsLoading, farmsError] = useCollectionData(farmsColl);
   const [showAddImage, setShowAddImage] = useState(false)
 
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+
+  const showDatePicker = () => {
+    setDatePickerVisibility(true);
+  };
+
+  const getDate = () => {
+    let tempDate = date.toString().split(' ');
+    return date !== ''
+      ? `${tempDate[0]} ${tempDate[1]} ${tempDate[2]} ${tempDate[3]}`
+      : '';
+  };
+
   const [user] = useAuthState(auth)
-  console.log(user.uid);
-  const [isShow, setIsShow] = useState(false)
-  const [edit, setEdit] = useState(false)
   const [text, onChangeText] = useState(0);
-
-  const pathParticular = `farms/${user.uid}/particulars`
-  const collParticular = collection(db, pathParticular)
-  const [docsParticular, loadingParticular, errorParticular] = useCollectionData(collParticular)
-
-  // const pathActivities = `farms/${user.uid}/activities`
+  // const [first, setfirst] = useState(second)
 
   const [munFocus, setMunFocus] = useState(false)
   const [brgyFocus, setBrgyFocus] = useState(false)
 
   // data natin
+  const [base, setBase] = useState('')
+  const [area, setArea] = useState(0.0)
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date())
+  const [farmName, setFarmName] = useState('')
+  const [municipality, setMunicipality] = useState('')
   const [brgyCode, setBrgyCode] = useState(null)
+  const [farmerName, setFarmerName] = useState('');
+  const [sex, setSex] = useState('')
   const [userLocation, setUserLocation] = useState(null);
   const [images, setImages] = useState([])
   const [uploadedImg, setUploadedImg] = useState([])
-  const [municipality, setMunicipality] = useState('')
-  const [farmName, setFarmName] = useState('')
-  const [date, setDate] = useState(new Date());
   // end ng data natin
-
-  const [base, setBase] = useState('')
 
   const [munCode, setMunCode] = useState(null)
   const [region, setRegion] = useState(null);
@@ -65,7 +76,7 @@ export const Calculator = ({ navigation }) => {
   const queryParti = collection(db, 'particulars');
   const [qParti, lParti, eParti] = useCollectionData(queryParti)
 
-  console.log("lParti: ", lParti);
+  const [components, setComponents] = useState({})
 
   useEffect(() => {
     if (qParti) {
@@ -75,9 +86,6 @@ export const Calculator = ({ navigation }) => {
 
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
-
-  console.log("date value: ", date);
-
 
   const addDocumentWithId = async () => {
     setIsShow(false)
@@ -105,9 +113,11 @@ export const Calculator = ({ navigation }) => {
       console.log(e);
     }
   }
+
   const handleMapPress = (e) => {
     setUserLocation(e.nativeEvent.coordinate);
   };
+
   const openCamera = async () => {
     try {
       await ImagePicker.requestCameraPermissionsAsync();
@@ -159,32 +169,117 @@ export const Calculator = ({ navigation }) => {
     }
   };
 
+  // important function
   const saveInputs = async () => {
-    const path = `farms/${user.uid}/phases`
+    function goBack() {
+      navigation.goBack()
+    }
+
     try {
       const uploadPromises = images.map(img => uploadImages(img.url, "Image"));
       // Wait for all images to upload
       await Promise.all(uploadPromises);
-      await setDoc(doc(db, 'farms', user.uid), {
+      const newFarm = await addDoc(farmsColl, {
+        area: area,
         brgy: brgyCode,
+        farmerName: farmerName,
+        harvest_date: endDate,
         geopoint: userLocation,
-        muni: municipality,
-        name: farmName,
-        prov: 'Camarines Norte',
-        uid: user.uid,
+        mun: municipality,
+        title: farmName,
+        plantNumber: base,
+        sex: sex,
+        start_date: startDate,
+        brgyUID: user.uid,
         images: uploadedImg
       })
+      await updateDoc(newFarm, { id: newFarm.id })
+      const farmComp = collection(db, `farms/${newFarm.id}/components`);
+      // ^ Changed the collection path to include newFarm.id
 
-      await setDoc(doc(db, path, 'pagtatanim'), {
-        name: 'pagtatanim',
-        starDate: Timestamp.fromDate(date),
-        uid: user.uid
+      const eventsRef = collection(db, `farms/${newFarm.id}/events`);
+      const vegetativeDate = new Date(Date.parse(startDate));
+      const floweringDate = new Date(vegetativeDate);
+      floweringDate.setMonth(vegetativeDate.getMonth() + 10);
+      const fruitingDate = new Date(floweringDate);
+      fruitingDate.setMonth(floweringDate.getMonth() + 3);
+      const harvestDate = new Date(Date.parse(endDate));
+      harvestDate.setMonth(fruitingDate.getMonth() + 5);
+
+      const eRef_vegetative = await addDoc(eventsRef, {
+        group: newFarm.id,
+        title: "Vegetative",
+        className: "vegetative",
+        start_time: Timestamp.fromDate(vegetativeDate),
+        end_time: Timestamp.fromDate(floweringDate)
+      });
+      await updateDoc(eRef_vegetative, { id: eRef_vegetative.id })
+
+      const eRef_flowering = await addDoc(eventsRef, {
+        group: newFarm.id,
+        title: "Flowering",
+        className: "flowering",
+        start_time: Timestamp.fromDate(floweringDate),
+        end_time: Timestamp.fromDate(fruitingDate)
       })
+      await updateDoc(eRef_flowering, { id: eRef_flowering.id })
+
+      const eRef_fruiting = await addDoc(eventsRef, {
+        group: newFarm.id,
+        title: "Fruiting",
+        className: "fruiting",
+        start_time: Timestamp.fromDate(fruitingDate),
+        end_time: Timestamp.fromDate(harvestDate)
+      })
+      await updateDoc(eRef_fruiting, { id: eRef_fruiting.id })
+
+      Alert.alert("Saved Successfully", `${farmName} of ${farmerName} has been created`), [
+        {
+          text: 'OK',
+          onPress: () => { goBack() }
+        }
+      ]
+
+      components.forEach(async (component) => {
+        try {
+
+          await addDoc(farmComp, {
+            component
+          })
+        } catch (e) {
+          console.log("error sa components:", e);
+        }
+      })
+
     } catch (e) {
       console.log("Saving Error: ", e);
     }
     setImages([])
     setUploadedImg([])
+  }
+  const BottomButton = () => {
+
+    const handleSave = () => {
+
+    }
+
+    const confirmSave = () =>
+      Alert.alert(`Confirm`, `Do you want to save ${farmerName}?`, [
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+        { text: 'YES', onPress: () => saveInputs() },
+      ]);
+
+    return (
+      <View style={{ marginTop: 6, width: '100%', marginBottom: 16 }}>
+        <TouchableOpacity style={{ ...styles.touch, flex: 0, width: '100%' }} onPress={confirmSave}>
+          <Text style={styles.text}>SAVE</Text>
+        </TouchableOpacity>
+      </View>
+    )
   }
 
   useEffect(() => {
@@ -225,11 +320,9 @@ export const Calculator = ({ navigation }) => {
     console.log("Longitude:", location.coords.longitude);
   };
 
-  const onChange = (event, selectedDate) => {
-    const currentDate = selectedDate;
-    setShow(false);
-    setDate(currentDate);
-  };
+  const hideDatePicker = () => {
+    setDatePickerVisibility(false)
+  }
 
   const showMode = (currentMode) => {
     setShow(true);
@@ -248,14 +341,12 @@ export const Calculator = ({ navigation }) => {
 
   return (
     <>
-      <ImageBackground resizeMode="cover" style={styles.image}>
+      <ImageBackground source={require('../assets/p1.jpg')} resizeMode="cover" style={styles.image}>
         <View style={{ flex: 1, alignItems: 'center', }}>
-          {/* {console.log("from onLoad:", images)} */}
-          {/* <Image source={require(`../assets/logo.png`)} style={{ height: 50, width: 50 }} /> */}
           <ScrollView
-            showsVerticalScrollIndicator={false} style={{ flex: 1, width: '100%' }}
+            showsVerticalScrollIndicator={false} style={{ width: '100%' }}
           >
-            {/* Particulars  */}
+            {/* particulars  */}
             <View style={styles.category_container}>
               {
                 lParti
@@ -263,119 +354,76 @@ export const Calculator = ({ navigation }) => {
                   <ActivityIndicator />
                   :
                   <>
+                    {/* Number 1 */}
                     <Text style={styles.head}>1. Land Area</Text>
                     <TextInput
                       editable
                       maxLength={40}
-                      onChangeText={(base) => { setBase(base) }}
+                      onChangeText={(base) => {
+                        setBase(base)
+                        setArea(parseFloat((base / 30000).toFixed(4)))
+                      }}
                       placeholder='No. of plants'
                       keyboardType='numeric'
                       value={base}
                       style={styles.dropdown}
                       disabled
                     />
-                    {base !== '' && <TableBuilder data={dataParti} input={base} />}
+                    {base !== '' && <TableBuilder data={dataParti} input={base} setComponents={setComponents} />}
                   </>
               }
-            </View>
+              <View style={{ height: '1%', borderBottomColor: '#FAF1CE', borderBottomWidth: .2, marginBottom: 6 }}></View>
 
-            {/* Date 
-
-            < View style={styles.category_container}>
-              <>
-                <Text style={styles.head}>1. Farm Details</Text>
-                <Button onPress={showDatepicker} title="1. Petsa ng Pagtanim" style={{ marginVertical: 12 }} />
-                {show && (
-                  <DateTimePicker
-                    testID="dateTimepicker"
-                    value={date}
-                    mode={mode}
-                    is24Hour={true}
-                    onChange={onChange}
-                    style={styles.text}
-                  />
-                )}
-                {
-                  loadingParticular
-                    ?
-                    <ActivityIndicator size='small' color='#3bcd6b' style={{ padding: 64, backgroundColor: '#fff' }} />
-                    :
-                    docsParticular?.map((doc) => (
-                      <TableBuilder
-                        key={doc.name}
-                        name={doc.name}
-                        path={`${pathParticular}/${doc.name}/${doc.name}`} />
-                    ))}
-                <AddButton setShow={setIsShow} navigation={navigation} />
-                <TouchableOpacity style={styles.touch2} onPress={() => {
-                  saveInputs()
-                  navigation.navigate('DataInputs', {
-                    brgyCode,
-                    userLocation,
-                    images,
-                    municipality,
-                    farmName
-                  })
-                }}>
-                  <Text style={styles.text1}>Paglagay ng Pagsusuri</Text>
-                </TouchableOpacity>
-                {/* // modal */}
-            {/* <Modal animationType='fade' transparent={true} visible={isShow} onRequestClose={() => (setIsShow(!isShow))}>
-                  <View style={styles.modalContainer}>
-                    <View style={styles.modalContent}>
-                      <Text style={styles.modalTitle}>Add New Table</Text>
-                      <TextInput
-                        style={styles.input}
-                        onChangeText={onChangeText}
-                        value={text}
-                        placeholder='Add Name'
-                      />
-                      <View style={styles.bottomButton}>
-                        <TouchableOpacity style={styles.bottomButtonItem} onPress={() => addDocumentWithId()}>
-                          <Text>Add</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.bottomButtonItem} onPress={() => setIsShow(false)}>
-                          <Text>Close</Text>
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                  </View>
-                </Modal>
-
-              </>
-
-            </View> */}
-
-            {/*Pineapple Details*/}
-            <View style={styles.category_container}>
+              {/* Number 2 */}
               <Text style={styles.head}>2. QP Farm Details</Text>
-              <TextInput
-                editable
-                maxLength={40}
-                onChangeText={text => setFarmName(text)}
-                placeholder='Date of Planting'
-                value={farmName}
-                style={styles.textinput}
-              />
               <TextInput
                 editable
                 maxLength={40}
                 onChangeText={text => setFarmName(text)}
                 placeholder='Stage of Crops'
                 value={farmName}
-                style={styles.textinput}
+                style={styles.dropdown}
+
               />
               <TextInput
-                editable
-                maxLength={40}
-                onChangeText={text => setFarmName(text)}
-                placeholder='Date of Harvest'
-                value={farmName}
-                style={styles.textinput}
+                style={styles.dropdown}
+                value={startDate.toLocaleDateString()}
+                placeholder="Date of Planting"
               />
-            </View>
-            {/* FarmLoc */}
-            <View style={styles.category_container}>
+              <Button onPress={showDatePicker} title="Date of Planting" />
+              <DateTimePickerModal
+                isVisible={isDatePickerVisible}
+                mode="date"
+                onConfirm={(date) => {
+                  setStartDate(date)
+                  hideDatePicker()
+                  console.log(startDate);
+                }}
+                onCancel={hideDatePicker}
+                style={{ marginBottom: 10 }}
+              />
+
+              <TextInput
+                style={styles.dropdown}
+                value={endDate.toLocaleDateString()}
+                placeholder="Date of Harvest"
+              />
+              <Button onPress={showDatePicker} title="Date of Harvest" />
+
+              <DateTimePickerModal
+                isVisible={isDatePickerVisible}
+                mode="date"
+                onConfirm={(date) => {
+                  setEndDate(date)
+                  hideDatePicker()
+                }}
+                onCancel={hideDatePicker}
+                style={{ marginBottom: 10 }}
+              />
+
+              <View style={{ height: '1%', borderBottomColor: '#FAF1CE', borderBottomWidth: .2, marginBottom: 6 }}></View>
+
+              {/* numberThree */}
               <Text style={styles.head}>3. Input Farm Location</Text>
               <View style={{
                 width: '100%',
@@ -412,6 +460,7 @@ export const Calculator = ({ navigation }) => {
                     setMunFocus(false);
                   }}
                 />
+
                 <Dropdown
                   style={[styles.dropdown, brgyFocus && { borderColor: 'blue' }]}
                   placeholderStyle={styles.placeholderStyle}
@@ -432,28 +481,62 @@ export const Calculator = ({ navigation }) => {
                     setBrgyFocus(false);
                   }}
                 />
+                <View style={{ height: '1%', borderBottomColor: '#FAF1CE', borderBottomWidth: .2, marginBottom: 6 }}></View>
+
+                {/* numberFour */}
+                <Text style={styles.head}>4. Farmer Details</Text>
+                <TextInput
+                  editable
+                  maxLength={40}
+                  onChangeText={text => setFarmerName(text)}
+                  placeholder='Name of Farmer'
+                  value={farmerName}
+                  style={styles.dropdown}
+                />
+                <TextInput
+                  editable
+                  maxLength={40}
+                  onChangeText={text => setSex(text)}
+                  placeholder='Sex'
+                  value={sex}
+                  style={styles.dropdown}
+                />
+                <View style={{ height: '1%', borderBottomColor: '#FAF1CE', borderBottomWidth: .2, marginBottom: 6 }}></View>
+
+                {/* numberFive */}
+                <Text style={styles.head}>5. Upload Farm Images</Text>
+                <View style={{ marginBottom: 8, width: '100%', height: 180, borderRadius: 6, padding: 4, backgroundColor: '#101010' }}>
+                  {
+                    images &&
+                    <FlatList
+                      data={images}
+                      // numColumns={3}
+                      horizontal={true}
+                      renderItem={({ item }) => (
+                        <View style={{ flex: 1 }}>
+                          <Image style={{ height: '100%', width: 240, borderRadius: 6 }} source={{ uri: item.url }} />
+                        </View>
+                      )}
+                      ItemSeparatorComponent={() =>
+                        <View style={{ width: 4, height: '100%' }}></View>
+                      }
+                    // columnWrapperStyle={{
+                    //   gap: 2,
+                    //   marginBottom: 2
+                    // }}
+                    />
+                  }
+                  <View style={{ flexDirection: 'row' }}>
+                    <TouchableOpacity style={styles.touch} onPress={() => {
+                      setShowAddImage(true)
+                    }}>
+                      <Text style={styles.text}>Add Image</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
               </View>
-            </View>
-            <View style={styles.category_container}>
-              <Text style={styles.head}>4. Farmer Details</Text>
-              <TextInput
-                editable
-                maxLength={40}
-                onChangeText={text => setFarmName(text)}
-                placeholder='Name of Farmer'
-                value={farmName}
-                style={styles.textinput}
-              />
-              <TextInput
-                editable
-                maxLength={40}
-                onChangeText={text => setFarmName(text)}
-                placeholder='Sex'
-                value={farmName}
-                style={styles.textinput}
-              />
-            </View>
-            {/* <View style={styles.container1}>
+              {/* <View style={styles.container1}>
                 <MapView style={styles.map} region={region} onPress={handleMapPress}>
                   {userLocation && (
                     <Marker
@@ -473,43 +556,10 @@ export const Calculator = ({ navigation }) => {
                 </View>
               </View> */}
 
-            {/* ImagesGal */}
-            <View style={styles.category_container}>
-              <Text style={styles.head}>4. Upload Farm Images</Text>
-              <View style={{ marginBottom: 8, width: '100%', height: 180, borderRadius: 6, padding: 4, backgroundColor: '#101010' }}>
-                {
-                  images &&
-                  <FlatList
-                    data={images}
-                    // numColumns={3}
-                    horizontal={true}
-                    renderItem={({ item }) => (
-                      <View style={{ flex: 1 }}>
-                        <Image style={{ height: '100%', width: 240, borderRadius: 6 }} source={{ uri: item.url }} />
-                      </View>
-                    )}
-                    ItemSeparatorComponent={() =>
-                      <View style={{ width: 4, height: '100%' }}></View>
-                    }
-                  // columnWrapperStyle={{
-                  //   gap: 2,
-                  //   marginBottom: 2
-                  // }}
-                  />
-                }
-              </View>
-              <View style={{ flexDirection: 'row' }}>
-                <TouchableOpacity style={styles.touch} onPress={() => {
-                  setShowAddImage(true)
-                }}>
-                  <Text style={styles.text}>Add Image</Text>
-                </TouchableOpacity>
-              </View>
+              {/* ImagesGal */}
             </View>
-
-
-
           </ScrollView>
+          <BottomButton />
         </View >
 
       </ImageBackground >
@@ -546,99 +596,48 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.37,
     shadowRadius: 7.49,
     elevation: 12,
-    backgroundColor: '#17AF41',
+    backgroundColor: 'green',
     borderRadius: 20,
     borderWidth: 1,
     borderColor: '#206830',
     flex: 1,
-    alignItems: 'center',
   },
-  touch2: {
-    paddingVertical: 16,
-    alignItems: 'center',
-    textAlign: 'center',
-    shadowOpacity: 0.37,
-    shadowRadius: 7.49,
-    elevation: 20,
-
-    backgroundColor: 'white',
+  textInput: {
     borderWidth: 1,
-    borderColor: '#206830',
-    marginTop: 10,
-    alignItems: 'center'
-  },
-  modalBackground: {
-    backgroundColor: '#00000060',
-    padding: 20,
-    justifyContent: 'center',
-    flex: 1,
-    fontFamily: 'serif',
-    fontWeight: 'bold',
-    color: 'white',
-    flex: 1,
-    fontFamily: 'serif',
-    fontWeight: 'bold',
-    color: 'white'
-  },
-  modalContainer: {
-    backgroundColor: '#fff',
-    padding: 24,
+    borderColor: 'black',
+    marginBottom: 5,
+    padding: 10,
   },
   image: {
     flex: 1,
-    opacity: .8,
-    paddingVertical: 36,
-    paddingHorizontal: 12,
-    backgroundColor: '#f9fafb'
+    opacity: 1.0,
+    paddingTop: 36,
   },
-  container: {
-    backgroundColor: 'white',
-    padding: 16,
-  },
-  container1: {
-    height: 200,
-    width: '100%',
-  },
+
   map: {
     height: 200,
     width: '100%',
   },
-  buttonContainer: {
-    position: 'absolute',
-    bottom: 16,
-    left: 16,
-    right: 16,
-  },
+
   dropdown: {
     height: 50,
-    borderColor: 'gray',
-    borderWidth: 0.5,
+    opacity: 1.0,
+    borderColor: 'green',
+    borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 8,
-    backgroundColor: 'white'
-  },
-  icon: {
-    marginRight: 5,
-  },
-  label: {
-    position: 'absolute',
     backgroundColor: 'white',
-    left: 22,
-    top: 8,
-    zIndex: 999,
-    paddingHorizontal: 8,
-    fontSize: 14,
+    marginBottom: 6,
+    color: 'black'
   },
+
   placeholderStyle: {
     fontSize: 16,
   },
   selectedTextStyle: {
     fontSize: 16,
   },
-  iconStyle: {
-    width: 20,
-    height: 20,
-  },
+
   inputSearchStyle: {
     height: 40,
     fontSize: 16,
@@ -663,26 +662,23 @@ const styles = StyleSheet.create({
     color: 'black'
   },
   category_container: {
-    backgroundColor: '#22b14c',
-    width: 'auto',
-    padding: 20,
-    marginTop: 20,
+    padding: 10,
+    margin: 16,
     opacity: 1.0,
-    borderRadius: 10
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    elevation: 5
+
+
   },
   head: {
     fontSize: 20,
     fontFamily: 'serif',
     fontWeight: 'bold',
-    color: 'white',
-    marginBottom: 10,
+    color: 'green',
+    marginBottom: 8,
   },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
-  },
+
   modalContent: {
     backgroundColor: 'white',
     width: 280,
@@ -700,43 +696,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 9,
   },
-  input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    marginBottom: 10,
-    paddingHorizontal: 10,
-    marginBottom: 10
+  verifyButton: {
+    position: 'absolute',
+    alignSelf: 'center',
+    right: 0,
   },
-  bottomButton: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    gap: 12
-  },
-  bottomButtonItem: {
-    flex: 1,
-    padding: 12,
-    alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    textAlign: 'center',
-    shadowOpacity: 0.37,
-    shadowRadius: 7.49,
-    elevation: 20,
-    backgroundColor: '#17AF41',
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#206830',
-  },
-  textinput: {
-    marginBottom: 5,
-    height: 50,
-    borderColor: 'gray',
-    borderWidth: 0.5,
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    backgroundColor: '#fff'
-  }
+
 });
 
 

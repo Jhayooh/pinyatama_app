@@ -2,6 +2,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { signOut } from "firebase/auth";
 import React, { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
+
 import {
     Button,
     Dimensions,
@@ -9,13 +10,11 @@ import {
     ImageBackground,
     KeyboardAvoidingView,
     Modal,
-    Platform,
-    ScrollView,
     StyleSheet,
     Text,
     TouchableHighlight,
     TouchableOpacity,
-    View
+    View,
 } from 'react-native';
 import { auth } from '../firebase/Config';
 import Login from './Login';
@@ -199,6 +198,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         flex: 1,
         alignItems: 'center',
+        alignItems: 'center',
         justifyContent: 'center',
         padding: 12,
         shadowColor: "#000000",
@@ -219,8 +219,11 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         padding: 12,
         shadowColor: "#000000",
+        padding: 12,
+        shadowColor: "#000000",
         shadowOffset: {
             width: 0,
+            height: 1,
             height: 1,
         },
         shadowOpacity: 0.16,

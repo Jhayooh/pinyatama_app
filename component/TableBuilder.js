@@ -10,74 +10,14 @@ import {
 import { db } from '../firebase/Config';
 import { AddDataRow } from './AddDataRow';
 
-const Total = ({ total, name }) => {
-
-  return (
-    <View style={{ ...styles.tableData, padding: 12 }}>
-      <Text style={{ flex: 4, fontWeight: 'bold', fontSize: 18 }}>Total {name} Inputs</Text>
-      <Text style={{ flex: 1, fontWeight: 'bold', fontSize: 18 }}>{total}</Text>
-    </View>
-  )
-}
-
-const TableData = ({ data }) => {
-  return (
-    <View style={styles.tableData}>
-      <View style={styles.tableHeadLabel3}>
-        <Text>{data.name}</Text>
-      </View>
-      <View style={styles.tableHeadLabel2}>
-        <Text>{data.qnty}</Text>
-      </View>
-      <View style={styles.tableHeadLabel2}>
-        <Text>{data.unit}</Text>
-      </View>
-      <View style={styles.tableHeadLabel2}>
-        <Text>{data.pUnit}</Text>
-      </View>
-      <View style={styles.tableHeadLabel2}>
-        <Text>{data.total}</Text>
-      </View>
-    </View>
-  )
-}
-
-export const TableBuilder = ({ data, input }) => {
-  console.log("data tablebuilder:", data);
+export const TableBuilder = ({ data, input, setComponents }) => {
   const [Hectares, setHectares] = useState(0)
   const plantingMaterials = data.find(item => item.name === "Planting Materials");
   const ferZero = data.find(item => item.name === "0-0-60");
   const ferUrea = data.find(item => item.name === "Urea");
   const Diuron = data.find(item => item.name === "Diuron");
   const Sticker = data.find(item => item.name === "Sticker");
-
-
   const [totalPrice, setTotalPrice] = useState(0)
-
-  // const docRef = doc(db, path, name)
-
-  // const [total, setTotal] = useState(0)
-  // const [totalCost, setTotalCost] = useState(0)
-  // const updateTotalInputs = async (newTotal) => {
-  //   try {
-  //     await updateDoc(docRef, {
-  //       totalInputs: newTotal
-  //     });
-  //   } catch (error) {
-  //     console.error("Error updating totalInputs:", error);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   if (docs) {
-  //     let sum = 0
-  //     docs.forEach(doc => {
-  //       sum += doc.total;
-  //     });
-  //     setTotal(sum);
-  //     updateTotalInputs(sum)
-  //   }
-  // }, [docs]);
 
   const getMult = (numOne, numTwo) => {
     const num = numOne * numTwo
@@ -85,7 +25,6 @@ export const TableBuilder = ({ data, input }) => {
   }
 
   const TableData = ({ name, qnty, unit, price, totalPrice }) => {
-    console.log(name, qnty, unit, price, totalPrice);
     // const totalPrice = calcTotalPrice(data.qnty, data.pUnit)
     return (
       <View style={styles.tableData}>
@@ -108,12 +47,6 @@ export const TableBuilder = ({ data, input }) => {
       </View>
     )
   }
-  useEffect(() => {
-    const number = input / 30000
-    setHectares(number)
-  }, [input])
-
-  console.log(plantingMaterials);
 
   const pmQnty = getMult(Hectares, 30000)
   const fZeroQnty = getMult(Hectares, 5)
@@ -121,11 +54,31 @@ export const TableBuilder = ({ data, input }) => {
   const dQnty = getMult(Hectares, 2)
   const sQnty = getMult(Hectares, 1)
 
+  const total_price = getMult(pmQnty, plantingMaterials.price) +
+    getMult(fUreaQnty, ferUrea.price) +
+    getMult(fZeroQnty, ferZero.price) +
+    getMult(dQnty, Diuron.price) +
+    getMult(sQnty, Sticker.price);
+
+  useEffect(() => {
+    const number = input / 30000
+    setHectares(number)
+    setComponents([
+      { compId: plantingMaterials.id, qnty: pmQnty, totalPrice: getMult(pmQnty, plantingMaterials.price), },
+      { compId: ferZero.id, qnty: fZeroQnty, totalPrice: getMult(fZeroQnty, ferZero.price) },
+      { compId: ferUrea.id, qnty: fUreaQnty, totalPrice: getMult(fUreaQnty, ferUrea.price) },
+      { compId: Diuron.id, qnty: dQnty, totalPrice: getMult(dQnty, Diuron.price) },
+      { compId: Sticker.id, qnty: sQnty, totalPrice: getMult(sQnty, Sticker.price) }
+    ])
+  }, [input])
+
+  console.log("this is the data: ", data);
+
   return (
     <>
-      <View style={{ ...styles.container, minHeight: 300, marginTop: 12, borderRadius: 10 }}>
-        <View style={{ flex: 1, alignItems: 'center', margin: 8 }}>
-          <Text style={{ backgroundColor: '#3bcd6b', padding: 8, alignItems: 'center', textAlign: 'center' }}>COST AND RETURN ANALYSIS {Hectares.toFixed(2)} HA PINEAPPLE PRODUCTION</Text>
+      <View style={{ ...styles.container, minHeight: 300, borderRadius: 10, paddingBottom: 12 }}>
+        <View style={{ alignItems: 'center', margin: 8 }}>
+          <Text style={{ width: '100%', backgroundColor: '#3bcd6b', padding: 8, alignItems: 'center', textAlign: 'center' }}>COST AND RETURN ANALYSIS {Hectares.toFixed(2)} HA PINEAPPLE PRODUCTION</Text>
         </View>
         <View style={{ flex: 1, marginTop: 6, marginHorizontal: 12 }}>
           {/* Header */}
@@ -198,15 +151,9 @@ export const TableBuilder = ({ data, input }) => {
               <Text styles={{ fontWeight: 'bold' }}>Total Material Input: </Text>
             </View>
             <View style={{ flex: 1, alignItems: 'flex-end' }}>
-              <Text styles={{ fontWeight: 'bold' }}>{
-                (
-                  getMult(pmQnty, plantingMaterials.price) +
-                  getMult(fUreaQnty, ferUrea.price) +
-                  getMult(fZeroQnty, ferZero.price) +
-                  getMult(dQnty, Diuron.price) +
-                  getMult(sQnty, Sticker.price)
-                ).toLocaleString()
-              }</Text>
+              <Text styles={{ fontWeight: 'bold' }}>
+                {total_price}
+              </Text>
             </View>
           </View>
         </View>
@@ -218,7 +165,7 @@ export const TableBuilder = ({ data, input }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#FAF1CE',
   },
   image: {
     flex: 1,

@@ -11,7 +11,7 @@ export default function Gallery({ navigation }) {
 
   const updateSearch = (text) => {
     setSearch(text);
-    // Perform search-related actions here, such as filtering data
+    
     console.log('Search:', text);
   };
 
@@ -69,8 +69,7 @@ const styles = StyleSheet.create({
     borderBottomColor: 'transparent',
     borderTopColor: 'transparent',
     padding:20
-   
-    
+ 
   },
   searchInputContainer: {
     backgroundColor: '#f2f2f2',
