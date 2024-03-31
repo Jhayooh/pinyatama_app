@@ -31,11 +31,8 @@ export const Calculator = ({ navigation }) => {
   const [farmsData, farmsLoading, farmsError] = useCollectionData(farmsColl);
   const [showAddImage, setShowAddImage] = useState(false)
 
-  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
-
-  const showDatePicker = () => {
-    setDatePickerVisibility(true);
-  };
+  const [startPicker, setStartPicker] = useState(false);
+  const [endPicker, setEndPicker] = useState(false);
 
   const getDate = () => {
     let tempDate = date.toString().split(' ');
@@ -79,6 +76,7 @@ export const Calculator = ({ navigation }) => {
 
   const [components, setComponents] = useState([])
   const [table, setTable] = useState(false)
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     if (qParti) {
@@ -177,11 +175,7 @@ export const Calculator = ({ navigation }) => {
 
   // important function
   const saveInputs = async () => {
-
     try {
-      const uploadPromises = images.map(img => uploadImages(img.url, "Image"));
-      // Wait for all images to upload
-      await Promise.all(uploadPromises);
       const newFarm = await addDoc(farmsColl, {
         area: area,
         brgy: brgyCode,
@@ -195,15 +189,28 @@ export const Calculator = ({ navigation }) => {
         plantNumber: base,
         sex: sex,
         brgyUID: user.uid,
-        images: uploadedImg
       })
       await updateDoc(newFarm, { id: newFarm.id })
-      const farmComp = collection(db, `farms/${newFarm.id}/components`);
-      Alert.alert(`Saved Successfully`, `${farmerName} is saved. Thank you very much for using this application. Donate at our charity using GCASH (+9564760102)`, [
-        { text: 'Ok', onPress: () => goBack() },
-      ]);
-      // ^ Changed the collection path to include newFarm.id
 
+      Alert.alert(`Saved Successfully`, `${farmerName} is saved. Thank you very much for using this application. Donate at our charity using GCASH (+9564760102)`, [
+        {
+          text: 'Ok', onPress: () => {
+            setSaving(false)
+            goBack()
+          }
+        },
+      ])
+      const farmComp = collection(db, `farms/${newFarm.id}/components`);
+      components.forEach(async (component) => {
+        try {
+
+          await addDoc(farmComp, {
+            ...component
+          })
+        } catch (e) {
+          console.log("error sa components:", e);
+        }
+      })
       const eventsRef = collection(db, `farms/${newFarm.id}/events`);
       const vegetativeDate = new Date(Date.parse(startDate));
       const floweringDate = new Date(vegetativeDate);
@@ -240,16 +247,10 @@ export const Calculator = ({ navigation }) => {
       })
       await updateDoc(eRef_fruiting, { id: eRef_fruiting.id })
 
-      components.forEach(async (component) => {
-        try {
-
-          await addDoc(farmComp, {
-            ...component
-          })
-        } catch (e) {
-          console.log("error sa components:", e);
-        }
-      })
+      const uploadPromises = images.map(img => uploadImages(img.url, "Image"));
+      // Wait for all images to upload
+      await Promise.all(uploadPromises);
+      await updateDoc(newFarm, { images: uploadedImg })
 
     } catch (e) {
       console.log("Saving Error: ", e);
@@ -265,7 +266,12 @@ export const Calculator = ({ navigation }) => {
           onPress: () => console.log('Cancel Pressed'),
           style: 'cancel',
         },
-        { text: 'YES', onPress: () => saveInputs() },
+        {
+          text: 'YES', onPress: () => {
+            setSaving(true)
+            saveInputs()
+          }
+        },
       ]);
 
     return (
@@ -363,7 +369,8 @@ export const Calculator = ({ navigation }) => {
   return (
     <>
       <ImageBackground source={require('../assets/p1.jpg')} resizeMode="cover" style={styles.image}>
-        <View style={{ flex: 1, alignItems: 'center', }}>
+        <View style={{ flex: 1, alignItems: 'center' }} >
+
           <ScrollView
             showsVerticalScrollIndicator={false} style={{ width: '100%' }}
           >
@@ -417,16 +424,15 @@ export const Calculator = ({ navigation }) => {
                 value={startDate.toLocaleDateString()}
                 placeholder="Date of Planting"
               />
-              <Button onPress={showDatePicker} title="Date of Planting" />
+              <Button onPress={()=>setStartPicker(true)} title="Date of Planting" />
               <DateTimePickerModal
-                isVisible={isDatePickerVisible}
+                isVisible={startPicker}
                 mode="date"
                 onConfirm={(date) => {
                   setStartDate(date)
-                  hideDatePicker()
-                  console.log(startDate);
+                  setStartPicker(false)
                 }}
-                onCancel={hideDatePicker}
+                onCancel={()=>setStartPicker(false)}
                 style={{ marginBottom: 10 }}
               />
 
@@ -435,16 +441,16 @@ export const Calculator = ({ navigation }) => {
                 value={endDate.toLocaleDateString()}
                 placeholder="Date of Harvest"
               />
-              <Button onPress={showDatePicker} title="Date of Harvest" />
+              <Button onPress={()=>setEndPicker(true)} title="Date of Harvest" />
 
               <DateTimePickerModal
-                isVisible={isDatePickerVisible}
+                isVisible={endPicker}
                 mode="date"
                 onConfirm={(date) => {
                   setEndDate(date)
-                  hideDatePicker()
+                  setEndPicker(false)
                 }}
-                onCancel={hideDatePicker}
+                onCancel={()=>setEndPicker(false)}
                 style={{ marginBottom: 10 }}
               />
 
@@ -588,8 +594,8 @@ export const Calculator = ({ navigation }) => {
           </ScrollView>
           <BottomButton />
         </View >
-
       </ImageBackground >
+      {saving && <ActivityIndicator color='#FF5733' size='large' style={styles.loading} />}
 
       <Modal animationType='fade' visible={showAddImage} transparent={true}>
         <View style={styles.addImage}>
@@ -695,8 +701,16 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: '#fff',
     elevation: 5
-
-
+  },
+  loading: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(150, 150, 150, 0.6)'
   },
   head: {
     fontSize: 20,
