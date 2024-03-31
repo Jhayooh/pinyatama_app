@@ -30,26 +30,11 @@ const GastosSaPinya = () => {
     )
 }
 
-const Charts = ({ pathParticular, pathPhases, pathActivities }) => {
+const Charts = ({ farms }) => {
+    console.log('this is the farms from chart', farms);
     const [isShow, setIsShow] = useState(false)
     const [selectedDay, setSelectedDay] = useState('')
-    const query = collection(db, pathParticular)
-    const [docs, loading, error] = useCollectionData(query)
-    const [data, setData] = useState([])
-
-    const [date, setDate] = useState(new Date(1598051730000));
-    const [mode, setMode] = useState('date');
-    const [show, setShow] = useState(false);
-    const [maxMonth, setMaxMonth] = useState('')
-    const schedQue = collection(db, pathPhases)
-    const [schedDoc, schedLoading, schedError] = useCollectionData(schedQue)
-    const [sched, setSched] = useState({
-
-    })
-    const actQuery = collection(db, pathActivities)
-    const [actDoc, actLoading, actError] = useCollectionData(actQuery)
     const [activities, setActivities] = useState({})
-
     const [startDate, setStartDate] = useState('')
 
     const getMaxSched = ({ date }) => {
@@ -79,17 +64,6 @@ const Charts = ({ pathParticular, pathPhases, pathActivities }) => {
         return toFormatDate.toDate().toISOString().split('T')[0];
     }
 
-    const checkCollection = async (collPath) => {
-        try {
-            const collectionRef = collection(db, collPath);
-            const snapshot = await getDocs(collectionRef);
-            return !snapshot.empty;
-        } catch (error) {
-            console.error('Error checking collection:', error);
-            return false;
-        }
-    };
-
     const generateDateRange = (startDate, endDate) => {
         console.log("start:", startDate);
         console.log("end:", endDate);
@@ -109,69 +83,68 @@ const Charts = ({ pathParticular, pathPhases, pathActivities }) => {
     };
 
     const color = ["rgb(0, 255, 0)", "rgb(0, 0, 255)", "rgb(255, 0, 0)"]
-    useEffect(() => {
-        setData(
-            docs?.map((doc, index) => (
-                {
-                    ...doc,
-                    color: color[index],
-                    legendFontColor: "#7F7F7F",
-                    legendFontSize: 15
-                }
-            ))
-        )
-        if (schedDoc) {
-            const newSched = schedDoc.reduce((acc, doc) => {
-                console.log("pa print po ng doc:", doc);
-                console.log("tingin ng subcollection", checkCollection(`${pathPhases}/${doc.name}/activities`));
-                const startDate = doc.starDate;
-                const formattedDate = formatDate(startDate)
-                acc[formattedDate] = {
-                    startingDay: true,
-                    color: '#50cebb',
-                    textColor: 'white',
-                };
-                if (doc.name === 'pagtatanim') {
-                    setMaxMonth(formatDate(getMaxSched(startDate)))
-                    setStartDate(formattedDate)
-                }
-                return acc;
-            }, {});
-            setSched(prevSched => ({ ...prevSched, ...newSched }));
-        }
+    // useEffect(() => {
+    //     setData(
+    //         farms?.map((doc, index) => (
+    //             {
+    //                 ...doc,
+    //                 color: color[index],
+    //                 legendFontColor: "#7F7F7F",
+    //                 legendFontSize: 15
+    //             }
+    //         ))
+    //     )
+    //     if (schedDoc) {
+    //         const newSched = schedDoc.reduce((acc, doc) => {
+    //             console.log("pa print po ng doc:", doc);
+    //             console.log("tingin ng subcollection", checkCollection(`${pathPhases}/${doc.name}/activities`));
+    //             const startDate = doc.starDate;
+    //             const formattedDate = formatDate(startDate)
+    //             acc[formattedDate] = {
+    //                 startingDay: true,
+    //                 color: '#50cebb',
+    //                 textColor: 'white',
+    //             };
+    //             if (doc.name === 'pagtatanim') {
+    //                 setMaxMonth(formatDate(getMaxSched(startDate)))
+    //                 setStartDate(formattedDate)
+    //             }
+    //             return acc;
+    //         }, {});
+    //         setSched(prevSched => ({ ...prevSched, ...newSched }));
+    //     }
 
-        if (actDoc) {
-            const newAct = actDoc.reduce((acc, doc) => {
-                const createdDate = doc.createdDate;
-                const formattedDate = formatDate(createdDate)
-                console.log("this is my docact", formattedDate);
-                acc[formattedDate] = {
-                    ...doc,
-                    marked: true,
-                    dotColor: 'red'
-                };
-                return acc;
-            }, {});
-            setActivities(prevActs => ({ ...prevActs, ...newAct }));
-        }
-    }, [docs, schedDoc, actDoc])
-
-    console.log("laman ng activities:", activities);
-    console.log("is there??", activities.hasOwnProperty(selectedDay));
+    //     if (actDoc) {
+    //         const newAct = actDoc.reduce((acc, doc) => {
+    //             const createdDate = doc.createdDate;
+    //             const formattedDate = formatDate(createdDate)
+    //             console.log("this is my docact", formattedDate);
+    //             acc[formattedDate] = {
+    //                 ...doc,
+    //                 marked: true,
+    //                 dotColor: 'red'
+    //             };
+    //             return acc;
+    //         }, {});
+    //         setActivities(prevActs => ({ ...prevActs, ...newAct }));
+    //     }
+    // }, [docs, schedDoc, actDoc])
 
     return (
         <>
-            <ScrollView>
-                {loading
-                    ?
-                    <ActivityIndicator size='small' color='#3bcd6b' style={{ padding: 64, backgroundColor: '#fff' }} />
-                    :
+            <ScrollView style={{
+                padding: 12,
+
+            }}>
                     <View style={{
                         flex: 1,
                         flexDirection: 'column',
                         gap: 8,
                         paddingVertical: 8
                     }}>
+                        <View>
+
+                        </View>
                         <Calendar
                             markingType='period'
                             style={{
@@ -184,13 +157,12 @@ const Charts = ({ pathParticular, pathPhases, pathActivities }) => {
                             }}
                             markedDates={activities}
                         />
-                        <DoughnutAndPie data={data} />
+                        <DoughnutAndPie />
                         <Line />
                         <Bar />
                         <DoughnutAndPie />
                         <Progress />
                     </View>
-                }
             </ScrollView>
 
             <Modal animationType='fade' transparent={true} visible={isShow} onRequestClose={() => (setIsShow(!isShow))}>

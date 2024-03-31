@@ -16,7 +16,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { auth } from '../firebase/Config';
+import { auth, db } from '../firebase/Config';
 import Login from './Login';
 
 // logo
@@ -27,12 +27,36 @@ import galleryLogo from '../assets/gal2.png'
 import videoLogo from '../assets/vid2.png'
 import aboutLogo from '../assets/info2.png'
 import logonLogo from '../assets/user2.png'
+import { collection } from "firebase/firestore";
+import { useCollectionData } from "react-firebase-hooks/firestore";
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
 export const Landing = ({ navigation }) => {
     const [showModal, setShowModal] = useState(false)
+
+    const farmsColl = collection(db, 'farms')
+    const [farms] = useCollectionData(farmsColl) 
+    // const farms = [{
+    //     "area": 1,
+    //     "brgy": "Cobangbang (Carumpit)",
+    //     "brgyUID": "MAicOo2SvfgMfg9cCVDwQks1gV72",
+    //     "cropStage": "Vegetative",
+    //     "farmerName": "Arjay Macalinao",
+    //     "geopoint": { "latitude": 14.107196953701209, "longitude": 14.107196953701209 },
+    //     "harvest_date": { "nanoseconds": 865000000, "seconds": 1711874130 },
+    //     "id": "24T8wnmupy83QjTUWyLn",
+    //     "images": [],
+    //     "mun": "DAET (Capital)",
+    //     "plantNumber": "30000",
+    //     "sex": "yes",
+    //     "start_date": {
+    //         "nanoseconds": 865000000,
+    //         "seconds": 1711874130
+    //     },
+    //     "title": "Animal Farm"
+    // }]
 
     const [user] = useAuthState(auth)
     console.log(user);
@@ -84,7 +108,7 @@ export const Landing = ({ navigation }) => {
                             </TouchableHighlight>
                         </View>
                         <View style={styles.btnRow}>
-                            <TouchableHighlight style={styles.btnbtn} onPress={() => navigation.navigate('Gallery')}>
+                            <TouchableHighlight style={styles.btnbtn} onPress={() => { navigation.navigate('Gallery', { farms: farms }) }}>
                                 <View style={styles.btnbtnChild}>
                                     <Image source={galleryLogo} style={styles.btnImage} />
                                     <Text style={styles.buttonText}>Mga Bukid ng Pinya</Text>
@@ -109,7 +133,7 @@ export const Landing = ({ navigation }) => {
                                     ?
                                     <View style={styles.btnbtnChild2}>
                                         <Image source={logonLogo} style={styles.btnImage} />
-                                        <Text style={{...styles.buttonText, color: '#fff'}}>Log out</Text>
+                                        <Text style={{ ...styles.buttonText, color: '#fff' }}>Log out</Text>
                                     </View>
                                     :
                                     <View style={styles.btnbtnChild}>
