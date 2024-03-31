@@ -1,5 +1,13 @@
 import React from 'react';
-import { Image, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  Image,
+  ImageBackground,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 const Card = ({ imageSource, title, description, onPress }) => {
   return (
@@ -13,42 +21,39 @@ const Card = ({ imageSource, title, description, onPress }) => {
   );
 };
 
-const TabView = ({ navigation }) => {
+const TabView = ({ route, navigation }) => {
+  const { farms = [] } = route.params;
+  const farm = farms[0]
   const handleCardPress = () => {
-    console.log('Card pressed!');
+    navigation.navigate("ProductionInput", { farms: farms })
   };
-
   return (
-    <ImageBackground source={require('../assets/p1.jpg')} resizeMode="cover" style={styles.backgroundImage}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.container}>
-          <Card
-             title="Card Title"
-             description="This is the example of React Native Card view. This is the easiest way to adding a card view on your screen."
-             imageSource={require('../assets/pine.jpg')}
-             onPress={handleCardPress}
-          />
-          <Card
-            title="Card Title"
-            description="This is the example of React Native Card view. This is the easiest way to adding a card view on your screen."
-            imageSource={require('../assets/pine.jpg')}
-            onPress={handleCardPress}
-          />
-          <Card
-            title="Card Title"
-            description="This is the example of React Native Card view. This is the easiest way to adding a card view on your screen."
-            imageSource={require('../assets/pine.jpg')}
-            onPress={handleCardPress}
-          />
-          <Card
-            title="Card Title"
-            description="This is the example of React Native Card view. This is the easiest way to adding a card view on your screen."
-            imageSource={require('../assets/pine.jpg')}
-            onPress={handleCardPress}
-          />
+    // <ImageBackground source={require('../assets/p1.jpg')} resizeMode="cover" style={styles.backgroundImage}>
+    <>
+    {
+      farms.length === 0
+        ?
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <Text>no farm found</Text>
         </View>
-      </ScrollView>
-    </ImageBackground>
+        :
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <View style={styles.container}>
+            {farms.map((farm) => (
+              <Card
+                key={farm.id} // Make sure to provide a unique key for each item
+                title={farm.title}
+                description="This is the example of React Native Card view. This is the easiest way to adding a card view on your screen."
+                imageSource={require('../assets/pine.jpg')}
+                onPress={handleCardPress}
+              />
+            ))}
+          </View>
+        </ScrollView>
+    }
+    </>
+
+    // </ImageBackground>
   );
 }
 
@@ -60,7 +65,7 @@ const styles = StyleSheet.create({
   },
   card: {
     marginTop: 20,
-    marginBottom:20,
+    marginBottom: 20,
     backgroundColor: '#fff',
     borderRadius: 10,
     padding: 20,
@@ -79,7 +84,7 @@ const styles = StyleSheet.create({
   cardImage: {
     width: 350,
     height: 120,
-    borderRadius:5,
+    borderRadius: 5,
     marginBottom: 10,
   },
   cardTitle: {

@@ -6,13 +6,12 @@ import TabView from './TabView';
 
 const Tab = createMaterialTopTabNavigator();
 
-export default function Gallery({ navigation }) {
+export default function Gallery({ route, navigation }) {
   const [search, setSearch] = useState('');
+  const { farms = [] } = route.params
 
   const updateSearch = (text) => {
     setSearch(text);
-    
-    console.log('Search:', text);
   };
 
   return (
@@ -25,7 +24,7 @@ export default function Gallery({ navigation }) {
         inputContainerStyle={styles.searchInputContainer}
         inputStyle={styles.searchInput}
       />
-      <Tab.Navigator 
+      <Tab.Navigator
         initialRouteName="Notifications"
         tabBarOptions={{
           activeTintColor: 'green',
@@ -38,21 +37,39 @@ export default function Gallery({ navigation }) {
           name="Notifications"
           component={TabView}
           options={{ tabBarLabel: 'Lahat' }}
+          initialParams={farms && {
+            farms: farms
+          }}
         />
         <Tab.Screen
-          name="Vegetitive"
+          name="Vegetative"
           component={TabView}
           options={{ tabBarLabel: 'Vegetative' }}
+          initialParams={{
+            farms: farms && farms.filter(obj =>
+              obj.cropStage.toLowerCase() === 'vegetative'
+            )
+          }}
         />
         <Tab.Screen
           name="Flowering"
           component={TabView}
           options={{ tabBarLabel: 'Flowering' }}
+          initialParams={{
+            farms: farms && farms.filter(obj =>
+              obj.cropStage.toLowerCase() === 'flowering'
+            )
+          }}
         />
         <Tab.Screen
           name="Fruiting"
           component={TabView}
           options={{ tabBarLabel: 'Fruiting' }}
+          initialParams={{
+            farms: farms && farms.filter(obj =>
+              obj.cropStage.toLowerCase() === 'fruiting'
+            )
+          }}
         />
       </Tab.Navigator>
     </ImageBackground>
@@ -68,14 +85,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'green',
     borderBottomColor: 'transparent',
     borderTopColor: 'transparent',
-    padding:20
- 
+    padding: 20
+
   },
   searchInputContainer: {
     backgroundColor: '#f2f2f2',
     borderRadius: 20,
     borderColor: 'green'
-   
+
   },
   searchInput: {
     fontSize: 16,

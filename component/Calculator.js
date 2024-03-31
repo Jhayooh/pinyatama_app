@@ -53,7 +53,8 @@ export const Calculator = ({ navigation }) => {
 
   // data natin
   const [base, setBase] = useState('')
-  const [area, setArea] = useState(0.0)
+  const [area, setArea] = useState(0)
+  const [cropStage, setCropStage] = useState('')
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date())
   const [farmName, setFarmName] = useState('')
@@ -76,7 +77,8 @@ export const Calculator = ({ navigation }) => {
   const queryParti = collection(db, 'particulars');
   const [qParti, lParti, eParti] = useCollectionData(queryParti)
 
-  const [components, setComponents] = useState({})
+  const [components, setComponents] = useState([])
+  const [table, setTable] = useState(false)
 
   useEffect(() => {
     if (qParti) {
@@ -169,11 +171,12 @@ export const Calculator = ({ navigation }) => {
     }
   };
 
+  function goBack() {
+    navigation.goBack()
+  }
+
   // important function
   const saveInputs = async () => {
-    function goBack() {
-      navigation.goBack()
-    }
 
     try {
       const uploadPromises = images.map(img => uploadImages(img.url, "Image"));
@@ -183,18 +186,22 @@ export const Calculator = ({ navigation }) => {
         area: area,
         brgy: brgyCode,
         farmerName: farmerName,
+        cropStage: cropStage,
+        start_date: startDate,
         harvest_date: endDate,
         geopoint: userLocation,
         mun: municipality,
         title: farmName,
         plantNumber: base,
         sex: sex,
-        start_date: startDate,
         brgyUID: user.uid,
         images: uploadedImg
       })
       await updateDoc(newFarm, { id: newFarm.id })
       const farmComp = collection(db, `farms/${newFarm.id}/components`);
+      Alert.alert(`Saved Successfully`, `${farmerName} is saved. Thank you very much for using this application. Donate at our charity using GCASH (+9564760102)`, [
+        { text: 'Ok', onPress: () => goBack() },
+      ]);
       // ^ Changed the collection path to include newFarm.id
 
       const eventsRef = collection(db, `farms/${newFarm.id}/events`);
@@ -233,18 +240,11 @@ export const Calculator = ({ navigation }) => {
       })
       await updateDoc(eRef_fruiting, { id: eRef_fruiting.id })
 
-      Alert.alert("Saved Successfully", `${farmName} of ${farmerName} has been created`), [
-        {
-          text: 'OK',
-          onPress: () => { goBack() }
-        }
-      ]
-
       components.forEach(async (component) => {
         try {
 
           await addDoc(farmComp, {
-            component
+            ...component
           })
         } catch (e) {
           console.log("error sa components:", e);
@@ -258,11 +258,6 @@ export const Calculator = ({ navigation }) => {
     setUploadedImg([])
   }
   const BottomButton = () => {
-
-    const handleSave = () => {
-
-    }
-
     const confirmSave = () =>
       Alert.alert(`Confirm`, `Do you want to save ${farmerName}?`, [
         {
@@ -329,15 +324,41 @@ export const Calculator = ({ navigation }) => {
     setMode(currentMode);
   };
 
-  const showDatepicker = () => {
-    showMode('date');
-  };
-
-  function getHectare({ numPlants }) {
-    return numPlants / 30000
+  const getMult = (numOne, numTwo) => {
+    const num = numOne * numTwo
+    return parseFloat(num.toFixed(0))
   }
 
-  console.log("data particular:", dataParti);
+  const handleBase = () => {
+    const baseValue = parseFloat(base);
+
+    const plantingMaterials = dataParti.find(item => item.name === "Planting Materials");
+    const ferZero = dataParti.find(item => item.name === "0-0-60");
+    const ferUrea = dataParti.find(item => item.name === "Urea");
+    const Diuron = dataParti.find(item => item.name === "Diuron");
+    const Sticker = dataParti.find(item => item.name === "Sticker");
+
+    const pmQnty = getMult(area, 30000)
+    const fZeroQnty = getMult(area, 5)
+    const fUreaQnty = getMult(area, 5)
+    const dQnty = getMult(area, 2)
+    const sQnty = getMult(area, 1)
+
+    if (baseValue === 0) {
+      return;
+    }
+
+    setComponents([
+      { ...plantingMaterials, qnty: pmQnty, totalPrice: getMult(pmQnty, plantingMaterials.price), },
+      { ...ferZero, qnty: fZeroQnty, totalPrice: getMult(fZeroQnty, ferZero.price) },
+      { ...ferUrea, qnty: fUreaQnty, totalPrice: getMult(fUreaQnty, ferUrea.price) },
+      { ...Diuron, qnty: dQnty, totalPrice: getMult(dQnty, Diuron.price) },
+      { ...Sticker, qnty: sQnty, totalPrice: getMult(sQnty, Sticker.price) }
+    ])
+
+    setTable(true)
+  }
+
 
   return (
     <>
@@ -348,6 +369,7 @@ export const Calculator = ({ navigation }) => {
           >
             {/* particulars  */}
             <View style={styles.category_container}>
+              <Text style={styles.head}>1. Land Area</Text>
               {
                 lParti
                   ?
@@ -355,21 +377,26 @@ export const Calculator = ({ navigation }) => {
                   :
                   <>
                     {/* Number 1 */}
-                    <Text style={styles.head}>1. Land Area</Text>
-                    <TextInput
-                      editable
-                      maxLength={40}
-                      onChangeText={(base) => {
-                        setBase(base)
-                        setArea(parseFloat((base / 30000).toFixed(4)))
-                      }}
-                      placeholder='No. of plants'
-                      keyboardType='numeric'
-                      value={base}
-                      style={styles.dropdown}
-                      disabled
-                    />
-                    {base !== '' && <TableBuilder data={dataParti} input={base} setComponents={setComponents} />}
+                    <View style={{ display: 'flex', flexDirection: 'row' }}>
+
+                      <TextInput
+                        editable
+                        // maxLength={40}
+                        onChangeText={(base) => {
+                          setBase(base)
+                          setArea(parseFloat((base / 30000).toFixed(4)))
+                        }}
+                        placeholder='No. of plants'
+                        keyboardType='numeric'
+                        value={base}
+                        style={{ ...styles.dropdown, flex: 3 }}
+                        disabled
+                      />
+                      <Button title='Calculate' style={{ flex: 1 }} onPress={() =>
+                        handleBase()
+                      } />
+                    </View>
+                    {table && <TableBuilder components={components} area={area} />}
                   </>
               }
               <View style={{ height: '1%', borderBottomColor: '#FAF1CE', borderBottomWidth: .2, marginBottom: 6 }}></View>
@@ -379,9 +406,9 @@ export const Calculator = ({ navigation }) => {
               <TextInput
                 editable
                 maxLength={40}
-                onChangeText={text => setFarmName(text)}
+                onChangeText={text => setCropStage(text)}
                 placeholder='Stage of Crops'
-                value={farmName}
+                value={cropStage}
                 style={styles.dropdown}
 
               />

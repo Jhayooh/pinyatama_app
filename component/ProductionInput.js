@@ -1,7 +1,7 @@
 import { collection, doc, setDoc } from 'firebase/firestore';
 import React, { useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { useCollectionData } from "react-firebase-hooks/firestore";
+import { useCollectionData } from 'react-firebase-hooks/firestore';
 import {
   ActivityIndicator,
   ImageBackground,
@@ -18,22 +18,14 @@ import { BottomButton } from './BottomButton';
 import Charts from './Charts';
 import { TableBuilder } from './TableBuilder';
 
-const ProductionInput = ({ navigation }) => {
+const ProductionInput = ({ route, navigation }) => {
   const [user] = useAuthState(auth)
-
-  const [materials, setMaterials] = useState([])
-  const [isShow, setIsShow] = useState(false)
+  const { farms = [] } = route.params
+  const farm = farms[0]
   const [edit, setEdit] = useState(false)
-  const [text, onChangeText] = useState('');
-  const pathParticular = `farms/${user.uid}/particulars`
-  const collParticular = collection(db, pathParticular)
-  const [docs, loading, error] = useCollectionData(collParticular)
-  const pathPhases = `farms/${user.uid}/phases`
-  const collPhases = collection(db, pathPhases)
-  const [phaseDoc, phaseLoading, phasesError] = useCollectionData(collPhases)
-  const pathActivities = `farms/${user.uid}/activities`
 
-  console.log("phaseDoc:", phaseDoc);
+  const componentsColl = collection(db, `farms/${farm.id}/components`)
+  const [compData, compLoading, compError] = useCollectionData(componentsColl)
 
   const addDocumentWithId = async () => {
     setIsShow(false)
@@ -51,10 +43,12 @@ const ProductionInput = ({ navigation }) => {
       <View style={styles.container}>
         <ImageBackground source={require('../assets/brakrawnd.png')} resizeMode="cover" style={styles.image}>
           <Text style={styles.name}>Pangalan ng Bukid</Text>
-          <TouchableOpacity style={{ height: 32, backgroundColor: 'red', alignItems: 'center', justifyContent: 'center' }} onPress={() => setEdit(!edit)}>
+          <TouchableOpacity style={{ height: 32, backgroundColor: 'red', alignItems: 'center', justifyContent: 'center' }} onPress={() => {
+            setEdit(!edit)
+            }}>
             <Text>Edit</Text>
           </TouchableOpacity>
-          <Text style={styles.loc}>Daet, Camarines Norte</Text>
+          <Text style={styles.loc}>{farm.title}</Text>
           <Text style={styles.label}>Pagsusuri ng Paggastos at Pagbabalik sa Produksiyon ng Pinya</Text>
 
           {edit
@@ -62,31 +56,29 @@ const ProductionInput = ({ navigation }) => {
             <>
               {/* Table Container */}
               < ScrollView style={styles.scrollView}>
-                <Text style={styles.texts}>PARTICULAR</Text>
+                <Text style={styles.texts}>PARTICULARS</Text>
 
                 {/* Table Heads */}
                 {
-                  loading
+                  compLoading
                     ?
                     <ActivityIndicator size='small' color='#3bcd6b' style={{ padding: 64, backgroundColor: '#fff' }} />
                     :
-                    docs?.map((doc) => (
-                      <TableBuilder
-                        key={doc.name}
-                        name={doc.name}
-                        path={`${pathParticular}/${doc.name}/${doc.name}`} />
-                    ))}
+                    <TableBuilder
+                      components={compData}
+                      area={farm.area}
+                    />
+                }
               </ScrollView>
-              <BottomButton setShow={setIsShow} navigation={navigation} />
             </>
             :
-            <Charts pathParticular={pathParticular} pathPhases={pathPhases} pathActivities={pathActivities} />
+            <Charts farms={farms} />
           }
         </ImageBackground>
       </View >
 
       {/* // modal */}
-      <Modal animationType='fade' transparent={true} visible={isShow} onRequestClose={() => (setIsShow(!isShow))}>
+      {/* <Modal animationType='fade' transparent={true} visible={isShow} onRequestClose={() => (setIsShow(!isShow))}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Add New Table</Text>
@@ -96,17 +88,9 @@ const ProductionInput = ({ navigation }) => {
               value={text}
               placeholder='Add Name'
             />
-            <View style={styles.bottomButton}>
-              <TouchableOpacity style={styles.bottomButtonItem} onPress={() => addDocumentWithId()}>
-                <Text>Add</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.bottomButtonItem} onPress={() => setIsShow(false)}>
-                <Text>Close</Text>
-              </TouchableOpacity>
-            </View>
           </View>
         </View>
-      </Modal>
+      </Modal> */}
     </>
   )
 }
