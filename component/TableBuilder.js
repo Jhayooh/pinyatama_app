@@ -10,19 +10,26 @@ import {
 import { db } from '../firebase/Config';
 import { AddDataRow } from './AddDataRow';
 
-export const TableBuilder = ({ data, input, setComponents }) => {
-  const [Hectares, setHectares] = useState(0)
-  const plantingMaterials = data.find(item => item.name === "Planting Materials");
-  const ferZero = data.find(item => item.name === "0-0-60");
-  const ferUrea = data.find(item => item.name === "Urea");
-  const Diuron = data.find(item => item.name === "Diuron");
-  const Sticker = data.find(item => item.name === "Sticker");
-  const [totalPrice, setTotalPrice] = useState(0)
+export const TableBuilder = ({ components, area }) => {
+  const [laborTotal, setLaborTotal] = useState(0)
+  const [materialTotal, setMaterialTotal] = useState(0)
+  console.log("comp sa tablebuilder:", components);
 
-  const getMult = (numOne, numTwo) => {
-    const num = numOne * numTwo
-    return parseFloat(num.toFixed(0))
-  }
+  useEffect(() => {
+    let materialSum = 0;
+    let laborSum = 0;
+
+    components.forEach((component) => {
+      if (component.particular.toLowerCase() === 'material') {
+        materialSum += parseInt(component.totalPrice);
+      } else if (component.particular.toLowerCase() === 'labor') {
+        laborSum += parseInt(component.totalPrice);
+      }
+    });
+
+    setMaterialTotal(materialSum);
+    setLaborTotal(laborSum);
+  }, [components]);
 
   const TableData = ({ name, qnty, unit, price, totalPrice }) => {
     // const totalPrice = calcTotalPrice(data.qnty, data.pUnit)
@@ -48,37 +55,11 @@ export const TableBuilder = ({ data, input, setComponents }) => {
     )
   }
 
-  const pmQnty = getMult(Hectares, 30000)
-  const fZeroQnty = getMult(Hectares, 5)
-  const fUreaQnty = getMult(Hectares, 5)
-  const dQnty = getMult(Hectares, 2)
-  const sQnty = getMult(Hectares, 1)
-
-  const total_price = getMult(pmQnty, plantingMaterials.price) +
-    getMult(fUreaQnty, ferUrea.price) +
-    getMult(fZeroQnty, ferZero.price) +
-    getMult(dQnty, Diuron.price) +
-    getMult(sQnty, Sticker.price);
-
-  useEffect(() => {
-    const number = input / 30000
-    setHectares(number)
-    setComponents([
-      { compId: plantingMaterials.id, qnty: pmQnty, totalPrice: getMult(pmQnty, plantingMaterials.price), },
-      { compId: ferZero.id, qnty: fZeroQnty, totalPrice: getMult(fZeroQnty, ferZero.price) },
-      { compId: ferUrea.id, qnty: fUreaQnty, totalPrice: getMult(fUreaQnty, ferUrea.price) },
-      { compId: Diuron.id, qnty: dQnty, totalPrice: getMult(dQnty, Diuron.price) },
-      { compId: Sticker.id, qnty: sQnty, totalPrice: getMult(sQnty, Sticker.price) }
-    ])
-  }, [input])
-
-  console.log("this is the data: ", data);
-
   return (
     <>
       <View style={{ ...styles.container, minHeight: 300, borderRadius: 10, paddingBottom: 12 }}>
         <View style={{ alignItems: 'center', margin: 8 }}>
-          <Text style={{ width: '100%', backgroundColor: '#3bcd6b', padding: 8, alignItems: 'center', textAlign: 'center' }}>COST AND RETURN ANALYSIS {Hectares.toFixed(2)} HA PINEAPPLE PRODUCTION</Text>
+          <Text style={{ width: '100%', backgroundColor: '#3bcd6b', padding: 8, alignItems: 'center', textAlign: 'center' }}>COST AND RETURN ANALYSIS {area.toFixed(2)} HA PINEAPPLE PRODUCTION</Text>
         </View>
         <View style={{ flex: 1, marginTop: 6, marginHorizontal: 12 }}>
           {/* Header */}
@@ -102,6 +83,62 @@ export const TableBuilder = ({ data, input, setComponents }) => {
 
           {/* Body */}
           <View style={{ ...styles.tableHead }}>
+            <Text styles={{ fontWeight: 'bold' }}>Materials Inputs:</Text>
+          </View>
+          {
+            components.map((component) => {
+              if (component.particular.toLowerCase() === 'material') {
+                return (
+                  <TableData
+                    name={component.name}
+                    qnty={component.qnty}
+                    unit={component.unit}
+                    price={component.price}
+                    totalPrice={component.totalPrice}
+                  />
+                )
+              }
+            })
+          }
+          <View style={{ ...styles.tableHead, borderTopWidth: 2, borderBottomWidth: 2 }}>
+            <View style={{ flex: 4 }}>
+              <Text styles={{ fontWeight: 'bold' }}>Total Material Input: </Text>
+            </View>
+            <View style={{ flex: 1, alignItems: 'flex-end' }}>
+              <Text styles={{ fontWeight: 'bold' }}>
+                {materialTotal}
+              </Text>
+            </View>
+          </View>
+          <View style={{ ...styles.tableHead }}>
+            <Text styles={{ fontWeight: 'bold' }}>Labor Inputs:</Text>
+          </View>
+          {
+            components.map((component) => {
+              if (component.particular.toLowerCase() === 'labor') {
+                return (
+                  <TableData
+                    name={component.name}
+                    qnty={component.qnty}
+                    unit={component.unit}
+                    price={component.price}
+                    totalPrice={component.totalPrice}
+                  />
+                )
+              }
+            })
+          }
+          <View style={{ ...styles.tableHead, borderTopWidth: 2, borderBottomWidth: 2 }}>
+            <View style={{ flex: 4 }}>
+              <Text styles={{ fontWeight: 'bold' }}>Total Labor Input: </Text>
+            </View>
+            <View style={{ flex: 1, alignItems: 'flex-end' }}>
+              <Text styles={{ fontWeight: 'bold' }}>
+                {laborTotal}
+              </Text>
+            </View>
+          </View>
+          {/* <View style={{ ...styles.tableHead }}>
             <View>
               <Text styles={{ fontWeight: 'bold' }}>Materials Inputs:</Text>
             </View>
@@ -155,7 +192,7 @@ export const TableBuilder = ({ data, input, setComponents }) => {
                 {total_price}
               </Text>
             </View>
-          </View>
+          </View> */}
         </View>
       </View>
     </>
