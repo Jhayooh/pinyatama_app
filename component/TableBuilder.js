@@ -90,6 +90,7 @@ export const TableBuilder = ({ components, area }) => {
               if (component.particular.toLowerCase() === 'material') {
                 return (
                   <TableData
+                    key={component.id}
                     name={component.name}
                     qnty={component.qnty}
                     unit={component.unit}
@@ -118,6 +119,7 @@ export const TableBuilder = ({ components, area }) => {
               if (component.particular.toLowerCase() === 'labor') {
                 return (
                   <TableData
+                    key={component.id}
                     name={component.name}
                     qnty={component.qnty}
                     unit={component.unit}

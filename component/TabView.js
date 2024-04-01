@@ -24,8 +24,10 @@ const Card = ({ imageSource, title, description, onPress }) => {
 const TabView = ({ route, navigation }) => {
   const { farms = [] } = route.params;
   const farm = farms[0]
-  const handleCardPress = () => {
-    navigation.navigate("ProductionInput", { farms: farms })
+  console.log("farms sa TabView:", farms);
+
+  const handleCardPress = (farm) => {
+    navigation.navigate("ProductionInput", { farms: [farm] })
   };
   return (
     // <ImageBackground source={require('../assets/p1.jpg')} resizeMode="cover" style={styles.backgroundImage}>
@@ -45,7 +47,7 @@ const TabView = ({ route, navigation }) => {
                 title={farm.title}
                 description="This is the example of React Native Card view. This is the easiest way to adding a card view on your screen."
                 imageSource={require('../assets/pine.jpg')}
-                onPress={handleCardPress}
+                onPress={()=>{handleCardPress(farm)}}
               />
             ))}
           </View>

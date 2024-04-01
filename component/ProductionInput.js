@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   ImageBackground,
   Modal,
+  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -27,6 +28,10 @@ const ProductionInput = ({ route, navigation }) => {
   const componentsColl = collection(db, `farms/${farm.id}/components`)
   const [compData, compLoading, compError] = useCollectionData(componentsColl)
 
+  console.log("farms sa pi:", farms);
+  console.log("comp sa pi", compData);
+  console.log("error:", compError)
+
   const addDocumentWithId = async () => {
     setIsShow(false)
     onChangeText('')
@@ -40,7 +45,7 @@ const ProductionInput = ({ route, navigation }) => {
 
   return (
     <>
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
         <ImageBackground source={require('../assets/brakrawnd.png')} resizeMode="cover" style={styles.image}>
           <Text style={styles.name}>Pangalan ng Bukid</Text>
           <TouchableOpacity style={{ height: 32, backgroundColor: 'red', alignItems: 'center', justifyContent: 'center' }} onPress={() => {
@@ -75,7 +80,7 @@ const ProductionInput = ({ route, navigation }) => {
             <Charts farms={farms} />
           }
         </ImageBackground>
-      </View >
+      </SafeAreaView >
 
       {/* // modal */}
       {/* <Modal animationType='fade' transparent={true} visible={isShow} onRequestClose={() => (setIsShow(!isShow))}>
