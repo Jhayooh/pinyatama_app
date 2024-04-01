@@ -52,7 +52,7 @@
     "react-native-screens": "~3.29.0",
     "react-native-size-matters": "^0.4.2",
     "react-native-snap-carousel": "^3.9.1",
-    "react-native-svg": "^14.1.0",
+    "react-native-svg": "14.1.0",
     "react-native-tab-view": "^3.5.2",
     "react-native-table-component": "^1.2.2",
     "react-native-vision-camera": "^3.9.0",
