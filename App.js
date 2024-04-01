@@ -10,7 +10,6 @@ import DataInputs from './component/DataInputs';
 import Gallery from './component/Gallery';
 import Inputs from './component/Inputs';
 import { Landing } from './component/Landing';
-import Login from './component/Login';
 import Map from './component/Map';
 import ProductionInput from './component/ProductionInput';
 import Register from './component/Register';
@@ -33,7 +32,6 @@ const App = () => (
             <Stack.Screen name='Charts' component={Charts} />
             <Stack.Screen name='DataInputs' component={DataInputs} />
             <Stack.Screen name='BottomButton' component={BottomButton} />
-            <Stack.Screen name='Login' component={Login} />
             <Stack.Screen name='Video' component={Video} />
             <Stack.Screen name='Register' component={Register} />
             <Stack.Screen name='Inputs' component={Inputs} />

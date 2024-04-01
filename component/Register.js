@@ -18,8 +18,6 @@ export default Register = ({ visible, onClose, showModal, setShowModal }) => {
     const [showAddImage, setShowAddImage] = useState(false)
 
     const [user] = useAuthState(auth)
-    console.log(user);
-
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(user => {
             if (user) {

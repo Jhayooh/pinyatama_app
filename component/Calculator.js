@@ -337,33 +337,14 @@ export const Calculator = ({ navigation }) => {
 
   const handleBase = () => {
     const baseValue = parseFloat(base);
-
-    const plantingMaterials = dataParti.find(item => item.name === "Planting Materials");
-    const ferZero = dataParti.find(item => item.name === "0-0-60");
-    const ferUrea = dataParti.find(item => item.name === "Urea");
-    const Diuron = dataParti.find(item => item.name === "Diuron");
-    const Sticker = dataParti.find(item => item.name === "Sticker");
-    const landClearing = dataParti.find(item => item.name === 'Land Clearing')
-
-    const pmQnty = getMult(area, 30000)
-    const fZeroQnty = getMult(area, 5)
-    const fUreaQnty = getMult(area, 5)
-    const dQnty = getMult(area, 2)
-    const sQnty = getMult(area, 1)
-    const lcQnty = getMult(area, 15)
-
     if (baseValue === 0) {
       return;
     }
 
-    setComponents([
-      { ...plantingMaterials, qnty: pmQnty, totalPrice: getMult(pmQnty, plantingMaterials.price), },
-      { ...ferZero, qnty: fZeroQnty, totalPrice: getMult(fZeroQnty, ferZero.price) },
-      { ...ferUrea, qnty: fUreaQnty, totalPrice: getMult(fUreaQnty, ferUrea.price) },
-      { ...Diuron, qnty: dQnty, totalPrice: getMult(dQnty, Diuron.price) },
-      { ...Sticker, qnty: sQnty, totalPrice: getMult(sQnty, Sticker.price) },
-      { ...landClearing, qnty: lcQnty, totalPrice: getMult(lcQnty, landClearing.price) }
-    ])
+    dataParti.map((item)=>{
+      const newQnty = getMult(area, item.defQnty)
+      setComponents(prev => [...prev, {...item, qntyPrice: newQnty, totalPrice: getMult(newQnty, item.price)}])
+    })
 
     setTable(true)
     setCalculating(false)

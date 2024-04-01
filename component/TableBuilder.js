@@ -14,6 +14,8 @@ export const TableBuilder = ({ components, area }) => {
   const [laborTotal, setLaborTotal] = useState(0)
   const [materialTotal, setMaterialTotal] = useState(0)
 
+  const [CostTotal, setCostTotal] = useState(0)
+
   useEffect(() => {
     let materialSum = 0;
     let laborSum = 0;
@@ -28,7 +30,15 @@ export const TableBuilder = ({ components, area }) => {
 
     setMaterialTotal(materialSum);
     setLaborTotal(laborSum);
+    setCostTotal(materialSum+laborSum);
   }, [components]);
+
+  const formatter = (num) => {
+    return num.toLocaleString('en-PH', {
+      style: 'currency',
+      currency: 'PHP'
+    })
+  }
 
   const TableData = ({ name, qnty, unit, price, totalPrice }) => {
     return (
@@ -43,11 +53,11 @@ export const TableBuilder = ({ components, area }) => {
           <Text>{unit}</Text>
         </View>
         <View style={{ ...styles.tableHeadLabel2, alignItems: 'flex-end' }}>
-          <Text>{price.toLocaleString()}</Text>
+          <Text>{formatter(price)}</Text>
         </View>
         <View style={{ ...styles.tableHeadLabel2, alignItems: 'flex-end' }}>
           {/* {setTotal(total + totalPrice)} */}
-          <Text>{totalPrice.toLocaleString()}</Text>
+          <Text>{formatter(totalPrice)}</Text>
         </View>
       </View>
     )
@@ -90,7 +100,7 @@ export const TableBuilder = ({ components, area }) => {
                   <TableData
                     key={component.id}
                     name={component.name}
-                    qnty={component.qnty}
+                    qnty={component.qntyPrice}
                     unit={component.unit}
                     price={component.price}
                     totalPrice={component.totalPrice}
@@ -99,6 +109,16 @@ export const TableBuilder = ({ components, area }) => {
               }
             })
           }
+          <View style={styles.tableHead}>
+            <View style={{ flex: 4 }}>
+              <Text styles={{ fontWeight: 'bold' }}>Land Rental</Text>
+            </View>
+            <View style={{ flex: 1, alignItems: 'flex-end' }}>
+              <Text styles={{ fontWeight: 'bold' }}>
+                {formatter(5000)}
+              </Text>
+            </View>
+          </View>
           <View style={{ ...styles.tableHead, borderTopWidth: 2, borderBottomWidth: 2 }}>
             <View style={{ flex: 4 }}>
               <Text styles={{ fontWeight: 'bold' }}>Total Material Input: </Text>
@@ -119,7 +139,7 @@ export const TableBuilder = ({ components, area }) => {
                   <TableData
                     key={component.id}
                     name={component.name}
-                    qnty={component.qnty}
+                    qnty={component.qntyPrice}
                     unit={component.unit}
                     price={component.price}
                     totalPrice={component.totalPrice}
@@ -138,7 +158,16 @@ export const TableBuilder = ({ components, area }) => {
               </Text>
             </View>
           </View>
-          
+          <View style={styles.tableHead}>
+            <View style={{ flex: 4 }}>
+              <Text styles={{ fontWeight: 'bold' }}>Total Cost of Production</Text>
+            </View>
+            <View style={{ flex: 1, alignItems: 'flex-end' }}>
+              <Text styles={{ fontWeight: 'bold' }}>
+                {formatter(materialTotal+laborTotal)}
+              </Text>
+            </View>
+          </View>
         </View>
       </View>
     </>

@@ -31,11 +31,26 @@ const GastosSaPinya = () => {
 }
 
 const Charts = ({ farms }) => {
-    console.log('this is the farms from chart', farms);
+    const farm = farms[0]
+    console.log('this is the farms from chart', farm);
     const [isShow, setIsShow] = useState(false)
     const [selectedDay, setSelectedDay] = useState('')
     const [activities, setActivities] = useState({})
     const [startDate, setStartDate] = useState('')
+
+    const componentColl = collection(db, `farms/${farm.id}/components`)
+    const [compData, compLoading, compError] = useCollectionData(componentColl)
+
+    if (compData) {
+        console.log("compData isTrue:", compData);
+    }
+    if (compLoading) {
+        console.log("compLoading isTrue: ", compLoading);
+    }
+
+    if (compError) {
+        console.log("compError isTrue:", compError);
+    }
 
     const getMaxSched = ({ date }) => {
         return moment(date).add(2, 'month')
@@ -83,86 +98,47 @@ const Charts = ({ farms }) => {
     };
 
     const color = ["rgb(0, 255, 0)", "rgb(0, 0, 255)", "rgb(255, 0, 0)"]
-    // useEffect(() => {
-    //     setData(
-    //         farms?.map((doc, index) => (
-    //             {
-    //                 ...doc,
-    //                 color: color[index],
-    //                 legendFontColor: "#7F7F7F",
-    //                 legendFontSize: 15
-    //             }
-    //         ))
-    //     )
-    //     if (schedDoc) {
-    //         const newSched = schedDoc.reduce((acc, doc) => {
-    //             console.log("pa print po ng doc:", doc);
-    //             console.log("tingin ng subcollection", checkCollection(`${pathPhases}/${doc.name}/activities`));
-    //             const startDate = doc.starDate;
-    //             const formattedDate = formatDate(startDate)
-    //             acc[formattedDate] = {
-    //                 startingDay: true,
-    //                 color: '#50cebb',
-    //                 textColor: 'white',
-    //             };
-    //             if (doc.name === 'pagtatanim') {
-    //                 setMaxMonth(formatDate(getMaxSched(startDate)))
-    //                 setStartDate(formattedDate)
-    //             }
-    //             return acc;
-    //         }, {});
-    //         setSched(prevSched => ({ ...prevSched, ...newSched }));
-    //     }
-
-    //     if (actDoc) {
-    //         const newAct = actDoc.reduce((acc, doc) => {
-    //             const createdDate = doc.createdDate;
-    //             const formattedDate = formatDate(createdDate)
-    //             console.log("this is my docact", formattedDate);
-    //             acc[formattedDate] = {
-    //                 ...doc,
-    //                 marked: true,
-    //                 dotColor: 'red'
-    //             };
-    //             return acc;
-    //         }, {});
-    //         setActivities(prevActs => ({ ...prevActs, ...newAct }));
-    //     }
-    // }, [docs, schedDoc, actDoc])
-
     return (
         <>
             <ScrollView style={{
                 padding: 12,
 
             }}>
-                    <View style={{
-                        flex: 1,
-                        flexDirection: 'column',
-                        gap: 8,
-                        paddingVertical: 8
-                    }}>
-                        <View>
+                <View style={{
+                    flex: 1,
+                    flexDirection: 'column',
+                    gap: 8,
+                    paddingVertical: 8
+                }}>
+                    <View>
 
-                        </View>
-                        <Calendar
-                            markingType='period'
-                            style={{
-                                borderRadius: 16,
-                                height: 380
-                            }}
-                            onDayPress={day => {
-                                setIsShow(true)
-                                setSelectedDay(day.dateString);
-                            }}
-                            markedDates={activities}
-                        />
-                        <DoughnutAndPie />
-                        <Line />
-                        <Bar />
-                        <DoughnutAndPie />
-                        <Progress />
                     </View>
+                    <Calendar
+                        markingType='period'
+                        style={{
+                            borderRadius: 16,
+                            height: 380
+                        }}
+                        onDayPress={day => {
+                            setIsShow(true)
+                            setSelectedDay(day.dateString);
+                        }}
+                        markedDates={activities}
+                    />
+                    {
+                        compLoading
+                            ?
+                            <ActivityIndicator />
+                            :
+                            <DoughnutAndPie data={compData} />
+                    }
+                    {
+                        
+                    }
+                    <Line />
+                    <Bar />
+                    <Progress />
+                </View>
             </ScrollView>
 
             <Modal animationType='fade' transparent={true} visible={isShow} onRequestClose={() => (setIsShow(!isShow))}>
