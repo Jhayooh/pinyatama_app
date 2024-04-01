@@ -77,7 +77,7 @@ export const Calculator = ({ navigation }) => {
   const [components, setComponents] = useState([])
   const [table, setTable] = useState(false)
   const [saving, setSaving] = useState(false)
-
+  const [calculating, setCalculating] = useState(false)
   useEffect(() => {
     if (qParti) {
       setDataParti([...qParti])
@@ -343,12 +343,14 @@ export const Calculator = ({ navigation }) => {
     const ferUrea = dataParti.find(item => item.name === "Urea");
     const Diuron = dataParti.find(item => item.name === "Diuron");
     const Sticker = dataParti.find(item => item.name === "Sticker");
+    const landClearing = dataParti.find(item => item.name === 'Land Clearing')
 
     const pmQnty = getMult(area, 30000)
     const fZeroQnty = getMult(area, 5)
     const fUreaQnty = getMult(area, 5)
     const dQnty = getMult(area, 2)
     const sQnty = getMult(area, 1)
+    const lcQnty = getMult(area, 15)
 
     if (baseValue === 0) {
       return;
@@ -359,10 +361,12 @@ export const Calculator = ({ navigation }) => {
       { ...ferZero, qnty: fZeroQnty, totalPrice: getMult(fZeroQnty, ferZero.price) },
       { ...ferUrea, qnty: fUreaQnty, totalPrice: getMult(fUreaQnty, ferUrea.price) },
       { ...Diuron, qnty: dQnty, totalPrice: getMult(dQnty, Diuron.price) },
-      { ...Sticker, qnty: sQnty, totalPrice: getMult(sQnty, Sticker.price) }
+      { ...Sticker, qnty: sQnty, totalPrice: getMult(sQnty, Sticker.price) },
+      { ...landClearing, qnty: lcQnty, totalPrice: getMult(lcQnty, landClearing.price) }
     ])
 
     setTable(true)
+    setCalculating(false)
   }
 
 
@@ -399,9 +403,18 @@ export const Calculator = ({ navigation }) => {
                         style={{ ...styles.dropdown, flex: 3 }}
                         disabled
                       />
-                      <Button title='Calculate' style={{ flex: 1 }} onPress={() =>
-                        handleBase()
-                      } />
+
+                      {
+                        calculating
+                        ?
+                        <ActivityIndicator style={{flex: 1}} size='small' color='#FF5733'/>
+                        :
+                        <Button title='Calculate' style={{ flex: 1 }} onPress={() => {
+                          setCalculating(true)
+                          handleBase()
+                        }
+                        } />
+                      }
                     </View>
                     {table && <TableBuilder components={components} area={area} />}
                   </>
@@ -424,7 +437,7 @@ export const Calculator = ({ navigation }) => {
                 value={startDate.toLocaleDateString()}
                 placeholder="Date of Planting"
               />
-              <Button onPress={()=>setStartPicker(true)} title="Date of Planting" />
+              <Button onPress={() => setStartPicker(true)} title="Date of Planting" />
               <DateTimePickerModal
                 isVisible={startPicker}
                 mode="date"
@@ -432,7 +445,7 @@ export const Calculator = ({ navigation }) => {
                   setStartDate(date)
                   setStartPicker(false)
                 }}
-                onCancel={()=>setStartPicker(false)}
+                onCancel={() => setStartPicker(false)}
                 style={{ marginBottom: 10 }}
               />
 
@@ -441,7 +454,7 @@ export const Calculator = ({ navigation }) => {
                 value={endDate.toLocaleDateString()}
                 placeholder="Date of Harvest"
               />
-              <Button onPress={()=>setEndPicker(true)} title="Date of Harvest" />
+              <Button onPress={() => setEndPicker(true)} title="Date of Harvest" />
 
               <DateTimePickerModal
                 isVisible={endPicker}
@@ -450,7 +463,7 @@ export const Calculator = ({ navigation }) => {
                   setEndDate(date)
                   setEndPicker(false)
                 }}
-                onCancel={()=>setEndPicker(false)}
+                onCancel={() => setEndPicker(false)}
                 style={{ marginBottom: 10 }}
               />
 

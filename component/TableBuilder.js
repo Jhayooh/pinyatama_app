@@ -13,7 +13,6 @@ import { AddDataRow } from './AddDataRow';
 export const TableBuilder = ({ components, area }) => {
   const [laborTotal, setLaborTotal] = useState(0)
   const [materialTotal, setMaterialTotal] = useState(0)
-  console.log("comp sa tablebuilder:", components);
 
   useEffect(() => {
     let materialSum = 0;
@@ -32,7 +31,6 @@ export const TableBuilder = ({ components, area }) => {
   }, [components]);
 
   const TableData = ({ name, qnty, unit, price, totalPrice }) => {
-    // const totalPrice = calcTotalPrice(data.qnty, data.pUnit)
     return (
       <View style={styles.tableData}>
         <View style={{ ...styles.tableHeadLabel3, alignItems: 'flex-start' }}>
@@ -140,61 +138,7 @@ export const TableBuilder = ({ components, area }) => {
               </Text>
             </View>
           </View>
-          {/* <View style={{ ...styles.tableHead }}>
-            <View>
-              <Text styles={{ fontWeight: 'bold' }}>Materials Inputs:</Text>
-            </View>
-          </View>
-          <TableData
-            name={plantingMaterials.name}
-            qnty={pmQnty}
-            unit={plantingMaterials.unit}
-            price={plantingMaterials.price}
-            totalPrice={getMult(pmQnty, plantingMaterials.price)}
-          />
-          <View style={{ ...styles.tableHead }}>
-            <View>
-              <Text styles={{ fontWeight: 'bold' }}>Fertilizer</Text>
-            </View>
-          </View>
-          <TableData
-            name={ferZero.name}
-            qnty={fZeroQnty}
-            unit={ferZero.unit}
-            price={ferZero.price}
-            totalPrice={getMult(fZeroQnty, ferZero.price)}
-          />
-          <TableData
-            name={ferUrea.name}
-            qnty={fUreaQnty}
-            unit={ferUrea.unit}
-            price={ferUrea.price}
-            totalPrice={getMult(fUreaQnty, ferUrea.price)}
-          />
-          <TableData
-            name={Diuron.name + " (2x)"}
-            qnty={dQnty}
-            unit={Diuron.unit}
-            price={Diuron.price}
-            totalPrice={getMult(dQnty, Diuron.price)}
-          />
-          <TableData
-            name={Sticker.name}
-            qnty={sQnty}
-            unit={Sticker.unit}
-            price={Sticker.price}
-            totalPrice={getMult(sQnty, Sticker.price)}
-          />
-          <View style={{ ...styles.tableHead, borderTopWidth: 2, borderBottomWidth: 2 }}>
-            <View style={{ flex: 4 }}>
-              <Text styles={{ fontWeight: 'bold' }}>Total Material Input: </Text>
-            </View>
-            <View style={{ flex: 1, alignItems: 'flex-end' }}>
-              <Text styles={{ fontWeight: 'bold' }}>
-                {total_price}
-              </Text>
-            </View>
-          </View> */}
+          
         </View>
       </View>
     </>
