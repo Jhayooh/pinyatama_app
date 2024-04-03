@@ -31,6 +31,9 @@ export const Calculator = ({ navigation }) => {
   const [farmsData, farmsLoading, farmsError] = useCollectionData(farmsColl);
   const [showAddImage, setShowAddImage] = useState(false)
 
+  const queryParti = collection(db, 'particulars');
+  const [qParti, lParti, eParti] = useCollectionData(queryParti)
+
   const [startPicker, setStartPicker] = useState(false);
   const [endPicker, setEndPicker] = useState(false);
 
@@ -70,19 +73,10 @@ export const Calculator = ({ navigation }) => {
   const municipalities = address.getCityMunOfProvince('0516')
   const brgy = address.getBarangaysOfCityMun(munCode)
 
-  const [dataParti, setDataParti] = useState([])
-  const queryParti = collection(db, 'particulars');
-  const [qParti, lParti, eParti] = useCollectionData(queryParti)
-
   const [components, setComponents] = useState([])
   const [table, setTable] = useState(false)
   const [saving, setSaving] = useState(false)
   const [calculating, setCalculating] = useState(false)
-  useEffect(() => {
-    if (qParti) {
-      setDataParti([...qParti])
-    }
-  }, [qParti]);
 
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
@@ -97,6 +91,13 @@ export const Calculator = ({ navigation }) => {
       console.error('Error adding document:', error);
     }
   };
+  const handleMapPress = (e) => {
+    setUserLocation(e.nativeEvent.coordinate);
+  };
+
+  const addImage = (image, height, width) => {
+    setImages(images => [...images, { url: image, height: height, width: width }])
+  }
 
   const openGallery = async () => {
     try {
@@ -114,10 +115,6 @@ export const Calculator = ({ navigation }) => {
     }
   }
 
-  const handleMapPress = (e) => {
-    setUserLocation(e.nativeEvent.coordinate);
-  };
-
   const openCamera = async () => {
     try {
       await ImagePicker.requestCameraPermissionsAsync();
@@ -132,10 +129,6 @@ export const Calculator = ({ navigation }) => {
     } catch (e) {
       console.log(e);
     }
-  }
-
-  const addImage = (image, height, width) => {
-    setImages(images => [...images, { url: image, height: height, width: width }])
   }
 
   const uploadImages = async (uri, fileType) => {
@@ -340,11 +333,11 @@ export const Calculator = ({ navigation }) => {
     if (baseValue === 0) {
       return;
     }
-
-    dataParti.map((item)=>{
-      const newQnty = getMult(area, item.defQnty)
-      setComponents(prev => [...prev, {...item, qntyPrice: newQnty, totalPrice: getMult(newQnty, item.price)}])
-    })
+      qParti.map((item) => {
+        const newQnty = getMult(area, item.defQnty)
+        setComponents(prev => [...prev, { ...item, qntyPrice: newQnty, totalPrice: getMult(newQnty, item.price) }])
+      })
+    
 
     setTable(true)
     setCalculating(false)
@@ -363,42 +356,38 @@ export const Calculator = ({ navigation }) => {
             <View style={styles.category_container}>
               <Text style={styles.head}>1. Land Area</Text>
               {
-                lParti
-                  ?
-                  <ActivityIndicator />
-                  :
-                  <>
-                    {/* Number 1 */}
-                    <View style={{ display: 'flex', flexDirection: 'row' }}>
+                <>
+                  {/* Number 1 */}
+                  <View style={{ display: 'flex', flexDirection: 'row' }}>
 
-                      <TextInput
-                        editable
-                        // maxLength={40}
-                        onChangeText={(base) => {
-                          setBase(base)
-                          setArea(parseFloat((base / 30000).toFixed(4)))
-                        }}
-                        placeholder='No. of plants'
-                        keyboardType='numeric'
-                        value={base}
-                        style={{ ...styles.dropdown, flex: 3 }}
-                        disabled
-                      />
+                    <TextInput
+                      editable
+                      // maxLength={40}
+                      onChangeText={(base) => {
+                        setBase(base)
+                        setArea(parseFloat((base / 30000).toFixed(4)))
+                      }}
+                      placeholder='No. of plants'
+                      keyboardType='numeric'
+                      value={base}
+                      style={{ ...styles.dropdown, flex: 3 }}
+                      disabled
+                    />
 
-                      {
-                        calculating
+                    {
+                      lParti && calculating
                         ?
-                        <ActivityIndicator style={{flex: 1}} size='small' color='#FF5733'/>
+                        <ActivityIndicator style={{ flex: 1 }} size='small' color='#FF5733' />
                         :
                         <Button title='Calculate' style={{ flex: 1 }} onPress={() => {
                           setCalculating(true)
                           handleBase()
                         }
                         } />
-                      }
-                    </View>
-                    {table && <TableBuilder components={components} area={area} />}
-                  </>
+                    }
+                  </View>
+                  {table && <TableBuilder components={components} area={area} />}
+                </>
               }
               <View style={{ height: '1%', borderBottomColor: '#FAF1CE', borderBottomWidth: .2, marginBottom: 6 }}></View>
 

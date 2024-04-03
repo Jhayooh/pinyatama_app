@@ -31,7 +31,7 @@ import galleryLogo from '../assets/gal2.png'
 import videoLogo from '../assets/vid2.png'
 import aboutLogo from '../assets/info2.png'
 import logonLogo from '../assets/user2.png'
-import { collection } from "firebase/firestore";
+import { addDoc, collection } from "firebase/firestore";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 
 const windowWidth = Dimensions.get('window').width;
@@ -63,6 +63,7 @@ export const Landing = ({ navigation }) => {
     }]
 
     const [user] = useAuthState(auth)
+
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(user => {
@@ -146,9 +147,9 @@ export const Landing = ({ navigation }) => {
                             </TouchableOpacity>
 
                             <TouchableOpacity style={loginStyle.createAccountButton}>
-                                <Text style={loginStyle.createAccountButtonText} onPress={()=>{
+                                <Text style={loginStyle.createAccountButtonText} onPress={() => {
                                     setShowLogin(false)
-                                    setShowRegister(true)
+                                    navigation.navigate('Register')
                                 }}>
                                     Create Account?</Text>
                             </TouchableOpacity>
@@ -160,19 +161,57 @@ export const Landing = ({ navigation }) => {
     }
 
     const RegistrationModal = () => {
-        const [avatar, setAvatar] = useState(null);
-        const [images, setImages] = useState([])
+        // Data pag register
+        const [brgy, setBrgy] = useState('')
+        const [disabled, setDisabled] = useState(false)
         const [firstName, setFirstName] = useState('');
         const [lastName, setLastName] = useState('');
+        const [email, setEmail] = useState('')
+        const [isRegistered, setIsRegistered] = useState(false)
+        const [mun, setMun] = useState('')
+        const [password, setPassword] = useState('')
+        const [phoneNumber, setPhoneNumber] = useState('')
+        const [photoUrl, setPhotoUrl] = useState(null)
+
+        // changed
         const [baranggay, setBaranggay] = useState('');
+        const [avatar, setAvatar] = useState(null);
+        const [images, setImages] = useState([])
         const [city, setCity] = useState('');
         const [province, setProvince] = useState('');
-        const [email, setEmail] = useState('')
-        const [password, setPassword] = useState('')
         const [showAddImage, setShowAddImage] = useState(false)
 
-        const handleRegister = () => {
+        function formatNumber(pNum) {
+            const cleanedNumber = pNum.replace(/\D/g, '');
+            if (cleanedNumber.startsWith('0')) {
+                return '+63' + cleanedNumber.slice(1);
+            }
+            console.log("the number", cleanedNumber);
+            return cleanedNumber;
+        }
 
+        const handleRegister = async () => {
+            const usersColl = collection(db, 'users')
+            const [usersData, usersLoading, usersError] = useCollectionData(usersColl)
+            try {
+                const userRef = await addDoc(usersColl, {
+                    brgy: brgy,
+                    disabled: false,
+                    displayName: firstName+lastName,
+                    email: email, 
+                    isRegistered: isRegistered,
+                    mun: mun,
+                    password: password,
+                    phoneNumber: formatNumber(phoneNumber),
+                    photoUrl: photoUrl,
+                })
+
+                await updateDoc(usersColl, {
+                    uid: userRef.id
+                })
+            } catch (e) {
+                console.log("error saving eh?:", e);
+            }
         }
 
         return (
@@ -182,94 +221,91 @@ export const Landing = ({ navigation }) => {
                 visible={showRegister}
                 onRequestClose={() => setShowRegister(false)}
             >
-                <View style={registerStyle.modalContainer}>
-                    <View style={registerStyle.modalContent}>
-                        <View style={{ marginBottom: 8, width: '100%', height: 180, borderRadius: 6, padding: 4, backgroundColor: '#101010' }}>
-                            {
-                                images &&
-                                <FlatList
-                                    data={images}
-                                    // numColumns={3}
-                                    horizontal={true}
-                                    renderItem={({ item }) => (
-                                        <View style={{ flex: 1 }}>
-                                            <Image style={{ height: '100%', width: 240, borderRadius: 100 }} source={{ uri: item.url }} />
-                                        </View>
-                                    )}
-                                    ItemSeparatorComponent={() =>
-                                        <View style={{ width: 4, height: '100%' }}></View>
-                                    }
-                                // columnWrapperStyle={{
-                                //   gap: 2,
-                                //   marginBottom: 2
-                                // }}
+                <View style={registerStyle.container}>
+                    <View style={registerStyle.formContainer}>
+                        <View style={registerStyle.card}>
+                            <View style={{ marginBottom: 8, width: 180, height: 180, borderRadius: 90, overflow: 'hidden', backgroundColor: '#101010', alignItems: 'center' }}>
+                                {
+                                    images &&
+                                    <Image source={{ uri: images.url }} style={{ height: '100%', width: 240, borderRadius: 6 }} />
+                                }
+                            </View>
+                            <View style={{ flexDirection: 'row' }}>
+                                <TouchableOpacity style={registerStyle.touch} onPress={() => {
+                                    setShowAddImage(true)
+                                }}>
+                                    <Text style={registerStyle.text}>Set Profile</Text>
+                                </TouchableOpacity>
+                            </View>
+
+                            <View style={registerStyle.inputContainer}>
+
+                                <TextInput
+                                    style={registerStyle.input}
+                                    placeholder="First Name"
+                                    value={firstName}
+                                    onChangeText={text => setFirstName(text)}
                                 />
-                            }
-                        </View>
-                        <View style={{ flexDirection: 'row' }}>
-                            <TouchableOpacity style={registerStyle.touch} onPress={() => {
-                                setShowAddImage(true)
+                                <TextInput
+                                    style={registerStyle.input}
+                                    placeholder="Last Name"
+                                    value={lastName}
+                                    onChangeText={text => setLastName(text)}
+                                />
+                                <TextInput
+                                    style={registerStyle.input}
+                                    placeholder="Baranggay"
+                                    value={baranggay}
+                                    onChangeText={text => setBaranggay(text)}
+                                />
+                                <TextInput
+                                    style={registerStyle.input}
+                                    placeholder="City"
+                                    value={city}
+                                    onChangeText={text => setCity(text)}
+                                />
+                                <TextInput
+                                    style={registerStyle.input}
+                                    placeholder="Province"
+                                    value={province}
+                                    onChangeText={text => setProvince(text)}
+                                />
+                                <TextInput
+                                    style={registerStyle.input}
+                                    placeholder="Email"
+                                    value={email}
+                                    onChangeText={text => setEmail(text)}
+                                />
+                                <TextInput
+                                    style={registerStyle.input}
+                                    placeholder="Password"
+                                    value={password}
+                                    onChangeText={text => setPassword(text)}
+                                    secureTextEntry
+                                />
+                            </View>
+                            <TouchableOpacity style={registerStyle.button} onClick={() => {
+                                Alert.alert(
+                                    'Sign up account.',
+                                    'are you sure you want to sign up this account?',
+                                    [
+                                        {
+                                            text: 'Cancel',
+                                            onPress: () => console.log('Cancel Pressed'),
+                                            style: 'cancel',
+                                        },
+                                        {
+                                            text: 'Yes',
+                                            onPress: handleRegister,
+                                        }
+                                    ]
+                                )
                             }}>
-                                <Text style={registerStyle.text}>Add Image</Text>
+                                <Text style={registerStyle.buttonText}>Sign Up</Text>
                             </TouchableOpacity>
                         </View>
-
-
-                        <View >
-                            <TextInput
-                                style={registerStyle.input}
-                                placeholder="First Name"
-                                value={firstName}
-                                onChangeText={text => setFirstName(text)}
-                            />
-                            <TextInput
-                                style={registerStyle.input}
-                                placeholder="Last Name"
-                                value={lastName}
-                                onChangeText={text => setLastName(text)}
-                            />
-                            <TextInput
-                                style={registerStyle.input}
-                                placeholder="Baranggay"
-                                value={baranggay}
-                                onChangeText={text => setBaranggay(text)}
-                            />
-                            <TextInput
-                                style={registerStyle.input}
-                                placeholder="City"
-                                value={city}
-                                onChangeText={text => setCity(text)}
-                            />
-                            <TextInput
-                                style={registerStyle.input}
-                                placeholder="Province"
-                                value={province}
-                                onChangeText={text => setProvince(text)}
-                            />
-                            <TextInput
-                                style={registerStyle.input}
-                                placeholder="Email"
-                                value={email}
-                                onChangeText={text => setEmail(text)}
-                            />
-                            <TextInput
-                                style={registerStyle.input}
-                                placeholder="Password"
-                                value={password}
-                                onChangeText={text => setPassword(text)}
-                                secureTextEntry
-                            />
-                        </View>
-                        <View style={registerStyle.bottomButton}>
-                            <TouchableOpacity style={registerStyle.bottomButtonItem} onPress={handleRegister} >
-                                <Text style={registerStyle.btnText}>Register</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={registerStyle.bottomButtonItem} onPress={() => setShowRegister(false)}>
-                                <Text style={registerStyle.btnText}>Close</Text>
-                            </TouchableOpacity>
-                        </View>
-                        {/* <Button title="Register" onPress={handleRegister} /> */}
                     </View>
+
                     <Modal animationType='fade' visible={showAddImage} transparent={true}>
                         <View style={registerStyle.addImage}>
                             <TouchableOpacity style={registerStyle.touch} onPress={() => {
@@ -290,7 +326,7 @@ export const Landing = ({ navigation }) => {
                         </View>
                     </Modal>
                 </View>
-            </Modal >
+            </Modal>
         );
     }
 
@@ -367,7 +403,7 @@ export const Landing = ({ navigation }) => {
                 </View>
             </View>
             <LoginModal />
-            <RegistrationModal />
+            {/* <RegistrationModal /> */}
         </>
     );
 }

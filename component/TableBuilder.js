@@ -30,7 +30,7 @@ export const TableBuilder = ({ components, area }) => {
 
     setMaterialTotal(materialSum);
     setLaborTotal(laborSum);
-    setCostTotal(materialSum+laborSum);
+    setCostTotal(materialSum + laborSum);
   }, [components]);
 
   const formatter = (num) => {
@@ -164,10 +164,26 @@ export const TableBuilder = ({ components, area }) => {
             </View>
             <View style={{ flex: 1, alignItems: 'flex-end' }}>
               <Text styles={{ fontWeight: 'bold' }}>
-                {formatter(materialTotal+laborTotal)}
+                {formatter(materialTotal + laborTotal)}
               </Text>
             </View>
           </View>
+          {
+            components.map((component) => {
+              if (component.particular.toLowerCase() === 'pineapple') {
+                return (
+                  <TableData
+                    key={component.id}
+                    name={component.name}
+                    qnty={component.qntyPrice}
+                    unit={component.unit}
+                    price={component.price}
+                    totalPrice={component.totalPrice}
+                  />
+                )
+              }
+            })
+          }
         </View>
       </View>
     </>

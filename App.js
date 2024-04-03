@@ -36,7 +36,6 @@ const App = () => (
             <Stack.Screen name='Register' component={Register} />
             <Stack.Screen name='Inputs' component={Inputs} />
             <Stack.Screen name = 'About' component={About}  />
-          
             </Stack.Navigator>
     </NavigationContainer>
 )
