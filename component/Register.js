@@ -9,7 +9,8 @@ import {
     Image,
     StyleSheet,
     Alert,
-    Modal
+    Modal,
+    Platform
 } from 'react-native'
 import {
     Input,
@@ -33,7 +34,8 @@ import cancel from '../assets/close.png'
 const styles = StyleSheet.create({
     safeArea: {
         // backgroundColor: 'red',
-        flex: 1
+        flex: 1,
+        paddingTop: Platform.OS === 'android' ? 25 : 0,
     },
     topContainer: {
         paddingTop: 12,

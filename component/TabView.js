@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  ActivityIndicator,
   Image,
   ImageBackground,
   ScrollView,
@@ -24,35 +25,34 @@ const Card = ({ imageSource, title, description, onPress }) => {
 const TabView = ({ route, navigation }) => {
   const { farms = [] } = route.params;
   const farm = farms[0]
-  console.log("farms sa TabView:", farms);
-
+  console.log("farms from tabview", farms);
   const handleCardPress = (farm) => {
     navigation.navigate("ProductionInput", { farms: [farm] })
   };
   return (
     // <ImageBackground source={require('../assets/p1.jpg')} resizeMode="cover" style={styles.backgroundImage}>
     <>
-    {
-      farms.length === 0
-        ?
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-          <Text>no farm found</Text>
-        </View>
-        :
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <View style={styles.container}>
-            {farms.map((farm) => (
-              <Card
-                key={farm.id} // Make sure to provide a unique key for each item
-                title={farm.title}
-                description="This is the example of React Native Card view. This is the easiest way to adding a card view on your screen."
-                imageSource={require('../assets/pine.jpg')}
-                onPress={()=>{handleCardPress(farm)}}
-              />
-            ))}
+      {
+        farms.length === 0
+          ?
+          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+            <ActivityIndicator />
           </View>
-        </ScrollView>
-    }
+          :
+          <ScrollView showsVerticalScrollIndicator={false}>
+            <View style={styles.container}>
+              {farms.map((farm) => (
+                <Card
+                  key={farm.id} // Make sure to provide a unique key for each item
+                  title={farm.title}
+                  description="This is the example of React Native Card view. This is the easiest way to adding a card view on your screen."
+                  imageSource={require('../assets/pine.jpg')}
+                  onPress={() => { handleCardPress(farm) }}
+                />
+              ))}
+            </View>
+          </ScrollView>
+      }
     </>
 
     // </ImageBackground>

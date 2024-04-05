@@ -40,27 +40,27 @@ const windowHeight = Dimensions.get('window').height;
 export const Landing = ({ navigation }) => {
     const [showLogin, setShowLogin] = useState(false)
     const [showRegister, setShowRegister] = useState(false)
-    // const farmsColl = collection(db, 'farms')
-    // const [farms] = useCollectionData(farmsColl) 
-    const farms = [{
-        "area": 1,
-        "brgy": "Cobangbang (Carumpit)",
-        "brgyUID": "MAicOo2SvfgMfg9cCVDwQks1gV72",
-        "cropStage": "Vegetative",
-        "farmerName": "Arjay Macalinao",
-        "geopoint": { "latitude": 14.107196953701209, "longitude": 14.107196953701209 },
-        "harvest_date": { "nanoseconds": 865000000, "seconds": 1711874130 },
-        "id": "24T8wnmupy83QjTUWyLn",
-        "images": [],
-        "mun": "DAET (Capital)",
-        "plantNumber": "30000",
-        "sex": "yes",
-        "start_date": {
-            "nanoseconds": 865000000,
-            "seconds": 1711874130
-        },
-        "title": "Animal Farm"
-    }]
+    const farmsColl = collection(db, 'farms')
+    const [farms] = useCollectionData(farmsColl)
+    // const farms = [{
+    //     "area": 1,
+    //     "brgy": "Cobangbang (Carumpit)",
+    //     "brgyUID": "MAicOo2SvfgMfg9cCVDwQks1gV72",
+    //     "cropStage": "Vegetative",
+    //     "farmerName": "Arjay Macalinao",
+    //     "geopoint": { "latitude": 14.107196953701209, "longitude": 14.107196953701209 },
+    //     "harvest_date": { "nanoseconds": 865000000, "seconds": 1711874130 },
+    //     "id": "24T8wnmupy83QjTUWyLn",
+    //     "images": [],
+    //     "mun": "DAET (Capital)",
+    //     "plantNumber": "30000",
+    //     "sex": "yes",
+    //     "start_date": {
+    //         "nanoseconds": 865000000,
+    //         "seconds": 1711874130
+    //     },
+    //     "title": "Animal Farm"
+    // }]
 
     const [user] = useAuthState(auth)
 
@@ -197,8 +197,8 @@ export const Landing = ({ navigation }) => {
                 const userRef = await addDoc(usersColl, {
                     brgy: brgy,
                     disabled: false,
-                    displayName: firstName+lastName,
-                    email: email, 
+                    displayName: firstName + lastName,
+                    email: email,
                     isRegistered: isRegistered,
                     mun: mun,
                     password: password,
@@ -360,7 +360,9 @@ export const Landing = ({ navigation }) => {
                             </TouchableHighlight>
                         </View>
                         <View style={styles.btnRow}>
-                            <TouchableHighlight style={styles.btnbtn} onPress={() => { navigation.navigate('Gallery', { farms: farms }) }}>
+                            <TouchableHighlight style={styles.btnbtn} onPress={() => {
+                                navigation.navigate('Gallery', { farms: farms })
+                            }}>
                                 <View style={styles.btnbtnChild}>
                                     <Image source={galleryLogo} style={styles.btnImage} />
                                     <Text style={styles.buttonText}>Mga Bukid ng Pinya</Text>

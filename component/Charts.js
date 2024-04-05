@@ -41,16 +41,71 @@ const Charts = ({ farms }) => {
     const componentColl = collection(db, `farms/${farm.id}/components`)
     const [compData, compLoading, compError] = useCollectionData(componentColl)
 
-    if (compData) {
-        console.log("compData isTrue:", compData);
-    }
-    if (compLoading) {
-        console.log("compLoading isTrue: ", compLoading);
+    const roiColl = collection(db, `farms/${farm.id}/roi`)
+    const [roiData, roiLoading, roiError] = useCollectionData(roiColl)
+
+    const [partTotal, setPartTotal] = useState([])
+    const [pineTotal, setPineTotal] = useState([])
+    const [netReturn, setNetReturn] = useState([])
+    const [newRoi, setNewRoi] = useState({})
+
+    const getPercentage = (n1, n2) => {
+        console.log("pirsint", (n1 / n2) * 100);
+        return (n1 / n2) * 100
     }
 
-    if (compError) {
-        console.log("compError isTrue:", compError);
-    }
+    useEffect(() => {
+
+        if (roiData) {
+            const data = {
+                labels: ["ROI"],
+                data: [roiData[0].roi/100]
+            };
+            setNewRoi(data)
+            setPartTotal([
+                {
+                    name: 'Material',
+                    sum: roiData[0].materialTotal,
+                    color: '#FF5733',
+                    legendFontColor: "#7F7F7F",
+                    legendFontSize: 16
+                },
+                {
+                    name: 'Labor',
+                    sum: roiData[0].laborTotal,
+                    color: '#4682B4',
+                    legendFontColor: "#7F7F7F",
+                    legendFontSize: 16
+                }
+            ])
+            setPineTotal([
+                {
+                    name: 'Pineapple',
+                    sum: roiData[0].grossReturn,
+                    color: '#4682B4',
+                    legendFontColor: "#7F7F7F",
+                    legendFontSize: 16
+                },
+                {
+                    name: 'Batterball',
+                    sum: roiData[0].batterBall,
+                    color: '#FF5733',
+                    legendFontColor: "#7F7F7F",
+                    legendFontSize: 16
+                }
+            ])
+            setNetReturn([
+                {
+                    name: 'Net Return',
+                    sum: roiData[0].netReturn,
+                    color: '#FF5733',
+                    legendFontColor: "#7F7F7F",
+                    legendFontSize: 16
+                }
+            ])
+
+        }
+    }, [roiData]);
 
     const getMaxSched = ({ date }) => {
         return moment(date).add(2, 'month')
@@ -96,12 +151,12 @@ const Charts = ({ farms }) => {
         }
         return dates;
     };
+    console.log(pineTotal);
 
     const color = ["rgb(0, 255, 0)", "rgb(0, 0, 255)", "rgb(255, 0, 0)"]
     return (
         <>
             <ScrollView style={{
-                padding: 12,
 
             }}>
                 <View style={{
@@ -111,7 +166,6 @@ const Charts = ({ farms }) => {
                     paddingVertical: 8
                 }}>
                     <View>
-
                     </View>
                     <Calendar
                         markingType='period'
@@ -126,18 +180,73 @@ const Charts = ({ farms }) => {
                         markedDates={activities}
                     />
                     {
-                        compLoading
+                        roiLoading && !newRoi || Object.keys(newRoi).length === 0
                             ?
                             <ActivityIndicator />
                             :
-                            <DoughnutAndPie data={compData} />
+                            <View style={{
+                                padding: 4,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backgroundColor: '#ffffff',
+                                flex: 1,
+                                borderRadius: 16,
+                            }}>
+                                <Text style={{ fontSize: 20, marginVertical: 12, fontWeight: '600' }}>ROI</Text>
+                                <Progress data={newRoi} />
+                            </View>
                     }
                     {
-                        
+                        roiLoading && partTotal.length > 0
+                            ?
+                            <ActivityIndicator />
+                            :
+                            <View style={{
+                                padding: 4,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backgroundColor: '#ffffff',
+                                flex: 1,
+                                borderRadius: 16,
+                            }}>
+                                <Text style={{ fontSize: 20, marginVertical: 12, fontWeight: '600' }}>Gastos sa Pinya</Text>
+                                <DoughnutAndPie data={partTotal} col={"sum"} title="Gastos sa Pinya" />
+                            </View>
                     }
-                    <Line />
-                    <Bar />
-                    <Progress />
+                    {
+                        roiLoading && pineTotal.length > 0
+                            ?
+                            <ActivityIndicator />
+                            :
+                            <View style={{
+                                padding: 4,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backgroundColor: '#ffffff',
+                                flex: 1,
+                                borderRadius: 16,
+                            }}>
+                                <Text style={{ fontSize: 20, marginVertical: 12, fontWeight: '600' }}>Gross Return</Text>
+                                <DoughnutAndPie data={pineTotal} col={"sum"} title="Gross Return" />
+                            </View>
+                    }
+                    {
+                        roiLoading && netReturn.length > 0
+                            ?
+                            <ActivityIndicator />
+                            :
+                            <View style={{
+                                padding: 4,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backgroundColor: '#ffffff',
+                                flex: 1,
+                                borderRadius: 16,
+                            }}>
+                                <Text style={{ fontSize: 20, marginVertical: 12, fontWeight: '600' }}>Net Return</Text>
+                                <DoughnutAndPie data={netReturn} col={"sum"} title="Gross Return" />
+                            </View>
+                    }
                 </View>
             </ScrollView>
 

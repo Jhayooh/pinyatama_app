@@ -28,10 +28,6 @@ const ProductionInput = ({ route, navigation }) => {
   const componentsColl = collection(db, `farms/${farm.id}/components`)
   const [compData, compLoading, compError] = useCollectionData(componentsColl)
 
-  console.log("farms sa pi:", farms);
-  console.log("comp sa pi", compData);
-  console.log("error:", compError)
-
   const addDocumentWithId = async () => {
     setIsShow(false)
     onChangeText('')
@@ -50,7 +46,7 @@ const ProductionInput = ({ route, navigation }) => {
           <Text style={styles.name}>Pangalan ng Bukid</Text>
           <TouchableOpacity style={{ height: 32, backgroundColor: 'red', alignItems: 'center', justifyContent: 'center' }} onPress={() => {
             setEdit(!edit)
-            }}>
+          }}>
             <Text>Edit</Text>
           </TouchableOpacity>
           <Text style={styles.loc}>{farm.title}</Text>

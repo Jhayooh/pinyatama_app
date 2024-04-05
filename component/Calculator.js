@@ -74,6 +74,7 @@ export const Calculator = ({ navigation }) => {
   const brgy = address.getBarangaysOfCityMun(munCode)
 
   const [components, setComponents] = useState([])
+  const [roiDetails, setRoiDetails] = useState({})
   const [table, setTable] = useState(false)
   const [saving, setSaving] = useState(false)
   const [calculating, setCalculating] = useState(false)
@@ -184,6 +185,9 @@ export const Calculator = ({ navigation }) => {
         brgyUID: user.uid,
       })
       await updateDoc(newFarm, { id: newFarm.id })
+      const farmComp = collection(db, `farms/${newFarm.id}/components`);
+      const eventsRef = collection(db, `farms/${newFarm.id}/events`);
+      const roiRef = collection(db, `farms/${newFarm.id}/roi`);
 
       Alert.alert(`Saved Successfully`, `${farmerName} is saved. Thank you very much for using this application. Donate at our charity using GCASH (+9564760102)`, [
         {
@@ -193,7 +197,6 @@ export const Calculator = ({ navigation }) => {
           }
         },
       ])
-      const farmComp = collection(db, `farms/${newFarm.id}/components`);
       components.forEach(async (component) => {
         try {
 
@@ -204,7 +207,12 @@ export const Calculator = ({ navigation }) => {
           console.log("error sa components:", e);
         }
       })
-      const eventsRef = collection(db, `farms/${newFarm.id}/events`);
+
+      const newRoi = await addDoc(roiRef, {
+        ...roiDetails
+      })
+      await updateDoc(newRoi,{id: newRoi.id})
+
       const vegetativeDate = new Date(Date.parse(startDate));
       const floweringDate = new Date(vegetativeDate);
       floweringDate.setMonth(vegetativeDate.getMonth() + 10);
@@ -325,23 +333,27 @@ export const Calculator = ({ navigation }) => {
 
   const getMult = (numOne, numTwo) => {
     const num = numOne * numTwo
-    return parseFloat(num.toFixed(0))
+    return parseFloat(num)
   }
 
-  const handleBase = () => {
-    const baseValue = parseFloat(base);
-    if (baseValue === 0) {
-      return;
-    }
-      qParti.map((item) => {
-        const newQnty = getMult(area, item.defQnty)
-        setComponents(prev => [...prev, { ...item, qntyPrice: newQnty, totalPrice: getMult(newQnty, item.price) }])
-      })
-    
-
-    setTable(true)
-    setCalculating(false)
+const handleBase = () => {
+  const baseValue = parseFloat(base);
+  if (baseValue === 0) {
+    return;
   }
+
+  const newComponents = qParti.map(item => {
+    const newQnty = getMult(area, item.defQnty)
+    return { ...item, qntyPrice: newQnty, totalPrice: getMult(newQnty, item.price), price: parseInt(item.price) };
+  });
+
+
+
+  setComponents(newComponents);
+  setTable(true);
+  setCalculating(false);
+};
+
 
 
   return (
@@ -365,7 +377,7 @@ export const Calculator = ({ navigation }) => {
                       // maxLength={40}
                       onChangeText={(base) => {
                         setBase(base)
-                        setArea(parseFloat((base / 30000).toFixed(4)))
+                        setArea(parseFloat(base / 30000))
                       }}
                       placeholder='No. of plants'
                       keyboardType='numeric'
@@ -386,7 +398,7 @@ export const Calculator = ({ navigation }) => {
                         } />
                     }
                   </View>
-                  {table && <TableBuilder components={components} area={area} />}
+                  {table && <TableBuilder components={components} area={area} setRoiDetails={setRoiDetails} />}
                 </>
               }
               <View style={{ height: '1%', borderBottomColor: '#FAF1CE', borderBottomWidth: .2, marginBottom: 6 }}></View>

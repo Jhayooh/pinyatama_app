@@ -10,8 +10,6 @@ export default function Gallery({ route, navigation }) {
   const [search, setSearch] = useState('');
   const { farms = [] } = route.params
 
-  console.log("farms sa gallery", farms);
-
   const updateSearch = (text) => {
     setSearch(text);
   };
