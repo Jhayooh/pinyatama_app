@@ -117,8 +117,11 @@ export const Landing = ({ navigation }) => {
                 .catch(error => alert(error.message))
         }
         return (
-            <Modal animationType='fade' transparent={true} visible={showLogin} onRequestClose={() => (setShowLogin(false))}>
-                <View style={loginStyle.container}>
+            <Modal animationType='fade' transparent={true} visible={showLogin} onBackdropPress={() => (setShowLogin(false))} onRequestClose={() => (setShowLogin(false))}>
+                <TouchableOpacity 
+                style={loginStyle.container}
+                activeOpacity={1} 
+                onPressOut={() => {setShowLogin(false)}}>
                     <View style={loginStyle.formContainer}>
                         <View style={loginStyle.card}>
                             <Text style={loginStyle.title}>MALIGAYANG PAGDATING</Text>
@@ -155,7 +158,7 @@ export const Landing = ({ navigation }) => {
                             </TouchableOpacity>
                         </View>
                     </View>
-                </View>
+                </TouchableOpacity>
             </Modal>
         )
     }
