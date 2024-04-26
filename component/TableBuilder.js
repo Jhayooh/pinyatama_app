@@ -10,16 +10,26 @@ import {
 import { db } from '../firebase/Config';
 import { AddDataRow } from './AddDataRow';
 
-export const TableBuilder = ({ components, area }) => {
+export const TableBuilder = ({ components, area, setRoiDetails }) => {
   const [laborTotal, setLaborTotal] = useState(0)
   const [materialTotal, setMaterialTotal] = useState(0)
+  const [costTotal, setCostTotal] = useState(0)
+  const [grossReturn, setGrossReturn] = useState(0)
+  const [batterBall, setBatterBall] = useState(0)
+  const [netReturn, setNetReturn] = useState(0)
+  const [roi, setRoi] = useState(0)
 
   useEffect(() => {
-    let materialSum = 0;
+    let materialSum = 5000;
     let laborSum = 0;
 
     components.forEach((component) => {
       if (component.particular.toLowerCase() === 'material') {
+        if (component.name.toLowerCase() === 'planting materials') {
+          const qntyPrice = parseInt(component.qntyPrice)
+          setGrossReturn(getPercentage(90, qntyPrice)*8);
+          setBatterBall(getPercentage(10, qntyPrice)*2);
+        }
         materialSum += parseInt(component.totalPrice);
       } else if (component.particular.toLowerCase() === 'labor') {
         laborSum += parseInt(component.totalPrice);
@@ -28,7 +38,42 @@ export const TableBuilder = ({ components, area }) => {
 
     setMaterialTotal(materialSum);
     setLaborTotal(laborSum);
+    setCostTotal(materialSum + laborSum);
   }, [components]);
+
+  useEffect(() => {
+    const grossReturnAndBatter = grossReturn + batterBall
+    const netReturnValue = grossReturnAndBatter - costTotal;
+    const roiValue = (netReturnValue / grossReturnAndBatter) * 100;
+    setNetReturn(netReturnValue);
+    setRoi(roiValue);
+  }, [grossReturn, batterBall, costTotal]);
+
+  useEffect(() => {
+    const roiDetails = {
+      laborTotal,
+      materialTotal,
+      costTotal,
+      grossReturn,
+      batterBall,
+      netReturn,
+      roi
+    };
+  
+    setRoiDetails(roiDetails);
+  }, [laborTotal, materialTotal, costTotal, grossReturn, batterBall, netReturn, roi]);
+
+  const getPercentage = (pirsint, nambir) => {
+    return (pirsint / 100) * nambir
+  }
+
+  const formatter = (num) => {
+    return num.toLocaleString('en-PH', {
+      style: 'currency',
+      currency: 'PHP',
+      minimumFractionDigits: 0
+    })
+  }
 
   const TableData = ({ name, qnty, unit, price, totalPrice }) => {
     return (
@@ -42,12 +87,12 @@ export const TableBuilder = ({ components, area }) => {
         <View style={{ ...styles.tableHeadLabel2, alignItems: 'center' }}>
           <Text>{unit}</Text>
         </View>
-        <View style={{ ...styles.tableHeadLabel2, alignItems: 'flex-end' }}>
-          <Text>{price.toLocaleString()}</Text>
+        <View style={{ ...styles.tableHeadLabel3, alignItems: 'flex-end' }}>
+          <Text>{formatter(price)}</Text>
         </View>
-        <View style={{ ...styles.tableHeadLabel2, alignItems: 'flex-end' }}>
+        <View style={{ ...styles.tableHeadLabel3, alignItems: 'flex-end' }}>
           {/* {setTotal(total + totalPrice)} */}
-          <Text>{totalPrice.toLocaleString()}</Text>
+          <Text>{formatter(totalPrice)}</Text>
         </View>
       </View>
     )
@@ -71,10 +116,10 @@ export const TableBuilder = ({ components, area }) => {
             <View style={{ ...styles.tableHeadLabel2, alignItems: 'center' }}>
               <Text>UNIT</Text>
             </View>
-            <View style={{ ...styles.tableHeadLabel2, alignItems: 'center' }}>
+            <View style={{ ...styles.tableHeadLabel3, alignItems: 'center' }}>
               <Text>PRICE/UNIT</Text>
             </View>
-            <View style={{ ...styles.tableHeadLabel2, alignItems: 'flex-end' }}>
+            <View style={{ ...styles.tableHeadLabel3, alignItems: 'flex-end' }}>
               <Text>TOTAL PRICE</Text>
             </View>
           </View>
@@ -90,7 +135,7 @@ export const TableBuilder = ({ components, area }) => {
                   <TableData
                     key={component.id}
                     name={component.name}
-                    qnty={component.qnty}
+                    qnty={component.qntyPrice}
                     unit={component.unit}
                     price={component.price}
                     totalPrice={component.totalPrice}
@@ -99,13 +144,23 @@ export const TableBuilder = ({ components, area }) => {
               }
             })
           }
-          <View style={{ ...styles.tableHead, borderTopWidth: 2, borderBottomWidth: 2 }}>
+          <View style={styles.tableHead}>
+            <View style={{ flex: 4 }}>
+              <Text styles={{ fontWeight: 'bold' }}>Land Rental</Text>
+            </View>
+            <View style={{ flex: 1, alignItems: 'flex-end' }}>
+              <Text styles={{ fontWeight: 'bold' }}>
+                {formatter(5000)}
+              </Text>
+            </View>
+          </View>
+          <View style={{ ...styles.tableHead, borderTopWidth: 2, borderBottomWidth: 2, marginBottom: 12 }}>
             <View style={{ flex: 4 }}>
               <Text styles={{ fontWeight: 'bold' }}>Total Material Input: </Text>
             </View>
             <View style={{ flex: 1, alignItems: 'flex-end' }}>
               <Text styles={{ fontWeight: 'bold' }}>
-                {materialTotal}
+                {formatter(materialTotal)}
               </Text>
             </View>
           </View>
@@ -119,7 +174,7 @@ export const TableBuilder = ({ components, area }) => {
                   <TableData
                     key={component.id}
                     name={component.name}
-                    qnty={component.qnty}
+                    qnty={component.qntyPrice}
                     unit={component.unit}
                     price={component.price}
                     totalPrice={component.totalPrice}
@@ -128,17 +183,60 @@ export const TableBuilder = ({ components, area }) => {
               }
             })
           }
-          <View style={{ ...styles.tableHead, borderTopWidth: 2, borderBottomWidth: 2 }}>
+          <View style={{ ...styles.tableHead, borderTopWidth: 2, borderBottomWidth: 2, marginBottom: 12 }}>
             <View style={{ flex: 4 }}>
               <Text styles={{ fontWeight: 'bold' }}>Total Labor Input: </Text>
             </View>
             <View style={{ flex: 1, alignItems: 'flex-end' }}>
               <Text styles={{ fontWeight: 'bold' }}>
-                {laborTotal}
+                {formatter(laborTotal)}
               </Text>
             </View>
           </View>
-          
+          <View style={styles.tableHead}>
+            <View style={{ flex: 4 }}>
+              <Text styles={{ fontWeight: 'bold' }}>Total Cost of Production</Text>
+            </View>
+            <View style={{ flex: 1, alignItems: 'flex-end' }}>
+              <Text styles={{ fontWeight: 'bold' }}>
+                {formatter(costTotal)}
+              </Text>
+            </View>
+          </View>
+          <TableData
+            name={'Gross Return'}
+            qnty={grossReturn}
+            unit={'pcs'}
+            price={8}
+            totalPrice={formatter(grossReturn * 8)}
+          />
+          <TableData
+            name={'Good Butterball'}
+            qnty={batterBall}
+            unit={'pcs'}
+            price={2}
+            totalPrice={formatter(batterBall * 2)}
+          />
+          <View style={styles.tableHead}>
+            <View style={{ flex: 4 }}>
+              <Text styles={{ fontWeight: 'bold' }}>Net Return</Text>
+            </View>
+            <View style={{ flex: 1, alignItems: 'flex-end' }}>
+              <Text styles={{ fontWeight: 'bold' }}>
+                {formatter(netReturn)}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.tableHead}>
+            <View style={{ flex: 4 }}>
+              <Text styles={{ fontWeight: 'bold' }}>ROI</Text>
+            </View>
+            <View style={{ flex: 1, alignItems: 'flex-end' }}>
+              <Text styles={{ fontWeight: 'bold' }}>
+                {`%${roi.toFixed(2)}`}
+              </Text>
+            </View>
+          </View>
         </View>
       </View>
     </>
@@ -192,14 +290,13 @@ const styles = StyleSheet.create({
     // padding: 6,
     // backgroundColor: '#3bcd6b',
     alignSelf: 'stretch',
-    // marginBottom: '16'
   },
   tableHeadLabel2: {
-    flex: 2,
+    flex: 1,
     alignSelf: 'stretch'
   },
   tableHeadLabel3: {
-    flex: 3,
+    flex: 2,
     alignSelf: 'stretch'
   },
   tableData: {

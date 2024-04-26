@@ -24,13 +24,10 @@ const ProductionInput = ({ route, navigation }) => {
   const { farms = [] } = route.params
   const farm = farms[0]
   const [edit, setEdit] = useState(false)
+  const [roiDetails, setRoiDetails] = useState({})
 
   const componentsColl = collection(db, `farms/${farm.id}/components`)
   const [compData, compLoading, compError] = useCollectionData(componentsColl)
-
-  console.log("farms sa pi:", farms);
-  console.log("comp sa pi", compData);
-  console.log("error:", compError)
 
   const addDocumentWithId = async () => {
     setIsShow(false)
@@ -47,13 +44,15 @@ const ProductionInput = ({ route, navigation }) => {
     <>
       <SafeAreaView style={styles.container}>
         <ImageBackground source={require('../assets/brakrawnd.png')} resizeMode="cover" style={styles.image}>
-          <Text style={styles.name}>Pangalan ng Bukid</Text>
-          <TouchableOpacity style={{ height: 32, backgroundColor: 'red', alignItems: 'center', justifyContent: 'center' }} onPress={() => {
-            setEdit(!edit)
+          <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', gap: 3}}>
+            <Text style={styles.name}>{farm.title}</Text>
+            <TouchableOpacity style={{ height: 32, backgroundColor: 'red', alignItems: 'center', justifyContent: 'center' }} onPress={() => {
+              setEdit(!edit)
             }}>
-            <Text>Edit</Text>
-          </TouchableOpacity>
-          <Text style={styles.loc}>{farm.title}</Text>
+              <Text>Edit</Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.loc}>{`${farm.mun}, ${farm.brgy}`}</Text>
           <Text style={styles.label}>Pagsusuri ng Paggastos at Pagbabalik sa Produksiyon ng Pinya</Text>
 
           {edit
@@ -72,6 +71,7 @@ const ProductionInput = ({ route, navigation }) => {
                     <TableBuilder
                       components={compData}
                       area={farm.area}
+                      setRoiDetails={setRoiDetails}
                     />
                 }
               </ScrollView>
