@@ -23,12 +23,14 @@ import {
 } from "native-base";
 import { ProgressSteps, ProgressStep } from 'react-native-progress-steps';
 import * as ImagePicker from 'expo-image-picker';
+import { collection, addDoc, updateDoc } from "firebase/firestore";
 
 import backIcon from '../assets/back.png'
 import noProf from '../assets/noProf.png'
 import camera from '../assets/upload.png'
 import gallery from '../assets/gallery.png'
 import cancel from '../assets/close.png'
+import { db } from '../firebase/Config';
 
 
 const styles = StyleSheet.create({
@@ -116,8 +118,26 @@ export default function Register({ navigation }) {
 
     const [profShow, setProfShow] = useState(false)
 
-    const handleRegister = () => {
-
+    const handleRegister = async () => {
+        const usersRef = collection(db, 'users')
+        try {
+            const docRef = await addDoc(usersRef, {
+                brgy: barangay,
+                disabled: false,
+                displayName: displayName,
+                email: email,
+                isRegistered: false,
+                mun: mun,
+                password: password,
+                phoneNumber: phoneNumber,
+                photoURL: photoUrl
+            });
+            await updateDoc(docRef, {
+                uid: docRef.id
+            })
+            navigation.goBack()
+        } catch (e) {
+        }
     }
 
     const openGallery = async () => {
@@ -276,7 +296,7 @@ export default function Register({ navigation }) {
                                         {
                                             municipalities.cityAndMun.map((mun) => {
                                                 return (
-                                                    <Select.Item label={mun.name} value={mun.mun_code} />
+                                                    <Select.Item key={mun.mun_code} label={mun.name} value={mun.mun_code} />
                                                 )
                                             })
                                         }
@@ -291,9 +311,9 @@ export default function Register({ navigation }) {
                                         endIcon: <CheckIcon size={5} />
                                     }} onValueChange={(item) => setBarangay(item)}>
                                         {
-                                            brgy.barangays.map((b) => {
+                                            brgy.barangays.map((b, index) => {
                                                 return (
-                                                    <Select.Item label={b.name} value={b.name} />
+                                                    <Select.Item key={index} label={b.name} value={b.name} />
                                                 )
                                             })
                                         }

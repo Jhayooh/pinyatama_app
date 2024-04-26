@@ -27,8 +27,8 @@ export const TableBuilder = ({ components, area, setRoiDetails }) => {
       if (component.particular.toLowerCase() === 'material') {
         if (component.name.toLowerCase() === 'planting materials') {
           const qntyPrice = parseInt(component.qntyPrice)
-          setGrossReturn(getPercentage(90, qntyPrice));
-          setBatterBall(getPercentage(10, qntyPrice));
+          setGrossReturn(getPercentage(90, qntyPrice)*8);
+          setBatterBall(getPercentage(10, qntyPrice)*2);
         }
         materialSum += parseInt(component.totalPrice);
       } else if (component.particular.toLowerCase() === 'labor') {
@@ -42,7 +42,7 @@ export const TableBuilder = ({ components, area, setRoiDetails }) => {
   }, [components]);
 
   useEffect(() => {
-    const grossReturnAndBatter = (grossReturn * 8) + (batterBall * 2)
+    const grossReturnAndBatter = grossReturn + batterBall
     const netReturnValue = grossReturnAndBatter - costTotal;
     const roiValue = (netReturnValue / grossReturnAndBatter) * 100;
     setNetReturn(netReturnValue);
@@ -62,7 +62,6 @@ export const TableBuilder = ({ components, area, setRoiDetails }) => {
   
     setRoiDetails(roiDetails);
   }, [laborTotal, materialTotal, costTotal, grossReturn, batterBall, netReturn, roi]);
-  
 
   const getPercentage = (pirsint, nambir) => {
     return (pirsint / 100) * nambir

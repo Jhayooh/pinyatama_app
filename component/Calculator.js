@@ -1,10 +1,11 @@
 import { address } from 'addresspinas';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
-import { GeoPoint, Timestamp, collection, doc, ref, setDoc, updateDoc, addDoc, storage } from 'firebase/firestore';
+import { GeoPoint, Timestamp, collection, doc, setDoc, updateDoc, addDoc, FieldValue } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import {
   Button,
   FlatList,
@@ -21,9 +22,10 @@ import {
   Alert
 } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import MapView, { Marker } from 'react-native-maps';
 
 import { Dropdown } from 'react-native-element-dropdown';
-import { auth, db } from '../firebase/Config';
+import { auth, db, storage } from '../firebase/Config';
 import { TableBuilder } from './TableBuilder';
 
 export const Calculator = ({ navigation }) => {
@@ -132,15 +134,18 @@ export const Calculator = ({ navigation }) => {
     }
   }
 
-  const uploadImages = async (uri, fileType) => {
+  const uploadImages = async (uri, fileType, newFarm) => {
+
     try {
+      console.log("number 1");
       const response = await fetch(uri);
       const blob = await response.blob();
       const filename = uri.substring(uri.lastIndexOf('/') + 1);
+      console.log("number 2");
 
-      const storageRef = ref(storage, `FarmImages/${user.uid}/${filename}`);
+      const storageRef = ref(storage, `FarmImages/${newFarm.id}/${filename}`);
       const uploadTask = uploadBytesResumable(storageRef, blob);
-
+      console.log("number 3");
       uploadTask.on('state_changed',
         (snapshot) => {
           // Handle progress
@@ -151,13 +156,15 @@ export const Calculator = ({ navigation }) => {
         () => {
           // Upload completed successfully, get download URL
           getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-            console.log('File available at', downloadURL);
-            setUploadedImg((uImg) => [...uImg, { url: downloadURL, uid: user.uid }]);
+            console.log('File available at', typeof(downloadURL));
+            setUploadedImg([...uploadedImg, downloadURL])
+            console.log("this is the uploaded img:", uploadedImg);
           }).catch((error) => {
             console.error("Error getting download URL: ", error);
           });
         }
       );
+
     } catch (error) {
       console.error("Error uploading image: ", error);
     }
@@ -188,7 +195,6 @@ export const Calculator = ({ navigation }) => {
       const farmComp = collection(db, `farms/${newFarm.id}/components`);
       const eventsRef = collection(db, `farms/${newFarm.id}/events`);
       const roiRef = collection(db, `farms/${newFarm.id}/roi`);
-
       Alert.alert(`Saved Successfully`, `${farmerName} is saved. Thank you very much for using this application. Donate at our charity using GCASH (+9564760102)`, [
         {
           text: 'Ok', onPress: () => {
@@ -211,7 +217,7 @@ export const Calculator = ({ navigation }) => {
       const newRoi = await addDoc(roiRef, {
         ...roiDetails
       })
-      await updateDoc(newRoi,{id: newRoi.id})
+      await updateDoc(newRoi, { id: newRoi.id })
 
       const vegetativeDate = new Date(Date.parse(startDate));
       const floweringDate = new Date(vegetativeDate);
@@ -248,11 +254,14 @@ export const Calculator = ({ navigation }) => {
       })
       await updateDoc(eRef_fruiting, { id: eRef_fruiting.id })
 
-      const uploadPromises = images.map(img => uploadImages(img.url, "Image"));
-      // Wait for all images to upload
-      await Promise.all(uploadPromises);
-      await updateDoc(newFarm, { images: uploadedImg })
+      for (const img of images) {
+        const upImg = await uploadImages(img.url, "Image", newFarm.id);
+        console.log("dl url", upImg);
 
+        setUploadedImg([...uploadedImg, upImg])
+        await updateDoc(newFarm, { images: uploadedImg })
+        console.log("this is the uploaded images:", uploadedImg);
+      }
     } catch (e) {
       console.log("Saving Error: ", e);
     }
@@ -336,26 +345,21 @@ export const Calculator = ({ navigation }) => {
     return parseFloat(num)
   }
 
-const handleBase = () => {
-  const baseValue = parseFloat(base);
-  if (baseValue === 0) {
-    return;
-  }
+  const handleBase = () => {
+    const baseValue = parseFloat(base);
+    if (baseValue === 0) {
+      return;
+    }
 
-  const newComponents = qParti.map(item => {
-    const newQnty = getMult(area, item.defQnty)
-    return { ...item, qntyPrice: newQnty, totalPrice: getMult(newQnty, item.price), price: parseInt(item.price) };
-  });
+    const newComponents = qParti.map(item => {
+      const newQnty = getMult(area, item.defQnty)
+      return { ...item, qntyPrice: newQnty, totalPrice: getMult(newQnty, item.price), price: parseInt(item.price) };
+    });
 
-
-
-  setComponents(newComponents);
-  setTable(true);
-  setCalculating(false);
-};
-
-
-
+    setComponents(newComponents);
+    setTable(true);
+    setCalculating(false);
+  };
   return (
     <>
       <ImageBackground source={require('../assets/p1.jpg')} resizeMode="cover" style={styles.image}>
@@ -385,7 +389,6 @@ const handleBase = () => {
                       style={{ ...styles.dropdown, flex: 3 }}
                       disabled
                     />
-
                     {
                       lParti && calculating
                         ?
@@ -509,6 +512,25 @@ const handleBase = () => {
                     setBrgyFocus(false);
                   }}
                 />
+                <View style={styles.container1}>
+                  <MapView style={styles.map} region={region} onPress={handleMapPress}>
+                    {userLocation && (
+                      <Marker
+                        coordinate={{
+                          latitude: userLocation.latitude,
+                          longitude: userLocation.longitude,
+                        }}
+                        title="Your Location"
+                        description="You are here!"
+                        draggable
+                        onDragEnd={(e) => setUserLocation(e.nativeEvent.coordinate)}
+                      />
+                    )}
+                  </MapView>
+                  <View style={styles.buttonContainer}>
+                    <Button title="Update Location" onPress={handleUpdateLocation} />
+                  </View>
+                </View>
                 <View style={{ height: '1%', borderBottomColor: '#FAF1CE', borderBottomWidth: .2, marginBottom: 6 }}></View>
 
                 {/* numberFour */}
@@ -564,26 +586,6 @@ const handleBase = () => {
                 </View>
 
               </View>
-              {/* <View style={styles.container1}>
-                <MapView style={styles.map} region={region} onPress={handleMapPress}>
-                  {userLocation && (
-                    <Marker
-                      coordinate={{
-                        latitude: userLocation.latitude,
-                        longitude: userLocation.longitude,
-                      }}
-                      title="Your Location"
-                      description="You are here!"
-                      draggable
-                      onDragEnd={(e) => setUserLocation(e.nativeEvent.coordinate)}
-                    />
-                  )}
-                </MapView>
-                <View style={styles.buttonContainer}>
-                  <Button title="Update Location" onPress={handleUpdateLocation} />
-                </View>
-              </View> */}
-
               {/* ImagesGal */}
             </View>
           </ScrollView>
