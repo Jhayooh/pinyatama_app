@@ -21,6 +21,7 @@ import {
   ActivityIndicator,
   Alert
 } from 'react-native';
+
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import MapView, { Marker } from 'react-native-maps';
 
@@ -156,7 +157,7 @@ export const Calculator = ({ navigation }) => {
         () => {
           // Upload completed successfully, get download URL
           getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-            console.log('File available at', typeof(downloadURL));
+            console.log('File available at', typeof (downloadURL));
             setUploadedImg([...uploadedImg, downloadURL])
             console.log("this is the uploaded img:", uploadedImg);
           }).catch((error) => {
@@ -360,6 +361,8 @@ export const Calculator = ({ navigation }) => {
     setTable(true);
     setCalculating(false);
   };
+
+
   return (
     <>
       <ImageBackground source={require('../assets/p1.jpg')} resizeMode="cover" style={styles.image}>
@@ -394,11 +397,13 @@ export const Calculator = ({ navigation }) => {
                         ?
                         <ActivityIndicator style={{ flex: 1 }} size='small' color='#FF5733' />
                         :
-                        <Button title='Calculate' style={{ flex: 1 }} onPress={() => {
+                        <TouchableOpacity style={{ marginLeft: 10, justifyContent: 'center' }} onPress={() => {
                           setCalculating(true)
                           handleBase()
                         }
-                        } />
+                        } >
+                          <Image source={require('../assets/calc.png')} style={{ width: 30, height: 30 }} />
+                        </TouchableOpacity>
                     }
                   </View>
                   {table && <TableBuilder components={components} area={area} setRoiDetails={setRoiDetails} />}
@@ -408,33 +413,35 @@ export const Calculator = ({ navigation }) => {
 
               {/* Number 2 */}
               <Text style={styles.head}>2. QP Farm Details</Text>
-              <TextInput
-                editable
-                maxLength={40}
-                onChangeText={text => setCropStage(text)}
-                placeholder='Stage of Crops'
+              <Dropdown
+                style={styles.dropdown}
+                placeholder="Select Stage of Crops"
+                data={['Vegetative', 'Flowering', 'Fruiting', 'Harvesting']}
                 value={cropStage}
-                style={styles.dropdown}
+                onChange={value => setCropStage(value)}
+              />
+              <View style={{ display: 'flex', flexDirection: 'row' }}>
+                <TextInput
+                  style={{ ...styles.dropdown, flex: 3 }}
+                  value={startDate.toLocaleDateString()}
+                  placeholder="Date of Planting"
+                />
+                <TouchableOpacity onPress={() => setStartPicker(true)} style={{ marginLeft: 10, justifyContent: 'center' }}>
+                  <Image source={require('../assets/cal.png')} style={{ width: 30, height: 30 }} />
+                </TouchableOpacity>
 
-              />
-              <TextInput
-                style={styles.dropdown}
-                value={startDate.toLocaleDateString()}
-                placeholder="Date of Planting"
-              />
-              <Button onPress={() => setStartPicker(true)} title="Date of Planting" />
-              <DateTimePickerModal
-                isVisible={startPicker}
-                mode="date"
-                onConfirm={(date) => {
-                  setStartDate(date)
-                  setStartPicker(false)
-                }}
-                onCancel={() => setStartPicker(false)}
-                style={{ marginBottom: 10 }}
-              />
-
-              <TextInput
+                <DateTimePickerModal
+                  isVisible={startPicker}
+                  mode="date"
+                  onConfirm={(date) => {
+                    setStartDate(date)
+                    setStartPicker(false)
+                  }}
+                  onCancel={() => setStartPicker(false)}
+                  style={{ marginBottom: 10 }}
+                />
+              </View>
+              {/* <TextInput
                 style={styles.dropdown}
                 value={endDate.toLocaleDateString()}
                 placeholder="Date of Harvest"
@@ -450,7 +457,7 @@ export const Calculator = ({ navigation }) => {
                 }}
                 onCancel={() => setEndPicker(false)}
                 style={{ marginBottom: 10 }}
-              />
+              /> */}
 
               <View style={{ height: '1%', borderBottomColor: '#FAF1CE', borderBottomWidth: .2, marginBottom: 6 }}></View>
 
@@ -543,14 +550,21 @@ export const Calculator = ({ navigation }) => {
                   value={farmerName}
                   style={styles.dropdown}
                 />
-                <TextInput
+                 <Dropdown
+                 style={styles.dropdown}
+                 placeholder='Select Sex'
+                 data={['Male','Female']}
+                 value={sex}
+                 onChangeText={text => setSex(text)}   
+                 />
+                {/* <TextInput
                   editable
                   maxLength={40}
                   onChangeText={text => setSex(text)}
                   placeholder='Sex'
                   value={sex}
                   style={styles.dropdown}
-                />
+                /> */}
                 <View style={{ height: '1%', borderBottomColor: '#FAF1CE', borderBottomWidth: .2, marginBottom: 6 }}></View>
 
                 {/* numberFive */}
@@ -596,20 +610,20 @@ export const Calculator = ({ navigation }) => {
 
       <Modal animationType='fade' visible={showAddImage} transparent={true}>
         <View style={styles.addImage}>
-          <TouchableOpacity style={styles.touch} onPress={() => {
+          <TouchableOpacity style={styles.cam} onPress={() => {
             openGallery()
           }}>
-            <Text style={styles.text}>Gallery</Text>
+            <Image source={require('../assets/gallery.png')}/>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.touch} onPress={() => {
+          <TouchableOpacity style={styles.cam} onPress={() => {
             openCamera()
           }}>
-            <Text style={styles.text}>Camera</Text>
+            <Image source={require('../assets/upload.png')}/>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.touch} onPress={() => {
+          <TouchableOpacity style={styles.cam} onPress={() => {
             setShowAddImage(!showAddImage)
           }}>
-            <Text style={styles.text}>Close</Text>
+            <Image source={require('../assets/close.png')}/>
           </TouchableOpacity>
         </View>
       </Modal>
@@ -627,6 +641,20 @@ const styles = StyleSheet.create({
     shadowRadius: 7.49,
     elevation: 12,
     backgroundColor: 'green',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#206830',
+    flex: 1,
+  },
+  cam: {
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    alignItems: 'center',
+    textAlign: 'center',
+    shadowOpacity: 0.37,
+    shadowRadius: 7.49,
+    elevation: 12,
+    backgroundColor: 'white',
     borderRadius: 20,
     borderWidth: 1,
     borderColor: '#206830',
