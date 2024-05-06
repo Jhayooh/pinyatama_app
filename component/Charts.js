@@ -31,11 +31,81 @@ const GastosSaPinya = () => {
 }
 
 const Charts = ({ farms }) => {
-    console.log('this is the farms from chart', farms);
+    const farm = farms[0]
+    console.log('this is the farms from chart', farm);
     const [isShow, setIsShow] = useState(false)
     const [selectedDay, setSelectedDay] = useState('')
     const [activities, setActivities] = useState({})
     const [startDate, setStartDate] = useState('')
+
+    const componentColl = collection(db, `farms/${farm.id}/components`)
+    const [compData, compLoading, compError] = useCollectionData(componentColl)
+
+    const roiColl = collection(db, `farms/${farm.id}/roi`)
+    const [roiData, roiLoading, roiError] = useCollectionData(roiColl)
+
+    const [partTotal, setPartTotal] = useState([])
+    const [pineTotal, setPineTotal] = useState([])
+    const [netReturn, setNetReturn] = useState([])
+    const [newRoi, setNewRoi] = useState({})
+
+    const getPercentage = (n1, n2) => {
+        console.log("pirsint", (n1 / n2) * 100);
+        return (n1 / n2) * 100
+    }
+
+    useEffect(() => {
+
+        if (roiData) {
+            const data = {
+                labels: ["ROI"],
+                data: [roiData[0].roi/100]
+            };
+            setNewRoi(data)
+            setPartTotal([
+                {
+                    name: 'Material',
+                    sum: roiData[0].materialTotal,
+                    color: '#FF5733',
+                    legendFontColor: "#7F7F7F",
+                    legendFontSize: 16
+                },
+                {
+                    name: 'Labor',
+                    sum: roiData[0].laborTotal,
+                    color: '#4682B4',
+                    legendFontColor: "#7F7F7F",
+                    legendFontSize: 16
+                }
+            ])
+            setPineTotal([
+                {
+                    name: 'Pineapple',
+                    sum: roiData[0].grossReturn,
+                    color: '#4682B4',
+                    legendFontColor: "#7F7F7F",
+                    legendFontSize: 16
+                },
+                {
+                    name: 'Batterball',
+                    sum: roiData[0].batterBall,
+                    color: '#FF5733',
+                    legendFontColor: "#7F7F7F",
+                    legendFontSize: 16
+                }
+            ])
+            setNetReturn([
+                {
+                    name: 'Net Return',
+                    sum: roiData[0].netReturn,
+                    color: '#FF5733',
+                    legendFontColor: "#7F7F7F",
+                    legendFontSize: 16
+                }
+            ])
+
+        }
+    }, [roiData]);
 
     const getMaxSched = ({ date }) => {
         return moment(date).add(2, 'month')
@@ -81,88 +151,103 @@ const Charts = ({ farms }) => {
         }
         return dates;
     };
+    console.log(pineTotal);
 
     const color = ["rgb(0, 255, 0)", "rgb(0, 0, 255)", "rgb(255, 0, 0)"]
-    // useEffect(() => {
-    //     setData(
-    //         farms?.map((doc, index) => (
-    //             {
-    //                 ...doc,
-    //                 color: color[index],
-    //                 legendFontColor: "#7F7F7F",
-    //                 legendFontSize: 15
-    //             }
-    //         ))
-    //     )
-    //     if (schedDoc) {
-    //         const newSched = schedDoc.reduce((acc, doc) => {
-    //             console.log("pa print po ng doc:", doc);
-    //             console.log("tingin ng subcollection", checkCollection(`${pathPhases}/${doc.name}/activities`));
-    //             const startDate = doc.starDate;
-    //             const formattedDate = formatDate(startDate)
-    //             acc[formattedDate] = {
-    //                 startingDay: true,
-    //                 color: '#50cebb',
-    //                 textColor: 'white',
-    //             };
-    //             if (doc.name === 'pagtatanim') {
-    //                 setMaxMonth(formatDate(getMaxSched(startDate)))
-    //                 setStartDate(formattedDate)
-    //             }
-    //             return acc;
-    //         }, {});
-    //         setSched(prevSched => ({ ...prevSched, ...newSched }));
-    //     }
-
-    //     if (actDoc) {
-    //         const newAct = actDoc.reduce((acc, doc) => {
-    //             const createdDate = doc.createdDate;
-    //             const formattedDate = formatDate(createdDate)
-    //             console.log("this is my docact", formattedDate);
-    //             acc[formattedDate] = {
-    //                 ...doc,
-    //                 marked: true,
-    //                 dotColor: 'red'
-    //             };
-    //             return acc;
-    //         }, {});
-    //         setActivities(prevActs => ({ ...prevActs, ...newAct }));
-    //     }
-    // }, [docs, schedDoc, actDoc])
-
     return (
         <>
             <ScrollView style={{
-                padding: 12,
 
             }}>
-                    <View style={{
-                        flex: 1,
-                        flexDirection: 'column',
-                        gap: 8,
-                        paddingVertical: 8
-                    }}>
-                        <View>
-
-                        </View>
-                        <Calendar
-                            markingType='period'
-                            style={{
-                                borderRadius: 16,
-                                height: 380
-                            }}
-                            onDayPress={day => {
-                                setIsShow(true)
-                                setSelectedDay(day.dateString);
-                            }}
-                            markedDates={activities}
-                        />
-                        <DoughnutAndPie />
-                        <Line />
-                        <Bar />
-                        <DoughnutAndPie />
-                        <Progress />
+                <View style={{
+                    flex: 1,
+                    flexDirection: 'column',
+                    gap: 8,
+                    paddingVertical: 8
+                }}>
+                    <View>
                     </View>
+                    <Calendar
+                        markingType='period'
+                        style={{
+                            borderRadius: 16,
+                            height: 380
+                        }}
+                        onDayPress={day => {
+                            setIsShow(true)
+                            setSelectedDay(day.dateString);
+                        }}
+                        markedDates={activities}
+                    />
+                    {
+                        roiLoading && !newRoi || Object.keys(newRoi).length === 0
+                            ?
+                            <ActivityIndicator />
+                            :
+                            <View style={{
+                                padding: 4,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backgroundColor: '#ffffff',
+                                flex: 1,
+                                borderRadius: 16,
+                            }}>
+                                <Text style={{ fontSize: 20, marginVertical: 12, fontWeight: '600' }}>ROI</Text>
+                                <Progress data={newRoi} />
+                            </View>
+                    }
+                    {
+                        roiLoading && partTotal.length > 0
+                            ?
+                            <ActivityIndicator />
+                            :
+                            <View style={{
+                                padding: 4,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backgroundColor: '#ffffff',
+                                flex: 1,
+                                borderRadius: 16,
+                            }}>
+                                <Text style={{ fontSize: 20, marginVertical: 12, fontWeight: '600' }}>Gastos sa Pinya</Text>
+                                <DoughnutAndPie data={partTotal} col={"sum"} title="Gastos sa Pinya" />
+                            </View>
+                    }
+                    {
+                        roiLoading && pineTotal.length > 0
+                            ?
+                            <ActivityIndicator />
+                            :
+                            <View style={{
+                                padding: 4,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backgroundColor: '#ffffff',
+                                flex: 1,
+                                borderRadius: 16,
+                            }}>
+                                <Text style={{ fontSize: 20, marginVertical: 12, fontWeight: '600' }}>Gross Return</Text>
+                                <DoughnutAndPie data={pineTotal} col={"sum"} title="Gross Return" />
+                            </View>
+                    }
+                    {
+                        roiLoading && netReturn.length > 0
+                            ?
+                            <ActivityIndicator />
+                            :
+                            <View style={{
+                                padding: 4,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backgroundColor: '#ffffff',
+                                flex: 1,
+                                borderRadius: 16,
+                            }}>
+                                <Text style={{ fontSize: 20, marginVertical: 12, fontWeight: '600' }}>Net Return</Text>
+                                <DoughnutAndPie data={netReturn} col={"sum"} title="Gross Return" />
+                            </View>
+                    }
+                </View>
             </ScrollView>
 
             <Modal animationType='fade' transparent={true} visible={isShow} onRequestClose={() => (setIsShow(!isShow))}>

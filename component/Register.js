@@ -1,34 +1,144 @@
-
+import React, { useState } from 'react'
+import { address } from 'addresspinas';
+import {
+    View,
+    Text,
+    Button,
+    SafeAreaView,
+    TouchableOpacity,
+    Image,
+    StyleSheet,
+    Alert,
+    Modal,
+    Platform
+} from 'react-native'
+import {
+    Input,
+    NativeBaseProvider,
+    FormControl,
+    WarningOutlineIcon,
+    Box,
+    Select,
+    CheckIcon
+} from "native-base";
+import { ProgressSteps, ProgressStep } from 'react-native-progress-steps';
 import * as ImagePicker from 'expo-image-picker';
-import React, { useEffect, useState } from 'react';
-import { useAuthState } from 'react-firebase-hooks/auth';
-import { Image, Modal, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { auth } from '../firebase/Config';
+import { collection, addDoc, updateDoc } from "firebase/firestore";
 
-export default Register = ({ visible, onClose, showModal, setShowModal }) => {
-    const [avatar, setAvatar] = useState(null);
-    const [images, setImages] = useState({})
+import backIcon from '../assets/back.png'
+import noProf from '../assets/noProf.png'
+import camera from '../assets/upload.png'
+import gallery from '../assets/gallery.png'
+import cancel from '../assets/close.png'
+import { db } from '../firebase/Config';
+
+
+const styles = StyleSheet.create({
+    safeArea: {
+        // backgroundColor: 'red',
+        flex: 1,
+        paddingTop: Platform.OS === 'android' ? 25 : 0,
+    },
+    topContainer: {
+        paddingTop: 12,
+        paddingHorizontal: 12
+    },
+    bottomContainer: {
+        // backgroundColor: 'yellow',
+        flex: 1,
+        paddingHorizontal: 32,
+        paddingVertical: 18,
+        justifyContent: 'flex-start'
+    },
+    textTitle: {
+        fontSize: 26,
+        fontWeight: '600'
+    },
+    input: {
+        color: '#333',
+        fontSize: 20,
+    },
+    formcontrol: {
+        marginTop: 14
+    },
+    avatar: {
+        width: 150,
+        height: 150,
+        borderRadius: 75,
+        borderWidth: 3,
+        borderColor: '#686868'
+    },
+    addProfContainer: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    addProfCenter: {
+        backgroundColor: '#fff',
+        padding: 24,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 16,
+
+    },
+    addProfTitle: {
+        fontSize: 20,
+        fontWeight: '600'
+
+    },
+    addProfBtn: {
+        padding: 8,
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    addProfBtnText: {
+        fontSize: 16,
+        marginTop: 12
+        // fontWeight: '600'
+    }
+})
+
+export default function Register({ navigation }) {
+    const [munCode, setMunCode] = useState(null)
+    const [imageUri, setImageUri] = useState(null)
+
+    const municipalities = address.getCityMunOfProvince('0516')
+    const brgy = address.getBarangaysOfCityMun(munCode)
+
+    const [barangay, setBarangay] = useState('')
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
-    const [baranggay, setBaranggay] = useState('');
-    const [city, setCity] = useState('');
-    const [province, setProvince] = useState('');
     const [email, setEmail] = useState('')
+    const [mun, setMun] = useState('')
     const [password, setPassword] = useState('')
-    const [showAddImage, setShowAddImage] = useState(false)
+    const [phoneNumber, setPhoneNumber] = useState('')
+    const [photoUrl, setPhotoUrl] = useState(null)
+    const [displayName, setDisplayName] = useState('')
 
-    const [user] = useAuthState(auth)
-    console.log(user);
+    const [profShow, setProfShow] = useState(false)
 
-    useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged(user => {
-            if (user) {
-                setShowModal(false)
-            }
-        })
-
-        return unsubscribe
-    }, [])
+    const handleRegister = async () => {
+        const usersRef = collection(db, 'users')
+        try {
+            const docRef = await addDoc(usersRef, {
+                brgy: barangay,
+                disabled: false,
+                displayName: displayName,
+                email: email,
+                isRegistered: false,
+                mun: mun,
+                password: password,
+                phoneNumber: phoneNumber,
+                photoURL: photoUrl
+            });
+            await updateDoc(docRef, {
+                uid: docRef.id
+            })
+            navigation.goBack()
+        } catch (e) {
+        }
+    }
 
     const openGallery = async () => {
         try {
@@ -45,9 +155,7 @@ export default Register = ({ visible, onClose, showModal, setShowModal }) => {
             console.log(e);
         }
     }
-    const handleMapPress = (e) => {
-        setUserLocation(e.nativeEvent.coordinate);
-    };
+
     const openCamera = async () => {
         try {
             await ImagePicker.requestCameraPermissionsAsync();
@@ -63,10 +171,6 @@ export default Register = ({ visible, onClose, showModal, setShowModal }) => {
             console.log(e);
         }
     }
-    const addImage = (image, height, width) => {
-        setImages({ url: image, height: height, width: width })
-    }
-    console.log("image added", images);
 
     const uploadImages = async (uri, fileType) => {
         try {
@@ -99,220 +203,181 @@ export default Register = ({ visible, onClose, showModal, setShowModal }) => {
         }
     };
 
-
-    const handleRegister = () => {
-        // Handle registration logic here
-        console.log("Avatar:", avatar);
-        console.log("First Name:", firstName);
-        console.log("Last Name:", lastName);
-        console.log("Baranggay:", baranggay);
-        console.log("City:", city);
-        console.log("Province:", province);
-        console.log("Email:", email);
-        console.log("Password:", password);
+    const progressStepsStyle = {
+        activeStepIconBorderColor: '#22b14c',
+        activeLabelColor: '#686868',
+        activeStepNumColor: 'white',
+        activeStepIconColor: '#22b14c',
+        completedStepIconColor: '#686868',
+        completedProgressBarColor: '#686868',
+        completedCheckColor: '#4bb543'
     };
+    const viewProps = {
+        flex: 1,
+    };
+    const nxtButton = {
+        backgroundColor: '#22b14c',
+        borderRadius: 12,
+        paddingHorizontal: 32,
+        paddingVertical: 12,
+    };
+    const nxtButtonText = {
+        color: '#fff',
+    }
 
-    return (
-        <Modal
-            animationType="slide"
-            transparent={true}
-            visible={visible}
-            onRequestClose={() => onClose()}
-        >
-            <View style={styles.container}>
-                <View style={styles.formContainer}>
-                    <View style={styles.card}>
-
-                    <View style={{ marginBottom: 8, width: 180, height: 180, borderRadius: 90, overflow: 'hidden', backgroundColor: '#101010', alignItems:'center' }}>      
-                            {
-                                images &&
-                                <Image source={{ uri: images.url }} style={{ height: '100%', width: 240, borderRadius: 6 }} />
-                            }
-                        </View>
-                        <View style={{ flexDirection: 'row' }}>
-                            <TouchableOpacity style={styles.touch} onPress={() => {
-                                setShowAddImage(true)
-                            }}>
-                                <Text style={styles.text}>Set Profile</Text>
+    const AddProfile = () => {
+        const handleClose = () => {
+            setProfShow(!profShow)
+        }
+        return (
+            <Modal animationType='fade' transparent={true} visible={profShow} onRequestClose={handleClose}>
+                <View style={styles.addProfContainer}>
+                    <View style={styles.addProfCenter}>
+                        <Text style={styles.addProfTitle}>Display Photo</Text>
+                        <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 24, marginTop: 16 }}>
+                            <TouchableOpacity style={styles.addProfBtn}>
+                                <Image source={camera} />
+                                <Text style={styles.addProfBtnText}>Camera</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.addProfBtn}>
+                                <Image source={gallery} />
+                                <Text style={styles.addProfBtnText}>Gallery</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.addProfBtn} onPress={handleClose}>
+                                <Image source={cancel} />
+                                <Text style={styles.addProfBtnText}>Cancel</Text>
                             </TouchableOpacity>
                         </View>
-
-                        <View style={styles.inputContainer}>
-
-                            <TextInput
-                                style={styles.input}
-                                placeholder="First Name"
-                                value={firstName}
-                                onChangeText={text => setFirstName(text)}
-                            />
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Last Name"
-                                value={lastName}
-                                onChangeText={text => setLastName(text)}
-                            />
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Baranggay"
-                                value={baranggay}
-                                onChangeText={text => setBaranggay(text)}
-                            />
-                            <TextInput
-                                style={styles.input}
-                                placeholder="City"
-                                value={city}
-                                onChangeText={text => setCity(text)}
-                            />
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Province"
-                                value={province}
-                                onChangeText={text => setProvince(text)}
-                            />
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Email"
-                                value={email}
-                                onChangeText={text => setEmail(text)}
-                            />
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Password"
-                                value={password}
-                                onChangeText={text => setPassword(text)}
-                                secureTextEntry
-                            />
-                        </View>
-                        <TouchableOpacity style={styles.button}>
-                            <Text style={styles.buttonText}>Sign Up</Text>
-                        </TouchableOpacity>
                     </View>
                 </View>
-                <Modal animationType='fade' visible={showAddImage} transparent={true}>
-                    <View style={styles.addImage}>
-                        <TouchableOpacity style={styles.touch} onPress={() => {
-                            openGallery()
-                        }}>
-                            <Text style={styles.text}>Gallery</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.touch} onPress={() => {
-                            openCamera()
-                        }}>
-                            <Text style={styles.text}>Camera</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.touch} onPress={() => {
-                            setShowAddImage(!showAddImage)
-                        }}>
-                            <Text style={styles.text}>Close</Text>
-                        </TouchableOpacity>
-                    </View>
-                </Modal>
-            </View>
-        </Modal>
-    );
-};
+            </Modal>
+        )
+    }
 
-const styles = {
-    container: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        justifyContent: 'center',
 
-    },
-    background: {
-        width: '100%',
-        height: '100%',
-        position: 'absolute',
-    },
-    logoContainer: {
-        alignItems: 'center',
-        marginTop: 120,
-    },
-    logo: {
-        width: 120,
-        height: 120,
-        borderRadius: 60,
-        resizeMode: 'contain',
-    },
+    return (
+        <NativeBaseProvider>
+            <SafeAreaView style={styles.safeArea}>
+                <View style={styles.topContainer}>
+                    <TouchableOpacity onPress={() => navigation.goBack()}>
+                        <Image source={backIcon} style={{ width: 40, height: 40 }} />
+                    </TouchableOpacity>
+                </View>
+                <View style={styles.bottomContainer}>
+                    <Text style={styles.textTitle}>Create an Account</Text>
+                    <ProgressSteps >
+                        <ProgressStep
+                            label="Personal Information"
+                            scrollable={false}
+                            viewProps={viewProps}
+                            nextBtnStyle={nxtButton}
+                            nextBtnTextStyle={nxtButtonText}>
+                            <Box style={{ flex: 1 }}>
+                                <FormControl isRequired style={styles.formcontrol}>
+                                    <FormControl.Label>Firstname</FormControl.Label>
+                                    <Input size='xl' value={firstName} placeholder='Enter firstname' style={styles.input} onChangeText={(fName) => setFirstName(fName)} />
+                                </FormControl>
 
-    formContainer: {
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    title: {
-        fontSize: 24,
-        color: '#fff',
-        marginBottom: 20,
-        marginTop: 20,
-    },
-    card: {
-        width: '80%',
-        backgroundColor: '#fff',
-        borderRadius: 4,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 2,
-        padding: 20,
-        marginBottom: 20,
-        
-    },
-    inputContainer: {
-        marginBottom:10,
-        
-    },
-    label: {
-        fontSize: 16,
-        color: '#333',
-    },
-    input: {
-        height: 40,
-        borderRadius: 6,
-        borderWidth: 1,
-        borderColor: '#ddd',
-        color: '#333',
-        paddingLeft: 10,
-        marginBottom: 10
-    },
-    button: {
-        width: '100%',
-        height: 40,
-        backgroundColor: 'green',
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: 4,
-    },
-    buttonText: {
-        color: '#fff',
-        fontSize: 16,
-    },
-    touch: {
-        paddingHorizontal: 24,
-        paddingVertical: 16,
-        alignItems: 'center',
-        textAlign: 'center',
-        shadowOpacity: 0.37,
-        shadowRadius: 7.49,
-        elevation: 12,
-        backgroundColor: '#17AF41',
-        borderRadius: 20,
-        borderWidth: 1,
-        borderColor: '#206830',
-        flex: 1,
-        alignItems: 'center',
-        marginBottom: 10
-    },
-    text: {
-        fontSize: 15,
-        fontFamily: 'serif',
-        fontWeight: 'bold',
-        color: 'white'
-    },
-    addImage: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        flexDirection: 'row'
-    },
-};
+                                <FormControl isRequired style={styles.formcontrol}>
+                                    <FormControl.Label>Lastname</FormControl.Label>
+                                    <Input size='xl' value={lastName} placeholder='Enter lastname' style={styles.input} onChangeText={(lName) => setLastName(lName)} />
+                                </FormControl>
+
+                                <FormControl isRequired style={styles.formcontrol}>
+                                    <FormControl.Label>Select Municipality</FormControl.Label>
+                                    <Select selectedValue={munCode} style={styles.input} minWidth="200" accessibilityLabel="Choose Municipality" placeholder="Choose Municipality" _selectedItem={{
+                                        bg: "teal.600",
+                                        endIcon: <CheckIcon size={5} />
+                                    }}
+                                        onValueChange={(item) => {
+                                            setMunCode(item)
+                                        }}
+                                    >
+                                        {
+                                            municipalities.cityAndMun.map((mun) => {
+                                                return (
+                                                    <Select.Item key={mun.mun_code} label={mun.name} value={mun.mun_code} />
+                                                )
+                                            })
+                                        }
+                                        <Select.Item label="UX Research" value="ux" />
+                                    </Select>
+                                </FormControl>
+
+                                <FormControl isRequired style={styles.formcontrol}>
+                                    <FormControl.Label>Choose service</FormControl.Label>
+                                    <Select selectedValue={barangay} style={styles.input} minWidth="200" accessibilityLabel="Choose Service" placeholder="Choose Service" _selectedItem={{
+                                        bg: "teal.600",
+                                        endIcon: <CheckIcon size={5} />
+                                    }} onValueChange={(item) => setBarangay(item)}>
+                                        {
+                                            brgy.barangays.map((b, index) => {
+                                                return (
+                                                    <Select.Item key={index} label={b.name} value={b.name} />
+                                                )
+                                            })
+                                        }
+                                    </Select>
+                                </FormControl>
+                            </Box>
+                        </ProgressStep>
+                        <ProgressStep
+                            label="Second Step"
+                            nextBtnStyle={nxtButton}
+                            nextBtnTextStyle={nxtButtonText}>
+                            <Box style={{ flex: 1 }}>
+                                <FormControl isRequired style={styles.formcontrol}>
+                                    <FormControl.Label>Email</FormControl.Label>
+                                    <Input size='xl' value={email} placeholder='Enter your email' style={styles.input} onChangeText={(e) => setEmail(e)} />
+                                </FormControl>
+                                <FormControl isRequired style={styles.formcontrol}>
+                                    <FormControl.Label>Phone Number</FormControl.Label>
+                                    <Input size='xl' type='' value={phoneNumber} placeholder='Enter your phone number' style={styles.input} onChangeText={(pNum) => setPhoneNumber(pNum)} />
+                                </FormControl>
+                            </Box>
+                        </ProgressStep>
+                        <ProgressStep label="Account Information" onSubmit={() => {
+                            Alert.alert(
+                                'Sign up account.',
+                                'are you sure you want to sign up this account?',
+                                [
+                                    {
+                                        text: 'Cancel',
+                                        onPress: () => console.log('Cancel Pressed'),
+                                        style: 'cancel',
+                                    },
+                                    {
+                                        text: 'Yes',
+                                        onPress: handleRegister,
+                                    }
+                                ]
+                            )
+                        }}
+                            nextBtnStyle={nxtButton}
+                            nextBtnTextStyle={nxtButtonText}>
+                            <Box style={{ flex: 1 }} >
+                                <Box style={{ width: '100%', alignItems: 'center', justifyContent: 'center' }}>
+                                    <Image source={imageUri ? imageUri : noProf} style={styles.avatar} />
+                                    <Button title='add profile' onPress={() => setProfShow(true)} />
+                                </Box>
+                                <Box style={{}}>
+                                    <FormControl isRequired style={styles.formcontrol}>
+                                        <FormControl.Label>Display Name</FormControl.Label>
+                                        <Input size='xl' value={displayName} placeholder='Enter desired display name' style={styles.input} onChangeText={(dName) => setDisplayName(dName)} />
+                                    </FormControl>
+                                    <FormControl isRequired style={styles.formcontrol}>
+                                        <FormControl.Label>Password</FormControl.Label>
+                                        <Input size='xl' value={password} type='password' placeholder='Enter your password' style={styles.input} onChangeText={(pWord) => setPassword(pWord)} />
+                                    </FormControl>
+                                </Box>
+                            </Box>
+                        </ProgressStep>
+                    </ProgressSteps>
+                </View>
+            </SafeAreaView>
+            <AddProfile />
+        </NativeBaseProvider>
+
+    )
+}
+

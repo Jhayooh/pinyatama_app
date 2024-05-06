@@ -1,10 +1,11 @@
 import { address } from 'addresspinas';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
-import { GeoPoint, Timestamp, collection, doc, ref, setDoc, updateDoc, addDoc, storage } from 'firebase/firestore';
+import { GeoPoint, Timestamp, collection, doc, setDoc, updateDoc, addDoc, FieldValue } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import {
   Button,
   FlatList,
@@ -20,16 +21,21 @@ import {
   ActivityIndicator,
   Alert
 } from 'react-native';
+
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import MapView, { Marker } from 'react-native-maps';
 
 import { Dropdown } from 'react-native-element-dropdown';
-import { auth, db } from '../firebase/Config';
+import { auth, db, storage } from '../firebase/Config';
 import { TableBuilder } from './TableBuilder';
 
 export const Calculator = ({ navigation }) => {
   const farmsColl = collection(db, 'farms')
   const [farmsData, farmsLoading, farmsError] = useCollectionData(farmsColl);
   const [showAddImage, setShowAddImage] = useState(false)
+
+  const queryParti = collection(db, 'particulars');
+  const [qParti, lParti, eParti] = useCollectionData(queryParti)
 
   const [startPicker, setStartPicker] = useState(false);
   const [endPicker, setEndPicker] = useState(false);
@@ -70,19 +76,11 @@ export const Calculator = ({ navigation }) => {
   const municipalities = address.getCityMunOfProvince('0516')
   const brgy = address.getBarangaysOfCityMun(munCode)
 
-  const [dataParti, setDataParti] = useState([])
-  const queryParti = collection(db, 'particulars');
-  const [qParti, lParti, eParti] = useCollectionData(queryParti)
-
   const [components, setComponents] = useState([])
+  const [roiDetails, setRoiDetails] = useState({})
   const [table, setTable] = useState(false)
   const [saving, setSaving] = useState(false)
-
-  useEffect(() => {
-    if (qParti) {
-      setDataParti([...qParti])
-    }
-  }, [qParti]);
+  const [calculating, setCalculating] = useState(false)
 
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
@@ -97,6 +95,13 @@ export const Calculator = ({ navigation }) => {
       console.error('Error adding document:', error);
     }
   };
+  const handleMapPress = (e) => {
+    setUserLocation(e.nativeEvent.coordinate);
+  };
+
+  const addImage = (image, height, width) => {
+    setImages(images => [...images, { url: image, height: height, width: width }])
+  }
 
   const openGallery = async () => {
     try {
@@ -114,10 +119,6 @@ export const Calculator = ({ navigation }) => {
     }
   }
 
-  const handleMapPress = (e) => {
-    setUserLocation(e.nativeEvent.coordinate);
-  };
-
   const openCamera = async () => {
     try {
       await ImagePicker.requestCameraPermissionsAsync();
@@ -134,19 +135,18 @@ export const Calculator = ({ navigation }) => {
     }
   }
 
-  const addImage = (image, height, width) => {
-    setImages(images => [...images, { url: image, height: height, width: width }])
-  }
+  const uploadImages = async (uri, fileType, newFarm) => {
 
-  const uploadImages = async (uri, fileType) => {
     try {
+      console.log("number 1");
       const response = await fetch(uri);
       const blob = await response.blob();
       const filename = uri.substring(uri.lastIndexOf('/') + 1);
+      console.log("number 2");
 
-      const storageRef = ref(storage, `FarmImages/${user.uid}/${filename}`);
+      const storageRef = ref(storage, `FarmImages/${newFarm.id}/${filename}`);
       const uploadTask = uploadBytesResumable(storageRef, blob);
-
+      console.log("number 3");
       uploadTask.on('state_changed',
         (snapshot) => {
           // Handle progress
@@ -157,13 +157,15 @@ export const Calculator = ({ navigation }) => {
         () => {
           // Upload completed successfully, get download URL
           getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-            console.log('File available at', downloadURL);
-            setUploadedImg((uImg) => [...uImg, { url: downloadURL, uid: user.uid }]);
+            console.log('File available at', typeof (downloadURL));
+            setUploadedImg([...uploadedImg, downloadURL])
+            console.log("this is the uploaded img:", uploadedImg);
           }).catch((error) => {
             console.error("Error getting download URL: ", error);
           });
         }
       );
+
     } catch (error) {
       console.error("Error uploading image: ", error);
     }
@@ -191,7 +193,9 @@ export const Calculator = ({ navigation }) => {
         brgyUID: user.uid,
       })
       await updateDoc(newFarm, { id: newFarm.id })
-
+      const farmComp = collection(db, `farms/${newFarm.id}/components`);
+      const eventsRef = collection(db, `farms/${newFarm.id}/events`);
+      const roiRef = collection(db, `farms/${newFarm.id}/roi`);
       Alert.alert(`Saved Successfully`, `${farmerName} is saved. Thank you very much for using this application. Donate at our charity using GCASH (+9564760102)`, [
         {
           text: 'Ok', onPress: () => {
@@ -200,7 +204,6 @@ export const Calculator = ({ navigation }) => {
           }
         },
       ])
-      const farmComp = collection(db, `farms/${newFarm.id}/components`);
       components.forEach(async (component) => {
         try {
 
@@ -211,7 +214,12 @@ export const Calculator = ({ navigation }) => {
           console.log("error sa components:", e);
         }
       })
-      const eventsRef = collection(db, `farms/${newFarm.id}/events`);
+
+      const newRoi = await addDoc(roiRef, {
+        ...roiDetails
+      })
+      await updateDoc(newRoi, { id: newRoi.id })
+
       const vegetativeDate = new Date(Date.parse(startDate));
       const floweringDate = new Date(vegetativeDate);
       floweringDate.setMonth(vegetativeDate.getMonth() + 10);
@@ -247,11 +255,14 @@ export const Calculator = ({ navigation }) => {
       })
       await updateDoc(eRef_fruiting, { id: eRef_fruiting.id })
 
-      const uploadPromises = images.map(img => uploadImages(img.url, "Image"));
-      // Wait for all images to upload
-      await Promise.all(uploadPromises);
-      await updateDoc(newFarm, { images: uploadedImg })
+      for (const img of images) {
+        const upImg = await uploadImages(img.url, "Image", newFarm.id);
+        console.log("dl url", upImg);
 
+        setUploadedImg([...uploadedImg, upImg])
+        await updateDoc(newFarm, { images: uploadedImg })
+        console.log("this is the uploaded images:", uploadedImg);
+      }
     } catch (e) {
       console.log("Saving Error: ", e);
     }
@@ -332,38 +343,24 @@ export const Calculator = ({ navigation }) => {
 
   const getMult = (numOne, numTwo) => {
     const num = numOne * numTwo
-    return parseFloat(num.toFixed(0))
+    return parseFloat(num)
   }
 
   const handleBase = () => {
     const baseValue = parseFloat(base);
-
-    const plantingMaterials = dataParti.find(item => item.name === "Planting Materials");
-    const ferZero = dataParti.find(item => item.name === "0-0-60");
-    const ferUrea = dataParti.find(item => item.name === "Urea");
-    const Diuron = dataParti.find(item => item.name === "Diuron");
-    const Sticker = dataParti.find(item => item.name === "Sticker");
-
-    const pmQnty = getMult(area, 30000)
-    const fZeroQnty = getMult(area, 5)
-    const fUreaQnty = getMult(area, 5)
-    const dQnty = getMult(area, 2)
-    const sQnty = getMult(area, 1)
-
     if (baseValue === 0) {
       return;
     }
 
-    setComponents([
-      { ...plantingMaterials, qnty: pmQnty, totalPrice: getMult(pmQnty, plantingMaterials.price), },
-      { ...ferZero, qnty: fZeroQnty, totalPrice: getMult(fZeroQnty, ferZero.price) },
-      { ...ferUrea, qnty: fUreaQnty, totalPrice: getMult(fUreaQnty, ferUrea.price) },
-      { ...Diuron, qnty: dQnty, totalPrice: getMult(dQnty, Diuron.price) },
-      { ...Sticker, qnty: sQnty, totalPrice: getMult(sQnty, Sticker.price) }
-    ])
+    const newComponents = qParti.map(item => {
+      const newQnty = getMult(area, item.defQnty)
+      return { ...item, qntyPrice: newQnty, totalPrice: getMult(newQnty, item.price), price: parseInt(item.price) };
+    });
 
-    setTable(true)
-  }
+    setComponents(newComponents);
+    setTable(true);
+    setCalculating(false);
+  };
 
 
   return (
@@ -378,70 +375,78 @@ export const Calculator = ({ navigation }) => {
             <View style={styles.category_container}>
               <Text style={styles.head}>1. Land Area</Text>
               {
-                lParti
-                  ?
-                  <ActivityIndicator />
-                  :
-                  <>
-                    {/* Number 1 */}
-                    <View style={{ display: 'flex', flexDirection: 'row' }}>
+                <>
+                  {/* Number 1 */}
+                  <View style={{ display: 'flex', flexDirection: 'row' }}>
 
-                      <TextInput
-                        editable
-                        // maxLength={40}
-                        onChangeText={(base) => {
-                          setBase(base)
-                          setArea(parseFloat((base / 30000).toFixed(4)))
-                        }}
-                        placeholder='No. of plants'
-                        keyboardType='numeric'
-                        value={base}
-                        style={{ ...styles.dropdown, flex: 3 }}
-                        disabled
-                      />
-                      <Button title='Calculate' style={{ flex: 1 }} onPress={() =>
-                        handleBase()
-                      } />
-                    </View>
-                    {table && <TableBuilder components={components} area={area} />}
-                  </>
+                    <TextInput
+                      editable
+                      // maxLength={40}
+                      onChangeText={(base) => {
+                        setBase(base)
+                        setArea(parseFloat(base / 30000))
+                      }}
+                      placeholder='No. of plants'
+                      keyboardType='numeric'
+                      value={base}
+                      style={{ ...styles.dropdown, flex: 3 }}
+                      disabled
+                    />
+                    {
+                      lParti && calculating
+                        ?
+                        <ActivityIndicator style={{ flex: 1 }} size='small' color='#FF5733' />
+                        :
+                        <TouchableOpacity style={{ marginLeft: 10, justifyContent: 'center' }} onPress={() => {
+                          setCalculating(true)
+                          handleBase()
+                        }
+                        } >
+                          <Image source={require('../assets/calc.png')} style={{ width: 30, height: 30 }} />
+                        </TouchableOpacity>
+                    }
+                  </View>
+                  {table && <TableBuilder components={components} area={area} setRoiDetails={setRoiDetails} />}
+                </>
               }
               <View style={{ height: '1%', borderBottomColor: '#FAF1CE', borderBottomWidth: .2, marginBottom: 6 }}></View>
 
               {/* Number 2 */}
               <Text style={styles.head}>2. QP Farm Details</Text>
-              <TextInput
-                editable
-                maxLength={40}
-                onChangeText={text => setCropStage(text)}
-                placeholder='Stage of Crops'
+              <Dropdown
+                style={styles.dropdown}
+                placeholder="Select Stage of Crops"
+                data={['Vegetative', 'Flowering', 'Fruiting', 'Harvesting']}
                 value={cropStage}
-                style={styles.dropdown}
+                onChange={value => setCropStage(value)}
+              />
+              <View style={{ display: 'flex', flexDirection: 'row' }}>
+                <TextInput
+                  style={{ ...styles.dropdown, flex: 3 }}
+                  value={startDate.toLocaleDateString()}
+                  placeholder="Date of Planting"
+                />
+                <TouchableOpacity onPress={() => setStartPicker(true)} style={{ marginLeft: 10, justifyContent: 'center' }}>
+                  <Image source={require('../assets/cal.png')} style={{ width: 30, height: 30 }} />
+                </TouchableOpacity>
 
-              />
-              <TextInput
-                style={styles.dropdown}
-                value={startDate.toLocaleDateString()}
-                placeholder="Date of Planting"
-              />
-              <Button onPress={()=>setStartPicker(true)} title="Date of Planting" />
-              <DateTimePickerModal
-                isVisible={startPicker}
-                mode="date"
-                onConfirm={(date) => {
-                  setStartDate(date)
-                  setStartPicker(false)
-                }}
-                onCancel={()=>setStartPicker(false)}
-                style={{ marginBottom: 10 }}
-              />
-
-              <TextInput
+                <DateTimePickerModal
+                  isVisible={startPicker}
+                  mode="date"
+                  onConfirm={(date) => {
+                    setStartDate(date)
+                    setStartPicker(false)
+                  }}
+                  onCancel={() => setStartPicker(false)}
+                  style={{ marginBottom: 10 }}
+                />
+              </View>
+              {/* <TextInput
                 style={styles.dropdown}
                 value={endDate.toLocaleDateString()}
                 placeholder="Date of Harvest"
               />
-              <Button onPress={()=>setEndPicker(true)} title="Date of Harvest" />
+              <Button onPress={() => setEndPicker(true)} title="Date of Harvest" />
 
               <DateTimePickerModal
                 isVisible={endPicker}
@@ -450,9 +455,9 @@ export const Calculator = ({ navigation }) => {
                   setEndDate(date)
                   setEndPicker(false)
                 }}
-                onCancel={()=>setEndPicker(false)}
+                onCancel={() => setEndPicker(false)}
                 style={{ marginBottom: 10 }}
-              />
+              /> */}
 
               <View style={{ height: '1%', borderBottomColor: '#FAF1CE', borderBottomWidth: .2, marginBottom: 6 }}></View>
 
@@ -514,6 +519,25 @@ export const Calculator = ({ navigation }) => {
                     setBrgyFocus(false);
                   }}
                 />
+                <View style={styles.container1}>
+                  <MapView style={styles.map} region={region} onPress={handleMapPress}>
+                    {userLocation && (
+                      <Marker
+                        coordinate={{
+                          latitude: userLocation.latitude,
+                          longitude: userLocation.longitude,
+                        }}
+                        title="Your Location"
+                        description="You are here!"
+                        draggable
+                        onDragEnd={(e) => setUserLocation(e.nativeEvent.coordinate)}
+                      />
+                    )}
+                  </MapView>
+                  <View style={styles.buttonContainer}>
+                    <Button title="Update Location" onPress={handleUpdateLocation} />
+                  </View>
+                </View>
                 <View style={{ height: '1%', borderBottomColor: '#FAF1CE', borderBottomWidth: .2, marginBottom: 6 }}></View>
 
                 {/* numberFour */}
@@ -526,14 +550,21 @@ export const Calculator = ({ navigation }) => {
                   value={farmerName}
                   style={styles.dropdown}
                 />
-                <TextInput
+                 <Dropdown
+                 style={styles.dropdown}
+                 placeholder='Select Sex'
+                 data={['Male','Female']}
+                 value={sex}
+                 onChangeText={text => setSex(text)}   
+                 />
+                {/* <TextInput
                   editable
                   maxLength={40}
                   onChangeText={text => setSex(text)}
                   placeholder='Sex'
                   value={sex}
                   style={styles.dropdown}
-                />
+                /> */}
                 <View style={{ height: '1%', borderBottomColor: '#FAF1CE', borderBottomWidth: .2, marginBottom: 6 }}></View>
 
                 {/* numberFive */}
@@ -569,26 +600,6 @@ export const Calculator = ({ navigation }) => {
                 </View>
 
               </View>
-              {/* <View style={styles.container1}>
-                <MapView style={styles.map} region={region} onPress={handleMapPress}>
-                  {userLocation && (
-                    <Marker
-                      coordinate={{
-                        latitude: userLocation.latitude,
-                        longitude: userLocation.longitude,
-                      }}
-                      title="Your Location"
-                      description="You are here!"
-                      draggable
-                      onDragEnd={(e) => setUserLocation(e.nativeEvent.coordinate)}
-                    />
-                  )}
-                </MapView>
-                <View style={styles.buttonContainer}>
-                  <Button title="Update Location" onPress={handleUpdateLocation} />
-                </View>
-              </View> */}
-
               {/* ImagesGal */}
             </View>
           </ScrollView>
@@ -599,20 +610,20 @@ export const Calculator = ({ navigation }) => {
 
       <Modal animationType='fade' visible={showAddImage} transparent={true}>
         <View style={styles.addImage}>
-          <TouchableOpacity style={styles.touch} onPress={() => {
+          <TouchableOpacity style={styles.cam} onPress={() => {
             openGallery()
           }}>
-            <Text style={styles.text}>Gallery</Text>
+            <Image source={require('../assets/gallery.png')}/>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.touch} onPress={() => {
+          <TouchableOpacity style={styles.cam} onPress={() => {
             openCamera()
           }}>
-            <Text style={styles.text}>Camera</Text>
+            <Image source={require('../assets/upload.png')}/>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.touch} onPress={() => {
+          <TouchableOpacity style={styles.cam} onPress={() => {
             setShowAddImage(!showAddImage)
           }}>
-            <Text style={styles.text}>Close</Text>
+            <Image source={require('../assets/close.png')}/>
           </TouchableOpacity>
         </View>
       </Modal>
@@ -630,6 +641,20 @@ const styles = StyleSheet.create({
     shadowRadius: 7.49,
     elevation: 12,
     backgroundColor: 'green',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#206830',
+    flex: 1,
+  },
+  cam: {
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    alignItems: 'center',
+    textAlign: 'center',
+    shadowOpacity: 0.37,
+    shadowRadius: 7.49,
+    elevation: 12,
+    backgroundColor: 'white',
     borderRadius: 20,
     borderWidth: 1,
     borderColor: '#206830',
