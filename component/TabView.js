@@ -45,7 +45,7 @@ const TabView = ({ route, navigation }) => {
                 <Card
                   key={farm.id} // Make sure to provide a unique key for each item
                   title={farm.title}
-                  description="This is the example of React Native Card view. This is the easiest way to adding a card view on your screen."
+                  description="This is the Location of the farm"
                   imageSource={require('../assets/pine.jpg')}
                   onPress={() => { handleCardPress(farm) }}
                 />

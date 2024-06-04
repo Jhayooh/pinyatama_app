@@ -144,7 +144,7 @@ export const Calculator = ({ navigation }) => {
       const filename = uri.substring(uri.lastIndexOf('/') + 1);
       console.log("number 2");
 
-      const storageRef = ref(storage, `FarmImages/${newFarm.id}/${filename}`);
+      const storageRef = ref(storage, `FarmImages/${newFarm}/${filename}`);
       const uploadTask = uploadBytesResumable(storageRef, blob);
       console.log("number 3");
       uploadTask.on('state_changed',
@@ -196,14 +196,6 @@ export const Calculator = ({ navigation }) => {
       const farmComp = collection(db, `farms/${newFarm.id}/components`);
       const eventsRef = collection(db, `farms/${newFarm.id}/events`);
       const roiRef = collection(db, `farms/${newFarm.id}/roi`);
-      Alert.alert(`Saved Successfully`, `${farmerName} is saved. Thank you very much for using this application. Donate at our charity using GCASH (+9564760102)`, [
-        {
-          text: 'Ok', onPress: () => {
-            setSaving(false)
-            goBack()
-          }
-        },
-      ])
       components.forEach(async (component) => {
         try {
 
@@ -220,12 +212,24 @@ export const Calculator = ({ navigation }) => {
       })
       await updateDoc(newRoi, { id: newRoi.id })
 
+      Alert.alert(`Saved Successfully`, `${farmName} is saved.`, [
+        {
+          text: 'Ok', onPress: () => {
+            setSaving(false)
+            goBack()
+          }
+        },
+      ])
+
       const vegetativeDate = new Date(Date.parse(startDate));
+
       const floweringDate = new Date(vegetativeDate);
       floweringDate.setMonth(vegetativeDate.getMonth() + 10);
+
       const fruitingDate = new Date(floweringDate);
       fruitingDate.setMonth(floweringDate.getMonth() + 3);
-      const harvestDate = new Date(Date.parse(endDate));
+
+      const harvestDate = new Date(fruitingDate);
       harvestDate.setMonth(fruitingDate.getMonth() + 5);
 
       const eRef_vegetative = await addDoc(eventsRef, {
@@ -271,7 +275,7 @@ export const Calculator = ({ navigation }) => {
   }
   const BottomButton = () => {
     const confirmSave = () =>
-      Alert.alert(`Confirm`, `Do you want to save ${farmerName}?`, [
+      Alert.alert(`Confirm`, `Do you want to save ${farmName}?`, [
         {
           text: 'Cancel',
           onPress: () => console.log('Cancel Pressed'),
@@ -361,7 +365,11 @@ export const Calculator = ({ navigation }) => {
     setTable(true);
     setCalculating(false);
   };
-
+  const data = [
+    { label: 'Male', value: 'Male' },
+    { label: 'Female', value: 'Female' },
+  ];
+  const [isFocus, setIsFocus] = useState(false);
 
   return (
     <>
@@ -413,13 +421,21 @@ export const Calculator = ({ navigation }) => {
 
               {/* Number 2 */}
               <Text style={styles.head}>2. QP Farm Details</Text>
-              <Dropdown
-                style={styles.dropdown}
-                placeholder="Select Stage of Crops"
-                data={['Vegetative', 'Flowering', 'Fruiting', 'Harvesting']}
+              <TextInput
+                editable
+                maxLength={40}
+                onChangeText={text => setCropStage(text)}
+                placeholder='Stage of Crops'
                 value={cropStage}
-                onChange={value => setCropStage(value)}
+                style={styles.dropdown}
               />
+              {/* <Dropdown
+              style={styles.dropdown}
+              placeholder="Select Stage of Crops"
+              data={['Vegetative', 'Flowering', 'Fruiting', 'Harvesting']}
+              value={cropStage}
+              onChange={value => setCropStage(value)}
+            /> */}
               <View style={{ display: 'flex', flexDirection: 'row' }}>
                 <TextInput
                   style={{ ...styles.dropdown, flex: 3 }}
@@ -442,22 +458,22 @@ export const Calculator = ({ navigation }) => {
                 />
               </View>
               {/* <TextInput
-                style={styles.dropdown}
-                value={endDate.toLocaleDateString()}
-                placeholder="Date of Harvest"
-              />
-              <Button onPress={() => setEndPicker(true)} title="Date of Harvest" />
+              style={styles.dropdown}
+              value={endDate.toLocaleDateString()}
+              placeholder="Date of Harvest"
+            />
+            <Button onPress={() => setEndPicker(true)} title="Date of Harvest" />
 
-              <DateTimePickerModal
-                isVisible={endPicker}
-                mode="date"
-                onConfirm={(date) => {
-                  setEndDate(date)
-                  setEndPicker(false)
-                }}
-                onCancel={() => setEndPicker(false)}
-                style={{ marginBottom: 10 }}
-              /> */}
+            <DateTimePickerModal
+              isVisible={endPicker}
+              mode="date"
+              onConfirm={(date) => {
+                setEndDate(date)
+                setEndPicker(false)
+              }}
+              onCancel={() => setEndPicker(false)}
+              style={{ marginBottom: 10 }}
+            /> */}
 
               <View style={{ height: '1%', borderBottomColor: '#FAF1CE', borderBottomWidth: .2, marginBottom: 6 }}></View>
 
@@ -550,21 +566,33 @@ export const Calculator = ({ navigation }) => {
                   value={farmerName}
                   style={styles.dropdown}
                 />
-                 <Dropdown
-                 style={styles.dropdown}
-                 placeholder='Select Sex'
-                 data={['Male','Female']}
-                 value={sex}
-                 onChangeText={text => setSex(text)}   
-                 />
-                {/* <TextInput
-                  editable
-                  maxLength={40}
-                  onChangeText={text => setSex(text)}
-                  placeholder='Sex'
+                {/* <Dropdown
+               style={styles.dropdown}
+               placeholder='Select Sex'
+               data={['Male','Female']}
+               value={sex}
+               onChangeText={text => setSex(text)}   
+               /> */}
+                <Dropdown
+                  style={[styles.dropdown, isFocus && { borderColor: 'blue' }]}
+                  placeholderStyle={styles.placeholderStyle}
+                  selectedTextStyle={styles.selectedTextStyle}
+                  inputSearchStyle={styles.inputSearchStyle}
+                  data={data}
+                  search
+                  maxHeight={300}
+                  labelField="label"
+                  valueField="value"
+                  placeholder={!isFocus ? 'Select item' : '...'}
+                  searchPlaceholder="Search..."
                   value={sex}
-                  style={styles.dropdown}
-                /> */}
+                  onFocus={() => setIsFocus(true)}
+                  onBlur={() => setIsFocus(false)}
+                  onChange={item => {
+                    setSex(item.value);
+                    setIsFocus(false);
+                  }}
+                  />
                 <View style={{ height: '1%', borderBottomColor: '#FAF1CE', borderBottomWidth: .2, marginBottom: 6 }}></View>
 
                 {/* numberFive */}
@@ -613,17 +641,17 @@ export const Calculator = ({ navigation }) => {
           <TouchableOpacity style={styles.cam} onPress={() => {
             openGallery()
           }}>
-            <Image source={require('../assets/gallery.png')}/>
+            <Image source={require('../assets/gallery.png')} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.cam} onPress={() => {
             openCamera()
           }}>
-            <Image source={require('../assets/upload.png')}/>
+            <Image source={require('../assets/upload.png')} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.cam} onPress={() => {
             setShowAddImage(!showAddImage)
           }}>
-            <Image source={require('../assets/close.png')}/>
+            <Image source={require('../assets/close.png')} />
           </TouchableOpacity>
         </View>
       </Modal>
