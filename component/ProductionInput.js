@@ -13,6 +13,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Image
 } from "react-native";
 import { auth, db } from '../firebase/Config';
 import { BottomButton } from './BottomButton';
@@ -43,13 +44,13 @@ const ProductionInput = ({ route, navigation }) => {
   return (
     <>
       <SafeAreaView style={styles.container}>
-        <ImageBackground source={require('../assets/brakrawnd.png')} resizeMode="cover" style={styles.image}>
+        <ImageBackground resizeMode="cover" style={styles.image}>
           <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', gap: 3}}>
             <Text style={styles.name}>{farm.title}</Text>
-            <TouchableOpacity style={{ height: 32, backgroundColor: 'red', alignItems: 'center', justifyContent: 'center' }} onPress={() => {
+            <TouchableOpacity style={{ height: 32, alignItems: 'center', justifyContent: 'center', paddingTop:20}} onPress={() => {
               setEdit(!edit)
             }}>
-              <Text>Edit</Text>
+              <Image source={require('../assets/edit.png')} style={{width:20, height:20}}/>
             </TouchableOpacity>
           </View>
           <Text style={styles.loc}>{`${farm.mun}, ${farm.brgy}`}</Text>
@@ -103,35 +104,38 @@ const ProductionInput = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent:'center',
+    alignItems:'center',
   },
   image: {
     flex: 1,
     // opacity: .5,
-    padding: 12
+    padding: 12,
+    backgroundColor:'#22b14c',
+    padding:20
 
   },
   name: {
     fontSize: 32,
-    color: '#fff',
+    paddingTop:20,
+    color: 'green',
     fontWeight: '700',
   },
   loc: {
     fontSize: 16,
-    color: '#fff',
+    color: 'black',
     fontWeight: '700',
     marginTop: 6
   },
   label: {
     // flex: 'row',
-    backgroundColor: "#E3E55A",
-    fontSize: 16,
-    alignSelf: "center",
-    paddingVertical: 8,
-    paddingHorizontal: 2,
+    alignItems:'center',
     marginTop: 18,
+    fontSize:23,
+    justifyContent:'center',
     fontWeight: 'bold',
-    justifyContent: 'center',
-    fontFamily: 'serif'
+    fontFamily: 'serif',
+    color:'white'
 
   },
   scrollView: {
