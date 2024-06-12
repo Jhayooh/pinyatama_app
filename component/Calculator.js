@@ -2,7 +2,7 @@ import { address } from 'addresspinas';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import { GeoPoint, Timestamp, collection, doc, setDoc, updateDoc, addDoc, FieldValue } from 'firebase/firestore';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
@@ -39,6 +39,9 @@ export const Calculator = ({ navigation }) => {
 
   const [startPicker, setStartPicker] = useState(false);
   const [endPicker, setEndPicker] = useState(false);
+
+  const focusNumplants = useRef(null)
+  const focusCropstage = useRef(null)
 
   const getDate = () => {
     let tempDate = date.toString().split(' ');
@@ -82,6 +85,22 @@ export const Calculator = ({ navigation }) => {
   const [saving, setSaving] = useState(false)
   const [calculating, setCalculating] = useState(false)
 
+  function GetIndObj(object, id, key) {
+    return object.filter((obj) => {
+      return obj[key] === id;
+    });
+  }
+  const usersCol = collection(db, 'users');
+  const [users, loadingUsers] = useCollectionData(usersCol)
+
+  useEffect(() => {
+    if (!loadingUsers){
+      const indUser = GetIndObj(users, user.uid, 'id')
+      setMunicipality(indUser[0].mun)
+      setBrgyCode(indUser[0].brgy)
+    }
+  }, [users])
+
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
 
@@ -95,6 +114,7 @@ export const Calculator = ({ navigation }) => {
       console.error('Error adding document:', error);
     }
   };
+
   const handleMapPress = (e) => {
     setUserLocation(e.nativeEvent.coordinate);
   };
@@ -136,7 +156,6 @@ export const Calculator = ({ navigation }) => {
   }
 
   const uploadImages = async (uri, fileType, newFarm) => {
-
     try {
       console.log("number 1");
       const response = await fetch(uri);
@@ -192,6 +211,7 @@ export const Calculator = ({ navigation }) => {
         sex: sex,
         brgyUID: user.uid,
       })
+
       await updateDoc(newFarm, { id: newFarm.id })
       const farmComp = collection(db, `farms/${newFarm.id}/components`);
       const eventsRef = collection(db, `farms/${newFarm.id}/events`);
@@ -274,6 +294,40 @@ export const Calculator = ({ navigation }) => {
     setUploadedImg([])
   }
   const BottomButton = () => {
+    const checkMissing = () => {
+      if (!base) {
+        Alert.alert('Walang laman haha', 'Maglagay ng bilang ng tanim.', [
+          {
+            text: 'Ok',
+            onPress: () => {focusNumplants.current.focus()},
+            style: 'cancel'
+          }
+        ])
+        return
+      }
+      if (!calculating){
+        Alert.alert('Walang laman haha', 'Kalkyuladuhin ang bilang ng tanim.', [
+          {
+            text: 'Ok',
+            onPress: () => {focusNumplants.current.focus()},
+            style: 'cancel'
+          }
+        ])
+        return
+      }
+      if (!cropStage){
+        Alert.alert('Walang laman haha', 'Maglagay ng stage ng tanim.', [
+          {
+            text: 'Ok',
+            onPress: () => {focusNumplants.current.focus()},
+            style: 'cancel'
+          }
+        ])
+        return
+      }
+      confirmSave()
+    }
+
     const confirmSave = () =>
       Alert.alert(`Confirm`, `Do you want to save ${farmName}?`, [
         {
@@ -291,7 +345,7 @@ export const Calculator = ({ navigation }) => {
 
     return (
       <View style={{ marginTop: 6, width: '100%', marginBottom: 16 }}>
-        <TouchableOpacity style={{ ...styles.touch, flex: 0, width: '100%' }} onPress={confirmSave}>
+        <TouchableOpacity style={{ ...styles.touch, flex: 0, width: '100%' }} onPress={checkMissing}>
           <Text style={styles.text}>SAVE</Text>
         </TouchableOpacity>
       </View>
@@ -381,19 +435,50 @@ export const Calculator = ({ navigation }) => {
           >
             {/* particulars  */}
             <View style={styles.category_container}>
+                {/* numberFour */}
+                <Text style={styles.head}>4. Farmer Details</Text>
+                <TextInput
+                  editable
+                  maxLength={40}
+                  onChangeText={text => setFarmerName(text)}
+                  placeholder='Name of Farmer'
+                  value={farmerName}
+                  style={styles.dropdown}
+                />
+                <Dropdown
+                  style={[styles.dropdown, isFocus && { borderColor: 'blue' }]}
+                  placeholderStyle={styles.placeholderStyle}
+                  selectedTextStyle={styles.selectedTextStyle}
+                  inputSearchStyle={styles.inputSearchStyle}
+                  data={data}
+                  search
+                  maxHeight={300}
+                  labelField="label"
+                  valueField="value"
+                  placeholder={!isFocus ? 'Select item' : '...'}
+                  searchPlaceholder="Search..."
+                  value={sex}
+                  onFocus={() => setIsFocus(true)}
+                  onBlur={() => setIsFocus(false)}
+                  onChange={item => {
+                    setSex(item.value);
+                    setIsFocus(false);
+                  }}
+                />
+                <View style={{ height: '1%', borderBottomColor: '#FAF1CE', borderBottomWidth: .2, marginBottom: 6 }}></View>
+
               <Text style={styles.head}>1. Land Area</Text>
               {
                 <>
                   {/* Number 1 */}
                   <View style={{ display: 'flex', flexDirection: 'row' }}>
-
                     <TextInput
                       editable
-                      // maxLength={40}
                       onChangeText={(base) => {
                         setBase(base)
                         setArea(parseFloat(base / 30000))
                       }}
+                      ref={focusNumplants}
                       placeholder='No. of plants'
                       keyboardType='numeric'
                       value={base}
@@ -429,13 +514,6 @@ export const Calculator = ({ navigation }) => {
                 value={cropStage}
                 style={styles.dropdown}
               />
-              {/* <Dropdown
-              style={styles.dropdown}
-              placeholder="Select Stage of Crops"
-              data={['Vegetative', 'Flowering', 'Fruiting', 'Harvesting']}
-              value={cropStage}
-              onChange={value => setCropStage(value)}
-            /> */}
               <View style={{ display: 'flex', flexDirection: 'row' }}>
                 <TextInput
                   style={{ ...styles.dropdown, flex: 3 }}
@@ -457,34 +535,11 @@ export const Calculator = ({ navigation }) => {
                   style={{ marginBottom: 10 }}
                 />
               </View>
-              {/* <TextInput
-              style={styles.dropdown}
-              value={endDate.toLocaleDateString()}
-              placeholder="Date of Harvest"
-            />
-            <Button onPress={() => setEndPicker(true)} title="Date of Harvest" />
-
-            <DateTimePickerModal
-              isVisible={endPicker}
-              mode="date"
-              onConfirm={(date) => {
-                setEndDate(date)
-                setEndPicker(false)
-              }}
-              onCancel={() => setEndPicker(false)}
-              style={{ marginBottom: 10 }}
-            /> */}
 
               <View style={{ height: '1%', borderBottomColor: '#FAF1CE', borderBottomWidth: .2, marginBottom: 6 }}></View>
 
               {/* numberThree */}
               <Text style={styles.head}>3. Input Farm Location</Text>
-              <View style={{
-                width: '100%',
-                flexDirection: 'column',
-                gap: 8,
-                paddingVertical: 8,
-              }}>
                 <TextInput
                   editable
                   maxLength={40}
@@ -493,48 +548,21 @@ export const Calculator = ({ navigation }) => {
                   value={farmName}
                   style={styles.dropdown}
                 />
-                <Dropdown
-                  style={[styles.dropdown, munFocus && { borderColor: 'blue' }]}
-                  placeholderStyle={styles.placeholderStyle}
-                  selectedTextStyle={styles.selectedTextStyle}
-                  inputSearchStyle={styles.inputSearchStyle}
-                  data={municipalities.cityAndMun}
-                  search
-                  maxHeight={220}
-                  labelField="name"
-                  valueField="mun_code"
-                  placeholder={!munFocus ? 'Select Municipalities' : '...'}
-                  searchPlaceholder="Search..."
-                  value={munCode}
-                  onFocus={() => setMunFocus(true)}
-                  onBlur={() => setMunFocus(false)}
-                  onChange={item => {
-                    setMunCode(item.mun_code);
-                    setMunicipality(item.name)
-                    setMunFocus(false);
-                  }}
+                <TextInput
+                  editable={false}
+                  maxLength={40}
+                  // placeholder='Enter Farm Name'
+                  value={municipality}
+                  style={styles.dropdown}
+                />
+                <TextInput
+                  maxLength={40}
+                  disabled={false}
+                  // placeholder='Enter Farm Name'
+                  value={brgyCode}
+                  style={styles.dropdown}
                 />
 
-                <Dropdown
-                  style={[styles.dropdown, brgyFocus && { borderColor: 'blue' }]}
-                  placeholderStyle={styles.placeholderStyle}
-                  selectedTextStyle={styles.selectedTextStyle}
-                  inputSearchStyle={styles.inputSearchStyle}
-                  data={brgy.barangays}
-                  search
-                  maxHeight={220}
-                  labelField="name"
-                  valueField="name"
-                  placeholder={!brgyFocus ? 'Select Barangay' : '...'}
-                  searchPlaceholder="Search..."
-                  value={brgyCode}
-                  onFocus={() => setBrgyFocus(true)}
-                  onBlur={() => setBrgyFocus(false)}
-                  onChange={item => {
-                    setBrgyCode(item.name);
-                    setBrgyFocus(false);
-                  }}
-                />
                 <View style={styles.container1}>
                   <MapView style={styles.map} region={region} onPress={handleMapPress}>
                     {userLocation && (
@@ -554,45 +582,6 @@ export const Calculator = ({ navigation }) => {
                     <Button title="Update Location" onPress={handleUpdateLocation} />
                   </View>
                 </View>
-                <View style={{ height: '1%', borderBottomColor: '#FAF1CE', borderBottomWidth: .2, marginBottom: 6 }}></View>
-
-                {/* numberFour */}
-                <Text style={styles.head}>4. Farmer Details</Text>
-                <TextInput
-                  editable
-                  maxLength={40}
-                  onChangeText={text => setFarmerName(text)}
-                  placeholder='Name of Farmer'
-                  value={farmerName}
-                  style={styles.dropdown}
-                />
-                {/* <Dropdown
-               style={styles.dropdown}
-               placeholder='Select Sex'
-               data={['Male','Female']}
-               value={sex}
-               onChangeText={text => setSex(text)}   
-               /> */}
-                <Dropdown
-                  style={[styles.dropdown, isFocus && { borderColor: 'blue' }]}
-                  placeholderStyle={styles.placeholderStyle}
-                  selectedTextStyle={styles.selectedTextStyle}
-                  inputSearchStyle={styles.inputSearchStyle}
-                  data={data}
-                  search
-                  maxHeight={300}
-                  labelField="label"
-                  valueField="value"
-                  placeholder={!isFocus ? 'Select item' : '...'}
-                  searchPlaceholder="Search..."
-                  value={sex}
-                  onFocus={() => setIsFocus(true)}
-                  onBlur={() => setIsFocus(false)}
-                  onChange={item => {
-                    setSex(item.value);
-                    setIsFocus(false);
-                  }}
-                  />
                 <View style={{ height: '1%', borderBottomColor: '#FAF1CE', borderBottomWidth: .2, marginBottom: 6 }}></View>
 
                 {/* numberFive */}
@@ -626,8 +615,6 @@ export const Calculator = ({ navigation }) => {
                     </TouchableOpacity>
                   </View>
                 </View>
-
-              </View>
               {/* ImagesGal */}
             </View>
           </ScrollView>
