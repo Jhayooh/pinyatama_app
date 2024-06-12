@@ -24,6 +24,8 @@ import {
 import { ProgressSteps, ProgressStep } from 'react-native-progress-steps';
 import * as ImagePicker from 'expo-image-picker';
 import { collection, addDoc, updateDoc } from "firebase/firestore";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { storage } from '../firebase/Config';
 
 import backIcon from '../assets/back.png'
 import noProf from '../assets/noProf.png'
@@ -126,15 +128,14 @@ export default function Register({ navigation }) {
                 disabled: false,
                 displayName: displayName,
                 email: email,
-                isRegistered: false,
+                status: 'pending',
                 mun: mun,
                 password: password,
                 phoneNumber: phoneNumber,
-                photoURL: photoUrl
+                photoURL: photoUrl,
+                uid: '1'
             });
-            await updateDoc(docRef, {
-                uid: docRef.id
-            })
+            await uploadImages(docRef)
             navigation.goBack()
         } catch (e) {
         }
@@ -144,12 +145,15 @@ export default function Register({ navigation }) {
         try {
 
             let result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.All,
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                aspect: [1, 1],
                 quality: .6,
             });
 
             if (!result.canceled) {
-                addImage(result.assets[0].uri, result.assets[0].height, result.assets[0].width)
+                setImageUri(result.assets[0].uri)
+                setProfShow(false)
             }
         } catch (e) {
             console.log(e);
@@ -161,24 +165,26 @@ export default function Register({ navigation }) {
             await ImagePicker.requestCameraPermissionsAsync();
             let result = await ImagePicker.launchCameraAsync({
                 cameraType: ImagePicker.CameraType.back,
+                allowsEditing: true,
+                aspect: [1, 1],
                 quality: .6
             })
 
             if (!result.canceled) {
-                addImage(result.assets[0].uri, result.assets[0].height, result.assets[0].width)
+                setImageUri(result.assets[0].uri)
+                setProfShow(false)
             }
         } catch (e) {
             console.log(e);
         }
     }
 
-    const uploadImages = async (uri, fileType) => {
+    const uploadImages = async (docRef) => {
         try {
-            const response = await fetch(uri);
+            const response = await fetch(imageUri);
             const blob = await response.blob();
-            const filename = uri.substring(uri.lastIndexOf('/') + 1);
 
-            const storageRef = ref(storage, `FarmImages/${user.uid}/${filename}`);
+            const storageRef = ref(storage, `ProfileImages/${docRef.id}`);
             const uploadTask = uploadBytesResumable(storageRef, blob);
 
             uploadTask.on('state_changed',
@@ -190,9 +196,11 @@ export default function Register({ navigation }) {
                 },
                 () => {
                     // Upload completed successfully, get download URL
-                    getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-                        console.log('File available at', downloadURL);
-                        setUploadedImg((uImg) => [...uImg, { url: downloadURL, uid: user.uid }]);
+                    getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
+                        await updateDoc(docRef, {
+                            uid: docRef.id,
+                            photoURL: downloadURL
+                        })
                     }).catch((error) => {
                         console.error("Error getting download URL: ", error);
                     });
@@ -235,11 +243,11 @@ export default function Register({ navigation }) {
                     <View style={styles.addProfCenter}>
                         <Text style={styles.addProfTitle}>Display Photo</Text>
                         <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 24, marginTop: 16 }}>
-                            <TouchableOpacity style={styles.addProfBtn}>
+                            <TouchableOpacity style={styles.addProfBtn} onPress={openCamera}>
                                 <Image source={camera} />
                                 <Text style={styles.addProfBtnText}>Camera</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={styles.addProfBtn}>
+                            <TouchableOpacity style={styles.addProfBtn} onPress={openGallery}>
                                 <Image source={gallery} />
                                 <Text style={styles.addProfBtnText}>Gallery</Text>
                             </TouchableOpacity>
@@ -289,8 +297,11 @@ export default function Register({ navigation }) {
                                         bg: "teal.600",
                                         endIcon: <CheckIcon size={5} />
                                     }}
-                                        onValueChange={(item) => {
+                                        onValueChange={item => {
                                             setMunCode(item)
+                                            const foundItem = municipalities.cityAndMun.find(entry => entry.mun_code === item);
+                                            setMun(foundItem ? foundItem.name : '');
+                                            console.log(foundItem ? foundItem.name : '');
                                         }}
                                     >
                                         {
@@ -357,7 +368,7 @@ export default function Register({ navigation }) {
                             nextBtnTextStyle={nxtButtonText}>
                             <Box style={{ flex: 1 }} >
                                 <Box style={{ width: '100%', alignItems: 'center', justifyContent: 'center' }}>
-                                    <Image source={imageUri ? imageUri : noProf} style={styles.avatar} />
+                                    <Image source={imageUri ? { uri: imageUri } : noProf} style={styles.avatar} />
                                     <Button title='add profile' onPress={() => setProfShow(true)} />
                                 </Box>
                                 <Box style={{}}>
