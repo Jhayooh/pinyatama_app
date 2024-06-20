@@ -5,7 +5,8 @@ import {
   ActivityIndicator,
   StyleSheet,
   Text,
-  View
+  View,
+  TextInput
 } from "react-native";
 import { db } from '../firebase/Config';
 import { AddDataRow } from './AddDataRow';
@@ -27,8 +28,8 @@ export const TableBuilder = ({ components, area, setRoiDetails }) => {
       if (component.particular.toLowerCase() === 'material') {
         if (component.name.toLowerCase() === 'planting materials') {
           const qntyPrice = parseInt(component.qntyPrice)
-          setGrossReturn(getPercentage(90, qntyPrice)*8);
-          setBatterBall(getPercentage(10, qntyPrice)*2);
+          setGrossReturn(getPercentage(90, qntyPrice) * 8);
+          setBatterBall(getPercentage(10, qntyPrice) * 2);
         }
         materialSum += parseInt(component.totalPrice);
       } else if (component.particular.toLowerCase() === 'labor') {
@@ -59,7 +60,7 @@ export const TableBuilder = ({ components, area, setRoiDetails }) => {
       netReturn,
       roi
     };
-  
+
     setRoiDetails(roiDetails);
   }, [laborTotal, materialTotal, costTotal, grossReturn, batterBall, netReturn, roi]);
 
@@ -81,8 +82,15 @@ export const TableBuilder = ({ components, area, setRoiDetails }) => {
         <View style={{ ...styles.tableHeadLabel3, alignItems: 'flex-start' }}>
           <Text>{name}</Text>
         </View>
-        <View style={{ ...styles.tableHeadLabel2, alignItems: 'center' }}>
-          <Text>{qnty.toLocaleString()}</Text>
+        <View style={{ ...styles.tableHeadLabel3, alignItems: 'center' }}>
+          <TextInput
+            editable
+            onChangeText={()=>null}
+            placeholder='Enter name of farmer'
+            value={qnty}
+            style={styles.textInput}
+          />
+          {/* <Text>{qnty.toLocaleString()}</Text> */}
         </View>
         <View style={{ ...styles.tableHeadLabel2, alignItems: 'center' }}>
           <Text>{unit}</Text>
@@ -101,26 +109,26 @@ export const TableBuilder = ({ components, area, setRoiDetails }) => {
   return (
     <>
       <View style={{ ...styles.container, minHeight: 300, borderRadius: 10, paddingBottom: 12 }}>
-        <View style={{ alignItems: 'center', margin: 8 }}>
-          <Text style={{ width: '100%', backgroundColor: '#3bcd6b', padding: 8, alignItems: 'center', textAlign: 'center' }}>COST AND RETURN ANALYSIS {area.toFixed(2)} HA PINEAPPLE PRODUCTION</Text>
+        <View style={{ alignItems: 'center', backgroundColor: '#4DAF50', margin: 8, marginBottom: 12, borderRadius: 6, }}>
+          <Text style={{ width: '100%', padding: 8, alignItems: 'center', textAlign: 'center', color: '#FFF' }}>COST AND RETURN ANALYSIS {area.toFixed(2)} HA PINEAPPLE PRODUCTION</Text>
         </View>
         <View style={{ flex: 1, marginTop: 6, marginHorizontal: 12 }}>
           {/* Header */}
           <View style={{ ...styles.tableHead, borderBottomWidth: 2, borderColor: '#000', }}>
             <View style={{ ...styles.tableHeadLabel3, alignItems: 'center' }}>
-              <Text>PARTICULARS</Text>
-            </View>
-            <View style={{ ...styles.tableHeadLabel2, alignItems: 'center' }}>
-              <Text>QUANTITY</Text>
-            </View>
-            <View style={{ ...styles.tableHeadLabel2, alignItems: 'center' }}>
-              <Text>UNIT</Text>
+              <Text style={{ fontSize: 12, fontWeight: '600' }}>PARTICULARS</Text>
             </View>
             <View style={{ ...styles.tableHeadLabel3, alignItems: 'center' }}>
-              <Text>PRICE/UNIT</Text>
+              <Text style={{ fontSize: 12 }}>QNTY</Text>
+            </View>
+            <View style={{ ...styles.tableHeadLabel2, alignItems: 'center' }}>
+              <Text style={{ fontSize: 12 }}>UNIT</Text>
+            </View>
+            <View style={{ ...styles.tableHeadLabel3, alignItems: 'center' }}>
+              <Text style={{ fontSize: 12 }}>PRICE/UNIT</Text>
             </View>
             <View style={{ ...styles.tableHeadLabel3, alignItems: 'flex-end' }}>
-              <Text>TOTAL PRICE</Text>
+              <Text style={{ fontSize: 12 }}>TOTAL PRICE</Text>
             </View>
           </View>
 
@@ -254,6 +262,18 @@ const styles = StyleSheet.create({
     paddingVertical: 36,
     paddingHorizontal: 12,
   },
+  textInput: {
+    flex: 1,
+    height: 42,
+    opacity: 1.0,
+    borderColor: '#E8E7E7',
+    borderWidth: 1,
+    backgroundColor: '#FBFBFB',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    color: '#3C3C3B',
+    fontSize: 16,
+  },
   name: {
     fontSize: 32,
     color: '#fff',
@@ -297,7 +317,8 @@ const styles = StyleSheet.create({
   },
   tableHeadLabel3: {
     flex: 2,
-    alignSelf: 'stretch'
+    alignSelf: 'stretch',
+    fontSize: 12
   },
   tableData: {
     alignItems: 'center',

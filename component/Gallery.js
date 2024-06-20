@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },
   searchContainer: {
-    backgroundColor: 'green',
+    backgroundColor: '#4DAF50',
     borderBottomColor: 'transparent',
     borderTopColor: 'transparent',
     padding: 20
