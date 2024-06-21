@@ -70,6 +70,9 @@ export const Calculator = ({ navigation }) => {
   const [farmerName, setFarmerName] = useState('');
   const [sex, setSex] = useState(null)
   const [userLocation, setUserLocation] = useState(null);
+  const [fieldId, setFieldId] = useState('')
+  const [firstname, setFirstname] = useState('')
+  const [lastname, setLastname] = useState('')
   const [images, setImages] = useState([])
   const [uploadedImg, setUploadedImg] = useState([])
   // end ng data natin
@@ -214,7 +217,7 @@ export const Calculator = ({ navigation }) => {
       const newFarm = await addDoc(farmsColl, {
         area: area,
         brgy: brgyCode,
-        farmerName: farmerName,
+        farmerName: firstname + lastname,
         cropStage: cropStage,
         start_date: startDate,
         harvest_date: endDate,
@@ -529,9 +532,9 @@ export const Calculator = ({ navigation }) => {
                     <Text style={styles.supText}>First Name</Text>
                     <TextInput
                       editable
-                      onChangeText={text => setFarmerName(text)}
-                      placeholder='Enter name of farmer'
-                      value={farmerName}
+                      onChangeText={text => setFirstname(text)}
+                      placeholder='Enter firstname of farmer'
+                      value={firstname}
                       style={firstnameFocus ? styles.textInputFocus : styles.textInput}
                       onFocus={() => setFirstnameFocus(true)}
                       onBlur={() => setFirstnameFocus(false)}
@@ -541,9 +544,9 @@ export const Calculator = ({ navigation }) => {
                     <Text style={styles.supText}>Last Name</Text>
                     <TextInput
                       editable
-                      onChangeText={text => setFarmerName(text)}
-                      placeholder='Enter name of farmer'
-                      value={farmerName}
+                      onChangeText={text => setLastname(text)}
+                      placeholder='Enter lastname of farmer'
+                      value={lastname}
                       style={lastnameFocus ? styles.textInputFocus : styles.textInput}
                       onFocus={() => setLastnameFocus(true)}
                       onBlur={() => setLastnameFocus(false)}
@@ -597,9 +600,9 @@ export const Calculator = ({ navigation }) => {
                     <TextInput
                       editable
                       maxLength={40}
-                      onChangeText={text => setFarmName(text)}
+                      onChangeText={text => setFieldId(text)}
                       placeholder='Enter field id'
-                      value={farmName}
+                      value={fieldId}
                       style={fieldidFocus ? styles.textInputFocus : styles.textInput}
                       onFocus={() => setFieldidFocus(true)}
                       onBlur={() => setFieldidFocus(false)}
@@ -748,21 +751,27 @@ export const Calculator = ({ navigation }) => {
       {saving && <ActivityIndicator color='#FF5733' size='large' style={styles.loading} />}
       <Modal animationType='fade' visible={showAddImage} transparent={true}>
         <View style={styles.addImage}>
-          <TouchableOpacity style={styles.cam} onPress={() => {
-            openGallery()
-          }}>
-            <Image source={require('../assets/gallery.png')} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.cam} onPress={() => {
-            openCamera()
-          }}>
-            <Image source={require('../assets/upload.png')} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.cam} onPress={() => {
-            setShowAddImage(!showAddImage)
-          }}>
-            <Image source={require('../assets/close.png')} />
-          </TouchableOpacity>
+          <View style={styles.modalContainer}>
+
+            <TouchableOpacity style={styles.cam} onPress={() => {
+              openGallery()
+            }}>
+              <Image source={require('../assets/gallery.png')} style={{ width: 42, height: 42 }} />
+              <Text>Gallery</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.cam} onPress={() => {
+              openCamera()
+            }}>
+              <Image source={require('../assets/upload.png')} style={{ width: 42, height: 42 }} />
+              <Text>Camera</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.cam} onPress={() => {
+              setShowAddImage(!showAddImage)
+            }}>
+              <Image source={require('../assets/close.png')} style={{ width: 42, height: 42 }} />
+              <Text>Close</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </Modal>
     </>
@@ -875,6 +884,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 32,
     marginTop: 8
+  },
+  addImage: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FFF',
+    flexDirection: 'row',
+    gap: 32,
+    padding: 32,
+    borderRadius: 8,
   }
 })
 

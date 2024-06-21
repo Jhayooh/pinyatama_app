@@ -343,7 +343,7 @@ export const Landing = ({ navigation }) => {
                     <Image source={appLogo} style={styles.appLogo} />
                     <View style={styles.btnContainer}>
                         <View style={styles.btnRow}>
-                            <TouchableHighlight style={styles.btnbtn} onPress={() =>
+                            <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn} onPress={() =>
                                 user
                                     ?
                                     navigation.navigate('Calculator')
@@ -355,7 +355,7 @@ export const Landing = ({ navigation }) => {
                                     <Text style={styles.buttonText}>Kalkulador ng gastos</Text>
                                 </View>
                             </TouchableHighlight>
-                            <TouchableHighlight style={styles.btnbtn}>
+                            <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn}>
                                 <View style={styles.btnbtnChild}>
                                     <Image source={yieldLogo} style={styles.btnImage} />
                                     <Text style={styles.buttonText}>Tagapagukit ng Pinya</Text>
@@ -363,7 +363,7 @@ export const Landing = ({ navigation }) => {
                             </TouchableHighlight>
                         </View>
                         <View style={styles.btnRow}>
-                            <TouchableHighlight style={styles.btnbtn} onPress={() => {
+                            <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn} onPress={() => {
                                 navigation.navigate('Gallery', { farms: farms })
                             }}>
                                 <View style={styles.btnbtnChild}>
@@ -371,7 +371,7 @@ export const Landing = ({ navigation }) => {
                                     <Text style={styles.buttonText}>Mga Bukid ng Pinya</Text>
                                 </View>
                             </TouchableHighlight>
-                            <TouchableHighlight style={styles.btnbtn} onPress={() => navigation.navigate('Video')}>
+                            <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn} onPress={() => navigation.navigate('Video')}>
                                 <View style={styles.btnbtnChild}>
                                     <Image source={videoLogo} style={styles.btnImage} />
                                     <Text style={styles.buttonText}>Mga Bidyo</Text>
@@ -379,7 +379,7 @@ export const Landing = ({ navigation }) => {
                             </TouchableHighlight>
                         </View>
                         <View style={styles.btnRow}>
-                            <TouchableHighlight style={styles.btnbtn} onPress={() => null}>
+                            <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn} onPress={() => null}>
                                 <View style={styles.btnbtnChild}>
                                     <Image source={aboutLogo} style={styles.btnImage} />
                                     <Text style={styles.buttonText}>Tungkol</Text>
@@ -395,7 +395,7 @@ export const Landing = ({ navigation }) => {
                                         </View>
                                     </TouchableHighlight>
                                     :
-                                    <TouchableHighlight style={styles.btnbtn} onPress={() => setShowLogin(true)}>
+                                    <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn} onPress={() => setShowLogin(true)}>
                                         <View style={styles.btnbtnChild}>
                                             <Image source={logonLogo} style={styles.btnImage} />
                                             <Text style={styles.buttonText}>Log in</Text>
@@ -474,7 +474,7 @@ const styles = StyleSheet.create({
     },
     btnbtn: {
         flex: 1,
-
+        borderRadius: 12,
     },
     btnbtnChild: {
         backgroundColor: '#fff',
