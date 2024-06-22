@@ -59,7 +59,7 @@ const Charts = ({ farms }) => {
         if (roiData) {
             const data = {
                 labels: ["ROI"],
-                data: [roiData[0].roi/100]
+                data: [roiData[0].roi / 100]
             };
             setNewRoi(data)
             setPartTotal([
@@ -163,15 +163,26 @@ const Charts = ({ farms }) => {
                     flex: 1,
                     flexDirection: 'column',
                     gap: 8,
-                    paddingVertical: 8
+                    paddingVertical: 8,
+                    margin: 15
                 }}>
                     <View>
                     </View>
+                    {/* Calendar */}
                     <Calendar
                         markingType='period'
                         style={{
                             borderRadius: 16,
-                            height: 380
+                            height: 380,
+                            backgroundColor: '#fff',
+                            shadowColor: 'green',
+                            shadowOffset: {
+                                width: 0,
+                                height: 2,
+                            },
+                            shadowOpacity: 0.25,
+                            shadowRadius: 3.84,
+                            elevation: 5
                         }}
                         onDayPress={day => {
                             setIsShow(true)
@@ -179,6 +190,7 @@ const Charts = ({ farms }) => {
                         }}
                         markedDates={activities}
                     />
+                    {/* ROI */}
                     {
                         roiLoading && !newRoi || Object.keys(newRoi).length === 0
                             ?
@@ -188,14 +200,22 @@ const Charts = ({ farms }) => {
                                 padding: 4,
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                backgroundColor: '#ffffff',
-                                flex: 1,
                                 borderRadius: 16,
+                                backgroundColor: '#fff',
+                                shadowColor: 'green',
+                                shadowOffset: {
+                                    width: 0,
+                                    height: 2,
+                                },
+                                shadowOpacity: 0.25,
+                                shadowRadius: 3.84,
+                                elevation: 5
                             }}>
-                                <Text style={{ fontSize: 20, marginVertical: 12, fontWeight: '600' }}>ROI</Text>
+                                <Text style={{ fontSize: 20, marginVertical: 12, fontWeight: '600', color:'green'  }}>ROI</Text>
                                 <Progress data={newRoi} />
                             </View>
                     }
+                    {/* Gastos sa Pinya */}
                     {
                         roiLoading && partTotal.length > 0
                             ?
@@ -205,14 +225,24 @@ const Charts = ({ farms }) => {
                                 padding: 4,
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                backgroundColor: '#ffffff',
+                                backgroundColor: '#fff',
+                                shadowColor: 'green',
+                                shadowOffset: {
+                                    width: 0,
+                                    height: 2,
+                                },
+                                shadowOpacity: 0.25,
+                                shadowRadius: 3.84,
+                                elevation: 5,
                                 flex: 1,
                                 borderRadius: 16,
+
                             }}>
-                                <Text style={{ fontSize: 20, marginVertical: 12, fontWeight: '600' }}>Gastos sa Pinya</Text>
+                                <Text style={{ fontSize: 20, marginVertical: 12, fontWeight: '600', color:'green'  }}>Gastos sa Pinya</Text>
                                 <DoughnutAndPie data={partTotal} col={"sum"} title="Gastos sa Pinya" />
                             </View>
                     }
+                    {/* Gross Return */}
                     {
                         roiLoading && pineTotal.length > 0
                             ?
@@ -222,14 +252,23 @@ const Charts = ({ farms }) => {
                                 padding: 4,
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                backgroundColor: '#ffffff',
+                                backgroundColor: '#fff',
+                                shadowColor: 'green',
+                                shadowOffset: {
+                                    width: 0,
+                                    height: 2,
+                                },
+                                shadowOpacity: 0.25,
+                                shadowRadius: 3.84,
+                                elevation: 5,
                                 flex: 1,
                                 borderRadius: 16,
                             }}>
-                                <Text style={{ fontSize: 20, marginVertical: 12, fontWeight: '600' }}>Gross Return</Text>
+                                <Text style={{ fontSize: 20, marginVertical: 12, fontWeight: '600' , color:'green'  }}>Gross Return</Text>
                                 <DoughnutAndPie data={pineTotal} col={"sum"} title="Gross Return" />
                             </View>
                     }
+                    {/* Net Return */}
                     {
                         roiLoading && netReturn.length > 0
                             ?
@@ -239,11 +278,19 @@ const Charts = ({ farms }) => {
                                 padding: 4,
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                backgroundColor: '#ffffff',
+                                backgroundColor: '#fff',
+                                shadowColor: 'green',
+                                shadowOffset: {
+                                    width: 0,
+                                    height: 2,
+                                },
+                                shadowOpacity: 0.25,
+                                shadowRadius: 3.84,
+                                elevation: 5,
                                 flex: 1,
                                 borderRadius: 16,
                             }}>
-                                <Text style={{ fontSize: 20, marginVertical: 12, fontWeight: '600' }}>Net Return</Text>
+                                <Text style={{ fontSize: 20, marginVertical: 12, fontWeight: '600', color:'green' }}>Net Return</Text>
                                 <DoughnutAndPie data={netReturn} col={"sum"} title="Gross Return" />
                             </View>
                     }

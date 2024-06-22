@@ -44,7 +44,7 @@ const ProductionInput = ({ route, navigation }) => {
   return (
     <>
       <SafeAreaView style={styles.container}>
-        <ImageBackground resizeMode="cover" style={styles.image}>
+        {/* <ImageBackground resizeMode="cover" style={styles.image}> */}
           <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', gap: 3}}>
             <Text style={styles.name}>{farm.title}</Text>
             <TouchableOpacity style={{ height: 32, alignItems: 'center', justifyContent: 'center', paddingTop:20}} onPress={() => {
@@ -54,14 +54,14 @@ const ProductionInput = ({ route, navigation }) => {
             </TouchableOpacity>
           </View>
           <Text style={styles.loc}>{`${farm.mun}, ${farm.brgy}`}</Text>
-          <Text style={styles.label}>Pagsusuri ng Paggastos at Pagbabalik sa Produksiyon ng Pinya</Text>
+          {/* <Text style={styles.label}>Pagsusuri ng Paggastos at Pagbabalik sa Produksiyon ng Pinya</Text> */}
 
           {edit
             ?
             <>
               {/* Table Container */}
               < ScrollView style={styles.scrollView}>
-                <Text style={styles.texts}>PARTICULARS</Text>
+                {/* <Text style={styles.texts}>PARTICULARS</Text> */}
 
                 {/* Table Heads */}
                 {
@@ -80,7 +80,7 @@ const ProductionInput = ({ route, navigation }) => {
             :
             <Charts farms={farms} />
           }
-        </ImageBackground>
+        {/* </ImageBackground> */}
       </SafeAreaView >
 
       {/* // modal */}
@@ -104,8 +104,8 @@ const ProductionInput = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent:'center',
-    alignItems:'center',
+    // justifyContent:'center',
+    // alignItems:'center',
   },
   image: {
     flex: 1,
@@ -120,22 +120,24 @@ const styles = StyleSheet.create({
     paddingTop:20,
     color: 'green',
     fontWeight: '700',
+    marginLeft:5
   },
   loc: {
     fontSize: 16,
     color: 'black',
     fontWeight: '700',
-    marginTop: 6
+    marginTop: 6,
+    marginLeft:10
   },
   label: {
     // flex: 'row',
     alignItems:'center',
     marginTop: 18,
-    fontSize:23,
+    fontSize:12,
     justifyContent:'center',
     fontWeight: 'bold',
     fontFamily: 'serif',
-    color:'white'
+    color:'#4DAF50'
 
   },
   scrollView: {

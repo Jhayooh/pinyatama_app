@@ -7,21 +7,14 @@ import { Dimensions, View, Text, ActivityIndicator } from 'react-native';
 export const DoughnutAndPie = ({ data, col }) => {
     const screenWidth = Dimensions.get('window').width;
 
-    // const chartConfig = {
-    //     color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-    //     style: {
-    //         borderRadius: 16
-    //     }
-    // };
-
     const chartConfig = {
-        backgroundColor: '#ffffff',
+        // backgroundColor: '#ffffff',
         backgroundGradientFromOpacity: 0,
         backgroundGradientToOpacity: 0,
         color: (opacity = 1) => `rgba(26, 255, 146, ${opacity})`,
-        strokeWidth: 2, // optional, default 3
+        strokeWidth: 2, 
         // barPercentage: 0.5,
-        useShadowColorFromDataset: false, // optional
+        useShadowColorFromDataset: false, 
         style: {
             borderRadius: 16,
         }
@@ -47,7 +40,8 @@ export const DoughnutAndPie = ({ data, col }) => {
                             accessor={col}
                             backgroundColor={'transparent'}
                             paddingLeft='18'
-                            absolute
+                            // absolute // para maging whole value
+                            relative //para maging percentage
                         />
                 }
             </View>

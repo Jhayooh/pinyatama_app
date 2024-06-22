@@ -23,6 +23,8 @@ import {
   Switch
 } from 'react-native';
 
+import { RadioButton } from 'react-native-paper';
+
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import MapView, { Marker } from 'react-native-maps';
 
@@ -98,8 +100,13 @@ export const Calculator = ({ navigation }) => {
   const [startdateFocus, setStartdateFocus] = useState(false)
   const [calculateFocus, setCalculateFocus] = useState(false)
 
+  const [firstnameError, setFirstnameError] = useState('');
+  const [lastnameError, setLastnameError] = useState('');
+  const [farmnameError, setFarmnameError] = useState('');
+  const [fieldIdError, setFieldIdError] = useState('');
+
   useEffect(() => {
-    if (!lastname){
+    if (!lastname) {
       return
     }
     setFarmName(lastname + ' QP Farm')
@@ -321,7 +328,7 @@ export const Calculator = ({ navigation }) => {
   const BottomButton = () => {
     const checkMissing = () => {
       if (!base) {
-        Alert.alert('Walang laman haha', 'Maglagay ng bilang ng tanim.', [
+        Alert.alert('This field is required!', 'Maglagay ng bilang ng tanim.', [
           {
             text: 'Ok',
             onPress: () => { focusNumplants.current.focus() },
@@ -342,6 +349,16 @@ export const Calculator = ({ navigation }) => {
       }
       if (!cropStage) {
         Alert.alert('Walang laman haha', 'Maglagay ng stage ng tanim.', [
+          {
+            text: 'Ok',
+            onPress: () => { focusNumplants.current.focus() },
+            style: 'cancel'
+          }
+        ])
+        return
+      }
+      if (!firstname) {
+        Alert.alert('This field is required!', 'Maglagay ng pangalan ng magsasaka', [
           {
             text: 'Ok',
             onPress: () => { focusNumplants.current.focus() },
@@ -377,7 +394,7 @@ export const Calculator = ({ navigation }) => {
           borderColor: '#4DAF50',
           ...styles.buttonTwo
         }} onPress={() => setIsNext(false)}>
-          <Text style={{ color: '#4DAF50', fontSize: 16 }}>Prev</Text>
+          <Text style={{ color: '#4DAF50', fontSize: 16 }}>Back</Text>
         </TouchableOpacity>
         <TouchableOpacity style={{
           ...styles.button,
@@ -468,6 +485,33 @@ export const Calculator = ({ navigation }) => {
   const switchMale = () => toggleSwitch('Male');
   const switchFemale = () => toggleSwitch('Female');
 
+  const [selectedValue, setSelectedValue] = useState('Male');
+
+  function handleNext() {
+    if (!firstname) {
+      Alert.alert('Farmer Name', 'Maglagay ng pangalan ng magsasaka')
+      return
+    }
+
+    if (!lastname) {
+      Alert.alert('Farmer Lastname', 'Maglagay ng pangalan ng magsasaka')
+      return
+    }
+
+    if (!farmName) {
+      Alert.alert('Farm Name', 'Maglagay ng pangalan ng bukid')
+      return
+    }
+
+    if (!fieldId) {
+      Alert.alert('Field ID', 'Maglagay ng Field ID')
+      return
+    }
+
+    setIsNext(true)
+  }
+
+
   return (
     <>
       <View style={styles.screen}>
@@ -488,7 +532,7 @@ export const Calculator = ({ navigation }) => {
                           setTable(false)
                         }}
                         ref={focusNumplants}
-                        placeholder='Enter number of plants'
+                        placeholder='Enter Number of Plants'
                         keyboardType='numeric'
                         value={base}
                         style={calculateFocus ? { ...styles.textInputFocus, borderBottomRightRadius: 0, borderTopRightRadius: 0 } : { ...styles.textInput, borderBottomRightRadius: 0, borderTopRightRadius: 0 }}
@@ -524,51 +568,99 @@ export const Calculator = ({ navigation }) => {
                 <View style={styles.section}>
                   <Text style={styles.header}>FARMER INFORMATION</Text>
                   <View style={styles.subsection}>
-                    <Text style={styles.supText}>First Name</Text>
+                    <View style={{ flexDirection: 'row', gap: 1 }}>
+                      <Text style={styles.supText}>First Name</Text>
+                      <Text style={{ color: 'red' }}>*</Text>
+                    </View>
+
                     <TextInput
                       editable
-                      onChangeText={text => setFirstname(text)}
-                      placeholder='Enter firstname of farmer'
+                      onChangeText={(text) => {
+                        if (/^[a-zA-Z]*$/.test(text)) {
+                          setFirstname(text);
+                          setFirstnameError('');
+                        } else {
+                          setFirstname('');
+                          setFirstnameError('Only alphabetic characters are allowed.');
+                        }
+                        if (text.trim() === '') {
+                          setFirstnameError('This is a required field');
+                        }
+                      }}
+                      placeholder='Enter Firstname of Farmer'
                       value={firstname}
                       style={firstnameFocus ? styles.textInputFocus : styles.textInput}
                       onFocus={() => setFirstnameFocus(true)}
                       onBlur={() => setFirstnameFocus(false)}
                     />
+                    {firstnameError ? <Text style={{ color: 'red', fontSize: 12 }}>{firstnameError}</Text> : null}
                   </View>
                   <View style={styles.subsection}>
-                    <Text style={styles.supText}>Last Name</Text>
+                    <View style={{ flexDirection: 'row', gap: 1 }}>
+                      <Text style={styles.supText}>Last Name</Text>
+                      <Text style={{ color: 'red' }}>*</Text>
+                    </View>
                     <TextInput
                       editable
-                      onChangeText={text => setLastname(text)}
-                      placeholder='Enter lastname of farmer'
+                      onChangeText={(text) => {
+                        if (/^[a-zA-Z]*$/.test(text)) {
+                          setLastname(text);
+                          setLastnameError('');
+                        } else {
+                          setLastname('');
+                          setLastnameError('Only alphabetic characters are allowed.');
+                        }
+                        if (text.trim() === '') {
+                          setLastnameError('This is a required field');
+                        }
+                      }}
+                      placeholder='Enter Lastname of Farmer'
                       value={lastname}
                       style={lastnameFocus ? styles.textInputFocus : styles.textInput}
                       onFocus={() => setLastnameFocus(true)}
                       onBlur={() => setLastnameFocus(false)}
                     />
+                    {lastnameError ? <Text style={{ color: 'red', fontSize: 12 }}>{lastnameError}</Text> : null}
                   </View>
                   <View style={styles.subsection}>
-                    <Text style={styles.supText}>Select Gender</Text>
+                    <View style={{ flexDirection: 'row', gap: 1 }}>
+                      <Text style={styles.supText}>Sex</Text>
+                      <Text style={{ color: 'red' }}>*</Text>
+                    </View>
                     <View style={styles.switches}>
                       <View style={styles.switchContainer}>
+                        <RadioButton.Android
+                          value="Male"
+                          status={selectedValue === 'Male' ?
+                            'checked' : 'unchecked'}
+                          onPress={() => setSelectedValue('Male')}
+                          color="#F5C115"
+                        />
                         <Text style={styles.genderText}>Male</Text>
-                        <Switch
+                        {/* <Switch
                           trackColor={{ false: '#E8E7E7', true: '#FCF0C5' }}
                           thumbColor={sex === 'Male' ? '#F5C115' : '#f4f3f4'}
                           ios_backgroundColor="#3e3e3e"
                           onValueChange={switchMale}
                           value={sex === 'Male'}
-                        />
+                        /> */}
                       </View>
                       <View style={styles.switchContainer}>
+                        <RadioButton.Android
+                          value="Female"
+                          status={selectedValue === 'Female' ?
+                            'checked' : 'unchecked'}
+                          onPress={() => setSelectedValue('Female')}
+                          color="#F5C115"
+                        />
                         <Text style={styles.genderText}>Female</Text>
-                        <Switch
+                        {/* <Switch
                           trackColor={{ false: '#E8E7E7', true: '#FCF0C5' }}
                           thumbColor={sex === 'Female' ? '#F5C115' : '#f4f3f4'}
                           ios_backgroundColor="#3e3e3e"
                           onValueChange={switchFemale}
                           value={sex === 'Female'}
-                        />
+                        /> */}
                       </View>
                     </View>
                   </View>
@@ -578,53 +670,85 @@ export const Calculator = ({ navigation }) => {
                 <View style={styles.section}>
                   <Text style={styles.header}>FARM INFORMATION</Text>
                   <View style={styles.subsection}>
-                    <Text style={styles.supText}>Farm Name</Text>
+                    <View style={{ flexDirection: 'row', gap: 1 }}>
+                      <Text style={styles.supText}>Farm Name</Text>
+                      <Text style={{ color: 'red' }}>*</Text>
+                    </View>
                     <TextInput
                       editable
                       maxLength={40}
-                      onChangeText={text => setFarmName(text)}
-                      placeholder='Enter farm name'
+                      onChangeText={(text) => {
+                        setFarmName(text);
+                        if (text.trim() === '') {
+                          setFarmnameError('This is a required field');
+                        } else {
+                          setFarmnameError('');
+                        }
+                      }}
+                      placeholder='Enter Farm Name'
                       value={farmName}
                       style={farmnameFocus ? styles.textInputFocus : styles.textInput}
                       onFocus={() => setFarmnameFocus(true)}
                       onBlur={() => setFarmnameFocus(false)}
+                      require
                     />
+                    {farmnameError ? <Text style={{ color: 'red', fontSize: 12 }}>{farmnameError}</Text> : null}
                   </View>
                   <View style={styles.subsection}>
-                    <Text style={styles.supText}>Field ID</Text>
+                    <View style={{ flexDirection: 'row', gap: 1 }}>
+                      <Text style={styles.supText}>Field ID</Text>
+                      <Text style={{ color: 'red' }}>*</Text>
+                    </View>
                     <TextInput
                       editable
                       maxLength={40}
-                      onChangeText={text => setFieldId(text)}
-                      placeholder='Enter field id'
+                      onChangeText={(text) => {
+                        setFieldId(text);
+                        if (text.trim() === '') {
+                          setFieldIdError('This is a required field');
+                        } else {
+                          setFieldIdError('');
+                        }
+                      }}
+                      placeholder='Enter Field ID'
                       value={fieldId}
                       style={fieldidFocus ? styles.textInputFocus : styles.textInput}
                       onFocus={() => setFieldidFocus(true)}
                       onBlur={() => setFieldidFocus(false)}
                     />
+                    {fieldIdError ? <Text style={{ color: 'red', fontSize: 12 }}>{fieldIdError}</Text> : null}
                   </View>
                   <View style={styles.subsection}>
-                    <Text style={styles.supText}>Municipality</Text>
+                    <View style={{ flexDirection: 'row', gap: 1 }}>
+                      <Text style={styles.supText}>Municipality</Text>
+                      <Text style={{ color: 'red' }}>*</Text>
+                    </View>
                     <TextInput
                       editable={false}
                       maxLength={40}
-                      placeholder='Enter farm municipality'
+                      placeholder='Enter Farm Municipality'
                       value={municipality}
                       style={styles.textInput}
                     />
                   </View>
                   <View style={styles.subsection}>
-                    <Text style={styles.supText}>Barangay</Text>
+                    <View style={{ flexDirection: 'row', gap: 1 }}>
+                      <Text style={styles.supText}>Barangay</Text>
+                      <Text style={{ color: 'red' }}>*</Text>
+                    </View>
                     <TextInput
                       maxLength={40}
                       disabled={false}
-                      placeholder='Enter farm barangay'
+                      placeholder='Enter Farm Barangay'
                       value={brgyCode}
                       style={styles.textInput}
                     />
                   </View>
                   <View style={styles.subsection}>
-                    <Text style={styles.supText}>Location</Text>
+                    <View style={{ flexDirection: 'row', gap: 1 }}>
+                      <Text style={styles.supText}>Location</Text>
+                      <Text style={{ color: 'red' }}>*</Text>
+                    </View>
                     <View style={styles.container1}>
                       <MapView style={styles.map} region={region} onPress={handleMapPress}>
                         {userLocation && (
@@ -655,9 +779,12 @@ export const Calculator = ({ navigation }) => {
 
                 {/* farm details */}
                 <View style={styles.section}>
-                  <Text style={styles.header}>FARM DETAIL</Text>
+                  <Text style={styles.header}>DATE OF PLANTING</Text>
                   <View style={styles.subsection}>
-                    <Text style={styles.supText}>Date of Planting</Text>
+                    <View style={{ flexDirection: 'row', gap: 1 }}>
+                      <Text style={styles.supText}>Date of Planting</Text>
+                      <Text style={{ color: 'red' }}>*</Text>
+                    </View>
                     <View style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
                       <TextInput
                         value={startDate.toLocaleDateString()}
@@ -715,21 +842,21 @@ export const Calculator = ({ navigation }) => {
                       setShowAddImage(true)
                     }}>
                       <Image source={require('../assets/up.png')} style={{}} />
-                      <Text style={{ color: '#E8E7E7', fontSize: 18 }}>Add image</Text>
+                      <Text style={{ color: '#E8E7E7', fontSize: 18 }}>Add Image</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
 
                 {/* Bottombutton */}
-                <View style={{ ...styles.section, marginBottom: 32, paddingTop: 14 }}>
-                  <View style={styles.buttonContainer}>
+                <View style={{ marginBottom: 32, paddingTop: 14, marginRight: 15 }}>
+                  <View style={{ alignItems: 'flex-end' }}>
                     <TouchableOpacity style={{
                       ...styles.button,
                       backgroundColor: '#FFF',
                       borderWidth: 1,
                       borderColor: '#4DAF50',
                       ...styles.buttonTwo
-                    }} onPress={() => setIsNext(true)}>
+                    }} onPress={handleNext}>
                       <Text style={{ color: '#4DAF50', fontSize: 16 }}>Next</Text>
                     </TouchableOpacity>
                   </View>

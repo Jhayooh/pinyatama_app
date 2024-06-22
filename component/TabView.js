@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import icon from '../assets/logo.png'
 
 const Card = ({ imageSource, title, description, onPress }) => {
   return (
@@ -43,9 +44,9 @@ const TabView = ({ route, navigation }) => {
             <View style={styles.container}>
               {farms.map((farm) => (
                 <Card
-                  key={farm.id} // Make sure to provide a unique key for each item
+                  key={farm.id} 
                   title={farm.title}
-                  description="This is the Location of the farm"
+                  description={` ${farm.brgy}, ${farm.mun} `} 
                   imageSource={require('../assets/pine.jpg')}
                   onPress={() => { handleCardPress(farm) }}
                 />
@@ -80,7 +81,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
     width: '90%',
-    alignItems: 'center',
+    // alignItems: 'center',
     borderColor: 'green',
   },
   cardImage: {
@@ -93,10 +94,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
+    color:'green'
   },
   cardDescription: {
     fontSize: 16,
     lineHeight: 24,
+    alignItems:'flex-start'
   },
   backgroundImage: {
     flex: 1,
