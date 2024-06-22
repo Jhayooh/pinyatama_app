@@ -86,7 +86,7 @@ export const TableBuilder = ({ components, area, setRoiDetails }) => {
           <TextInput
             editable
             onChangeText={()=>null}
-            placeholder='Enter name of farmer'
+            placeholder={qnty.toString()}
             value={qnty}
             style={styles.textInput}
           />

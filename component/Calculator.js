@@ -98,6 +98,14 @@ export const Calculator = ({ navigation }) => {
   const [startdateFocus, setStartdateFocus] = useState(false)
   const [calculateFocus, setCalculateFocus] = useState(false)
 
+  useEffect(() => {
+    if (!lastname){
+      return
+    }
+    setFarmName(lastname + ' QP Farm')
+  }, [lastname])
+
+
   function GetIndObj(object, id, key) {
     return object.filter((obj) => {
       return obj[key] === id;
@@ -364,29 +372,16 @@ export const Calculator = ({ navigation }) => {
       <>
         <TouchableOpacity style={{
           ...styles.button,
-          paddingHorizontal: 24,
-          shadowColor: "#000",
-          shadowOffset: {
-            width: 0,
-            height: 2,
-          },
-          shadowOpacity: 0.25,
-          shadowRadius: 3.84,
-          elevation: 5,
+          backgroundColor: '#FFF',
+          borderWidth: 1,
+          borderColor: '#4DAF50',
+          ...styles.buttonTwo
         }} onPress={() => setIsNext(false)}>
-          <Text style={{ color: '#fff', fontSize: 16 }}>Prev</Text>
+          <Text style={{ color: '#4DAF50', fontSize: 16 }}>Prev</Text>
         </TouchableOpacity>
         <TouchableOpacity style={{
           ...styles.button,
-          paddingHorizontal: 24,
-          shadowColor: "#000",
-          shadowOffset: {
-            width: 0,
-            height: 2,
-          },
-          shadowOpacity: 0.25,
-          shadowRadius: 3.84,
-          elevation: 5,
+          ...styles.buttonTwo
         }} onPress={checkMissing}>
           <Text style={{ color: '#fff', fontSize: 16 }}>SAVE</Text>
         </TouchableOpacity>
@@ -483,7 +478,7 @@ export const Calculator = ({ navigation }) => {
                 <View style={{ ...styles.section, marginHorizontal: table ? 0 : 14, paddingHorizontal: 8 }}>
                   <Text style={styles.header}>CALCULATE</Text>
                   <View style={styles.subsection}>
-                    <Text style={styles.supText}>Date of Planting</Text>
+                    <Text style={styles.supText}>Number of Plants</Text>
                     <View style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
                       <TextInput
                         editable
@@ -518,7 +513,7 @@ export const Calculator = ({ navigation }) => {
                   {table && <TableBuilder components={components} area={area} setRoiDetails={setRoiDetails} />}
                 </View>
                 <View style={{ ...styles.section, marginBottom: 32, paddingTop: 14 }}>
-                  <View style={{ alignItems: 'center', display: 'flex', flexDirection: 'row', }}>
+                  <View style={{ ...styles.buttonContainer }}>
                     <BottomButton />
                   </View>
                 </View>
@@ -645,7 +640,7 @@ export const Calculator = ({ navigation }) => {
                           />
                         )}
                       </MapView>
-                      <View style={styles.buttonContainer}>
+                      <View>
                         <TouchableOpacity style={{ ...styles.button, borderTopLeftRadius: 0, borderTopRightRadius: 0, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 22, paddingVertical: 8, justifyContent: 'center', gap: 12 }} onPress={() => {
                           handleUpdateLocation()
                         }}>
@@ -727,20 +722,15 @@ export const Calculator = ({ navigation }) => {
 
                 {/* Bottombutton */}
                 <View style={{ ...styles.section, marginBottom: 32, paddingTop: 14 }}>
-                  <View style={{ alignItems: 'center' }}>
+                  <View style={styles.buttonContainer}>
                     <TouchableOpacity style={{
                       ...styles.button,
-                      paddingHorizontal: 24,
-                      shadowColor: "#000",
-                      shadowOffset: {
-                        width: 0,
-                        height: 2,
-                      },
-                      shadowOpacity: 0.25,
-                      shadowRadius: 3.84,
-                      elevation: 5,
+                      backgroundColor: '#FFF',
+                      borderWidth: 1,
+                      borderColor: '#4DAF50',
+                      ...styles.buttonTwo
                     }} onPress={() => setIsNext(true)}>
-                      <Text style={{ color: '#fff', fontSize: 16 }}>Next</Text>
+                      <Text style={{ color: '#4DAF50', fontSize: 16 }}>Next</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -899,6 +889,26 @@ const styles = StyleSheet.create({
     gap: 32,
     padding: 32,
     borderRadius: 8,
+  },
+  buttonContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 32,
+  },
+  buttonTwo: {
+    paddingHorizontal: 42,
+    paddingVertical: 12,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    marginVertical: 8,
   }
 })
 
