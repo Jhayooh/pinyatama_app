@@ -19,7 +19,8 @@ import {
   TouchableOpacity,
   View,
   ActivityIndicator,
-  Alert
+  Alert,
+  Switch
 } from 'react-native';
 
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
@@ -60,15 +61,18 @@ export const Calculator = ({ navigation }) => {
   // data natin
   const [base, setBase] = useState('')
   const [area, setArea] = useState(0)
-  const [cropStage, setCropStage] = useState('')
+  const [cropStage, setCropStage] = useState('vegetative')
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date())
   const [farmName, setFarmName] = useState('')
   const [municipality, setMunicipality] = useState('')
   const [brgyCode, setBrgyCode] = useState(null)
   const [farmerName, setFarmerName] = useState('');
-  const [sex, setSex] = useState('')
+  const [sex, setSex] = useState(null)
   const [userLocation, setUserLocation] = useState(null);
+  const [fieldId, setFieldId] = useState('')
+  const [firstname, setFirstname] = useState('')
+  const [lastname, setLastname] = useState('')
   const [images, setImages] = useState([])
   const [uploadedImg, setUploadedImg] = useState([])
   // end ng data natin
@@ -85,6 +89,15 @@ export const Calculator = ({ navigation }) => {
   const [saving, setSaving] = useState(false)
   const [calculating, setCalculating] = useState(false)
 
+  const [isNext, setIsNext] = useState(false)
+
+  const [firstnameFocus, setFirstnameFocus] = useState(false)
+  const [lastnameFocus, setLastnameFocus] = useState(false)
+  const [farmnameFocus, setFarmnameFocus] = useState(false)
+  const [fieldidFocus, setFieldidFocus] = useState(false)
+  const [startdateFocus, setStartdateFocus] = useState(false)
+  const [calculateFocus, setCalculateFocus] = useState(false)
+
   function GetIndObj(object, id, key) {
     return object.filter((obj) => {
       return obj[key] === id;
@@ -94,7 +107,7 @@ export const Calculator = ({ navigation }) => {
   const [users, loadingUsers] = useCollectionData(usersCol)
 
   useEffect(() => {
-    if (!loadingUsers){
+    if (!loadingUsers) {
       const indUser = GetIndObj(users, user.uid, 'id')
       setMunicipality(indUser[0].mun)
       setBrgyCode(indUser[0].brgy)
@@ -194,13 +207,17 @@ export const Calculator = ({ navigation }) => {
     navigation.goBack()
   }
 
+  function calcRoi() {
+
+  }
+
   // important function
   const saveInputs = async () => {
     try {
       const newFarm = await addDoc(farmsColl, {
         area: area,
         brgy: brgyCode,
-        farmerName: farmerName,
+        farmerName: firstname + lastname,
         cropStage: cropStage,
         start_date: startDate,
         harvest_date: endDate,
@@ -218,7 +235,6 @@ export const Calculator = ({ navigation }) => {
       const roiRef = collection(db, `farms/${newFarm.id}/roi`);
       components.forEach(async (component) => {
         try {
-
           await addDoc(farmComp, {
             ...component
           })
@@ -293,33 +309,34 @@ export const Calculator = ({ navigation }) => {
     setImages([])
     setUploadedImg([])
   }
+
   const BottomButton = () => {
     const checkMissing = () => {
       if (!base) {
         Alert.alert('Walang laman haha', 'Maglagay ng bilang ng tanim.', [
           {
             text: 'Ok',
-            onPress: () => {focusNumplants.current.focus()},
+            onPress: () => { focusNumplants.current.focus() },
             style: 'cancel'
           }
         ])
         return
       }
-      if (!calculating){
+      if (!table) {
         Alert.alert('Walang laman haha', 'Kalkyuladuhin ang bilang ng tanim.', [
           {
             text: 'Ok',
-            onPress: () => {focusNumplants.current.focus()},
+            onPress: () => { focusNumplants.current.focus() },
             style: 'cancel'
           }
         ])
         return
       }
-      if (!cropStage){
+      if (!cropStage) {
         Alert.alert('Walang laman haha', 'Maglagay ng stage ng tanim.', [
           {
             text: 'Ok',
-            onPress: () => {focusNumplants.current.focus()},
+            onPress: () => { focusNumplants.current.focus() },
             style: 'cancel'
           }
         ])
@@ -344,11 +361,37 @@ export const Calculator = ({ navigation }) => {
       ]);
 
     return (
-      <View style={{ marginTop: 6, width: '100%', marginBottom: 16 }}>
-        <TouchableOpacity style={{ ...styles.touch, flex: 0, width: '100%' }} onPress={checkMissing}>
-          <Text style={styles.text}>SAVE</Text>
+      <>
+        <TouchableOpacity style={{
+          ...styles.button,
+          paddingHorizontal: 24,
+          shadowColor: "#000",
+          shadowOffset: {
+            width: 0,
+            height: 2,
+          },
+          shadowOpacity: 0.25,
+          shadowRadius: 3.84,
+          elevation: 5,
+        }} onPress={() => setIsNext(false)}>
+          <Text style={{ color: '#fff', fontSize: 16 }}>Prev</Text>
         </TouchableOpacity>
-      </View>
+        <TouchableOpacity style={{
+          ...styles.button,
+          paddingHorizontal: 24,
+          shadowColor: "#000",
+          shadowOffset: {
+            width: 0,
+            height: 2,
+          },
+          shadowOpacity: 0.25,
+          shadowRadius: 3.84,
+          elevation: 5,
+        }} onPress={checkMissing}>
+          <Text style={{ color: '#fff', fontSize: 16 }}>SAVE</Text>
+        </TouchableOpacity>
+
+      </>
     )
   }
 
@@ -385,9 +428,6 @@ export const Calculator = ({ navigation }) => {
       latitudeDelta: 0.0922,
       longitudeDelta: 0.0421,
     });
-
-    console.log("Latitude:", location.coords.latitude);
-    console.log("Longitude:", location.coords.longitude);
   };
 
   const hideDatePicker = () => {
@@ -423,223 +463,315 @@ export const Calculator = ({ navigation }) => {
     { label: 'Male', value: 'Male' },
     { label: 'Female', value: 'Female' },
   ];
+
   const [isFocus, setIsFocus] = useState(false);
+
+  const toggleSwitch = (switchValue) => {
+    setSex(switchValue === sex ? null : switchValue);
+  };
+
+  const switchMale = () => toggleSwitch('Male');
+  const switchFemale = () => toggleSwitch('Female');
 
   return (
     <>
-      <ImageBackground source={require('../assets/p1.jpg')} resizeMode="cover" style={styles.image}>
-        <View style={{ flex: 1, alignItems: 'center' }} >
-
-          <ScrollView
-            showsVerticalScrollIndicator={false} style={{ width: '100%' }}
-          >
-            {/* particulars  */}
-            <View style={styles.category_container}>
-                {/* numberFour */}
-                <Text style={styles.head}>4. Farmer Details</Text>
-                <TextInput
-                  editable
-                  maxLength={40}
-                  onChangeText={text => setFarmerName(text)}
-                  placeholder='Name of Farmer'
-                  value={farmerName}
-                  style={styles.dropdown}
-                />
-                <Dropdown
-                  style={[styles.dropdown, isFocus && { borderColor: 'blue' }]}
-                  placeholderStyle={styles.placeholderStyle}
-                  selectedTextStyle={styles.selectedTextStyle}
-                  inputSearchStyle={styles.inputSearchStyle}
-                  data={data}
-                  search
-                  maxHeight={300}
-                  labelField="label"
-                  valueField="value"
-                  placeholder={!isFocus ? 'Select item' : '...'}
-                  searchPlaceholder="Search..."
-                  value={sex}
-                  onFocus={() => setIsFocus(true)}
-                  onBlur={() => setIsFocus(false)}
-                  onChange={item => {
-                    setSex(item.value);
-                    setIsFocus(false);
-                  }}
-                />
-                <View style={{ height: '1%', borderBottomColor: '#FAF1CE', borderBottomWidth: .2, marginBottom: 6 }}></View>
-
-              <Text style={styles.head}>1. Land Area</Text>
-              {
-                <>
-                  {/* Number 1 */}
-                  <View style={{ display: 'flex', flexDirection: 'row' }}>
-                    <TextInput
-                      editable
-                      onChangeText={(base) => {
-                        setBase(base)
-                        setArea(parseFloat(base / 30000))
-                      }}
-                      ref={focusNumplants}
-                      placeholder='No. of plants'
-                      keyboardType='numeric'
-                      value={base}
-                      style={{ ...styles.dropdown, flex: 3 }}
-                      disabled
-                    />
-                    {
-                      lParti && calculating
-                        ?
-                        <ActivityIndicator style={{ flex: 1 }} size='small' color='#FF5733' />
-                        :
-                        <TouchableOpacity style={{ marginLeft: 10, justifyContent: 'center' }} onPress={() => {
-                          setCalculating(true)
-                          handleBase()
-                        }
-                        } >
-                          <Image source={require('../assets/calc.png')} style={{ width: 30, height: 30 }} />
-                        </TouchableOpacity>
-                    }
+      <View style={styles.screen}>
+        <ScrollView style={styles.scroll}>
+          {
+            isNext ?
+              <>
+                <View style={{ ...styles.section, marginHorizontal: table ? 0 : 14, paddingHorizontal: 8 }}>
+                  <Text style={styles.header}>CALCULATE</Text>
+                  <View style={styles.subsection}>
+                    <Text style={styles.supText}>Date of Planting</Text>
+                    <View style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
+                      <TextInput
+                        editable
+                        onChangeText={(base) => {
+                          setBase(base)
+                          setArea(parseFloat(base / 30000))
+                          setTable(false)
+                        }}
+                        ref={focusNumplants}
+                        placeholder='Enter number of plants'
+                        keyboardType='numeric'
+                        value={base}
+                        style={calculateFocus ? { ...styles.textInputFocus, borderBottomRightRadius: 0, borderTopRightRadius: 0 } : { ...styles.textInput, borderBottomRightRadius: 0, borderTopRightRadius: 0 }}
+                        onFocus={() => setCalculateFocus(true)}
+                        onBlur={() => setCalculateFocus(false)}
+                      />
+                      {
+                        lParti && calculating
+                          ?
+                          <ActivityIndicator style={{ flex: 1 }} size='small' color='#FF5733' />
+                          :
+                          <TouchableOpacity onPress={() => {
+                            setCalculating(true)
+                            handleBase()
+                          }} style={{ ...styles.button, backgroundColor: '#F5C115', borderBottomLeftRadius: 0, borderTopLeftRadius: 0, paddingHorizontal: 22, paddingVertical: 0, justifyContent: 'center' }}>
+                            <Image source={require('../assets/calc.png')} style={{}} />
+                            {/* <Text style={{color: '#FFF'}}>Select</Text> */}
+                          </TouchableOpacity>
+                      }
+                    </View>
                   </View>
                   {table && <TableBuilder components={components} area={area} setRoiDetails={setRoiDetails} />}
-                </>
-              }
-              <View style={{ height: '1%', borderBottomColor: '#FAF1CE', borderBottomWidth: .2, marginBottom: 6 }}></View>
-
-              {/* Number 2 */}
-              <Text style={styles.head}>2. QP Farm Details</Text>
-              <TextInput
-                editable
-                maxLength={40}
-                onChangeText={text => setCropStage(text)}
-                placeholder='Stage of Crops'
-                value={cropStage}
-                style={styles.dropdown}
-              />
-              <View style={{ display: 'flex', flexDirection: 'row' }}>
-                <TextInput
-                  style={{ ...styles.dropdown, flex: 3 }}
-                  value={startDate.toLocaleDateString()}
-                  placeholder="Date of Planting"
-                />
-                <TouchableOpacity onPress={() => setStartPicker(true)} style={{ marginLeft: 10, justifyContent: 'center' }}>
-                  <Image source={require('../assets/cal.png')} style={{ width: 30, height: 30 }} />
-                </TouchableOpacity>
-
-                <DateTimePickerModal
-                  isVisible={startPicker}
-                  mode="date"
-                  onConfirm={(date) => {
-                    setStartDate(date)
-                    setStartPicker(false)
-                  }}
-                  onCancel={() => setStartPicker(false)}
-                  style={{ marginBottom: 10 }}
-                />
-              </View>
-
-              <View style={{ height: '1%', borderBottomColor: '#FAF1CE', borderBottomWidth: .2, marginBottom: 6 }}></View>
-
-              {/* numberThree */}
-              <Text style={styles.head}>3. Input Farm Location</Text>
-                <TextInput
-                  editable
-                  maxLength={40}
-                  onChangeText={text => setFarmName(text)}
-                  placeholder='Enter Farm Name'
-                  value={farmName}
-                  style={styles.dropdown}
-                />
-                <TextInput
-                  editable={false}
-                  maxLength={40}
-                  // placeholder='Enter Farm Name'
-                  value={municipality}
-                  style={styles.dropdown}
-                />
-                <TextInput
-                  maxLength={40}
-                  disabled={false}
-                  // placeholder='Enter Farm Name'
-                  value={brgyCode}
-                  style={styles.dropdown}
-                />
-
-                <View style={styles.container1}>
-                  <MapView style={styles.map} region={region} onPress={handleMapPress}>
-                    {userLocation && (
-                      <Marker
-                        coordinate={{
-                          latitude: userLocation.latitude,
-                          longitude: userLocation.longitude,
-                        }}
-                        title="Your Location"
-                        description="You are here!"
-                        draggable
-                        onDragEnd={(e) => setUserLocation(e.nativeEvent.coordinate)}
-                      />
-                    )}
-                  </MapView>
-                  <View style={styles.buttonContainer}>
-                    <Button title="Update Location" onPress={handleUpdateLocation} />
+                </View>
+                <View style={{ ...styles.section, marginBottom: 32, paddingTop: 14 }}>
+                  <View style={{ alignItems: 'center', display: 'flex', flexDirection: 'row', }}>
+                    <BottomButton />
                   </View>
                 </View>
-                <View style={{ height: '1%', borderBottomColor: '#FAF1CE', borderBottomWidth: .2, marginBottom: 6 }}></View>
+              </> :
 
-                {/* numberFive */}
-                <Text style={styles.head}>5. Upload Farm Images</Text>
-                <View style={{ marginBottom: 8, width: '100%', height: 180, borderRadius: 6, padding: 4, backgroundColor: '#101010' }}>
-                  {
-                    images &&
-                    <FlatList
-                      data={images}
-                      // numColumns={3}
-                      horizontal={true}
-                      renderItem={({ item }) => (
-                        <View style={{ flex: 1 }}>
-                          <Image style={{ height: '100%', width: 240, borderRadius: 6 }} source={{ uri: item.url }} />
-                        </View>
-                      )}
-                      ItemSeparatorComponent={() =>
-                        <View style={{ width: 4, height: '100%' }}></View>
-                      }
-                    // columnWrapperStyle={{
-                    //   gap: 2,
-                    //   marginBottom: 2
-                    // }}
+              <>
+                {/* Farmer Detail */}
+                <View style={styles.section}>
+                  <Text style={styles.header}>FARMER INFORMATION</Text>
+                  <View style={styles.subsection}>
+                    <Text style={styles.supText}>First Name</Text>
+                    <TextInput
+                      editable
+                      onChangeText={text => setFirstname(text)}
+                      placeholder='Enter firstname of farmer'
+                      value={firstname}
+                      style={firstnameFocus ? styles.textInputFocus : styles.textInput}
+                      onFocus={() => setFirstnameFocus(true)}
+                      onBlur={() => setFirstnameFocus(false)}
                     />
-                  }
-                  <View style={{ flexDirection: 'row' }}>
-                    <TouchableOpacity style={styles.touch} onPress={() => {
+                  </View>
+                  <View style={styles.subsection}>
+                    <Text style={styles.supText}>Last Name</Text>
+                    <TextInput
+                      editable
+                      onChangeText={text => setLastname(text)}
+                      placeholder='Enter lastname of farmer'
+                      value={lastname}
+                      style={lastnameFocus ? styles.textInputFocus : styles.textInput}
+                      onFocus={() => setLastnameFocus(true)}
+                      onBlur={() => setLastnameFocus(false)}
+                    />
+                  </View>
+                  <View style={styles.subsection}>
+                    <Text style={styles.supText}>Select Gender</Text>
+                    <View style={styles.switches}>
+                      <View style={styles.switchContainer}>
+                        <Text style={styles.genderText}>Male</Text>
+                        <Switch
+                          trackColor={{ false: '#E8E7E7', true: '#FCF0C5' }}
+                          thumbColor={sex === 'Male' ? '#F5C115' : '#f4f3f4'}
+                          ios_backgroundColor="#3e3e3e"
+                          onValueChange={switchMale}
+                          value={sex === 'Male'}
+                        />
+                      </View>
+                      <View style={styles.switchContainer}>
+                        <Text style={styles.genderText}>Female</Text>
+                        <Switch
+                          trackColor={{ false: '#E8E7E7', true: '#FCF0C5' }}
+                          thumbColor={sex === 'Female' ? '#F5C115' : '#f4f3f4'}
+                          ios_backgroundColor="#3e3e3e"
+                          onValueChange={switchFemale}
+                          value={sex === 'Female'}
+                        />
+                      </View>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Farm Location */}
+                <View style={styles.section}>
+                  <Text style={styles.header}>FARM INFORMATION</Text>
+                  <View style={styles.subsection}>
+                    <Text style={styles.supText}>Farm Name</Text>
+                    <TextInput
+                      editable
+                      maxLength={40}
+                      onChangeText={text => setFarmName(text)}
+                      placeholder='Enter farm name'
+                      value={farmName}
+                      style={farmnameFocus ? styles.textInputFocus : styles.textInput}
+                      onFocus={() => setFarmnameFocus(true)}
+                      onBlur={() => setFarmnameFocus(false)}
+                    />
+                  </View>
+                  <View style={styles.subsection}>
+                    <Text style={styles.supText}>Field ID</Text>
+                    <TextInput
+                      editable
+                      maxLength={40}
+                      onChangeText={text => setFieldId(text)}
+                      placeholder='Enter field id'
+                      value={fieldId}
+                      style={fieldidFocus ? styles.textInputFocus : styles.textInput}
+                      onFocus={() => setFieldidFocus(true)}
+                      onBlur={() => setFieldidFocus(false)}
+                    />
+                  </View>
+                  <View style={styles.subsection}>
+                    <Text style={styles.supText}>Municipality</Text>
+                    <TextInput
+                      editable={false}
+                      maxLength={40}
+                      placeholder='Enter farm municipality'
+                      value={municipality}
+                      style={styles.textInput}
+                    />
+                  </View>
+                  <View style={styles.subsection}>
+                    <Text style={styles.supText}>Barangay</Text>
+                    <TextInput
+                      maxLength={40}
+                      disabled={false}
+                      placeholder='Enter farm barangay'
+                      value={brgyCode}
+                      style={styles.textInput}
+                    />
+                  </View>
+                  <View style={styles.subsection}>
+                    <Text style={styles.supText}>Location</Text>
+                    <View style={styles.container1}>
+                      <MapView style={styles.map} region={region} onPress={handleMapPress}>
+                        {userLocation && (
+                          <Marker
+                            coordinate={{
+                              latitude: userLocation.latitude,
+                              longitude: userLocation.longitude,
+                            }}
+                            title="Your Location"
+                            description="You are here!"
+                            draggable
+                            onDragEnd={(e) => setUserLocation(e.nativeEvent.coordinate)}
+                          />
+                        )}
+                      </MapView>
+                      <View style={styles.buttonContainer}>
+                        <TouchableOpacity style={{ ...styles.button, borderTopLeftRadius: 0, borderTopRightRadius: 0, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 22, paddingVertical: 8, justifyContent: 'center', gap: 12 }} onPress={() => {
+                          handleUpdateLocation()
+                        }}>
+                          <Image source={require('../assets/loc.png')} style={{}} />
+                          <Text style={{ color: '#E8E7E7', fontSize: 18 }}>Update Location</Text>
+                        </TouchableOpacity>
+                        {/* <Button title="Update Location" onPress={handleUpdateLocation} /> */}
+                      </View>
+                    </View>
+                  </View>
+                </View>
+
+                {/* farm details */}
+                <View style={styles.section}>
+                  <Text style={styles.header}>FARM DETAIL</Text>
+                  <View style={styles.subsection}>
+                    <Text style={styles.supText}>Date of Planting</Text>
+                    <View style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
+                      <TextInput
+                        value={startDate.toLocaleDateString()}
+                        placeholder="Date of Planting"
+                        style={startdateFocus ? { ...styles.textInputFocus, borderBottomRightRadius: 0, borderTopRightRadius: 0 } : { ...styles.textInput, borderBottomRightRadius: 0, borderTopRightRadius: 0 }}
+                        onFocus={() => setStartdateFocus(true)}
+                        onBlur={() => setStartdateFocus(false)}
+                      />
+                      <TouchableOpacity onPress={() => setStartPicker(true)} style={{ ...styles.button, backgroundColor: '#F5C115', borderBottomLeftRadius: 0, borderTopLeftRadius: 0, paddingHorizontal: 22, paddingVertical: 0, justifyContent: 'center' }}>
+                        <Image source={require('../assets/cal.png')} style={{}} />
+                        {/* <Text style={{color: '#FFF'}}>Select</Text> */}
+                      </TouchableOpacity>
+
+                      <DateTimePickerModal
+                        isVisible={startPicker}
+                        mode="date"
+                        onConfirm={(date) => {
+                          setStartDate(date)
+                          setStartPicker(false)
+                        }}
+                        onCancel={() => setStartPicker(false)}
+                        style={{ marginBottom: 10 }}
+                      />
+                    </View>
+                  </View>
+                </View>
+
+                {/* Images */}
+                <View style={styles.section}>
+                  <Text style={styles.header}>UPLOAD IMAGES</Text>
+                  <View style={styles.subsection}>
+                    <View style={{ borderBottomLeftRadius: 0, borderBottomRightRadius: 0, height: 180, borderRadius: 8, padding: 4, backgroundColor: '#FEFAE0' }}>
+                      {
+                        images &&
+                        <FlatList
+                          data={images}
+                          // numColumns={3}
+                          horizontal={true}
+                          renderItem={({ item }) => (
+                            <View style={{ flex: 1 }}>
+                              <Image style={{ height: '100%', width: 240, borderRadius: 6 }} source={{ uri: item.url }} />
+                            </View>
+                          )}
+                          ItemSeparatorComponent={() =>
+                            <View style={{ width: 4, height: '100%' }}></View>
+                          }
+                        // columnWrapperStyle={{
+                        //   gap: 2,
+                        //   marginBottom: 2
+                        // }}
+                        />
+                      }
+                    </View>
+                    <TouchableOpacity style={{ ...styles.button, borderTopLeftRadius: 0, borderTopRightRadius: 0, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 22, paddingVertical: 8, justifyContent: 'center', gap: 12 }} onPress={() => {
                       setShowAddImage(true)
                     }}>
-                      <Text style={styles.text}>Add Image</Text>
+                      <Image source={require('../assets/up.png')} style={{}} />
+                      <Text style={{ color: '#E8E7E7', fontSize: 18 }}>Add image</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
-              {/* ImagesGal */}
-            </View>
-          </ScrollView>
-          <BottomButton />
-        </View >
-      </ImageBackground >
-      {saving && <ActivityIndicator color='#FF5733' size='large' style={styles.loading} />}
 
+                {/* Bottombutton */}
+                <View style={{ ...styles.section, marginBottom: 32, paddingTop: 14 }}>
+                  <View style={{ alignItems: 'center' }}>
+                    <TouchableOpacity style={{
+                      ...styles.button,
+                      paddingHorizontal: 24,
+                      shadowColor: "#000",
+                      shadowOffset: {
+                        width: 0,
+                        height: 2,
+                      },
+                      shadowOpacity: 0.25,
+                      shadowRadius: 3.84,
+                      elevation: 5,
+                    }} onPress={() => setIsNext(true)}>
+                      <Text style={{ color: '#fff', fontSize: 16 }}>Next</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </>
+          }
+        </ScrollView>
+      </View>
+      {saving && <ActivityIndicator color='#FF5733' size='large' style={styles.loading} />}
       <Modal animationType='fade' visible={showAddImage} transparent={true}>
         <View style={styles.addImage}>
-          <TouchableOpacity style={styles.cam} onPress={() => {
-            openGallery()
-          }}>
-            <Image source={require('../assets/gallery.png')} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.cam} onPress={() => {
-            openCamera()
-          }}>
-            <Image source={require('../assets/upload.png')} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.cam} onPress={() => {
-            setShowAddImage(!showAddImage)
-          }}>
-            <Image source={require('../assets/close.png')} />
-          </TouchableOpacity>
+          <View style={styles.modalContainer}>
+
+            <TouchableOpacity style={styles.cam} onPress={() => {
+              openGallery()
+            }}>
+              <Image source={require('../assets/gallery.png')} style={{ width: 42, height: 42 }} />
+              <Text>Gallery</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.cam} onPress={() => {
+              openCamera()
+            }}>
+              <Image source={require('../assets/upload.png')} style={{ width: 42, height: 42 }} />
+              <Text>Camera</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.cam} onPress={() => {
+              setShowAddImage(!showAddImage)
+            }}>
+              <Image source={require('../assets/close.png')} style={{ width: 42, height: 42 }} />
+              <Text>Close</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </Modal>
     </>
@@ -647,142 +779,127 @@ export const Calculator = ({ navigation }) => {
 }
 
 const styles = StyleSheet.create({
-  touch: {
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    alignItems: 'center',
-    textAlign: 'center',
-    shadowOpacity: 0.37,
-    shadowRadius: 7.49,
-    elevation: 12,
-    backgroundColor: 'green',
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#206830',
+  screen: {
     flex: 1,
+    backgroundColor: '#FAFAFA',
+    // paddingHorizontal: 14,
   },
-  cam: {
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    alignItems: 'center',
-    textAlign: 'center',
-    shadowOpacity: 0.37,
-    shadowRadius: 7.49,
-    elevation: 12,
-    backgroundColor: 'white',
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#206830',
+  section: {
+    // backgroundColor: 'red',
+    paddingTop: 32,
+    paddingBottom: 14,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    marginTop: 16,
+    backgroundColor: '#FFF',
+    marginHorizontal: 16,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.20,
+    shadowRadius: 1.41,
+    elevation: 2,
+  },
+  scroll: {
     flex: 1,
+    paddingBottom: 12,
+  },
+  subsection: {
+    marginBottom: 22,
+  },
+  header: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#4DAF50',
+    marginBottom: 14,
+  },
+  subHeader: {
+    color: '#5E5E5E',
+    marginBottom: 30,
+    fontWeight: '500',
+    fontSize: 14,
   },
   textInput: {
-    borderWidth: 1,
-    borderColor: 'black',
-    marginBottom: 5,
-    padding: 10,
-  },
-  image: {
     flex: 1,
+    height: 46,
     opacity: 1.0,
-    paddingTop: 36,
+    borderColor: '#E8E7E7',
+    borderWidth: 1,
+    backgroundColor: '#FBFBFB',
+    borderRadius: 8,
+    paddingHorizontal: 18,
+    color: '#3C3C3B',
+    fontSize: 16,
   },
-
+  textInputFocus: {
+    flex: 1,
+    height: 46,
+    opacity: 1.0,
+    borderColor: '#F5C115',
+    borderWidth: 1.6,
+    backgroundColor: '#FBFBFB',
+    borderRadius: 8,
+    paddingHorizontal: 18,
+    color: '#3C3C3B',
+    fontSize: 16,
+    shadowColor: "#F5C115",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.22,
+    shadowRadius: 2.22,
+    elevation: 3,
+  },
+  supText: {
+    color: '#070707',
+    fontSize: 12,
+    fontWeight: '500',
+    marginBottom: 4
+  },
+  divider: {
+    borderBottomColor: '#5E5E5E',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    marginBottom: 12
+  },
   map: {
-    height: 200,
+    height: 300,
     width: '100%',
   },
-
-  dropdown: {
-    height: 50,
-    opacity: 1.0,
-    borderColor: 'green',
-    borderWidth: 1,
+  button: {
+    backgroundColor: '#4DAF50',
+    alignItems: 'center',
+    padding: 12,
     borderRadius: 8,
-    paddingHorizontal: 8,
-    backgroundColor: 'white',
-    marginBottom: 6,
-    color: 'black'
   },
-
-  placeholderStyle: {
-    fontSize: 16,
+  switchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12
   },
-  selectedTextStyle: {
-    fontSize: 16,
-  },
-
-  inputSearchStyle: {
-    height: 40,
-    fontSize: 16,
+  switches: {
+    display: 'flex',
+    flexDirection: 'row',
+    gap: 32,
+    marginTop: 8
   },
   addImage: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    flexDirection: 'row'
   },
-  text: {
-    fontSize: 15,
-    fontFamily: 'serif',
-    fontWeight: 'bold',
-    color: 'white'
-  },
-  text1: {
-    fontSize: 15,
-    fontFamily: 'serif',
-    fontWeight: 'bold',
-    color: 'black'
-  },
-  category_container: {
-    padding: 10,
-    margin: 16,
-    opacity: 1.0,
-    borderRadius: 10,
-    backgroundColor: '#fff',
-    elevation: 5
-  },
-  loading: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-    alignItems: 'center',
+  modalContainer: {
     justifyContent: 'center',
-    backgroundColor: 'rgba(150, 150, 150, 0.6)'
-  },
-  head: {
-    fontSize: 20,
-    fontFamily: 'serif',
-    fontWeight: 'bold',
-    color: 'green',
-    marginBottom: 8,
-  },
-
-  modalContent: {
-    backgroundColor: 'white',
-    width: 280,
-    padding: 20,
-    borderRadius: 10,
-    elevation: 5, // Android shadow
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  modalLabel: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    marginBottom: 9,
-  },
-  verifyButton: {
-    position: 'absolute',
-    alignSelf: 'center',
-    right: 0,
-  },
-
-});
+    alignItems: 'center',
+    backgroundColor: '#FFF',
+    flexDirection: 'row',
+    gap: 32,
+    padding: 32,
+    borderRadius: 8,
+  }
+})
 
 

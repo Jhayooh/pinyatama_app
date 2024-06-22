@@ -22,21 +22,46 @@ const App = () => (
     <NavigationContainer>
         <Stack.Navigator
             screenOptions={{
-                headerShown: false
+                headerShown: true
             }}>
-            <Stack.Screen name='Landing' component={Landing} />
-            <Stack.Screen name='Calculator' component={Calculator} />
+            <Stack.Screen name='Landing' component={Landing}
+                options={{
+                    headerShown: false
+                }} />
+            <Stack.Screen
+                name='Calculator'
+                component={Calculator}
+                options={{
+                    title: 'Calculator',
+                    headerTintColor: '#E8E7E7',
+                    headerBackTitleVisible: false,
+                    headerStyle: {
+                        backgroundColor: '#4DAF50',
+                    }
+                }}
+            />
             <Stack.Screen name='ProductionInput' component={ProductionInput} />
             <Stack.Screen name='Map' component={Map} />
-            <Stack.Screen name='Gallery' component={Gallery} />
+            <Stack.Screen
+                name='Gallery'
+                component={Gallery}
+                options={{
+                    title: 'Gallery',
+                    headerTintColor: '#E8E7E7',
+                    headerBackTitleVisible: false,
+                    headerStyle: {
+                        backgroundColor: '#4DAF50',
+                    }
+                }}
+            />
             <Stack.Screen name='Charts' component={Charts} />
             <Stack.Screen name='DataInputs' component={DataInputs} />
             <Stack.Screen name='BottomButton' component={BottomButton} />
             <Stack.Screen name='Video' component={Video} />
             <Stack.Screen name='Register' component={Register} />
             <Stack.Screen name='Inputs' component={Inputs} />
-            <Stack.Screen name = 'About' component={About}  />
-            </Stack.Navigator>
+            <Stack.Screen name='About' component={About} />
+        </Stack.Navigator>
     </NavigationContainer>
 )
 
