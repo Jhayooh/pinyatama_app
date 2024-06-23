@@ -379,7 +379,7 @@ export const Landing = ({ navigation }) => {
                             </TouchableHighlight>
                         </View>
                         <View style={styles.btnRow}>
-                            <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn} onPress={() => null}>
+                            <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn} onPress={() => navigation.navigate('About')}>
                                 <View style={styles.btnbtnChild}>
                                     <Image source={aboutLogo} style={styles.btnImage} />
                                     <Text style={styles.buttonText}>Tungkol</Text>

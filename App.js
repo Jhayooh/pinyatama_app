@@ -32,7 +32,7 @@ const App = () => (
                 name='Calculator'
                 component={Calculator}
                 options={{
-                    title: 'Calculator',
+                    title: 'Kalkulador ng Gastos',
                     headerTintColor: '#E8E7E7',
                     headerBackTitleVisible: false,
                     headerStyle: {
@@ -40,13 +40,24 @@ const App = () => (
                     }
                 }}
             />
-            <Stack.Screen name='ProductionInput' component={ProductionInput} />
+            <Stack.Screen
+                name='ProductionInput'
+                component={ProductionInput}
+                options={{
+                    title: 'Production Input',
+                    headerTintColor: '#E8E7E7',
+                    headerBackTitleVisible: false,
+                    headerStyle: {
+                        backgroundColor: '#4DAF50',
+                    }
+                }}
+            />
             <Stack.Screen name='Map' component={Map} />
             <Stack.Screen
                 name='Gallery'
                 component={Gallery}
                 options={{
-                    title: 'Gallery',
+                    title: 'Mga Bukid ng Pinya',
                     headerTintColor: '#E8E7E7',
                     headerBackTitleVisible: false,
                     headerStyle: {
@@ -54,13 +65,37 @@ const App = () => (
                     }
                 }}
             />
+            <Stack.Screen
+                name='About'
+                component={About}
+                options={{
+                    title: 'Tungkol sa QP Farming',
+                    headerTintColor: '#E8E7E7',
+                    headerBackTitleVisible: false,
+                    headerStyle: {
+                        backgroundColor: '#4DAF50',
+                    }
+                }}
+            />
+            <Stack.Screen
+                name='Video'
+                component={Video}
+                options={{
+                    title: 'Mga Bidyo',
+                    headerTintColor: '#E8E7E7',
+                    headerBackTitleVisible: false,
+                    headerStyle: {
+                        backgroundColor: '#4DAF50',
+                    }
+                }} />
+
             <Stack.Screen name='Charts' component={Charts} />
             <Stack.Screen name='DataInputs' component={DataInputs} />
             <Stack.Screen name='BottomButton' component={BottomButton} />
-            <Stack.Screen name='Video' component={Video} />
             <Stack.Screen name='Register' component={Register} />
             <Stack.Screen name='Inputs' component={Inputs} />
-            <Stack.Screen name='About' component={About} />
+
+
         </Stack.Navigator>
     </NavigationContainer>
 )

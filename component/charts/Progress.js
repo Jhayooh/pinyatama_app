@@ -12,24 +12,14 @@ export const Progress = ({ data }) => {
         backgroundGradientFromOpacity: 0,
         backgroundGradientToOpacity: 0,
         color: (opacity = 1) => `rgba(26, 255, 146, ${opacity})`,
-        strokeWidth: 2, // optional, default 3
+        strokeWidth: 2, 
         barPercentage: 0.5,
-        useShadowColorFromDataset: false, // optional
+        useShadowColorFromDataset: false, 
         style: {
             borderRadius: 16,
         }
     };
-    // useEffect(() => {
-    //     setNewData({
-    //         labels: ["Total Cost", "Net Return", "ROI"],
-    //         data: [0.4, 0.6, 0.8]
-    //     })
-
-    // }, [data])
-    // const data = {
-    //     labels: ["Swim", "Bike", "Run"], // optional
-    //     data: [0.4, 0.6, 0.8]
-    //   };
+    
     return (
         <>
             <View style={{ alignItems: 'center', justifyContent: 'center', minHeight: 80 }}>
