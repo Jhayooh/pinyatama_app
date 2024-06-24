@@ -11,7 +11,7 @@ import {
 import { db } from '../firebase/Config';
 import { AddDataRow } from './AddDataRow';
 
-export const TableBuilder = ({ components, area, setRoiDetails }) => {
+export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => {
   const [laborTotal, setLaborTotal] = useState(0)
   const [materialTotal, setMaterialTotal] = useState(0)
   const [costTotal, setCostTotal] = useState(0)
@@ -20,16 +20,27 @@ export const TableBuilder = ({ components, area, setRoiDetails }) => {
   const [netReturn, setNetReturn] = useState(0)
   const [roi, setRoi] = useState(0)
 
+  function getPinePrice(pine){
+    const newPine = pineapple.filter(thePine => thePine.name.toLowerCase() === pine.toLowerCase())[0]
+    console.log("the Pine price", newPine)
+    return parseInt(newPine.price)
+  }
+
   useEffect(() => {
     let materialSum = 5000;
     let laborSum = 0;
+
+
 
     components.forEach((component) => {
       if (component.particular.toLowerCase() === 'material') {
         if (component.name.toLowerCase() === 'planting materials') {
           const qntyPrice = parseInt(component.qntyPrice)
-          setGrossReturn(getPercentage(90, qntyPrice) * 8);
-          setBatterBall(getPercentage(10, qntyPrice) * 2);
+          setGrossReturn(getPercentage(90, qntyPrice));
+          console.log("defQnty:", qntyPrice);
+          console.log(getPercentage(90, qntyPrice))
+          console.log("price ng pineapple", getPinePrice('pineapple'));
+          setBatterBall(getPercentage(10, qntyPrice));
         }
         materialSum += parseInt(component.totalPrice);
       } else if (component.particular.toLowerCase() === 'labor') {

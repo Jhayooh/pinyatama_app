@@ -22,7 +22,6 @@ import {
   Alert,
   Switch
 } from 'react-native';
-
 import { RadioButton } from 'react-native-paper';
 
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
@@ -39,6 +38,9 @@ export const Calculator = ({ navigation }) => {
 
   const queryParti = collection(db, 'particulars');
   const [qParti, lParti, eParti] = useCollectionData(queryParti)
+  
+  const quertyPine = collection(db, 'pineapple');
+  const [qPine, lPine, ePine] = useCollectionData(quertyPine)
 
   const [startPicker, setStartPicker] = useState(false);
   const [endPicker, setEndPicker] = useState(false);
@@ -70,7 +72,7 @@ export const Calculator = ({ navigation }) => {
   const [municipality, setMunicipality] = useState('')
   const [brgyCode, setBrgyCode] = useState(null)
   const [farmerName, setFarmerName] = useState('');
-  const [sex, setSex] = useState(null)
+  const [sex, setSex] = useState('Male')
   const [userLocation, setUserLocation] = useState(null);
   const [fieldId, setFieldId] = useState('')
   const [firstname, setFirstname] = useState('')
@@ -250,9 +252,10 @@ export const Calculator = ({ navigation }) => {
       const roiRef = collection(db, `farms/${newFarm.id}/roi`);
       components.forEach(async (component) => {
         try {
-          await addDoc(farmComp, {
+          const newComp = await addDoc(farmComp, {
             ...component
           })
+          await updateDoc(newComp, { id: newComp.id })
         } catch (e) {
           console.log("error sa components:", e);
         }
@@ -554,7 +557,7 @@ export const Calculator = ({ navigation }) => {
                       }
                     </View>
                   </View>
-                  {table && <TableBuilder components={components} area={area} setRoiDetails={setRoiDetails} />}
+                  {table && qPine && <TableBuilder components={components} area={area} setRoiDetails={setRoiDetails} pineapple={qPine}/>}
                 </View>
                 <View style={{ ...styles.section, marginBottom: 32, paddingTop: 14 }}>
                   <View style={{ ...styles.buttonContainer }}>
@@ -631,9 +634,9 @@ export const Calculator = ({ navigation }) => {
                       <View style={styles.switchContainer}>
                         <RadioButton.Android
                           value="Male"
-                          status={selectedValue === 'Male' ?
+                          status={sex === 'Male' ?
                             'checked' : 'unchecked'}
-                          onPress={() => setSelectedValue('Male')}
+                          onPress={() => setSex('Male')}
                           color="#F5C115"
                         />
                         <Text style={styles.genderText}>Male</Text>
@@ -648,9 +651,9 @@ export const Calculator = ({ navigation }) => {
                       <View style={styles.switchContainer}>
                         <RadioButton.Android
                           value="Female"
-                          status={selectedValue === 'Female' ?
+                          status={sex === 'Female' ?
                             'checked' : 'unchecked'}
-                          onPress={() => setSelectedValue('Female')}
+                          onPress={() => setSex('Female')}
                           color="#F5C115"
                         />
                         <Text style={styles.genderText}>Female</Text>
