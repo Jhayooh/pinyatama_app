@@ -4,21 +4,24 @@ import { ImageBackground, StyleSheet } from 'react-native';
 import { SearchBar } from 'react-native-elements';
 import TabView from './TabView';
 
+//icons
+
+
 const Tab = createMaterialTopTabNavigator();
 
-export default function Gallery({ route, navigation }) {
+export default function Gallery({ route }) {
   const [search, setSearch] = useState('');
   const { farms = [] } = route.params
 
-  const updateSearch = (text) => {
+  const handleSearch = (text) => {
     setSearch(text);
   };
 
   return (
     <ImageBackground style={styles.background} >
       <SearchBar
-        placeholder="Search"
-        onChangeText={updateSearch}
+        placeholder="Maghanap..."
+        onChangeText={handleSearch}
         value={search}
         containerStyle={styles.searchContainer}
         inputContainerStyle={styles.searchInputContainer}
@@ -68,6 +71,16 @@ export default function Gallery({ route, navigation }) {
           initialParams={{
             farms: farms && farms.filter(obj =>
               obj.cropStage.toLowerCase() === 'fruiting'
+            )
+          }}
+        />
+        <Tab.Screen
+          name="Archive"
+          component={TabView}
+          options={{ tabBarLabel: 'Archive' }}
+          initialParams={{
+            farms: farms && farms.filter(obj =>
+              obj.cropStage.toLowerCase() === 'complete'
             )
           }}
         />

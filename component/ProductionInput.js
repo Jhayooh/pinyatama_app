@@ -44,59 +44,40 @@ const ProductionInput = ({ route, navigation }) => {
   return (
     <>
       <SafeAreaView style={styles.container}>
-        {/* <ImageBackground resizeMode="cover" style={styles.image}> */}
-          <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', gap: 3}}>
-            <Text style={styles.name}>{farm.title}</Text>
-            <TouchableOpacity style={{ height: 32, alignItems: 'center', justifyContent: 'center', paddingTop:20}} onPress={() => {
-              setEdit(!edit)
-            }}>
-              <Image source={require('../assets/edit.png')} style={{width:20, height:20}}/>
-            </TouchableOpacity>
-          </View>
-          <Text style={styles.loc}>{`${farm.mun}, ${farm.brgy}`}</Text>
-          {/* <Text style={styles.label}>Pagsusuri ng Paggastos at Pagbabalik sa Produksiyon ng Pinya</Text> */}
+        <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', gap: 3 }}>
+          <Text style={styles.name}>{farm.title}</Text>
+          <TouchableOpacity style={{ height: 32, alignItems: 'center', justifyContent: 'center', paddingTop: 20 }} onPress={() => {
+            setEdit(!edit)
+          }}>
+            <Image source={require('../assets/edit.png')} style={{ width: 20, height: 20 }} />
+          </TouchableOpacity>
+        </View>
+        <Text style={styles.loc}>{`${farm.mun}, ${farm.brgy}`}</Text>
 
-          {edit
-            ?
-            <>
-              {/* Table Container */}
-              < ScrollView style={styles.scrollView}>
-                {/* <Text style={styles.texts}>PARTICULARS</Text> */}
 
-                {/* Table Heads */}
-                {
-                  compLoading
-                    ?
-                    <ActivityIndicator size='small' color='#3bcd6b' style={{ padding: 64, backgroundColor: '#fff' }} />
-                    :
-                    <TableBuilder
-                      components={compData}
-                      area={farm.area}
-                      setRoiDetails={setRoiDetails}
-                    />
-                }
-              </ScrollView>
-            </>
-            :
-            <Charts farms={farms} />
-          }
-        {/* </ImageBackground> */}
+        {edit
+          ?
+          <>
+            < ScrollView style={styles.scrollView}>       
+              {
+                compLoading
+                  ?
+                  <ActivityIndicator size='small' color='#3bcd6b' style={{ padding: 64, backgroundColor: '#fff' }} />
+                  :
+                  <TableBuilder
+                    components={compData}
+                    area={farm.area}
+                    setRoiDetails={setRoiDetails}
+                  />
+              }
+            </ScrollView>
+          </>
+          :
+          <Charts farms={farms} />
+        }
       </SafeAreaView >
 
-      {/* // modal */}
-      {/* <Modal animationType='fade' transparent={true} visible={isShow} onRequestClose={() => (setIsShow(!isShow))}>
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Add New Table</Text>
-            <TextInput
-              style={styles.input}
-              onChangeText={onChangeText}
-              value={text}
-              placeholder='Add Name'
-            />
-          </View>
-        </View>
-      </Modal> */}
+
     </>
   )
 }
@@ -104,40 +85,36 @@ const ProductionInput = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // justifyContent:'center',
-    // alignItems:'center',
   },
   image: {
     flex: 1,
-    // opacity: .5,
     padding: 12,
-    backgroundColor:'#22b14c',
-    padding:20
+    backgroundColor: '#22b14c',
+    padding: 20
 
   },
   name: {
     fontSize: 32,
-    paddingTop:20,
+    paddingTop: 20,
     color: 'green',
     fontWeight: '700',
-    marginLeft:5
+    marginLeft: 5
   },
   loc: {
     fontSize: 16,
     color: 'black',
     fontWeight: '700',
     marginTop: 6,
-    marginLeft:10
+    marginLeft: 10
   },
   label: {
-    // flex: 'row',
-    alignItems:'center',
+    alignItems: 'center',
     marginTop: 18,
-    fontSize:12,
-    justifyContent:'center',
+    fontSize: 12,
+    justifyContent: 'center',
     fontWeight: 'bold',
     fontFamily: 'serif',
-    color:'#4DAF50'
+    color: '#4DAF50'
 
   },
   scrollView: {
@@ -182,14 +159,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
     backgroundColor: 'white',
     width: 280,
     padding: 20,
     borderRadius: 10,
-    elevation: 5, // Android shadow
+    elevation: 5, 
   },
   modalTitle: {
     fontSize: 18,
