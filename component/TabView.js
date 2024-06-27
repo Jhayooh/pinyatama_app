@@ -9,15 +9,17 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import icon from '../assets/logo.png'
 
-const Card = ({ imageSource, title, description, onPress }) => {
+
+const Card = ({ imageSource, title, description, startDate, endDate, onPress }) => {
   return (
     <TouchableOpacity onPress={onPress} style={styles.card}>
       <Image source={imageSource} style={styles.cardImage} />
       <View style={styles.cardContent}>
         <Text style={styles.cardTitle}>{title}</Text>
         <Text style={styles.cardDescription}>{description}</Text>
+        <Text style={styles.cardDate}> Date of Planting: {startDate} - Date of Harvest: {endDate} </Text>
+     
       </View>
     </TouchableOpacity>
   );
@@ -26,12 +28,18 @@ const Card = ({ imageSource, title, description, onPress }) => {
 const TabView = ({ route, navigation }) => {
   const { farms = [] } = route.params;
   const farm = farms[0]
-  console.log("farms from tabview", farms);
+ 
+
   const handleCardPress = (farm) => {
     navigation.navigate("ProductionInput", { farms: [farm] })
   };
+
+  function dateFormatter(date) {
+    const d = new Date(date.toMillis())
+    return d.toLocaleDateString()
+  }
+
   return (
-    // <ImageBackground source={require('../assets/p1.jpg')} resizeMode="cover" style={styles.backgroundImage}>
     <>
       {
         farms.length === 0
@@ -44,9 +52,11 @@ const TabView = ({ route, navigation }) => {
             <View style={styles.container}>
               {farms.map((farm) => (
                 <Card
-                  key={farm.id} 
+                  key={farm.id}
                   title={farm.title}
-                  description={` ${farm.brgy}, ${farm.mun} `} 
+                  description={` ${farm.brgy}, ${farm.mun} `}
+                  startDate={dateFormatter(farm.start_date)}
+                  endDate={dateFormatter(farm.harvest_date)}
                   imageSource={require('../assets/pine.jpg')}
                   onPress={() => { handleCardPress(farm) }}
                 />
@@ -55,8 +65,6 @@ const TabView = ({ route, navigation }) => {
           </ScrollView>
       }
     </>
-
-    // </ImageBackground>
   );
 }
 
@@ -81,7 +89,6 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
     width: '90%',
-    // alignItems: 'center',
     borderColor: 'green',
   },
   cardImage: {
@@ -94,12 +101,20 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
-    color:'green'
+    color: 'green'
   },
   cardDescription: {
     fontSize: 16,
-    lineHeight: 24,
-    alignItems:'flex-start'
+    lineHeight: 18,
+    alignItems: 'flex-start'
+  },
+
+  cardDate: {
+    mt: 3,
+    fontSize: 10,
+    lineHeight: 20,
+    alignItems: 'flex-start',
+    marginLeft:5
   },
   backgroundImage: {
     flex: 1,

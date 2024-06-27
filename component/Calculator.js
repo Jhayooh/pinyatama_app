@@ -33,12 +33,13 @@ import { TableBuilder } from './TableBuilder';
 
 export const Calculator = ({ navigation }) => {
   const farmsColl = collection(db, 'farms')
+  const farmerColl = collection(db, 'farmer')
   const [farmsData, farmsLoading, farmsError] = useCollectionData(farmsColl);
   const [showAddImage, setShowAddImage] = useState(false)
 
   const queryParti = collection(db, 'particulars');
   const [qParti, lParti, eParti] = useCollectionData(queryParti)
-  
+
   const quertyPine = collection(db, 'pineapple');
   const [qPine, lPine, ePine] = useCollectionData(quertyPine)
 
@@ -231,10 +232,15 @@ export const Calculator = ({ navigation }) => {
   // important function
   const saveInputs = async () => {
     try {
+      const newFarmer = await addDoc(farmerColl, {
+        firstName: firstname,
+        lastName: lastname,
+        sex: sex,
+      })
+      await updateDoc(newFarmer, { id: newFarmer.id })
       const newFarm = await addDoc(farmsColl, {
         area: area,
         brgy: brgyCode,
-        farmerName: firstname + lastname,
         cropStage: cropStage,
         start_date: startDate,
         harvest_date: endDate,
@@ -242,8 +248,9 @@ export const Calculator = ({ navigation }) => {
         mun: municipality,
         title: farmName,
         plantNumber: base,
-        sex: sex,
         brgyUID: user.uid,
+        farmerName: firstname + ' ' + lastname,
+        sex: sex,
       })
 
       await updateDoc(newFarm, { id: newFarm.id })
@@ -552,12 +559,12 @@ export const Calculator = ({ navigation }) => {
                             handleBase()
                           }} style={{ ...styles.button, backgroundColor: '#F5C115', borderBottomLeftRadius: 0, borderTopLeftRadius: 0, paddingHorizontal: 22, paddingVertical: 0, justifyContent: 'center' }}>
                             <Image source={require('../assets/calc.png')} style={{}} />
-                            {/* <Text style={{color: '#FFF'}}>Select</Text> */}
+                            
                           </TouchableOpacity>
                       }
                     </View>
                   </View>
-                  {table && qPine && <TableBuilder components={components} area={area} setRoiDetails={setRoiDetails} pineapple={qPine}/>}
+                  {table && qPine && <TableBuilder components={components} area={area} setRoiDetails={setRoiDetails} pineapple={qPine} />}
                 </View>
                 <View style={{ ...styles.section, marginBottom: 32, paddingTop: 14 }}>
                   <View style={{ ...styles.buttonContainer }}>
@@ -639,7 +646,7 @@ export const Calculator = ({ navigation }) => {
                           onPress={() => setSex('Male')}
                           color="#F5C115"
                         />
-                        <Text style={styles.genderText}>Male</Text>
+                        <Text >Male</Text>
                         {/* <Switch
                           trackColor={{ false: '#E8E7E7', true: '#FCF0C5' }}
                           thumbColor={sex === 'Male' ? '#F5C115' : '#f4f3f4'}
@@ -656,7 +663,7 @@ export const Calculator = ({ navigation }) => {
                           onPress={() => setSex('Female')}
                           color="#F5C115"
                         />
-                        <Text style={styles.genderText}>Female</Text>
+                        <Text >Female</Text>
                         {/* <Switch
                           trackColor={{ false: '#E8E7E7', true: '#FCF0C5' }}
                           thumbColor={sex === 'Female' ? '#F5C115' : '#f4f3f4'}
@@ -841,12 +848,20 @@ export const Calculator = ({ navigation }) => {
                         />
                       }
                     </View>
-                    <TouchableOpacity style={{ ...styles.button, borderTopLeftRadius: 0, borderTopRightRadius: 0, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 22, paddingVertical: 8, justifyContent: 'center', gap: 12 }} onPress={() => {
-                      setShowAddImage(true)
-                    }}>
-                      <Image source={require('../assets/up.png')} style={{}} />
-                      <Text style={{ color: '#E8E7E7', fontSize: 18 }}>Add Image</Text>
-                    </TouchableOpacity>
+                    <View style={{ flex: 1, flexDirection: 'row' }}>
+                      <TouchableOpacity style={{ ...styles.button, borderTopLeftRadius: 0, borderTopRightRadius: 0, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 22, paddingVertical: 8, justifyContent: 'center', gap: 12,marginRight:5  }} onPress={() => {
+                        setShowAddImage(true)
+                      }}>
+                        <Image source={require('../assets/up.png')} style={{}} />
+                        <Text style={{ color: '#E8E7E7', fontSize: 18, }}>Add Image</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={{ ...styles.button, borderTopLeftRadius: 0, borderTopRightRadius: 0, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 22, paddingVertical: 8, justifyContent: 'center', gap: 12,marginLeft:5  }} onPress={() => {
+                        setShowAddImage(true)
+                      }}>
+                        <Image source={require('../assets/up.png')} style={{}} />
+                        <Text style={{ color: '#E8E7E7', fontSize: 18 }}>Delete Image</Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 </View>
 
