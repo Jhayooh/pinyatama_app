@@ -16,13 +16,12 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
   const [materialTotal, setMaterialTotal] = useState(0)
   const [costTotal, setCostTotal] = useState(0)
   const [grossReturn, setGrossReturn] = useState(0)
-  const [batterBall, setBatterBall] = useState(0)
+  const [butterBall, setBatterBall] = useState(0)
   const [netReturn, setNetReturn] = useState(0)
   const [roi, setRoi] = useState(0)
 
   function getPinePrice(pine){
     const newPine = pineapple.filter(thePine => thePine.name.toLowerCase() === pine.toLowerCase())[0]
-    console.log("the Pine price", newPine)
     return parseInt(newPine.price)
   }
 
@@ -30,16 +29,11 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
     let materialSum = 5000;
     let laborSum = 0;
 
-
-
     components.forEach((component) => {
       if (component.particular.toLowerCase() === 'material') {
         if (component.name.toLowerCase() === 'planting materials') {
           const qntyPrice = parseInt(component.qntyPrice)
           setGrossReturn(getPercentage(90, qntyPrice));
-          console.log("defQnty:", qntyPrice);
-          console.log(getPercentage(90, qntyPrice))
-          console.log("price ng pineapple", getPinePrice('pineapple'));
           setBatterBall(getPercentage(10, qntyPrice));
         }
         materialSum += parseInt(component.totalPrice);
@@ -54,12 +48,12 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
   }, [components]);
 
   useEffect(() => {
-    const grossReturnAndBatter = grossReturn + batterBall
+    const grossReturnAndBatter = (grossReturn*getPinePrice('pineapple')) + (butterBall*getPinePrice('butterball'))
     const netReturnValue = grossReturnAndBatter - costTotal;
     const roiValue = (netReturnValue / grossReturnAndBatter) * 100;
     setNetReturn(netReturnValue);
     setRoi(roiValue);
-  }, [grossReturn, batterBall, costTotal]);
+  }, [grossReturn, butterBall, costTotal]);
 
   useEffect(() => {
     const roiDetails = {
@@ -67,13 +61,13 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
       materialTotal,
       costTotal,
       grossReturn,
-      batterBall,
+      butterBall,
       netReturn,
       roi
     };
 
     setRoiDetails(roiDetails);
-  }, [laborTotal, materialTotal, costTotal, grossReturn, batterBall, netReturn, roi]);
+  }, [laborTotal, materialTotal, costTotal, grossReturn, butterBall, netReturn, roi]);
 
   const getPercentage = (pirsint, nambir) => {
     return (pirsint / 100) * nambir
@@ -231,10 +225,10 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
           />
           <TableData
             name={'Good Butterball'}
-            qnty={batterBall}
+            qnty={butterBall}
             unit={'pcs'}
             price={2}
-            totalPrice={formatter(batterBall * 2)}
+            totalPrice={formatter(butterBall * 2)}
           />
           <View style={styles.tableHead}>
             <View style={{ flex: 4 }}>
