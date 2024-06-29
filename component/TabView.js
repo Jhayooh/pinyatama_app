@@ -14,11 +14,14 @@ import {
 const Card = ({ imageSource, title, description, startDate, endDate, onPress }) => {
   return (
     <TouchableOpacity onPress={onPress} style={styles.card}>
-      <Image source={imageSource} style={styles.cardImage} />
+      <Image source={{uri: imageSource}} style={styles.cardImage} />
       <View style={styles.cardContent}>
         <Text style={styles.cardTitle}>{title}</Text>
         <Text style={styles.cardDescription}>{description}</Text>
-        <Text style={styles.cardDate}> Date of Planting: {startDate} - Date of Harvest: {endDate} </Text>
+        <Text style={styles.cardDate}> Date of Planting: {startDate}  </Text>
+        <Text style={styles.cardDate}> Date of Harvest: {endDate}  </Text>
+
+        
      
       </View>
     </TouchableOpacity>
@@ -26,9 +29,8 @@ const Card = ({ imageSource, title, description, startDate, endDate, onPress }) 
 };
 
 const TabView = ({ route, navigation }) => {
-  const { farms = [] } = route.params;
+  const { farms = [], imageUrls = {} } = route.params;
   const farm = farms[0]
- 
 
   const handleCardPress = (farm) => {
     navigation.navigate("ProductionInput", { farms: [farm] })
@@ -42,7 +44,7 @@ const TabView = ({ route, navigation }) => {
   return (
     <>
       {
-        farms.length === 0
+        farms.length === 0 && Object.keys(imageUrls).length != 0
           ?
           <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
             <ActivityIndicator />
@@ -57,7 +59,7 @@ const TabView = ({ route, navigation }) => {
                   description={` ${farm.brgy}, ${farm.mun} `}
                   startDate={dateFormatter(farm.start_date)}
                   endDate={dateFormatter(farm.harvest_date)}
-                  imageSource={require('../assets/pine.jpg')}
+                  imageSource={imageUrls[farm.id]}
                   onPress={() => { handleCardPress(farm) }}
                 />
               ))}
