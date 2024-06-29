@@ -39,20 +39,23 @@ export const Calculator = ({ navigation }) => {
 
   const queryParti = collection(db, 'particulars');
   const [qParti, lParti, eParti] = useCollectionData(queryParti)
-
+  
   const quertyPine = collection(db, 'pineapple');
   const [qPine, lPine, ePine] = useCollectionData(quertyPine)
-
+  
   const [startPicker, setStartPicker] = useState(false);
   const [endPicker, setEndPicker] = useState(false);
-
+  
+  const usersCol = collection(db, 'users');
+  const [users, loadingUsers] = useCollectionData(usersCol)
+  
   const focusNumplants = useRef(null)
   const focusCropstage = useRef(null)
 
   const getDate = () => {
     let tempDate = date.toString().split(' ');
     return date !== ''
-      ? `${tempDate[0]} ${tempDate[1]} ${tempDate[2]} ${tempDate[3]}`
+    ? `${tempDate[0]} ${tempDate[1]} ${tempDate[2]} ${tempDate[3]}`
       : '';
   };
 
@@ -121,8 +124,6 @@ export const Calculator = ({ navigation }) => {
       return obj[key] === id;
     });
   }
-  const usersCol = collection(db, 'users');
-  const [users, loadingUsers] = useCollectionData(usersCol)
 
   useEffect(() => {
     if (!loadingUsers) {
