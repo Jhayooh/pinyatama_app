@@ -252,6 +252,7 @@ export const Calculator = ({ navigation }) => {
         brgyUID: user.uid,
         farmerName: firstname + ' ' + lastname,
         sex: sex,
+        fieldId: fieldId,
       })
 
       await updateDoc(newFarm, { id: newFarm.id })
