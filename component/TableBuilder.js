@@ -52,7 +52,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
     const netReturnValue = grossReturnAndBatter - costTotal;
     const roiValue = (netReturnValue / grossReturnAndBatter) * 100;
     setNetReturn(netReturnValue);
-    setRoi(roiValue);
+    setRoi(Math.round(roiValue * 100) / 100);
   }, [grossReturn, butterBall, costTotal]);
 
   useEffect(() => {
@@ -278,6 +278,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     color: '#3C3C3B',
     fontSize: 16,
+    width:'100%'
   },
   name: {
     fontSize: 32,

@@ -252,6 +252,7 @@ export const Calculator = ({ navigation }) => {
         brgyUID: user.uid,
         farmerName: firstname + ' ' + lastname,
         sex: sex,
+        fieldId: fieldId,
       })
 
       await updateDoc(newFarm, { id: newFarm.id })
@@ -522,6 +523,13 @@ export const Calculator = ({ navigation }) => {
     setIsNext(true)
   }
 
+  const deleteLastImage = () => {
+    if (images.length > 0) {
+      const updatedImages = [...images];
+      updatedImages.pop();
+      setImages(updatedImages);
+    }
+  };
 
   return (
     <>
@@ -560,7 +568,7 @@ export const Calculator = ({ navigation }) => {
                             handleBase()
                           }} style={{ ...styles.button, backgroundColor: '#F5C115', borderBottomLeftRadius: 0, borderTopLeftRadius: 0, paddingHorizontal: 22, paddingVertical: 0, justifyContent: 'center' }}>
                             <Image source={require('../assets/calc.png')} style={{}} />
-                            
+
                           </TouchableOpacity>
                       }
                     </View>
@@ -583,21 +591,17 @@ export const Calculator = ({ navigation }) => {
                       <Text style={styles.supText}>First Name</Text>
                       <Text style={{ color: 'red' }}>*</Text>
                     </View>
-
                     <TextInput
-                      editable
-                      onChangeText={(text) => {
-                        if (/^[a-zA-Z]*$/.test(text)) {
-                          setFirstname(text);
-                          setFirstnameError('');
-                        } else {
-                          setFirstname('');
-                          setFirstnameError('Only alphabetic characters are allowed.');
-                        }
-                        if (text.trim() === '') {
-                          setFirstnameError('This is a required field');
-                        }
-                      }}
+                       editable
+                       maxLength={40}
+                       onChangeText={(text) => {
+                         setFirstname(text);
+                         if (text.trim() === '') {
+                           setFirstnameError('This is a required field');
+                         } else {
+                           setFirstnameError('');
+                         }
+                       }}
                       placeholder='Enter Firstname of Farmer'
                       value={firstname}
                       style={firstnameFocus ? styles.textInputFocus : styles.textInput}
@@ -613,16 +617,13 @@ export const Calculator = ({ navigation }) => {
                     </View>
                     <TextInput
                       editable
+                      maxLength={40}
                       onChangeText={(text) => {
-                        if (/^[a-zA-Z]*$/.test(text)) {
-                          setLastname(text);
-                          setLastnameError('');
-                        } else {
-                          setLastname('');
-                          setLastnameError('Only alphabetic characters are allowed.');
-                        }
+                        setLastname(text);
                         if (text.trim() === '') {
                           setLastnameError('This is a required field');
+                        } else {
+                          setLastnameError('');
                         }
                       }}
                       placeholder='Enter Lastname of Farmer'
@@ -836,7 +837,7 @@ export const Calculator = ({ navigation }) => {
                           horizontal={true}
                           renderItem={({ item }) => (
                             <View style={{ flex: 1 }}>
-                              <Image style={{ height: '100%', width: 240, borderRadius: 6 }} source={{ uri: item.url }} />
+                             <Image style={{ height: '100%', width: 240, borderRadius: 6 }} source={{ uri: item.url }} />
                             </View>
                           )}
                           ItemSeparatorComponent={() =>
@@ -850,17 +851,19 @@ export const Calculator = ({ navigation }) => {
                       }
                     </View>
                     <View style={{ flex: 1, flexDirection: 'row' }}>
-                      <TouchableOpacity style={{ ...styles.button, borderTopLeftRadius: 0, borderTopRightRadius: 0, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 22, paddingVertical: 8, justifyContent: 'center', gap: 12,marginRight:5  }} onPress={() => {
+                      <TouchableOpacity 
+                      style={{ ...styles.button, borderTopLeftRadius: 0, borderTopRightRadius: 0, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 22, paddingVertical: 8, justifyContent: 'center', gap: 10, marginRight: 5 }} onPress={() => {
                         setShowAddImage(true)
                       }}>
                         <Image source={require('../assets/up.png')} style={{}} />
                         <Text style={{ color: '#E8E7E7', fontSize: 18, }}>Add Image</Text>
                       </TouchableOpacity>
-                      <TouchableOpacity style={{ ...styles.button, borderTopLeftRadius: 0, borderTopRightRadius: 0, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 22, paddingVertical: 8, justifyContent: 'center', gap: 12,marginLeft:5  }} onPress={() => {
-                        setShowAddImage(true)
-                      }}>
-                        <Image source={require('../assets/up.png')} style={{}} />
-                        <Text style={{ color: '#E8E7E7', fontSize: 18 }}>Delete Image</Text>
+                      <TouchableOpacity 
+                      style={{ ...styles.button, borderTopLeftRadius: 0, borderTopRightRadius: 0, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 22, paddingVertical: 8, justifyContent: 'center'}}
+                        onPress={deleteLastImage}
+                      >
+                         <Image source={require('../assets/delete.png')} style={{width:'15%', height:'70%'}} />
+                         <Text style={{ color: '#E8E7E7', fontSize: 18, }}>Delete Image</Text>
                       </TouchableOpacity>
                     </View>
                   </View>
