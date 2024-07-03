@@ -7,6 +7,8 @@ import { Dimensions, View, Text, ActivityIndicator } from 'react-native';
 export const DoughnutAndPie = ({ data, col }) => {
     const screenWidth = Dimensions.get('window').width;
 
+    console.log(data)
+
     const chartConfig = {
         // backgroundColor: '#ffffff',
         backgroundGradientFromOpacity: 0,
@@ -28,7 +30,6 @@ export const DoughnutAndPie = ({ data, col }) => {
                         ?
                         <ActivityIndicator />
                         :
-
                         <PieChart
                             style={{
                                 ...chartConfig.style,
