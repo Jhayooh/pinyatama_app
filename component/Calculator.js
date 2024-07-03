@@ -136,17 +136,6 @@ export const Calculator = ({ navigation }) => {
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
 
-  const addDocumentWithId = async () => {
-    setIsShow(false)
-    onChangeText('')
-    try {
-      const docParticular = doc(collParticular, text);
-      await setDoc(docParticular, { name: text, totalInputs: 0 });
-    } catch (error) {
-      console.error('Error adding document:', error);
-    }
-  };
-
   const handleMapPress = (e) => {
     setUserLocation(e.nativeEvent.coordinate);
   };
@@ -224,10 +213,6 @@ export const Calculator = ({ navigation }) => {
 
   function goBack() {
     navigation.goBack()
-  }
-
-  function calcRoi() {
-
   }
 
   // important function
@@ -547,7 +532,7 @@ export const Calculator = ({ navigation }) => {
                         editable
                         onChangeText={(base) => {
                           setBase(base)
-                          setArea(parseFloat(base / 30000))
+                          setArea(Math.round(((parseFloat(base / 30000)) * 100)/100))
                           setTable(false)
                         }}
                         ref={focusNumplants}
