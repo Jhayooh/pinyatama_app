@@ -88,7 +88,7 @@ const Charts = ({ farms }) => {
                 },
                 {
                     name: 'Batterball',
-                    sum: roiData[0].batterBall,
+                    sum: roiData[0].butterBall,
                     color: '#FF5733',
                     legendFontColor: "#7F7F7F",
                     legendFontSize: 16
@@ -304,7 +304,6 @@ const Charts = ({ farms }) => {
                             <Text>Meron akong actibidades</Text> :
                             <Text>No activity</Text>
                     }
-
                     <Button title='isarado mo ako' onPress={() => setIsShow(!isShow)} />
                 </View>
             </Modal>

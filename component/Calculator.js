@@ -197,9 +197,6 @@ export const Calculator = ({ navigation }) => {
         () => {
           // Upload completed successfully, get download URL
           getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-            console.log('File available at', typeof (downloadURL));
-            setUploadedImg([...uploadedImg, downloadURL])
-            console.log("this is the uploaded img:", uploadedImg);
           }).catch((error) => {
             console.error("Error getting download URL: ", error);
           });
@@ -240,7 +237,6 @@ export const Calculator = ({ navigation }) => {
         fieldId: fieldId,
       })
 
-      await updateDoc(newFarm, { id: newFarm.id })
       const farmComp = collection(db, `farms/${newFarm.id}/components`);
       const eventsRef = collection(db, `farms/${newFarm.id}/events`);
       const roiRef = collection(db, `farms/${newFarm.id}/roi`);
@@ -260,15 +256,6 @@ export const Calculator = ({ navigation }) => {
       })
       await updateDoc(newRoi, { id: newRoi.id })
 
-      Alert.alert(`Saved Successfully`, `${farmName} is saved.`, [
-        {
-          text: 'Ok', onPress: () => {
-            setSaving(false)
-            goBack()
-          }
-        },
-      ])
-
       const vegetativeDate = new Date(Date.parse(startDate));
 
       const floweringDate = new Date(vegetativeDate);
@@ -279,6 +266,10 @@ export const Calculator = ({ navigation }) => {
 
       const harvestDate = new Date(fruitingDate);
       harvestDate.setMonth(fruitingDate.getMonth() + 5);
+      await updateDoc(newFarm, {
+        id: newFarm.id,
+        harvest_date: harvestDate
+      })
 
       const eRef_vegetative = await addDoc(eventsRef, {
         group: newFarm.id,
@@ -307,19 +298,21 @@ export const Calculator = ({ navigation }) => {
       })
       await updateDoc(eRef_fruiting, { id: eRef_fruiting.id })
 
+      Alert.alert(`Saved Successfully`, `${farmName} is saved.`, [
+        {
+          text: 'Ok', onPress: () => {
+            setSaving(false)
+            goBack()
+          }
+        },
+      ])
+
       for (const img of images) {
         const upImg = await uploadImages(img.url, "Image", newFarm.id);
-        console.log("dl url", upImg);
-
-        setUploadedImg([...uploadedImg, upImg])
-        await updateDoc(newFarm, { images: uploadedImg })
-        console.log("this is the uploaded images:", uploadedImg);
       }
     } catch (e) {
       console.log("Saving Error: ", e);
     }
-    setImages([])
-    setUploadedImg([])
   }
 
   const BottomButton = () => {
@@ -570,16 +563,16 @@ export const Calculator = ({ navigation }) => {
                       <Text style={{ color: 'red' }}>*</Text>
                     </View>
                     <TextInput
-                       editable
-                       maxLength={40}
-                       onChangeText={(text) => {
-                         setFirstname(text);
-                         if (text.trim() === '') {
-                           setFirstnameError('This is a required field');
-                         } else {
-                           setFirstnameError('');
-                         }
-                       }}
+                      editable
+                      maxLength={40}
+                      onChangeText={(text) => {
+                        setFirstname(text);
+                        if (text.trim() === '') {
+                          setFirstnameError('This is a required field');
+                        } else {
+                          setFirstnameError('');
+                        }
+                      }}
                       placeholder='Enter Firstname of Farmer'
                       value={firstname}
                       style={firstnameFocus ? styles.textInputFocus : styles.textInput}
@@ -815,7 +808,7 @@ export const Calculator = ({ navigation }) => {
                           horizontal={true}
                           renderItem={({ item }) => (
                             <View style={{ flex: 1 }}>
-                             <Image style={{ height: '100%', width: 240, borderRadius: 6 }} source={{ uri: item.url }} />
+                              <Image style={{ height: '100%', width: 240, borderRadius: 6 }} source={{ uri: item.url }} />
                             </View>
                           )}
                           ItemSeparatorComponent={() =>
@@ -829,19 +822,19 @@ export const Calculator = ({ navigation }) => {
                       }
                     </View>
                     <View style={{ flex: 1, flexDirection: 'row' }}>
-                      <TouchableOpacity 
-                      style={{ ...styles.button, borderTopLeftRadius: 0, borderTopRightRadius: 0, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 22, paddingVertical: 8, justifyContent: 'center', gap: 10, marginRight: 5 }} onPress={() => {
-                        setShowAddImage(true)
-                      }}>
+                      <TouchableOpacity
+                        style={{ ...styles.button, borderTopLeftRadius: 0, borderTopRightRadius: 0, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 22, paddingVertical: 8, justifyContent: 'center', gap: 10, marginRight: 5 }} onPress={() => {
+                          setShowAddImage(true)
+                        }}>
                         <Image source={require('../assets/up.png')} style={{}} />
                         <Text style={{ color: '#E8E7E7', fontSize: 18, }}>Add Image</Text>
                       </TouchableOpacity>
-                      <TouchableOpacity 
-                      style={{ ...styles.button, borderTopLeftRadius: 0, borderTopRightRadius: 0, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 22, paddingVertical: 8, justifyContent: 'center'}}
+                      <TouchableOpacity
+                        style={{ ...styles.button, borderTopLeftRadius: 0, borderTopRightRadius: 0, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 22, paddingVertical: 8, justifyContent: 'center' }}
                         onPress={deleteLastImage}
                       >
-                         <Image source={require('../assets/delete.png')} style={{width:'15%', height:'70%'}} />
-                         <Text style={{ color: '#E8E7E7', fontSize: 18, }}>Delete Image</Text>
+                        <Image source={require('../assets/delete.png')} style={{ width: '15%', height: '70%' }} />
+                        <Text style={{ color: '#E8E7E7', fontSize: 18, }}>Delete Image</Text>
                       </TouchableOpacity>
                     </View>
                   </View>
