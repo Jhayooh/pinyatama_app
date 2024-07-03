@@ -115,7 +115,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
     <>
       <View style={{ ...styles.container, minHeight: 300, borderRadius: 10, paddingBottom: 12, margin:10}}>
         <View style={{ alignItems: 'center', backgroundColor: '#4DAF50', margin: 8, marginBottom: 12, borderRadius: 6, }}>
-          <Text style={{ width: '100%', padding: 8, alignItems: 'center', textAlign: 'center', color: '#FFF' }}>COST AND RETURN ANALYSIS {area.toFixed(2)} HA PINEAPPLE PRODUCTION</Text>
+          <Text style={{ width: '100%', padding: 8, alignItems: 'center', textAlign: 'center', color: '#FFF' }}>COST AND RETURN ANALYSIS {area} HA PINEAPPLE PRODUCTION</Text>
         </View>
         <View style={{ flex: 1, marginTop: 6, marginHorizontal: 12 }}>
           {/* Header */}

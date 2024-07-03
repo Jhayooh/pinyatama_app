@@ -473,16 +473,9 @@ export const Calculator = ({ navigation }) => {
     { label: 'Female', value: 'Female' },
   ];
 
-  const [isFocus, setIsFocus] = useState(false);
-
   const toggleSwitch = (switchValue) => {
     setSex(switchValue === sex ? null : switchValue);
   };
-
-  const switchMale = () => toggleSwitch('Male');
-  const switchFemale = () => toggleSwitch('Female');
-
-  const [selectedValue, setSelectedValue] = useState('Male');
 
   function handleNext() {
     if (!firstname) {
@@ -532,7 +525,7 @@ export const Calculator = ({ navigation }) => {
                         editable
                         onChangeText={(base) => {
                           setBase(base)
-                          setArea(Math.round(((parseFloat(base / 30000)) * 100)/100))
+                          setArea(parseFloat((base / 30000).toFixed(2)))
                           setTable(false)
                         }}
                         ref={focusNumplants}
