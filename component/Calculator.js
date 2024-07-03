@@ -222,7 +222,7 @@ export const Calculator = ({ navigation }) => {
       })
       await updateDoc(newFarmer, { id: newFarmer.id })
       const newFarm = await addDoc(farmsColl, {
-        area: area,
+        area: area.toFixed(2),
         brgy: brgyCode,
         cropStage: cropStage,
         start_date: startDate,

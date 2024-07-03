@@ -22,7 +22,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
 
   function getPinePrice(pine){
     const newPine = pineapple.filter(thePine => thePine.name.toLowerCase() === pine.toLowerCase())[0]
-    return parseInt(newPine.price)
+    return parseInt(newPine.price.toFixed())
   }
 
   useEffect(() => {
@@ -33,8 +33,8 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
       if (component.particular.toLowerCase() === 'material') {
         if (component.name.toLowerCase() === 'planting materials') {
           const qntyPrice = parseInt(component.qntyPrice)
-          setGrossReturn(getPercentage(90, qntyPrice).toFixed());
-          setBatterBall(getPercentage(10, qntyPrice).toFixed());
+          setGrossReturn(getPercentage(90, qntyPrice));
+          setBatterBall(getPercentage(10, qntyPrice));
         }
         materialSum += parseInt(component.totalPrice);
       } else if (component.particular.toLowerCase() === 'labor') {
