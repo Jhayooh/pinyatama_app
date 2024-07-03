@@ -278,6 +278,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     color: '#3C3C3B',
     fontSize: 16,
+    width:'100%'
   },
   name: {
     fontSize: 32,
