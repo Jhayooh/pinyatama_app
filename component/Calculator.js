@@ -454,7 +454,7 @@ export const Calculator = ({ navigation }) => {
 
     const newComponents = qParti.map(item => {
       const newQnty = getMult(area, item.defQnty)
-      return { ...item, qntyPrice: newQnty, totalPrice: getMult(newQnty, item.price), price: parseInt(item.price) };
+      return { ...item, qntyPrice: Math.ceil(newQnty), totalPrice: getMult(newQnty, item.price), price: parseInt(item.price) };
     });
 
     setComponents(newComponents);
@@ -518,7 +518,7 @@ export const Calculator = ({ navigation }) => {
                         editable
                         onChangeText={(base) => {
                           setBase(base)
-                          setArea(parseFloat((base / 30000).toFixed(2)))
+                          setArea(base / 30000)
                           setTable(false)
                         }}
                         ref={focusNumplants}

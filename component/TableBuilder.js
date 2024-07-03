@@ -33,8 +33,8 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
       if (component.particular.toLowerCase() === 'material') {
         if (component.name.toLowerCase() === 'planting materials') {
           const qntyPrice = parseInt(component.qntyPrice)
-          setGrossReturn(getPercentage(90, qntyPrice));
-          setBatterBall(getPercentage(10, qntyPrice));
+          setGrossReturn(getPercentage(90, qntyPrice).toFixed());
+          setBatterBall(getPercentage(10, qntyPrice).toFixed());
         }
         materialSum += parseInt(component.totalPrice);
       } else if (component.particular.toLowerCase() === 'labor') {
@@ -70,7 +70,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
   }, [laborTotal, materialTotal, costTotal, grossReturn, butterBall, netReturn, roi]);
 
   const getPercentage = (pirsint, nambir) => {
-    return (pirsint / 100) * nambir
+    return (nambir / 100) * pirsint
   }
 
   const formatter = (num) => {
@@ -115,7 +115,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
     <>
       <View style={{ ...styles.container, minHeight: 300, borderRadius: 10, paddingBottom: 12, margin:10}}>
         <View style={{ alignItems: 'center', backgroundColor: '#4DAF50', margin: 8, marginBottom: 12, borderRadius: 6, }}>
-          <Text style={{ width: '100%', padding: 8, alignItems: 'center', textAlign: 'center', color: '#FFF' }}>COST AND RETURN ANALYSIS {area} HA PINEAPPLE PRODUCTION</Text>
+          <Text style={{ width: '100%', padding: 8, alignItems: 'center', textAlign: 'center', color: '#FFF' }}>COST AND RETURN ANALYSIS {area.toFixed(2)} HA PINEAPPLE PRODUCTION</Text>
         </View>
         <View style={{ flex: 1, marginTop: 6, marginHorizontal: 12 }}>
           {/* Header */}
