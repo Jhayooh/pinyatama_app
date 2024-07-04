@@ -443,7 +443,7 @@ export const Calculator = ({ navigation }) => {
 
   const getMult = (numOne, numTwo) => {
     const num = numOne * numTwo
-    return parseFloat(num)
+    return Math.round(num*10)/10
   }
 
   const handleBase = () => {
@@ -454,7 +454,7 @@ export const Calculator = ({ navigation }) => {
 
     const newComponents = qParti.map(item => {
       const newQnty = getMult(area, item.defQnty)
-      return { ...item, qntyPrice: Math.ceil(newQnty), totalPrice: getMult(newQnty, item.price), price: parseInt(item.price) };
+      return { ...item, qntyPrice: newQnty, totalPrice: getMult(newQnty, item.price), price: parseInt(item.price), foreignId: item.id };
     });
 
     setComponents(newComponents);

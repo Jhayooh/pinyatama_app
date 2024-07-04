@@ -70,7 +70,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
   }, [laborTotal, materialTotal, costTotal, grossReturn, butterBall, netReturn, roi]);
 
   const getPercentage = (pirsint, nambir) => {
-    return (nambir / 100) * pirsint
+    return Math.round((nambir / 100) * pirsint)
   }
 
   const formatter = (num) => {
@@ -157,16 +157,6 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
               }
             })
           }
-          <View style={styles.tableHead}>
-            <View style={{ flex: 4 }}>
-              <Text styles={{ fontWeight: 'bold' }}>Land Rental</Text>
-            </View>
-            <View style={{ flex: 1, alignItems: 'flex-end' }}>
-              <Text styles={{ fontWeight: 'bold' }}>
-                {formatter(5000)}
-              </Text>
-            </View>
-          </View>
           <View style={{ ...styles.tableHead, borderTopWidth: 2, borderBottomWidth: 2, marginBottom: 12 }}>
             <View style={{ flex: 4 }}>
               <Text styles={{ fontWeight: 'bold' }}>Total Material Input: </Text>
@@ -246,7 +236,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
             </View>
             <View style={{ flex: 1, alignItems: 'flex-end' }}>
               <Text styles={{ fontWeight: 'bold' }}>
-                {`%${roi.toFixed(2)}`}
+                {`${roi.toFixed(2)} %`}
               </Text>
             </View>
           </View>
