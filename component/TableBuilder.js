@@ -20,10 +20,29 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
   const [netReturn, setNetReturn] = useState(0)
   const [roi, setRoi] = useState(0)
 
-  function getPinePrice(pine){
-    const newPine = pineapple.filter(thePine => thePine.name.toLowerCase() === pine.toLowerCase())[0]
-    return parseInt(newPine.price.toFixed())
+  function getPinePrice(pine) {
+    // Check if pineapple is defined and not empty
+    if (pineapple && pineapple.length > 0) {
+      const newPine = pineapple.filter(thePine => thePine.name.toLowerCase() === pine.toLowerCase())[0];
+      if (newPine) {
+        // Check if newPine is defined before accessing its properties
+        return parseInt(newPine.price.toFixed());
+      } else {
+        // Handle case where pineapple contains no matching pine
+        console.error(`Pineapple with name '${pine}' not found.`);
+        return null; // Or handle accordingly based on your application logic
+      }
+    } else {
+      // Handle case where pineapple is undefined or empty
+      console.error('Pineapple data is undefined or empty.');
+      return null; // Or handle accordingly based on your application logic
+    }
   }
+  
+  // function getPinePrice(pine) {
+  //   const newPine = pineapple.filter(thePine => thePine.name.toLowerCase() === pine.toLowerCase())[0]
+  //   return parseInt(newPine.price.toFixed())
+  // }
 
   useEffect(() => {
     let materialSum = 5000;
@@ -48,7 +67,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
   }, [components]);
 
   useEffect(() => {
-    const grossReturnAndBatter = (grossReturn*getPinePrice('pineapple')) + (butterBall*getPinePrice('butterball'))
+    const grossReturnAndBatter = (grossReturn * getPinePrice('pineapple')) + (butterBall * getPinePrice('butterball'))
     const netReturnValue = grossReturnAndBatter - costTotal;
     const roiValue = (netReturnValue / grossReturnAndBatter) * 100;
     setNetReturn(netReturnValue);
@@ -90,7 +109,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
         <View style={{ ...styles.tableHeadLabel3, alignItems: 'center' }}>
           <TextInput
             editable
-            onChangeText={()=>null}
+            onChangeText={() => null}
             placeholder={qnty.toString()}
             value={qnty}
             style={styles.textInput}
@@ -113,9 +132,12 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
 
   return (
     <>
-      <View style={{ ...styles.container, minHeight: 300, borderRadius: 10, paddingBottom: 12, margin:10}}>
+      <View style={{ ...styles.container, minHeight: 300, borderRadius: 10, paddingBottom: 12, margin: 10 }}>
         <View style={{ alignItems: 'center', backgroundColor: '#4DAF50', margin: 8, marginBottom: 12, borderRadius: 6, }}>
-          <Text style={{ width: '100%', padding: 8, alignItems: 'center', textAlign: 'center', color: '#FFF' }}>COST AND RETURN ANALYSIS {area.toFixed(2)} HA PINEAPPLE PRODUCTION</Text>
+          <Text style={{ width: '100%', padding: 8, alignItems: 'center', textAlign: 'center', color: '#FFF' }}>
+            COST AND RETURN ANALYSIS {typeof area === 'number' ? area.toFixed(2) : area} HA PINEAPPLE PRODUCTION
+          </Text>
+
         </View>
         <View style={{ flex: 1, marginTop: 6, marginHorizontal: 12 }}>
           {/* Header */}
@@ -268,7 +290,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     color: '#3C3C3B',
     fontSize: 16,
-    width:'100%'
+    width: '100%'
   },
   name: {
     fontSize: 32,

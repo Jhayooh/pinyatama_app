@@ -412,7 +412,6 @@ export const Calculator = ({ navigation }) => {
     const lat = location.coords.latitude
     const long = location.coords.latitude
     setUserLocation(new GeoPoint(lat, long));
-    // console.log(location.coords);
     setRegion({
       latitude: location.coords.latitude,
       longitude: location.coords.longitude,
