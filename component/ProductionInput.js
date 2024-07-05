@@ -1,89 +1,56 @@
 import React, { useState } from 'react';
 import { SafeAreaView, StyleSheet, Text, TouchableOpacity,ScrollView, View, Image } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import Charts from './Charts'; 
-import Profile from './Profile'; 
-import Images from './ImagesTab'; 
-import { TableBuilder } from './TableBuilder';
+import Charts from './Charts';
 
 //db
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
 import { collection, doc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase/Config';
+import { Button } from 'native-base';
 
 const Tab = createMaterialTopTabNavigator();
 
 const ProductionInput = ({ route, navigation }) => {
+  const [edit, setEdit] = useState(false)
   const [user] = useAuthState(auth)
+
   const { farms = [] } = route.params
   const farm = farms[0]
-  const [edit, setEdit] = useState(false)
   const [roiDetails, setRoiDetails] = useState({})
-
+  
   const componentsColl = collection(db, `farms/${farm.id}/components`)
   const [compData, compLoading, compError] = useCollectionData(componentsColl)
 
-  const addDocumentWithId = async () => {
-    setIsShow(false)
-    onChangeText('')
-    try {
-      const documentRef = doc(collParticular, text);
-      await setDoc(documentRef, { name: text, totalInputs: 0 });
-    } catch (error) {
-      console.error('Error adding document:', error);
+  React.useEffect(() => {
+    if (!user || !compData){
+      return
     }
-  };
-
-    
+    navigation.setOptions({
+      headerRight: () => (
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Edit', {farm: farm, compData: compData})}
+          title="Info"
+        >
+          <View style={{display:'flex', justifyContent:'space-between', flexDirection:'row',gap:1}}>
+          <Image source={require('../assets/edit.png')} style={{width:20, height:20}}/>
+          <Text style={{color:'white',  fontSize:20}}>Edit</Text>
+          </View>
+         
+        </TouchableOpacity>     
+      ),
+    });
+  }, [navigation, compData]);
 
   return (
     <>
     <SafeAreaView style={styles.container}>
     <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', gap: 3 , marginLeft:15}}>
       <Text style={styles.name}>{farm.title}</Text>
-      <TouchableOpacity style={{ height: 32, alignItems: 'center', justifyContent: 'center' }} onPress={() => {
-        setEdit(!edit)
-      }}>            
-       <Image source={require('../assets/edit.png')} style={{ width: 20, height: 20 }} />
-      </TouchableOpacity>
     </View>
       <Text style={styles.location}>{`${farm.mun}, ${farm.brgy}`}</Text>
-
-      {edit ? (
-        <Tab.Navigator
-          initialRouteName="Profile"
-          tabBarOptions={{
-            activeTintColor: 'green',
-            labelStyle: { fontSize: 11, fontWeight: 'bold' },
-            style: { backgroundColor: 'white' },
-          }}
-        >
-          <Tab.Screen
-            name="Profile"
-            component={Profile} 
-            options={{ tabBarLabel: 'Profile' }}
-          />
-          <Tab.Screen
-            name="Images"
-            component={Images} 
-            options={{ tabBarLabel: 'Images' }}
-          />
-          <Tab.Screen
-            name="CostAndReturn"
-            options={{ tabBarLabel: 'Cost and Return' }}
-          >
-            {() => (
-              <ScrollView>
-                <TableBuilder components={compData} area={farm.area} setRoiDetails={setRoiDetails} />
-              </ScrollView>
-            )}
-          </Tab.Screen>
-
-        </Tab.Navigator>
-      ) : (
         <Charts farms={farms} />
-      )}
     </SafeAreaView>
     </>
   );

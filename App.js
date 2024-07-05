@@ -1,7 +1,7 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, TouchableOpacity ,Text} from 'react-native';
 import About from './component/About';
 import { BottomButton } from './component/BottomButton';
 import { Calculator } from './component/Calculator';
@@ -14,6 +14,9 @@ import Map from './component/Map';
 import ProductionInput from './component/ProductionInput';
 import Register from './component/Register';
 import Video from './component/Video';
+import Edit from './component/Edit'
+import { Button } from 'native-base';
+
 
 
 const Stack = createNativeStackNavigator();
@@ -33,6 +36,18 @@ const App = () => (
                 component={Calculator}
                 options={{
                     title: 'Kalkulador ng Gastos',
+                    headerTintColor: '#E8E7E7',
+                    headerBackTitleVisible: false,
+                    headerStyle: {
+                        backgroundColor: '#4DAF50',
+                    }
+                }}
+            />
+            <Stack.Screen
+                name='Edit'
+                component={Edit}
+                options={{
+                    title: 'Edit',
                     headerTintColor: '#E8E7E7',
                     headerBackTitleVisible: false,
                     headerStyle: {

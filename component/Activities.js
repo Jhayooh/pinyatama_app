@@ -3,18 +3,18 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-const ImagesTab = () => {
+const Activities= () => {
   return (
     <View style={styles.container}>
-      <Text>This is the Images screen</Text>
+      <Text>This is the Activities screen</Text>
       {/* Add more content as needed */}
     </View>
   );
 };
+export default Activities;
 
 const styles= StyleSheet.create({
-  container:{
-    padding:10
-  }
+    container:{
+        padding:10
+    }
 })
-export default ImagesTab;

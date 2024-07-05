@@ -29,11 +29,8 @@ export default function Gallery({ route }) {
   }
 
   useEffect(() => {
-    if (!farms){
-      return
-    }
-    console.log("working naman", imageUrls);
     async function fetchImageUrls() {
+      if (!farms) return
       const urls = {};
       for (const marker of farms) {
         const url = await getImage(marker.id);
@@ -45,8 +42,6 @@ export default function Gallery({ route }) {
     }
     fetchImageUrls();
   }, [farms]);
-
-  Object.keys(imageUrls).length != 0 && console.log("ihhh kiss muna", imageUrls)
 
   return (
     <ImageBackground style={styles.background} >
