@@ -10,7 +10,8 @@ import {
     StyleSheet,
     Alert,
     Modal,
-    Platform
+    Platform,
+    TextInput
 } from 'react-native'
 import {
     Input,
@@ -54,9 +55,20 @@ const styles = StyleSheet.create({
     },
     textTitle: {
         fontSize: 26,
-        fontWeight: '600'
+        fontWeight: '600',
+
     },
     input: {
+        color: '#333',
+        fontSize: 20,
+        borderRadius: 8,
+        borderWidth: 1,
+        height: 50,
+        padding: 10,
+        borderColor: '#E8E7E7',
+
+    },
+    input1: {
         color: '#333',
         fontSize: 20,
     },
@@ -120,6 +132,20 @@ export default function Register({ navigation }) {
 
     const [profShow, setProfShow] = useState(false)
 
+    const [firstnameError, setFirstnameError] = useState('');
+    const [lastnameError, setLastnameError] = useState('');
+    const [munError, setMunError] = useState('');
+    const [brgyError, setBrgyError] = useState('');
+    const [emailError, setPhoneError] = useState('');
+    const [displayError, setDisplayError] = useState('');
+    const [passwordError, setPasswordError] = useState('');
+
+    function handleNext(){
+        if (!firstName){
+            Alert.alert('Farmer Name', 'Maglagay ng pangalan ng magsasaka')
+            return
+        }
+    }
     const handleRegister = async () => {
         const usersRef = collection(db, 'users')
         try {
@@ -266,11 +292,11 @@ export default function Register({ navigation }) {
     return (
         <NativeBaseProvider>
             <SafeAreaView style={styles.safeArea}>
-                <View style={styles.topContainer}>
+                {/* <View style={styles.topContainer}>
                     <TouchableOpacity onPress={() => navigation.goBack()}>
                         <Image source={backIcon} style={{ width: 40, height: 40 }} />
                     </TouchableOpacity>
-                </View>
+                </View> */}
                 <View style={styles.bottomContainer}>
                     <Text style={styles.textTitle}>Create an Account</Text>
                     <ProgressSteps >
@@ -283,20 +309,53 @@ export default function Register({ navigation }) {
                             <Box style={{ flex: 1 }}>
                                 <FormControl isRequired style={styles.formcontrol}>
                                     <FormControl.Label>Firstname</FormControl.Label>
-                                    <Input size='xl' value={firstName} placeholder='Enter firstname' style={styles.input} onChangeText={(fName) => setFirstName(fName)} />
+                                    <TextInput
+                                        editable
+                                        value={firstName}
+                                        placeholder='Enter Firstname'
+                                        style={[styles.input, firstnameError ? { borderColor: 'red', borderWidth: 1 } : null]}
+                                        onChangeText={(fName) => {
+                                            setFirstName(fName);
+                                            if (fName.trim() === '') {
+                                                setFirstnameError('This is required field');
+                                            } else {
+                                                setFirstnameError('');
+                                            }
+                                        }}
+                                    />
+                                    {firstnameError ? <Text style={{ color: 'red', fontSize: 12 }}>{firstnameError}</Text> : null}
                                 </FormControl>
 
                                 <FormControl isRequired style={styles.formcontrol}>
                                     <FormControl.Label>Lastname</FormControl.Label>
-                                    <Input size='xl' value={lastName} placeholder='Enter lastname' style={styles.input} onChangeText={(lName) => setLastName(lName)} />
+                                    <TextInput
+                                        editable={!firstnameError}
+                                        value={lastName}
+                                        placeholder='Enter Lastname'
+                                        style={[styles.input, lastnameError ? { borderColor: 'red', borderWidth: 1 } : null]}
+                                        onChangeText={(lName) => {
+                                            setLastName(lName);
+                                            if (lName.trim() === '') {
+                                                setLastnameError('This is required field');
+                                            } else {
+                                                setLastnameError('');
+                                            }
+                                        }} />
+                                    {lastnameError ? <Text style={{ color: 'red', fontSize: 12 }}>{lastnameError}</Text> : null}
                                 </FormControl>
 
                                 <FormControl isRequired style={styles.formcontrol}>
                                     <FormControl.Label>Select Municipality</FormControl.Label>
-                                    <Select selectedValue={munCode} style={styles.input} minWidth="200" accessibilityLabel="Choose Municipality" placeholder="Choose Municipality" _selectedItem={{
-                                        bg: "teal.600",
-                                        endIcon: <CheckIcon size={5} />
-                                    }}
+                                    <Select
+                                        selectedValue={munCode}
+                                        style={styles.input1}
+                                        minWidth="200"
+                                        accessibilityLabel="Municipality"
+                                        placeholder="Choose Municipality"
+                                        _selectedItem={{
+                                            bg: "teal.600",
+                                            endIcon: <CheckIcon size={5} />
+                                        }}
                                         onValueChange={item => {
                                             setMunCode(item)
                                             const foundItem = municipalities.cityAndMun.find(entry => entry.mun_code === item);
@@ -316,8 +375,8 @@ export default function Register({ navigation }) {
                                 </FormControl>
 
                                 <FormControl isRequired style={styles.formcontrol}>
-                                    <FormControl.Label>Choose service</FormControl.Label>
-                                    <Select selectedValue={barangay} style={styles.input} minWidth="200" accessibilityLabel="Choose Service" placeholder="Choose Service" _selectedItem={{
+                                    <FormControl.Label>Baranggay</FormControl.Label>
+                                    <Select selectedValue={barangay} style={styles.input1} minWidth="200" accessibilityLabel="Baranggay" placeholder="Baranggay" _selectedItem={{
                                         bg: "teal.600",
                                         endIcon: <CheckIcon size={5} />
                                     }} onValueChange={(item) => setBarangay(item)}>
@@ -339,14 +398,14 @@ export default function Register({ navigation }) {
                             <Box style={{ flex: 1 }}>
                                 <FormControl isRequired style={styles.formcontrol}>
                                     <FormControl.Label>Email</FormControl.Label>
-                                    <Input size='xl' value={email} placeholder='Enter your email' style={styles.input} onChangeText={(e) => setEmail(e)} />
+                                    <Input size='xl' value={email} placeholder='Enter your Email' style={styles.input} onChangeText={(e) => setEmail(e)} />
                                 </FormControl>
                                 <FormControl isRequired style={styles.formcontrol}>
                                     <FormControl.Label>Phone Number</FormControl.Label>
-                                    <Input size='xl' type='' value={phoneNumber} placeholder='Enter your phone number' style={styles.input} onChangeText={(pNum) => setPhoneNumber(pNum)} />
+                                    <Input size='xl' type='' value={phoneNumber} placeholder='Enter your Phone Number' style={styles.input} onChangeText={(pNum) => setPhoneNumber(pNum)} />
                                 </FormControl>
                             </Box>
-                        </ProgressStep>
+                        </ProgressStep >
                         <ProgressStep label="Account Information" onSubmit={() => {
                             Alert.alert(
                                 'Sign up account.',
@@ -374,11 +433,11 @@ export default function Register({ navigation }) {
                                 <Box style={{}}>
                                     <FormControl isRequired style={styles.formcontrol}>
                                         <FormControl.Label>Display Name</FormControl.Label>
-                                        <Input size='xl' value={displayName} placeholder='Enter desired display name' style={styles.input} onChangeText={(dName) => setDisplayName(dName)} />
+                                        <TextInput size='xl' value={displayName} placeholder='Enter desired display name' style={styles.input} onChangeText={(dName) => setDisplayName(dName)} />
                                     </FormControl>
                                     <FormControl isRequired style={styles.formcontrol}>
                                         <FormControl.Label>Password</FormControl.Label>
-                                        <Input size='xl' value={password} type='password' placeholder='Enter your password' style={styles.input} onChangeText={(pWord) => setPassword(pWord)} />
+                                        <TextInput size='xl' value={password} type='password' placeholder='Enter your password' style={styles.input} onChangeText={(pWord) => setPassword(pWord)} />
                                     </FormControl>
                                 </Box>
                             </Box>

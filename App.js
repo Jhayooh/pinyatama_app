@@ -107,7 +107,17 @@ const App = () => (
             <Stack.Screen name='Charts' component={Charts} />
             <Stack.Screen name='DataInputs' component={DataInputs} />
             <Stack.Screen name='BottomButton' component={BottomButton} />
-            <Stack.Screen name='Register' component={Register} />
+            <Stack.Screen 
+            name='Register' 
+            component={Register}
+            options={{
+                title: 'Register',
+                headerTintColor: '#E8E7E7',
+                headerBackTitleVisible: false,
+                headerStyle: {
+                    backgroundColor: '#4DAF50',
+                }
+            }}  />
             <Stack.Screen name='Inputs' component={Inputs} />
 
 
