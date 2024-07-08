@@ -368,7 +368,8 @@ export const Calculator = ({ navigation }) => {
           style: 'cancel',
         },
         {
-          text: 'YES', onPress: () => {
+          text: 'YES', 
+          onPress: () => {
             setSaving(true)
             saveInputs()
           }
