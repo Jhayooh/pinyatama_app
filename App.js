@@ -1,7 +1,7 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
-import { StyleSheet, TouchableOpacity ,Text} from 'react-native';
+import { StyleSheet, TouchableOpacity, Text } from 'react-native';
 import About from './component/About';
 import { BottomButton } from './component/BottomButton';
 import { Calculator } from './component/Calculator';
@@ -16,6 +16,7 @@ import Register from './component/Register';
 import Video from './component/Video';
 import Edit from './component/Edit'
 import { Button } from 'native-base';
+import { PlantNum } from './component/PlantNum';
 
 
 
@@ -102,22 +103,38 @@ const App = () => (
                     headerStyle: {
                         backgroundColor: '#4DAF50',
                     }
-                }} />
+                }}
+            />
+
+            <Stack.Screen
+                name='Register'
+                component={Register}
+                options={{
+                    title: 'Register',
+                    headerTintColor: '#E8E7E7',
+                    headerBackTitleVisible: false,
+                    headerStyle: {
+                        backgroundColor: '#4DAF50',
+                    }
+                }}
+            />
+            <Stack.Screen
+                name='Number of Plants'
+                component={PlantNum}
+                options={{
+                    title: 'Number of Plants',
+                    headerTintColor: '#E8E7E7',
+                    headerBackTitleVisible: false,
+                    headerStyle: {
+                        backgroundColor: '#4DAF50',
+                    }
+                }}
+            />
 
             <Stack.Screen name='Charts' component={Charts} />
             <Stack.Screen name='DataInputs' component={DataInputs} />
             <Stack.Screen name='BottomButton' component={BottomButton} />
-            <Stack.Screen 
-            name='Register' 
-            component={Register}
-            options={{
-                title: 'Register',
-                headerTintColor: '#E8E7E7',
-                headerBackTitleVisible: false,
-                headerStyle: {
-                    backgroundColor: '#4DAF50',
-                }
-            }}  />
+
             <Stack.Screen name='Inputs' component={Inputs} />
 
 
