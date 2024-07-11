@@ -6,14 +6,21 @@ export default function Profile({ route, navigation }) {
 
     farm && console.log("Farm sa profile", farm)
 
-    
+
     return (
         <View style={styles.container}>
             <ScrollView>
                 <View style={styles.section}>
                     <View style={styles.subsection}>
                         <Text style={{ color: 'green', alignItems: 'center', fontSize: 20, fontWeight: 'bold', marginBottom: 20 }}>Impormasyon ng Bukid</Text>
-
+                        <View style={{ flexDirection: 'column', gap: 1, marginBottom: 20 }}>
+                            <Text style={styles.supText}>Field ID</Text>
+                            <TextInput
+                                editable
+                                placeholder={farm.fieldId}
+                                style={styles.textInput}
+                            />
+                        </View>
                         <View style={{ flexDirection: 'column', gap: 1, marginBottom: 20 }}>
                             <Text style={styles.supText}>Pangalan ng Bukid</Text>
                             <TextInput
@@ -24,21 +31,14 @@ export default function Profile({ route, navigation }) {
 
                             />
                         </View>
-                        <View style={{ flexDirection: 'column', gap: 1, marginBottom: 20 }}>
-                            <Text style={styles.supText}>Field ID</Text>
-                            <TextInput
-                                editable
-                                placeholder={farm.fieldId}
-                                style={styles.textInput}
-                            />
-                        </View>
+
                         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                             <View style={{ flex: 1, flexDirection: 'column', marginRight: 5, marginBottom: 20 }}>
                                 <Text style={styles.supText}>Pangalan ng Magsasaka</Text>
                                 <TextInput
                                     editable
                                     placeholder={farm.farmerName}
-                                    style={{...styles.textInput, width: '100%', }}
+                                    style={{ ...styles.textInput, width: '100%', }}
                                 />
                             </View>
                             <View style={{ flex: 1, flexDirection: 'column', marginLeft: 5, marginBottom: 20 }}>
@@ -46,7 +46,7 @@ export default function Profile({ route, navigation }) {
                                 <TextInput
                                     editable
                                     placeholder={farm.sex}
-                                    style={{...styles.textInput, width: '100%' }}
+                                    style={{ ...styles.textInput, width: '100%' }}
                                 />
                             </View>
                         </View>
@@ -56,7 +56,7 @@ export default function Profile({ route, navigation }) {
                                 <TextInput
                                     editable
                                     placeholder={farm.brgy}
-                                    style={{ ...styles.textInput,width: '100%' }}
+                                    style={{ ...styles.textInput, width: '100%' }}
                                 />
                             </View>
                             <View style={{ flex: 1, flexDirection: 'column', marginLeft: 5, marginBottom: 20 }}>
@@ -64,7 +64,7 @@ export default function Profile({ route, navigation }) {
                                 <TextInput
                                     editable
                                     placeholder={farm.mun}
-                                    style={{...styles.textInput, width: '100%' }}
+                                    style={{ ...styles.textInput, width: '100%' }}
                                 />
                             </View>
                         </View>
@@ -74,7 +74,7 @@ export default function Profile({ route, navigation }) {
                                 <TextInput
                                     editable
                                     placeholder={farm.plantNumber}
-                                    style={{...styles.textInput, width: '100%' }}
+                                    style={{ ...styles.textInput, width: '100%' }}
                                 />
                             </View>
                             <View style={{ flex: 1, flexDirection: 'column', marginLeft: 5 }}>
@@ -82,7 +82,7 @@ export default function Profile({ route, navigation }) {
                                 <TextInput
                                     editable
                                     placeholder={farm.area}
-                                    style={{ ...styles.textInput,width: '100%' }}
+                                    style={{ ...styles.textInput, width: '100%' }}
                                 />
                             </View>
                         </View>
@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.20,
         shadowRadius: 1.41,
         elevation: 2,
-        marginBottom:10
+        marginBottom: 10
     },
     subsection: {
         marginBottom: 22,
@@ -140,11 +140,11 @@ const styles = StyleSheet.create({
         fontSize: 16,
         shadowColor: "#F5C115",
         shadowOffset: {
-          width: 0,
-          height: 1,
+            width: 0,
+            height: 1,
         },
         shadowOpacity: 0.22,
         shadowRadius: 2.22,
         elevation: 3,
-      },
+    },
 })
