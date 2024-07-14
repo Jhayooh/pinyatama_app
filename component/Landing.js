@@ -42,28 +42,8 @@ export const Landing = ({ navigation }) => {
     const [showRegister, setShowRegister] = useState(false)
     const farmsColl = collection(db, 'farms')
     const [farms] = useCollectionData(farmsColl)
-    // const farms = [{
-    //     "area": 1,
-    //     "brgy": "Cobangbang (Carumpit)",
-    //     "brgyUID": "MAicOo2SvfgMfg9cCVDwQks1gV72",
-    //     "cropStage": "Vegetative",
-    //     "farmerName": "Arjay Macalinao",
-    //     "geopoint": { "latitude": 14.107196953701209, "longitude": 14.107196953701209 },
-    //     "harvest_date": { "nanoseconds": 865000000, "seconds": 1711874130 },
-    //     "id": "24T8wnmupy83QjTUWyLn",
-    //     "images": [],
-    //     "mun": "DAET (Capital)",
-    //     "plantNumber": "30000",
-    //     "sex": "yes",
-    //     "start_date": {
-    //         "nanoseconds": 865000000,
-    //         "seconds": 1711874130
-    //     },
-    //     "title": "Animal Farm"
-    // }]
 
     const [user] = useAuthState(auth)
-
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(user => {
@@ -84,7 +64,7 @@ export const Landing = ({ navigation }) => {
     }
 
     const handleLogout = () => {
-        Alert.alert('Signing Out', 'Your are about to sign out, haha sure ka sis?', [
+        Alert.alert('Signing Out', 'Are your sure you want to sign out to this account?', [
             {
                 text: 'Cancel',
                 onPress: () => console.log('Cancel Pressed'),
@@ -114,7 +94,7 @@ export const Landing = ({ navigation }) => {
                 .then(userCredentials => {
                     console.log('Logged in with:', userCredentials.user.email);
                 })
-                .catch(error => alert(error.message))
+                .catch(error => Alert.alert('Invalid Account', 'User not found, please contact the administration.'))
         }
         return (
             <Modal animationType='fade' transparent={true} visible={showLogin} onBackdropPress={() => (setShowLogin(false))} onRequestClose={() => (setShowLogin(false))}>
@@ -355,7 +335,7 @@ export const Landing = ({ navigation }) => {
                                     <Text style={styles.buttonText}>Kalkulador ng gastos</Text>
                                 </View>
                             </TouchableHighlight>
-                            <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn}>
+                            <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn}  onPress={() => navigation.navigate('Number of Plants')}>
                                 <View style={styles.btnbtnChild}>
                                     <Image source={yieldLogo} style={styles.btnImage} />
                                     <Text style={styles.buttonText}>Tagapagukit ng Pinya</Text>

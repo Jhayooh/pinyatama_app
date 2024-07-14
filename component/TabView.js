@@ -20,9 +20,6 @@ const Card = ({ imageSource, title, description, startDate, endDate, onPress }) 
         <Text style={styles.cardDescription}>{description}</Text>
         <Text style={styles.cardDate}> Date of Planting: {startDate}  </Text>
         <Text style={styles.cardDate}> Date of Harvest: {endDate}  </Text>
-
-        
-     
       </View>
     </TouchableOpacity>
   );

@@ -23,6 +23,7 @@ import {
   Switch
 } from 'react-native';
 import { RadioButton } from 'react-native-paper';
+import {HeaderBackButton} from '@react-navigation/elements'
 
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import MapView, { Marker } from 'react-native-maps';
@@ -110,6 +111,29 @@ export const Calculator = ({ navigation }) => {
   const [lastnameError, setLastnameError] = useState('');
   const [farmnameError, setFarmnameError] = useState('');
   const [fieldIdError, setFieldIdError] = useState('');
+
+  useEffect(() => {
+    if (!isNext) {
+      navigation.setOptions({
+        headerLeft: (props) => (
+          <HeaderBackButton
+          {...props}
+          onPress={()=>navigation.goBack()}
+          />
+        ),
+      });
+
+    } else {
+      navigation.setOptions({
+        headerLeft: (props) => (
+          <HeaderBackButton
+          {...props}
+          onPress={()=>setIsNext(false)}
+          />
+        ),
+      });
+    }
+  }, [isNext])
 
   useEffect(() => {
     if (!lastname) {
@@ -368,7 +392,8 @@ export const Calculator = ({ navigation }) => {
           style: 'cancel',
         },
         {
-          text: 'YES', onPress: () => {
+          text: 'YES',
+          onPress: () => {
             setSaving(true)
             saveInputs()
           }
@@ -412,7 +437,6 @@ export const Calculator = ({ navigation }) => {
     const lat = location.coords.latitude
     const long = location.coords.latitude
     setUserLocation(new GeoPoint(lat, long));
-    // console.log(location.coords);
     setRegion({
       latitude: location.coords.latitude,
       longitude: location.coords.longitude,
@@ -443,7 +467,7 @@ export const Calculator = ({ navigation }) => {
 
   const getMult = (numOne, numTwo) => {
     const num = numOne * numTwo
-    return Math.round(num*10)/10
+    return Math.round(num * 10) / 10
   }
 
   const handleBase = () => {
