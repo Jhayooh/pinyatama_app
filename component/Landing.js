@@ -335,7 +335,7 @@ export const Landing = ({ navigation }) => {
                                     <Text style={styles.buttonText}>Kalkulador ng gastos</Text>
                                 </View>
                             </TouchableHighlight>
-                            <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn}  onPress={() => navigation.navigate('Number of Plants')}>
+                            <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn}  onPress={() => navigation.navigate('About')}>
                                 <View style={styles.btnbtnChild}>
                                     <Image source={yieldLogo} style={styles.btnImage} />
                                     <Text style={styles.buttonText}>Tagapagukit ng Pinya</Text>
