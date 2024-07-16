@@ -3,14 +3,18 @@ import { View, Text, StyleSheet, Image, Modal, TouchableOpacity } from 'react-na
 import * as ImagePicker from 'expo-image-picker';
 
 //db
-import { storage } from '../firebase/Config';
-import { getDownloadURL, listAll, ref, uploadBytesResumable } from 'firebase/storage';
+import { storage, db, auth } from '../firebase/Config';
+import { deleteObject, getDownloadURL, listAll, ref, uploadBytesResumable } from 'firebase/storage';
+import { addDoc, collection, updateDoc } from 'firebase/firestore';
 
 const ImagesTab = ({ route }) => {
   const { farm } = route.params
   const [images, setImages] = useState([]);
   const [showAddImage, setShowAddImage] = useState(false)
+  const [selectedImages, setSelectedImages] = useState([]);
 
+
+  //fetching and displaying image
   useEffect(() => {
     const fetchImages = async () => {
 
@@ -34,8 +38,9 @@ const ImagesTab = ({ route }) => {
     fetchImages();
   }, [farm]);
 
+  //adding image
   const addImage = (image, height, width) => {
-    setImages(images => [...images, { url: image, height: height, width: width }])
+    setImages(images => [...images, { src: image, height: height, width: width }])
   }
 
   const openGallery = async () => {
@@ -102,30 +107,72 @@ const ImagesTab = ({ route }) => {
     }
   };
 
+  const SaveImage = async () => {
+    try {
+      for (const img of images) {
+        const upImg = await uploadImages(img.url, "Image", farm.id);
+        console.log("Image uploaded successfully:", upImg);
+      }
+    } catch (e) {
+      console.log("Saving Error: ", e);
+    }
+  };
+
   function goBack() {
     navigation.goBack()
   }
 
+  //deleting image
+  const handleSelectImage = (imageRef) => {
+    setSelectedImages((prevSelected) => {
+      if (prevSelected.includes(imageRef)) {
+        return prevSelected.filter((ref) => ref !== imageRef);
+      } else {
+        return [...prevSelected, imageRef];
+      }
+    });
+  };
 
+  handleDeleteSelected = async () => {
+    try {
+      const deletePromises = selectedImages.map((imageRef) => deleteObject(imageRef));
+      await Promise.all(deletePromises);
+      setImages((prevImages) => prevImages.filter((image) => !selectedImages.includes(image.ref)));
+      setSelectedImages([]);
+    } catch (error) {
+      console.error('Error deleting images', error);
+    }
+  };
 
   return (
     <>
       <View>
         <View style={styles.screen}>
-          <TouchableOpacity style={styles.button} onPress={() => {
-            setShowAddImage(true)
-          }}>
-            <Text style={{ color: '#fff', fontSize: 15, }}>Add Image</Text>
-          </TouchableOpacity>
-
+          <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+            <TouchableOpacity style={styles.button} onPress={() => {
+              setShowAddImage(true)
+            }}>
+              <Text style={{ color: '#fff', fontSize: 15, }}>Add Image</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+            style={styles.button} 
+            onPress={() => { handleDeleteSelected()}}>
+              <Text style={{ color: '#fff', fontSize: 15, }}>Delete Image</Text>
+              {/* <Image source={require('../assets/trash.png')}  width={20} height={50} /> */}
+            </TouchableOpacity>
+          </View>
           <View style={styles.container}>
             {images?.map((image, index) => (
-              <View key={index} style={styles.imageContainer}>
+              <TouchableOpacity
+                key={index}
+                style={styles.imageContainer}
+                onPress= {() => { handleSelectImage(image.Ref) }}
+              >
                 <Image
                   source={{ uri: image.src }}
                   style={{ width: '100%', height: '100%' }}
                 />
-              </View>
+              </TouchableOpacity>
             ))}
           </View>
         </View>
@@ -163,8 +210,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     padding: 5,
     display: 'flex',
-    justifyContent: 'flex-start',
-    alignItems: 'flex-start',
+    // justifyContent: 'flex-start',
+    // alignItems: 'flex-start',
     height: '100%',
 
   },
@@ -180,9 +227,9 @@ const styles = StyleSheet.create({
   },
 
   imageContainer: {
-    margin: 3,
-    width: '30%',
-    height: '20%',
+    margin: 2,
+    width: '32.3%',
+    height: '22%',
     overflow: 'hidden',
   },
   addImage: {
@@ -214,7 +261,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
-    margin:10
+    margin: 10
   }
 })
 export default ImagesTab;
