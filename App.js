@@ -16,9 +16,6 @@ import Register from './component/Register';
 import Video from './component/Video';
 import Edit from './component/Edit'
 import { Button } from 'native-base';
-import { PlantNum } from './component/PlantNum';
-
-
 
 const Stack = createNativeStackNavigator();
 
@@ -118,18 +115,7 @@ const App = () => (
                     }
                 }}
             />
-            <Stack.Screen
-                name='Number of Plants'
-                component={PlantNum}
-                options={{
-                    title: 'Number of Plants',
-                    headerTintColor: '#E8E7E7',
-                    headerBackTitleVisible: false,
-                    headerStyle: {
-                        backgroundColor: '#4DAF50',
-                    }
-                }}
-            />
+           
 
             <Stack.Screen name='Charts' component={Charts} />
             <Stack.Screen name='DataInputs' component={DataInputs} />

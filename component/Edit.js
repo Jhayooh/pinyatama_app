@@ -38,15 +38,15 @@ const Edit = ({ route, navigation }) => {
                             farm: farm
                         }}
                     />
-                        {/* {()=>(
-                            <ScrollView>
-                                <Profile compData={compData} farm={farm} />
-                            </ScrollView>
-                        )} */}
+                       
                     <Tab.Screen
                         name="Images"
                         component={Images}
                         options={{ tabBarLabel: 'Images' }}
+                        initialParams={{
+                            farm: farm,
+                            
+                        }}
                     />
                     <Tab.Screen
                         name="CostAndReturn"
