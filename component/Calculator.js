@@ -23,7 +23,7 @@ import {
   Switch
 } from 'react-native';
 import { RadioButton } from 'react-native-paper';
-import {HeaderBackButton} from '@react-navigation/elements'
+import { HeaderBackButton } from '@react-navigation/elements'
 
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import MapView, { Marker } from 'react-native-maps';
@@ -117,8 +117,8 @@ export const Calculator = ({ navigation }) => {
       navigation.setOptions({
         headerLeft: (props) => (
           <HeaderBackButton
-          {...props}
-          onPress={()=>navigation.goBack()}
+            {...props}
+            onPress={() => navigation.goBack()}
           />
         ),
       });
@@ -127,8 +127,8 @@ export const Calculator = ({ navigation }) => {
       navigation.setOptions({
         headerLeft: (props) => (
           <HeaderBackButton
-          {...props}
-          onPress={()=>setIsNext(false)}
+            {...props}
+            onPress={() => setIsNext(false)}
           />
         ),
       });
@@ -150,7 +150,7 @@ export const Calculator = ({ navigation }) => {
   }
 
   useEffect(() => {
-    if (!loadingUsers) {
+    if (users) {
       const indUser = GetIndObj(users, user.uid, 'id')
       setMunicipality(indUser[0].mun)
       setBrgyCode(indUser[0].brgy)
@@ -239,12 +239,13 @@ export const Calculator = ({ navigation }) => {
   // important function
   const saveInputs = async () => {
     try {
-      const newFarmer = await addDoc(farmerColl, {
-        firstName: firstname,
-        lastName: lastname,
-        sex: sex,
+      await setDoc(doc(farmsColl, fieldId), {
+        firstname,
+        lastname,
+        sex,
+        farmName,
+        fieldId,
       })
-      await updateDoc(newFarmer, { id: newFarmer.id })
       const newFarm = await addDoc(farmsColl, {
         area: area.toFixed(2),
         brgy: brgyCode,
