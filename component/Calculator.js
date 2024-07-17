@@ -239,7 +239,7 @@ export const Calculator = ({ navigation }) => {
   // important function
   const saveInputs = async () => {
     try {
-      await setDoc(doc(farmsColl, fieldId), {
+      await setDoc(doc(farmerColl, fieldId), {
         firstname,
         lastname,
         sex,
