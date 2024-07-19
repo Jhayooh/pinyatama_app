@@ -119,6 +119,7 @@ export const Calculator = ({ navigation }) => {
           <HeaderBackButton
             {...props}
             onPress={() => navigation.goBack()}
+            
           />
         ),
       });
@@ -403,7 +404,7 @@ export const Calculator = ({ navigation }) => {
 
     return (
       <>
-        <TouchableOpacity style={{
+        {/* <TouchableOpacity style={{
           ...styles.button,
           backgroundColor: '#FFF',
           borderWidth: 1,
@@ -411,7 +412,7 @@ export const Calculator = ({ navigation }) => {
           ...styles.buttonTwo
         }} onPress={() => setIsNext(false)}>
           <Text style={{ color: '#4DAF50', fontSize: 16 }}>Back</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <TouchableOpacity style={{
           ...styles.button,
           ...styles.buttonTwo
@@ -559,17 +560,20 @@ export const Calculator = ({ navigation }) => {
                           ?
                           <ActivityIndicator style={{ flex: 1 }} size='small' color='#FF5733' />
                           :
-                          <TouchableOpacity onPress={() => {
+                          <TouchableOpacity onPress={() => 
+                            {
                             setCalculating(true)
                             handleBase()
-                          }} style={{ ...styles.button, backgroundColor: '#F5C115', borderBottomLeftRadius: 0, borderTopLeftRadius: 0, paddingHorizontal: 22, paddingVertical: 0, justifyContent: 'center' }}>
+                          }
+                          } style={{ ...styles.button, backgroundColor: '#F5C115', borderBottomLeftRadius: 0, borderTopLeftRadius: 0, paddingHorizontal: 22, paddingVertical: 0, justifyContent: 'center' }}>
                             <Image source={require('../assets/calc.png')} style={{}} />
-
                           </TouchableOpacity>
+                          
                       }
                     </View>
+                    {table && qPine && <TableBuilder components={components} area={area} setRoiDetails={setRoiDetails} pineapple={qPine} />}
                   </View>
-                  {table && qPine && <TableBuilder components={components} area={area} setRoiDetails={setRoiDetails} pineapple={qPine} />}
+                  
                 </View>
                 <View style={{ ...styles.section, marginBottom: 32, paddingTop: 14 }}>
                   <View style={{ ...styles.buttonContainer }}>
@@ -829,7 +833,6 @@ export const Calculator = ({ navigation }) => {
                         images &&
                         <FlatList
                           data={images}
-                          // numColumns={3}
                           horizontal={true}
                           renderItem={({ item }) => (
                             <View style={{ flex: 1 }}>
@@ -839,11 +842,8 @@ export const Calculator = ({ navigation }) => {
                           ItemSeparatorComponent={() =>
                             <View style={{ width: 4, height: '100%' }}></View>
                           }
-                        // columnWrapperStyle={{
-                        //   gap: 2,
-                        //   marginBottom: 2
-                        // }}
                         />
+                      
                       }
                     </View>
                     <View style={{ flex: 1, flexDirection: 'row' }}>

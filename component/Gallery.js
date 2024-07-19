@@ -6,6 +6,9 @@ import TabView from './TabView';
 import { ref, listAll, getDownloadURL } from 'firebase/storage';
 import { storage } from '../firebase/Config';
 
+//image
+import Default from '../assets/p.jpg'
+
 const Tab = createMaterialTopTabNavigator();
 
 export default function Gallery({ route }) {
@@ -69,8 +72,9 @@ export default function Gallery({ route }) {
             options={{ tabBarLabel: 'Lahat' }}
             initialParams={{
               farms: farms,
-              imageUrls: imageUrls
+              imageUrls: imageUrls 
             }}
+            
           />
 
           <Tab.Screen

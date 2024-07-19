@@ -24,28 +24,9 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
   const [butterPrice, setButterPrice] = useState(0)
 
   function getPinePrice(pine) {
-    // Check if pineapple is defined and not empty
-    if (pineapple && pineapple.length > 0) {
-      const newPine = pineapple.filter(thePine => thePine.name.toLowerCase() === pine.toLowerCase())[0];
-      if (newPine) {
-        // Check if newPine is defined before accessing its properties
-        return parseInt(newPine.price.toFixed());
-      } else {
-        // Handle case where pineapple contains no matching pine
-        console.error(`Pineapple with name '${pine}' not found.`);
-        return null; // Or handle accordingly based on your application logic
-      }
-    } else {
-      // Handle case where pineapple is undefined or empty
-      console.error('Pineapple data is undefined or empty.');
-      return null; // Or handle accordingly based on your application logic
-    }
+    const newPine = pineapple.filter(thePine => thePine.name.toLowerCase() === pine.toLowerCase())[0]
+    return parseInt(newPine.price.toFixed())
   }
-
-  // function getPinePrice(pine) {
-  //   const newPine = pineapple.filter(thePine => thePine.name.toLowerCase() === pine.toLowerCase())[0]
-  //   return parseInt(newPine.price.toFixed())
-  // }
 
   useEffect(() => {
     let materialSum = 0;
@@ -116,6 +97,11 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
   }
 
   const TableData = ({ name, qnty, unit, price, totalPrice }) => {
+    console.log("name", name)
+    console.log("qnty", qnty)
+    console.log("unit", unit)
+    console.log("price", price)
+    console.log("totalPrice", totalPrice)
     return (
       <View style={styles.tableData}>
         <View style={{ ...styles.tableHeadLabel3, alignItems: 'flex-start' }}>
@@ -247,15 +233,15 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
             name={'Gross Return'}
             qnty={grossReturn}
             unit={'pcs'}
-            price={getPinePrice('pineapple')}
-            totalPrice={grossReturn * getPinePrice('pineapple')}
+            price={pinePrice}
+            totalPrice={grossReturn * pinePrice}
           />
           <TableData
             name={'Good Butterball'}
             qnty={butterBall}
             unit={'pcs'}
-            price={getPinePrice('butterball')}
-            totalPrice={butterBall * getPinePrice('butterball')}
+            price={butterPrice}
+            totalPrice={butterBall * butterPrice}
           />
           <View style={styles.tableHead}>
             <View style={{ flex: 4 }}>

@@ -79,19 +79,12 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     marginLeft:20
   },
-  // editButton: {
-  //   padding: 10,
-  // },
-  // editIcon: {
-  //   width: 20,
-  //   height: 20,
-  // },
 });
 
 export default ProductionInput;
 
 
-// import { collection, doc, setDoc } from 'firebase/firestore';
+
 // import React, { useState } from 'react';
 // import { useAuthState } from 'react-firebase-hooks/auth';
 // import { useCollectionData } from 'react-firebase-hooks/firestore';
