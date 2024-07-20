@@ -151,7 +151,7 @@ export const Calculator = ({ navigation }) => {
   }
 
   useEffect(() => {
-    if (!loadingUsers) {
+    if (users) {
       const indUser = GetIndObj(users, user.uid, 'id')
       setMunicipality(indUser[0].mun)
       setBrgyCode(indUser[0].brgy)
@@ -240,12 +240,13 @@ export const Calculator = ({ navigation }) => {
   // important function
   const saveInputs = async () => {
     try {
-      const newFarmer = await addDoc(farmerColl, {
-        firstName: firstname,
-        lastName: lastname,
-        sex: sex,
+      await setDoc(doc(farmerColl, fieldId), {
+        firstname,
+        lastname,
+        sex,
+        farmName,
+        fieldId,
       })
-      await updateDoc(newFarmer, { id: newFarmer.id })
       const newFarm = await addDoc(farmsColl, {
         area: area.toFixed(2),
         brgy: brgyCode,

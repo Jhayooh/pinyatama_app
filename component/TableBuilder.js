@@ -14,39 +14,24 @@ import { AddDataRow } from './AddDataRow';
 export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => {
   const [laborTotal, setLaborTotal] = useState(0)
   const [materialTotal, setMaterialTotal] = useState(0)
+  const [fertilizerTotal, setFertlizerTotal] = useState(0)
   const [costTotal, setCostTotal] = useState(0)
   const [grossReturn, setGrossReturn] = useState(0)
   const [butterBall, setBatterBall] = useState(0)
   const [netReturn, setNetReturn] = useState(0)
   const [roi, setRoi] = useState(0)
+  const [pinePrice, setPinePrice] = useState(0)
+  const [butterPrice, setButterPrice] = useState(0)
 
   function getPinePrice(pine) {
-    // Check if pineapple is defined and not empty
-    if (pineapple && pineapple.length > 0) {
-      const newPine = pineapple.filter(thePine => thePine.name.toLowerCase() === pine.toLowerCase())[0];
-      if (newPine) {
-        // Check if newPine is defined before accessing its properties
-        return parseInt(newPine.price.toFixed());
-      } else {
-        // Handle case where pineapple contains no matching pine
-        console.error(`Pineapple with name '${pine}' not found.`);
-        return null; // Or handle accordingly based on your application logic
-      }
-    } else {
-      // Handle case where pineapple is undefined or empty
-      console.error('Pineapple data is undefined or empty.');
-      return null; // Or handle accordingly based on your application logic
-    }
+    const newPine = pineapple.filter(thePine => thePine.name.toLowerCase() === pine.toLowerCase())[0]
+    return parseInt(newPine.price.toFixed())
   }
-  
-  // function getPinePrice(pine) {
-  //   const newPine = pineapple.filter(thePine => thePine.name.toLowerCase() === pine.toLowerCase())[0]
-  //   return parseInt(newPine.price.toFixed())
-  // }
 
   useEffect(() => {
-    let materialSum = 5000;
+    let materialSum = 0;
     let laborSum = 0;
+    let fertilizerSum = 0;
 
     components.forEach((component) => {
       if (component.particular.toLowerCase() === 'material') {
@@ -54,6 +39,9 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
           const qntyPrice = parseInt(component.qntyPrice)
           setGrossReturn(getPercentage(90, qntyPrice));
           setBatterBall(getPercentage(10, qntyPrice));
+        }
+        if (component.parent.toLowerCase() === 'fertilizer') {
+          fertilizerSum += parseInt(component.totalPrice)
         }
         materialSum += parseInt(component.totalPrice);
       } else if (component.particular.toLowerCase() === 'labor') {
@@ -63,13 +51,18 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
 
     setMaterialTotal(materialSum);
     setLaborTotal(laborSum);
+    setFertlizerTotal(fertilizerSum);
     setCostTotal(materialSum + laborSum);
-  }, [components]);
+  }, [components, pineapple]);
 
   useEffect(() => {
-    const grossReturnAndBatter = (grossReturn * getPinePrice('pineapple')) + (butterBall * getPinePrice('butterball'))
+    const pineapplePrice = getPinePrice('pineapple')
+    const butterballPrice = getPinePrice('butterball')
+    const grossReturnAndBatter = (grossReturn * pineapplePrice) + (butterBall * butterballPrice)
     const netReturnValue = grossReturnAndBatter - costTotal;
     const roiValue = (netReturnValue / grossReturnAndBatter) * 100;
+    setPinePrice(pineapplePrice)
+    setButterPrice(butterballPrice)
     setNetReturn(netReturnValue);
     setRoi(Math.round(roiValue * 100) / 100);
   }, [grossReturn, butterBall, costTotal]);
@@ -78,15 +71,18 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
     const roiDetails = {
       laborTotal,
       materialTotal,
+      fertilizerTotal,
       costTotal,
       grossReturn,
       butterBall,
       netReturn,
-      roi
+      roi,
+      pinePrice,
+      butterPrice
     };
 
     setRoiDetails(roiDetails);
-  }, [laborTotal, materialTotal, costTotal, grossReturn, butterBall, netReturn, roi]);
+  }, [laborTotal, materialTotal, costTotal, grossReturn, butterBall, netReturn, roi, pineapple]);
 
   const getPercentage = (pirsint, nambir) => {
     return Math.round((nambir / 100) * pirsint)
@@ -101,6 +97,11 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
   }
 
   const TableData = ({ name, qnty, unit, price, totalPrice }) => {
+    console.log("name", name)
+    console.log("qnty", qnty)
+    console.log("unit", unit)
+    console.log("price", price)
+    console.log("totalPrice", totalPrice)
     return (
       <View style={styles.tableData}>
         <View style={{ ...styles.tableHeadLabel3, alignItems: 'flex-start' }}>
@@ -232,15 +233,15 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
             name={'Gross Return'}
             qnty={grossReturn}
             unit={'pcs'}
-            price={8}
-            totalPrice={formatter(grossReturn * 8)}
+            price={pinePrice}
+            totalPrice={grossReturn * pinePrice}
           />
           <TableData
             name={'Good Butterball'}
             qnty={butterBall}
             unit={'pcs'}
-            price={2}
-            totalPrice={formatter(butterBall * 2)}
+            price={butterPrice}
+            totalPrice={butterBall * butterPrice}
           />
           <View style={styles.tableHead}>
             <View style={{ flex: 4 }}>
