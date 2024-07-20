@@ -3,6 +3,7 @@ import { signOut } from "firebase/auth";
 import React, { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { Avatar } from "native-base";
 
 import {
     Button,
@@ -40,15 +41,24 @@ const windowHeight = Dimensions.get('window').height;
 export const Landing = ({ navigation }) => {
     const [showLogin, setShowLogin] = useState(false)
     const [showRegister, setShowRegister] = useState(false)
+
+    const usersColl = collection(db, 'users')
+    const [users] = useCollectionData(usersColl)
+
     const farmsColl = collection(db, 'farms')
     const [farms] = useCollectionData(farmsColl)
 
     const [user] = useAuthState(auth)
 
+    const logUser = user && users?.find(item => item.id === user.uid)
+
+
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(user => {
             if (user) {
                 setShowLogin(false)
+                console.log("usersssss", user)
+                console.log('loguserrr', logUser)
             }
         })
 
@@ -98,10 +108,10 @@ export const Landing = ({ navigation }) => {
         }
         return (
             <Modal animationType='fade' transparent={true} visible={showLogin} onBackdropPress={() => (setShowLogin(false))} onRequestClose={() => (setShowLogin(false))}>
-                <TouchableOpacity 
-                style={loginStyle.container}
-                activeOpacity={1} 
-                onPressOut={() => {setShowLogin(false)}}>
+                <TouchableOpacity
+                    style={loginStyle.container}
+                    activeOpacity={1}
+                    onPressOut={() => { setShowLogin(false) }}>
                     <View style={loginStyle.formContainer}>
                         <View style={loginStyle.card}>
                             <Text style={loginStyle.title}>MALIGAYANG PAGDATING</Text>
@@ -335,7 +345,7 @@ export const Landing = ({ navigation }) => {
                                     <Text style={styles.buttonText}>Kalkulador ng gastos</Text>
                                 </View>
                             </TouchableHighlight>
-                            <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn}  onPress={() => navigation.navigate('About')}>
+                            <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn} onPress={() => navigation.navigate('About')}>
                                 <View style={styles.btnbtnChild}>
                                     <Image source={yieldLogo} style={styles.btnImage} />
                                     <Text style={styles.buttonText}>Tagapagukit ng Pinya</Text>
@@ -366,11 +376,24 @@ export const Landing = ({ navigation }) => {
                                 </View>
                             </TouchableHighlight>
                             {
+
                                 user
                                     ?
                                     <TouchableHighlight style={styles.btnbtn} onPress={handleLogout}>
                                         <View style={styles.btnbtnChild2}>
-                                            <Image source={logonLogo} style={styles.btnImage} />
+                                            {
+                                                logUser.photoURL ? (
+                                                    <Image
+                                                        source={{ uri: logUser.photoURL }}
+                                                        style={{ ...styles.btnImage, borderRadius: 50 }}
+                                                    />
+                                                ) : (
+                                                    <Image
+                                                        source={logonLogo}
+                                                        style={styles.btnImage}
+                                                    />
+                                                )}
+
                                             <Text style={{ ...styles.buttonText, color: '#fff' }}>Log out</Text>
                                         </View>
                                     </TouchableHighlight>
