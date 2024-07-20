@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { address } from 'addresspinas';
+import _ from 'lodash'
 import {
     View,
     Text,
@@ -99,19 +100,19 @@ const styles = StyleSheet.create({
     addProfTitle: {
         fontSize: 20,
         fontWeight: '600',
-        
+
 
     },
     addProfBtn: {
         padding: 8,
         alignItems: 'center',
         justifyContent: 'center',
-        
+
     },
     addProfBtnText: {
         fontSize: 16,
         marginTop: 12
-        
+
         // fontWeight: '600'
     }
 })
@@ -156,6 +157,8 @@ export default function Register({ navigation }) {
             const docRef = await addDoc(usersRef, {
                 brgy: barangay,
                 disabled: false,
+                firstname: firstName,
+                lastname: lastName,
                 displayName: displayName,
                 email: email,
                 status: 'pending',
@@ -270,7 +273,7 @@ export default function Register({ navigation }) {
         elevation: 5,
         marginVertical: 8,
         marginLeft: 20,
-        marginBottom:.1
+        marginBottom: .1
 
     };
     const nxtButtonText = {
@@ -292,7 +295,7 @@ export default function Register({ navigation }) {
         shadowRadius: 3.84,
         elevation: 5,
         marginVertical: 8,
-        marginBottom:.1
+        marginBottom: .1
     }
     const prvButtonText = {
         color: '#4DAF50',
@@ -501,7 +504,6 @@ export default function Register({ navigation }) {
                                             setMunCode(item)
                                             const foundItem = municipalities.cityAndMun.find(entry => entry.mun_code === item);
                                             setMun(foundItem ? foundItem.name : '');
-                                            console.log(foundItem ? foundItem.name : '');
                                         }}
                                     >
                                         {

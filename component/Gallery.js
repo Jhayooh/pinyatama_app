@@ -56,7 +56,7 @@ export default function Gallery({ route }) {
         inputContainerStyle={styles.searchInputContainer}
         inputStyle={styles.searchInput}
       />
-      {farms && Object.keys(imageUrls).length != 0 &&
+      {farms && Object.keys(imageUrls).length !== 0 &&
         <Tab.Navigator
           initialRouteName="Notifications"
           tabBarOptions={{

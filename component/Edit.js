@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { SafeAreaView, StyleSheet, Text, TouchableOpacity, ScrollView, View, Image } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { useCollectionData } from 'react-firebase-hooks/firestore';
+import { collection } from 'firebase/firestore';
+import { db } from "../firebase/Config";
 
 //components
 import Charts from './Charts';
@@ -16,6 +19,8 @@ const Edit = ({ route, navigation }) => {
 
     farm && console.log("farm sa edit", farm)
     const [roiDetails, setRoiDetails] = useState({})
+    const quertyPine = collection(db, 'pineapple');
+    const [qPine, lPine, ePine] = useCollectionData(quertyPine)
 
     React.useEffect(() => {
         navigation.setOptions({
@@ -67,7 +72,7 @@ const Edit = ({ route, navigation }) => {
                     >
                         {() => (
                             <ScrollView>
-                                <TableBuilder components={compData} area={farm.area} setRoiDetails={setRoiDetails} />
+                                {qPine && <TableBuilder components={compData} area={farm.area} setRoiDetails={setRoiDetails} pineapple={qPine} />}
                             </ScrollView>
                         )}
                     </Tab.Screen>
