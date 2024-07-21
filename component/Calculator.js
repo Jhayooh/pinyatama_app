@@ -24,6 +24,7 @@ import {
 } from 'react-native';
 import { RadioButton } from 'react-native-paper';
 import { HeaderBackButton } from '@react-navigation/elements'
+import _ from 'lodash'
 
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import MapView, { Marker } from 'react-native-maps';
@@ -240,13 +241,19 @@ export const Calculator = ({ navigation }) => {
   // important function
   const saveInputs = async () => {
     try {
-      await setDoc(doc(farmerColl, fieldId), {
+      const newAccount = {
         firstname,
         lastname,
         sex,
         farmName,
         fieldId,
-      })
+      }
+      // const exist = users.some(user => _.isEqual(user, newAccount));
+      // if (exist) {
+      // }
+
+      await setDoc(doc(farmerColl, fieldId), newAccount)
+
       const newFarm = await addDoc(farmsColl, {
         area: area.toFixed(2),
         brgy: brgyCode,

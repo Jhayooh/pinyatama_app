@@ -4,17 +4,17 @@
     "slug": "Pinyatama",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/logo.png",
+    "icon": "./assets/pinyatamap-logo.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "image": "./assets/splashScreen.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#40A040"
     },
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
-      
       "supportsTablet": true
     },
     "android": {
