@@ -4,7 +4,7 @@
     "slug": "Pinyatama",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/pinyatamap-logo.png",
+    "icon": "./assets/logo.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splashScreen.png",
@@ -29,9 +29,7 @@
         "projectId": "2815b92d-bfb2-4fa4-bade-95fd0afafad5"
       }
     },
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
+    "runtimeVersion": "1.0.0",
     "updates": {
       "url": "https://u.expo.dev/2815b92d-bfb2-4fa4-bade-95fd0afafad5"
     }
