@@ -16,7 +16,7 @@ export default function Profile({ route, navigation }) {
                         <View style={{ flexDirection: 'column', gap: 1, marginBottom: 20 }}>
                             <Text style={styles.supText}>Field ID</Text>
                             <TextInput
-                                editable
+                                editable={false}
                                 placeholder={farm.fieldId}
                                 style={styles.textInput}
                             />
@@ -38,7 +38,7 @@ export default function Profile({ route, navigation }) {
                                 <TextInput
                                     editable
                                     placeholder={farm.farmerName}
-                                    style={{ ...styles.textInput, width: '100%', }}
+                                    style={{ ...styles.textInput, }}
                                 />
                             </View>
                             <View style={{ flex: 1, flexDirection: 'column', marginLeft: 5, marginBottom: 20 }}>
@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 18,
         color: '#3C3C3B',
         fontSize: 16,
-        shadowColor: "#F5C115",
+        // shadowColor: "#F5C115",
         shadowOffset: {
             width: 0,
             height: 1,
