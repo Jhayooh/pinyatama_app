@@ -7,14 +7,14 @@
     "icon": "./assets/logo.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "image": "./assets/splashScreen.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#40A040"
     },
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
-      
       "supportsTablet": true
     },
     "android": {
@@ -29,9 +29,7 @@
         "projectId": "2815b92d-bfb2-4fa4-bade-95fd0afafad5"
       }
     },
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
+    "runtimeVersion": "1.0.0",
     "updates": {
       "url": "https://u.expo.dev/2815b92d-bfb2-4fa4-bade-95fd0afafad5"
     }

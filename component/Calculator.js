@@ -24,6 +24,7 @@ import {
 } from 'react-native';
 import { RadioButton } from 'react-native-paper';
 import { HeaderBackButton } from '@react-navigation/elements'
+import _ from 'lodash'
 
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import MapView, { Marker } from 'react-native-maps';
@@ -119,7 +120,7 @@ export const Calculator = ({ navigation }) => {
           <HeaderBackButton
             {...props}
             onPress={() => navigation.goBack()}
-            
+
           />
         ),
       });
@@ -240,13 +241,19 @@ export const Calculator = ({ navigation }) => {
   // important function
   const saveInputs = async () => {
     try {
-      await setDoc(doc(farmerColl, fieldId), {
+      const newAccount = {
         firstname,
         lastname,
         sex,
         farmName,
         fieldId,
-      })
+      }
+      // const exist = users.some(user => _.isEqual(user, newAccount));
+      // if (exist) {
+      // }
+
+      await setDoc(doc(farmerColl, fieldId), newAccount)
+
       const newFarm = await addDoc(farmsColl, {
         area: area.toFixed(2),
         brgy: brgyCode,
@@ -560,20 +567,19 @@ export const Calculator = ({ navigation }) => {
                           ?
                           <ActivityIndicator style={{ flex: 1 }} size='small' color='#FF5733' />
                           :
-                          <TouchableOpacity onPress={() => 
-                            {
+                          <TouchableOpacity onPress={() => {
                             setCalculating(true)
                             handleBase()
                           }
                           } style={{ ...styles.button, backgroundColor: '#F5C115', borderBottomLeftRadius: 0, borderTopLeftRadius: 0, paddingHorizontal: 22, paddingVertical: 0, justifyContent: 'center' }}>
                             <Image source={require('../assets/calc.png')} style={{}} />
                           </TouchableOpacity>
-                          
+
                       }
                     </View>
                     {table && qPine && <TableBuilder components={components} area={area} setRoiDetails={setRoiDetails} pineapple={qPine} />}
                   </View>
-                  
+
                 </View>
                 <View style={{ ...styles.section, marginBottom: 32, paddingTop: 14 }}>
                   <View style={{ ...styles.buttonContainer }}>
@@ -756,7 +762,7 @@ export const Calculator = ({ navigation }) => {
                       style={styles.textInput}
                     />
                   </View>
-                  <View style={styles.subsection}>
+                  {/* <View style={styles.subsection}>
                     <View style={{ flexDirection: 'row', gap: 1 }}>
                       <Text style={styles.supText}>Location</Text>
                       <Text style={{ color: 'red' }}>*</Text>
@@ -783,10 +789,10 @@ export const Calculator = ({ navigation }) => {
                           <Image source={require('../assets/loc.png')} style={{}} />
                           <Text style={{ color: '#E8E7E7', fontSize: 18 }}>Update Location</Text>
                         </TouchableOpacity>
-                        {/* <Button title="Update Location" onPress={handleUpdateLocation} /> */}
+                        <Button title="Update Location" onPress={handleUpdateLocation} />
                       </View>
                     </View>
-                  </View>
+                  </View> */}
                 </View>
 
                 {/* farm details */}
@@ -843,7 +849,7 @@ export const Calculator = ({ navigation }) => {
                             <View style={{ width: 4, height: '100%' }}></View>
                           }
                         />
-                      
+
                       }
                     </View>
                     <View style={{ flex: 1, flexDirection: 'row' }}>
@@ -883,7 +889,6 @@ export const Calculator = ({ navigation }) => {
           }
         </ScrollView>
       </View>
-      {saving && <ActivityIndicator color='#FF5733' size='large' style={styles.loading} />}
       <Modal animationType='fade' visible={showAddImage} transparent={true}>
         <View style={styles.addImage}>
           <View style={styles.modalContainer}>
@@ -906,6 +911,13 @@ export const Calculator = ({ navigation }) => {
               <Image source={require('../assets/close.png')} style={{ width: 42, height: 42 }} />
               <Text>Close</Text>
             </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+      <Modal animationType='fade' visible={saving} transparent={true}>
+        <View style={styles.addImage}>
+          <View style={{...styles.modalContainer, paddingHorizontal: 42}}>
+            <ActivityIndicator size='large' />
           </View>
         </View>
       </Modal>
@@ -1054,7 +1066,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
     marginVertical: 8,
-  }
+  },
 })
 
 

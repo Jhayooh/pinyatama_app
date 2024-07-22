@@ -12,6 +12,7 @@ import { db } from '../firebase/Config';
 import { AddDataRow } from './AddDataRow';
 
 export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => {
+  const [comps, setComps] = useState(components)
   const [laborTotal, setLaborTotal] = useState(0)
   const [materialTotal, setMaterialTotal] = useState(0)
   const [fertilizerTotal, setFertlizerTotal] = useState(0)
@@ -22,6 +23,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
   const [roi, setRoi] = useState(0)
   const [pinePrice, setPinePrice] = useState(0)
   const [butterPrice, setButterPrice] = useState(0)
+  const [trial, setTrial] = useState(0)
 
   function getPinePrice(pine) {
     const newPine = pineapple.filter(thePine => thePine.name.toLowerCase() === pine.toLowerCase())[0]
@@ -33,7 +35,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
     let laborSum = 0;
     let fertilizerSum = 0;
 
-    components.forEach((component) => {
+    comps.forEach((component) => {
       if (component.particular.toLowerCase() === 'material') {
         if (component.name.toLowerCase() === 'planting materials') {
           const qntyPrice = parseInt(component.qntyPrice)
@@ -53,7 +55,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
     setLaborTotal(laborSum);
     setFertlizerTotal(fertilizerSum);
     setCostTotal(materialSum + laborSum);
-  }, [components, pineapple]);
+  }, [comps, pineapple]);
 
   useEffect(() => {
     const pineapplePrice = getPinePrice('pineapple')
@@ -96,12 +98,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
     })
   }
 
-  const TableData = ({ name, qnty, unit, price, totalPrice }) => {
-    console.log("name", name)
-    console.log("qnty", qnty)
-    console.log("unit", unit)
-    console.log("price", price)
-    console.log("totalPrice", totalPrice)
+  const TableData = ({ compId, name, qnty, unit, price, totalPrice }) => {
     return (
       <View style={styles.tableData}>
         <View style={{ ...styles.tableHeadLabel3, alignItems: 'flex-start' }}>
@@ -110,9 +107,15 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
         <View style={{ ...styles.tableHeadLabel3, alignItems: 'center' }}>
           <TextInput
             editable
-            onChangeText={() => null}
+            type='number'
+            onChangeText={(e) => {
+              if (!compId) return
+              setTrial(e)
+              
+              
+            }}
             placeholder={qnty.toString()}
-            value={qnty}
+            value={qnty.toString()}
             style={styles.textInput}
           />
           {/* <Text>{qnty.toLocaleString()}</Text> */}
@@ -165,11 +168,12 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
             <Text styles={{ fontWeight: 'bold' }}>Materials Inputs:</Text>
           </View>
           {
-            components.map((component) => {
+            comps.map((component) => {
               if (component.particular.toLowerCase() === 'material') {
                 return (
                   <TableData
                     key={component.id}
+                    compId={component.id}
                     name={component.name}
                     qnty={component.qntyPrice}
                     unit={component.unit}
@@ -194,11 +198,12 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
             <Text styles={{ fontWeight: 'bold' }}>Labor Inputs:</Text>
           </View>
           {
-            components.map((component) => {
+            comps.map((component) => {
               if (component.particular.toLowerCase() === 'labor') {
                 return (
                   <TableData
                     key={component.id}
+                    compId={component.id}
                     name={component.name}
                     qnty={component.qntyPrice}
                     unit={component.unit}
