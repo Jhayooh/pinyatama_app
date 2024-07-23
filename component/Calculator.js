@@ -33,6 +33,12 @@ import { Dropdown } from 'react-native-element-dropdown';
 import { auth, db, storage } from '../firebase/Config';
 import { TableBuilder } from './TableBuilder';
 
+
+const soilType = [
+  { label: 'Sandy Loam', value: '1' },
+  { label: 'Clay', value: '2' },
+]
+
 export const Calculator = ({ navigation }) => {
   const [user] = useAuthState(auth)
   const farmsColl = collection(db, 'farms')
@@ -137,7 +143,7 @@ export const Calculator = ({ navigation }) => {
           />
         ),
         headerRight: () => (
-          <Button title={isAddFarm ? 'Cancel' : 'Add New Farm'} onPress={() => { setIsAddFarm(!isAddFarm) }} />
+          <Button color='orange' title={isAddFarm ? 'Cancel' : 'Add New Farm'} onPress={() => { setIsAddFarm(!isAddFarm) }} />
         )
       });
 
@@ -188,7 +194,7 @@ export const Calculator = ({ navigation }) => {
 
   useEffect(() => {
     if (!isAddFarm) return
-    
+
     setMunicipality(indUser.mun)
     setBrgyCode(indUser.brgy)
     setFarmName('')
@@ -310,6 +316,7 @@ export const Calculator = ({ navigation }) => {
         sex: sex,
         fieldId: fieldId,
         farmerId: newAccount.id,
+        
       })
 
       const farmComp = collection(db, `farms/${newFarm.id}/components`);
@@ -611,6 +618,8 @@ export const Calculator = ({ navigation }) => {
     }
   }
 
+  const [soil, setSoil] = useState(null);
+
   return (
     <>
       <View style={styles.screen}>
@@ -618,6 +627,44 @@ export const Calculator = ({ navigation }) => {
           {
             isNext ?
               <>
+                <View style={{ ...styles.section, paddingHorizontal: 8 }}>
+                  {/* <Text style={styles.header}>CALCULATE</Text> */}
+                  <View style={styles.subsection}>
+                    <Text style={styles.supText}>Weather</Text>
+                    <View style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
+                      <TextInput
+                        editable
+                        placeholder='Weather'
+                        style={{ ...styles.textInput, borderBottomRightRadius: 0, borderTopRightRadius: 0 }}
+                      />
+                    </View>
+                  </View>
+                  <View style={styles.subsection}>
+                    <Text style={styles.supText}>Nitrogen Phosporus Potassium</Text>
+                    <View style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
+                      <TextInput
+                        editable
+                        placeholder='Enter NPK '
+                        keyboardType='numeric'
+                        style={{ ...styles.textInput, borderBottomRightRadius: 0, borderTopRightRadius: 0 }}
+                      />
+                    </View>
+                  </View>
+                  <View style={styles.subsection}>
+                    <Text style={styles.supText}>Soil Type</Text>
+                    <View style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
+                      <Dropdown
+                        data={soilType}
+                        labelField='label'
+                        valueField='value'
+                        placeholder='Select soil type'
+                        value={soil}
+                        onChange={item => { setSoil(item.value) }}
+                        style={{ ...styles.textInput, borderBottomRightRadius: 0, borderTopRightRadius: 0 }}
+                      />
+                    </View>
+                  </View>
+                </View>
                 <View style={{ ...styles.section, marginHorizontal: table ? 0 : 14, paddingHorizontal: 8 }}>
                   <Text style={styles.header}>CALCULATE</Text>
                   <View style={styles.subsection}>
@@ -648,7 +695,7 @@ export const Calculator = ({ navigation }) => {
                             handleBase()
                           }
                           } style={{ ...styles.button, backgroundColor: '#F5C115', borderBottomLeftRadius: 0, borderTopLeftRadius: 0, paddingHorizontal: 22, paddingVertical: 0, justifyContent: 'center' }}>
-                            <Image source={require('../assets/calc.png')} style={{}} />
+                            <Text> Calculate </Text>
                           </TouchableOpacity>
 
                       }
