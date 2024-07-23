@@ -1,7 +1,7 @@
 import { address } from 'addresspinas';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
-import { GeoPoint, Timestamp, collection, doc, setDoc, updateDoc, addDoc, FieldValue } from 'firebase/firestore';
+import { GeoPoint, Timestamp, collection, doc, setDoc, updateDoc, addDoc, FieldValue, query, where } from 'firebase/firestore';
 import React, { useEffect, useState, useRef } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
@@ -34,10 +34,15 @@ import { auth, db, storage } from '../firebase/Config';
 import { TableBuilder } from './TableBuilder';
 
 export const Calculator = ({ navigation }) => {
+  const [user] = useAuthState(auth)
   const farmsColl = collection(db, 'farms')
-  const farmerColl = collection(db, 'farmer')
   const [farmsData, farmsLoading, farmsError] = useCollectionData(farmsColl);
-  const [showAddImage, setShowAddImage] = useState(false)
+
+  const dataColl = collection(db, 'dataFarm')
+  const [dataFarms] = useCollectionData(dataColl);
+
+  const farmerColl = collection(db, 'farmer')
+  const [farmerData] = useCollectionData(farmerColl);
 
   const queryParti = collection(db, 'particulars');
   const [qParti, lParti, eParti] = useCollectionData(queryParti)
@@ -51,6 +56,8 @@ export const Calculator = ({ navigation }) => {
   const usersCol = collection(db, 'users');
   const [users, loadingUsers] = useCollectionData(usersCol)
 
+  const [showAddImage, setShowAddImage] = useState(false)
+
   const focusNumplants = useRef(null)
   const focusCropstage = useRef(null)
 
@@ -61,12 +68,13 @@ export const Calculator = ({ navigation }) => {
       : '';
   };
 
-  const [user] = useAuthState(auth)
   const [text, onChangeText] = useState(0);
   // const [first, setfirst] = useState(second)
 
   const [munFocus, setMunFocus] = useState(false)
   const [brgyFocus, setBrgyFocus] = useState(false)
+
+  const [indUser, setIndUser] = useState({})
 
   // data natin
   const [base, setBase] = useState('')
@@ -85,6 +93,8 @@ export const Calculator = ({ navigation }) => {
   const [lastname, setLastname] = useState('')
   const [images, setImages] = useState([])
   const [uploadedImg, setUploadedImg] = useState([])
+
+  const [uniqueId, setUniqueId] = useState(0)
   // end ng data natin
 
   const [munCode, setMunCode] = useState(null)
@@ -113,7 +123,10 @@ export const Calculator = ({ navigation }) => {
   const [farmnameError, setFarmnameError] = useState('');
   const [fieldIdError, setFieldIdError] = useState('');
 
+  const [isAddFarm, setIsAddFarm] = useState(false)
+
   useEffect(() => {
+    console.log("numOne")
     if (!isNext) {
       navigation.setOptions({
         headerLeft: (props) => (
@@ -123,6 +136,9 @@ export const Calculator = ({ navigation }) => {
 
           />
         ),
+        headerRight: () => (
+          <Button title={isAddFarm ? 'Cancel' : 'Add New Farm'} onPress={() => { setIsAddFarm(!isAddFarm) }} />
+        )
       });
 
     } else {
@@ -135,14 +151,25 @@ export const Calculator = ({ navigation }) => {
         ),
       });
     }
-  }, [isNext])
+  }, [isNext, isAddFarm])
 
   useEffect(() => {
-    if (!lastname) {
-      return
-    }
-    setFarmName(lastname + ' QP Farm')
+    console.log('numTwo');
+    if (!lastname) return
+    setFieldId(lastname + uniqueId)
   }, [lastname])
+
+  function uniqueID() {
+    return Math.floor(Math.random() * Date.now())
+  }
+
+  useEffect(() => {
+    console.log('numThree');
+    if (!isAddFarm) return
+    const idid = '-FID' + uniqueID()
+    setUniqueId(idid);
+    setFieldId(idid);
+  }, [isAddFarm])
 
 
   function GetIndObj(object, id, key) {
@@ -152,12 +179,24 @@ export const Calculator = ({ navigation }) => {
   }
 
   useEffect(() => {
-    if (users) {
-      const indUser = GetIndObj(users, user.uid, 'id')
-      setMunicipality(indUser[0].mun)
-      setBrgyCode(indUser[0].brgy)
-    }
+    if (!users) return
+    const io = GetIndObj(users, user.uid, 'id')
+    setIndUser(io[0])
+    console.log("indUser", io[0])
   }, [users])
+
+
+  useEffect(() => {
+    if (!isAddFarm) return
+    
+    setMunicipality(indUser.mun)
+    setBrgyCode(indUser.brgy)
+    setFarmName('')
+    setFirstname('')
+    setLastname('')
+    setSex('Male')
+
+  }, [isAddFarm])
 
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
@@ -241,18 +280,20 @@ export const Calculator = ({ navigation }) => {
   // important function
   const saveInputs = async () => {
     try {
-      const newAccount = {
+      const newAccount = await addDoc(farmerColl, {
         firstname,
         lastname,
         sex,
         farmName,
+      })
+      await updateDoc(newAccount, { id: newAccount.id })
+      await setDoc(doc(dataColl, fieldId), {
         fieldId,
-      }
-      // const exist = users.some(user => _.isEqual(user, newAccount));
-      // if (exist) {
-      // }
-
-      await setDoc(doc(farmerColl, fieldId), newAccount)
+        farmName,
+        farmerId: newAccount.id,
+        mun: municipality,
+        brgy: brgyCode
+      })
 
       const newFarm = await addDoc(farmsColl, {
         area: area.toFixed(2),
@@ -268,6 +309,7 @@ export const Calculator = ({ navigation }) => {
         farmerName: firstname + ' ' + lastname,
         sex: sex,
         fieldId: fieldId,
+        farmerId: newAccount.id,
       })
 
       const farmComp = collection(db, `farms/${newFarm.id}/components`);
@@ -437,6 +479,7 @@ export const Calculator = ({ navigation }) => {
 
   const getLocationAsync = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
+
     if (status !== 'granted') {
       Alert.alert('Permission to access location was denied');
       return;
@@ -494,14 +537,6 @@ export const Calculator = ({ navigation }) => {
     setTable(true);
     setCalculating(false);
   };
-  const data = [
-    { label: 'Male', value: 'Male' },
-    { label: 'Female', value: 'Female' },
-  ];
-
-  const toggleSwitch = (switchValue) => {
-    setSex(switchValue === sex ? null : switchValue);
-  };
 
   function handleNext() {
     if (!firstname) {
@@ -534,6 +569,47 @@ export const Calculator = ({ navigation }) => {
       setImages(updatedImages);
     }
   };
+
+  const fieldIdChange = (e) => {
+    // Index: 0
+    // Area: 1.00
+    // Barangay: Iraya Sur
+    // Barangay UID: oYKtMJrkXkdxy3EQERUSBFRh6WO2
+    // Crop Stage: Complete
+    // Farmer Name: Arnina Baisa
+    // Field ID: Baisa - 6382
+    // Geopoint: Latitude: 14.1098492, Longitude: 14.1098492
+    // Harvest Date: July 18, 2024(UTC)
+    // ID: 0ScZaSJMaW4v680w28pj
+    // Municipality: San Vicente
+    // Plant Number: 30000
+    // Sex: Female
+    // Start Date: January 17, 2023(UTC)
+    // Title: Baisa QP Farm
+
+    // fieldId,
+    // farmName,
+    // farmerId: newAccount.id
+
+    // firstname,
+    // lastname,
+    // sex,
+    // farmName,
+
+    // if (!farmerData) return
+
+    const f = farmerData?.find(fd => fd.id === e.farmerId)
+    console.log('eee', e)
+    if (f) {
+      setFieldId(e.fieldId)
+      setFarmName(f['farmName'])
+      setFirstname(f['firstname'])
+      setLastname(f['lastname'])
+      setSex(f['sex'])
+      setMunicipality(e.mun)
+      setBrgyCode(e.brgy)
+    }
+  }
 
   return (
     <>
@@ -589,6 +665,136 @@ export const Calculator = ({ navigation }) => {
               </> :
 
               <>
+                {/* Farm Location */}
+                <View style={styles.section}>
+                  <Text style={styles.header}>FARM INFORMATION</Text>
+                  <View style={styles.subsection}>
+                    <View style={{ flexDirection: 'row', gap: 1 }}>
+                      <Text style={styles.supText}>Field ID</Text>
+                      <Text style={{ color: 'red' }}>*</Text>
+                    </View>
+                    {
+                      isAddFarm ?
+                        <>
+                          <TextInput
+                            editable={false}
+                            maxLength={40}
+                            onChangeText={(text) => {
+                              setFieldId(text);
+                              if (text.trim() === '') {
+                                setFieldIdError('This is a required field');
+                              } else {
+                                setFieldIdError('');
+                              }
+                            }}
+                            placeholder='Field ID'
+                            value={fieldId}
+                            style={fieldidFocus ? styles.textInputFocus : styles.textInput}
+                            onFocus={() => setFieldidFocus(true)}
+                            onBlur={() => setFieldidFocus(false)}
+                          />
+                          {fieldIdError ? <Text style={{ color: 'red', fontSize: 12 }}>{fieldIdError}</Text> : null}
+                        </>
+                        :
+                        <Dropdown
+                          search
+                          data={dataFarms && indUser ? dataFarms.filter(df => df.mun === indUser.mun && df.brgy === indUser.brgy) : []}
+                          labelField='fieldId'
+                          valueField='fieldId'
+                          onChange={fieldIdChange}
+                          placeholder={!fieldidFocus ? 'Select Farm Field ID' : '...'}
+                          searchPlaceholder="Search..."
+                          value={fieldId}
+                          style={fieldidFocus ? styles.textInputFocus : styles.textInput}
+                          onFocus={() => setFieldidFocus(true)}
+                          onBlur={() => setFieldidFocus(false)}
+                        />
+                    }
+                  </View>
+                  <View style={styles.subsection}>
+                    <View style={{ flexDirection: 'row', gap: 1 }}>
+                      <Text style={styles.supText}>Farm Name</Text>
+                      <Text style={{ color: 'red' }}>*</Text>
+                    </View>
+                    <TextInput
+                      editable={isAddFarm}
+                      maxLength={40}
+                      onChangeText={(text) => {
+                        setFarmName(text);
+                        if (text.trim() === '') {
+                          setFarmnameError('This is a required field');
+                        } else {
+                          setFarmnameError('');
+                        }
+                      }}
+                      placeholder='Enter Farm Name'
+                      value={farmName}
+                      style={farmnameFocus ? styles.textInputFocus : styles.textInput}
+                      onFocus={() => setFarmnameFocus(true)}
+                      onBlur={() => setFarmnameFocus(false)}
+                      require
+                    />
+                    {farmnameError ? <Text style={{ color: 'red', fontSize: 12 }}>{farmnameError}</Text> : null}
+                  </View>
+                  <View style={styles.subsection}>
+                    <View style={{ flexDirection: 'row', gap: 1 }}>
+                      <Text style={styles.supText}>Municipality</Text>
+                      <Text style={{ color: 'red' }}>*</Text>
+                    </View>
+                    <TextInput
+                      editable={false}
+                      maxLength={40}
+                      placeholder='Enter Farm Municipality'
+                      value={municipality}
+                      style={styles.textInput}
+                    />
+                  </View>
+                  <View style={styles.subsection}>
+                    <View style={{ flexDirection: 'row', gap: 1 }}>
+                      <Text style={styles.supText}>Barangay</Text>
+                      <Text style={{ color: 'red' }}>*</Text>
+                    </View>
+                    <TextInput
+                      maxLength={40}
+                      disabled={false}
+                      placeholder='Enter Farm Barangay'
+                      value={brgyCode}
+                      style={styles.textInput}
+                    />
+                  </View>
+                  {/* <View style={styles.subsection}>
+                    <View style={{ flexDirection: 'row', gap: 1 }}>
+                      <Text style={styles.supText}>Location</Text>
+                      <Text style={{ color: 'red' }}>*</Text>
+                    </View>
+                    <View style={styles.container1}>
+                      <MapView style={styles.map} region={region} onPress={handleMapPress}>
+                        {userLocation && (
+                          <Marker
+                            coordinate={{
+                              latitude: userLocation.latitude,
+                              longitude: userLocation.longitude,
+                            }}
+                            title="Your Location"
+                            description="You are here!"
+                            draggable
+                            onDragEnd={(e) => setUserLocation(e.nativeEvent.coordinate)}
+                          />
+                        )}
+                      </MapView>
+                      <View>
+                        <TouchableOpacity style={{ ...styles.button, borderTopLeftRadius: 0, borderTopRightRadius: 0, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 22, paddingVertical: 8, justifyContent: 'center', gap: 12 }} onPress={() => {
+                          handleUpdateLocation()
+                        }}>
+                          <Image source={require('../assets/loc.png')} style={{}} />
+                          <Text style={{ color: '#E8E7E7', fontSize: 18 }}>Update Location</Text>
+                        </TouchableOpacity>
+                        <Button title="Update Location" onPress={handleUpdateLocation} />
+                      </View>
+                    </View>
+                  </View> */}
+                </View>
+
                 {/* Farmer Detail */}
                 <View style={styles.section}>
                   <Text style={styles.header}>FARMER INFORMATION</Text>
@@ -598,7 +804,7 @@ export const Calculator = ({ navigation }) => {
                       <Text style={{ color: 'red' }}>*</Text>
                     </View>
                     <TextInput
-                      editable
+                      editable={isAddFarm}
                       maxLength={40}
                       onChangeText={(text) => {
                         setFirstname(text);
@@ -622,7 +828,7 @@ export const Calculator = ({ navigation }) => {
                       <Text style={{ color: 'red' }}>*</Text>
                     </View>
                     <TextInput
-                      editable
+                      editable={isAddFarm}
                       maxLength={40}
                       onChangeText={(text) => {
                         setLastname(text);
@@ -682,117 +888,6 @@ export const Calculator = ({ navigation }) => {
                       </View>
                     </View>
                   </View>
-                </View>
-
-                {/* Farm Location */}
-                <View style={styles.section}>
-                  <Text style={styles.header}>FARM INFORMATION</Text>
-                  <View style={styles.subsection}>
-                    <View style={{ flexDirection: 'row', gap: 1 }}>
-                      <Text style={styles.supText}>Farm Name</Text>
-                      <Text style={{ color: 'red' }}>*</Text>
-                    </View>
-                    <TextInput
-                      editable
-                      maxLength={40}
-                      onChangeText={(text) => {
-                        setFarmName(text);
-                        if (text.trim() === '') {
-                          setFarmnameError('This is a required field');
-                        } else {
-                          setFarmnameError('');
-                        }
-                      }}
-                      placeholder='Enter Farm Name'
-                      value={farmName}
-                      style={farmnameFocus ? styles.textInputFocus : styles.textInput}
-                      onFocus={() => setFarmnameFocus(true)}
-                      onBlur={() => setFarmnameFocus(false)}
-                      require
-                    />
-                    {farmnameError ? <Text style={{ color: 'red', fontSize: 12 }}>{farmnameError}</Text> : null}
-                  </View>
-                  <View style={styles.subsection}>
-                    <View style={{ flexDirection: 'row', gap: 1 }}>
-                      <Text style={styles.supText}>Field ID</Text>
-                      <Text style={{ color: 'red' }}>*</Text>
-                    </View>
-                    <TextInput
-                      editable
-                      maxLength={40}
-                      onChangeText={(text) => {
-                        setFieldId(text);
-                        if (text.trim() === '') {
-                          setFieldIdError('This is a required field');
-                        } else {
-                          setFieldIdError('');
-                        }
-                      }}
-                      placeholder='Enter Field ID'
-                      value={fieldId}
-                      style={fieldidFocus ? styles.textInputFocus : styles.textInput}
-                      onFocus={() => setFieldidFocus(true)}
-                      onBlur={() => setFieldidFocus(false)}
-                    />
-                    {fieldIdError ? <Text style={{ color: 'red', fontSize: 12 }}>{fieldIdError}</Text> : null}
-                  </View>
-                  <View style={styles.subsection}>
-                    <View style={{ flexDirection: 'row', gap: 1 }}>
-                      <Text style={styles.supText}>Municipality</Text>
-                      <Text style={{ color: 'red' }}>*</Text>
-                    </View>
-                    <TextInput
-                      editable={false}
-                      maxLength={40}
-                      placeholder='Enter Farm Municipality'
-                      value={municipality}
-                      style={styles.textInput}
-                    />
-                  </View>
-                  <View style={styles.subsection}>
-                    <View style={{ flexDirection: 'row', gap: 1 }}>
-                      <Text style={styles.supText}>Barangay</Text>
-                      <Text style={{ color: 'red' }}>*</Text>
-                    </View>
-                    <TextInput
-                      maxLength={40}
-                      disabled={false}
-                      placeholder='Enter Farm Barangay'
-                      value={brgyCode}
-                      style={styles.textInput}
-                    />
-                  </View>
-                  {/* <View style={styles.subsection}>
-                    <View style={{ flexDirection: 'row', gap: 1 }}>
-                      <Text style={styles.supText}>Location</Text>
-                      <Text style={{ color: 'red' }}>*</Text>
-                    </View>
-                    <View style={styles.container1}>
-                      <MapView style={styles.map} region={region} onPress={handleMapPress}>
-                        {userLocation && (
-                          <Marker
-                            coordinate={{
-                              latitude: userLocation.latitude,
-                              longitude: userLocation.longitude,
-                            }}
-                            title="Your Location"
-                            description="You are here!"
-                            draggable
-                            onDragEnd={(e) => setUserLocation(e.nativeEvent.coordinate)}
-                          />
-                        )}
-                      </MapView>
-                      <View>
-                        <TouchableOpacity style={{ ...styles.button, borderTopLeftRadius: 0, borderTopRightRadius: 0, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 22, paddingVertical: 8, justifyContent: 'center', gap: 12 }} onPress={() => {
-                          handleUpdateLocation()
-                        }}>
-                          <Image source={require('../assets/loc.png')} style={{}} />
-                          <Text style={{ color: '#E8E7E7', fontSize: 18 }}>Update Location</Text>
-                        </TouchableOpacity>
-                        <Button title="Update Location" onPress={handleUpdateLocation} />
-                      </View>
-                    </View>
-                  </View> */}
                 </View>
 
                 {/* farm details */}
@@ -916,7 +1011,7 @@ export const Calculator = ({ navigation }) => {
       </Modal>
       <Modal animationType='fade' visible={saving} transparent={true}>
         <View style={styles.addImage}>
-          <View style={{...styles.modalContainer, paddingHorizontal: 42}}>
+          <View style={{ ...styles.modalContainer, paddingHorizontal: 42 }}>
             <ActivityIndicator size='large' />
           </View>
         </View>
