@@ -11,7 +11,7 @@ import {
 import { db } from '../firebase/Config';
 import { AddDataRow } from './AddDataRow';
 
-export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => {
+export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setComponents }) => {
   const [comps, setComps] = useState(components)
   const [laborTotal, setLaborTotal] = useState(0)
   const [materialTotal, setMaterialTotal] = useState(0)
@@ -83,6 +83,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
       butterPrice
     };
 
+    setComponents(comps)
     setRoiDetails(roiDetails);
   }, [laborTotal, materialTotal, costTotal, grossReturn, butterBall, netReturn, roi, pineapple]);
 
@@ -98,7 +99,25 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
     })
   }
 
-  const TableData = ({ compId, name, qnty, unit, price, totalPrice }) => {
+  const TableData = ({ component, editable }) => {
+    const [name, setName] = useState(component.name)
+    const [qntyPrice, setQntyPrice] = useState(component.qntyPrice)
+    const [unit, setUnit] = useState(component.unit)
+    const [price, setPrice] = useState(component.price)
+    const [totalPrice, setTotalPrice] = useState(component.totalPrice)
+
+    const handleEnter = () => {
+      setComps((prev) =>
+        prev.map((c) =>
+          c.id === component.id ? { ...c, qntyPrice: qntyPrice, totalPrice: qntyPrice * price } : c
+        ))
+    }
+
+    const handleEdit = (e) => {
+      const v = e || 0
+      setQntyPrice(v)
+      setTotalPrice(v * price)
+    }
     return (
       <View style={styles.tableData}>
         <View style={{ ...styles.tableHeadLabel3, alignItems: 'flex-start' }}>
@@ -106,17 +125,14 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
         </View>
         <View style={{ ...styles.tableHeadLabel3, alignItems: 'center' }}>
           <TextInput
-            editable
-            type='number'
-            onChangeText={(e) => {
-              if (!compId) return
-              setTrial(e)
-              
-              
-            }}
-            placeholder={qnty.toString()}
-            value={qnty.toString()}
-            style={styles.textInput}
+            editable={editable}
+            keyboardType='numeric'
+            maxLength={3}
+            onChangeText={handleEdit}
+            onSubmitEditing={handleEnter}
+            placeholder={component ? qntyPrice.toString() : ""}
+            value={qntyPrice}
+            style={editable ? { ...styles.textInput, borderColor: 'orange', borderWidth: 1 } : styles.textInput}
           />
           {/* <Text>{qnty.toLocaleString()}</Text> */}
         </View>
@@ -165,20 +181,32 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
 
           {/* Body */}
           <View style={{ ...styles.tableHead }}>
-            <Text styles={{ fontWeight: 'bold' }}>Materials Inputs:</Text>
+            <Text styles={{ fontWeight: 900, fontSize: '32px' }}>Materials Inputs:</Text>
+          </View>
+          <View style={{ ...styles.tableHead }}>
+            <Text styles={{ fontWeight: 'bold' }}>Fertilizers</Text>
           </View>
           {
-            comps.map((component) => {
-              if (component.particular.toLowerCase() === 'material') {
+            comps?.map((comp) => {
+              if (comp.parent.toLowerCase() === 'fertilizer') {
                 return (
                   <TableData
-                    key={component.id}
-                    compId={component.id}
-                    name={component.name}
-                    qnty={component.qntyPrice}
-                    unit={component.unit}
-                    price={component.price}
-                    totalPrice={component.totalPrice}
+                    key={comp.id}
+                    component={comp}
+                    editable={true}
+                  />
+                )
+              }
+            })
+          }
+          {
+            comps?.map((comp) => {
+              if (comp.particular.toLowerCase() === 'material' && comp.parent.toLowerCase() !== 'fertilizer') {
+                return (
+                  <TableData
+                    key={comp.id}
+                    component={comp}
+                    editable={false}
                   />
                 )
               }
@@ -198,17 +226,13 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
             <Text styles={{ fontWeight: 'bold' }}>Labor Inputs:</Text>
           </View>
           {
-            comps.map((component) => {
-              if (component.particular.toLowerCase() === 'labor') {
+            comps?.map((comp) => {
+              if (comp.particular.toLowerCase() === 'labor') {
                 return (
                   <TableData
-                    key={component.id}
-                    compId={component.id}
-                    name={component.name}
-                    qnty={component.qntyPrice}
-                    unit={component.unit}
-                    price={component.price}
-                    totalPrice={component.totalPrice}
+                    key={comp.id}
+                    component={comp}
+                    editable={false}
                   />
                 )
               }
@@ -235,18 +259,24 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple }) => 
             </View>
           </View>
           <TableData
-            name={'Gross Return'}
-            qnty={grossReturn}
-            unit={'pcs'}
-            price={pinePrice}
-            totalPrice={grossReturn * pinePrice}
+            component={{
+              name: 'Gross Return',
+              qntyPrice: grossReturn,
+              unit: 'pcs',
+              price: pinePrice,
+              totalPrice: grossReturn * pinePrice
+            }}
+            editable={false}
           />
           <TableData
-            name={'Good Butterball'}
-            qnty={butterBall}
-            unit={'pcs'}
-            price={butterPrice}
-            totalPrice={butterBall * butterPrice}
+            component={{
+              name: 'Good Butterball',
+              qntyPrice: butterBall,
+              unit: 'pcs',
+              price: butterPrice,
+              totalPrice: butterBall * butterPrice
+            }}
+            editable={false}
           />
           <View style={styles.tableHead}>
             <View style={{ flex: 4 }}>

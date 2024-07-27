@@ -188,7 +188,7 @@ export const Calculator = ({ navigation }) => {
 
   useEffect(() => {
     if (!isAddFarm) return
-    
+
     setMunicipality(indUser.mun)
     setBrgyCode(indUser.brgy)
     setFarmName('')
@@ -435,7 +435,7 @@ export const Calculator = ({ navigation }) => {
       confirmSave()
     }
 
-    const confirmSave = () =>
+    const confirmSave = () => {
       Alert.alert(`Confirm`, `Do you want to save ${farmName}?`, [
         {
           text: 'Cancel',
@@ -450,6 +450,7 @@ export const Calculator = ({ navigation }) => {
           }
         },
       ]);
+    }
 
     return (
       <>
@@ -599,7 +600,6 @@ export const Calculator = ({ navigation }) => {
     // if (!farmerData) return
 
     const f = farmerData?.find(fd => fd.id === e.farmerId)
-    console.log('eee', e)
     if (f) {
       setFieldId(e.fieldId)
       setFarmName(f['farmName'])
@@ -653,13 +653,13 @@ export const Calculator = ({ navigation }) => {
 
                       }
                     </View>
-                    {table && qPine && <TableBuilder components={components} area={area} setRoiDetails={setRoiDetails} pineapple={qPine} />}
+                    {table && qPine && <TableBuilder components={components} area={area} setRoiDetails={setRoiDetails} pineapple={qPine} setComponents={setComponents} />}
                   </View>
 
                 </View>
                 <View style={{ ...styles.section, marginBottom: 32, paddingTop: 14 }}>
                   <View style={{ ...styles.buttonContainer }}>
-                    <BottomButton />
+                    {calculating && <BottomButton />}
                   </View>
                 </View>
               </> :

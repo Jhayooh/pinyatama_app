@@ -18,6 +18,7 @@ const Edit = ({ route, navigation }) => {
     const { farm = {}, compData = {} } = route.params
 
     farm && console.log("farm sa edit", farm)
+    const [comp, setComp] = useState(compData)
     const [roiDetails, setRoiDetails] = useState({})
     const quertyPine = collection(db, 'pineapple');
     const [qPine, lPine, ePine] = useCollectionData(quertyPine)
@@ -72,7 +73,7 @@ const Edit = ({ route, navigation }) => {
                     >
                         {() => (
                             <ScrollView>
-                                {qPine && <TableBuilder components={compData} area={farm.area} setRoiDetails={setRoiDetails} pineapple={qPine} />}
+                                {qPine && <TableBuilder components={comp} area={farm.area} setRoiDetails={setRoiDetails} pineapple={qPine} setComponents={setComp}/>}
                             </ScrollView>
                         )}
                     </Tab.Screen>
