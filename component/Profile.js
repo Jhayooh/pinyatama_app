@@ -26,19 +26,16 @@ export default function Profile({ route, navigation }) {
                             <TextInput
                                 editable
                                 placeholder={farm.title}
-                                style={styles.textInput}
-
-
+                                style={{...styles.textInput, borderColor:'green'}}
                             />
                         </View>
-
                         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                             <View style={{ flex: 1, flexDirection: 'column', marginRight: 5, marginBottom: 20 }}>
                                 <Text style={styles.supText}>Pangalan ng Magsasaka</Text>
                                 <TextInput
                                     editable
                                     placeholder={farm.farmerName}
-                                    style={{ ...styles.textInput, }}
+                                    style={{...styles.textInput, borderColor:'green'}}
                                 />
                             </View>
                             <View style={{ flex: 1, flexDirection: 'column', marginLeft: 5, marginBottom: 20 }}>
@@ -46,7 +43,7 @@ export default function Profile({ route, navigation }) {
                                 <TextInput
                                     editable
                                     placeholder={farm.sex}
-                                    style={{ ...styles.textInput, width: '100%' }}
+                                    style={{ ...styles.textInput, width: '100%', borderColor:'green' }}
                                 />
                             </View>
                         </View>
@@ -56,7 +53,7 @@ export default function Profile({ route, navigation }) {
                                 <TextInput
                                     editable
                                     placeholder={farm.brgy}
-                                    style={{ ...styles.textInput, width: '100%' }}
+                                    style={{ ...styles.textInput, width: '100%', borderColor:'green' }}
                                 />
                             </View>
                             <View style={{ flex: 1, flexDirection: 'column', marginLeft: 5, marginBottom: 20 }}>
@@ -64,25 +61,43 @@ export default function Profile({ route, navigation }) {
                                 <TextInput
                                     editable
                                     placeholder={farm.mun}
-                                    style={{ ...styles.textInput, width: '100%' }}
+                                    style={{ ...styles.textInput, width: '100%', borderColor:'green' }}
                                 />
                             </View>
                         </View>
                         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                            <View style={{ flex: 1, flexDirection: 'column', marginRight: 5 }}>
+                            <View style={{ flex: 1, flexDirection: 'column', marginRight: 5, marginBottom: 20  }}>
                                 <Text style={styles.supText}>Bilang ng Tanim</Text>
                                 <TextInput
                                     editable
                                     placeholder={farm.plantNumber}
-                                    style={{ ...styles.textInput, width: '100%' }}
+                                    style={{ ...styles.textInput, width: '100%' , borderColor:'green'}}
                                 />
                             </View>
-                            <View style={{ flex: 1, flexDirection: 'column', marginLeft: 5 }}>
+                            <View style={{ flex: 1, flexDirection: 'column', marginLeft: 5, marginBottom: 20  }}>
                                 <Text style={styles.supText}>Land Area</Text>
                                 <TextInput
                                     editable
                                     placeholder={farm.area}
-                                    style={{ ...styles.textInput, width: '100%' }}
+                                    style={{ ...styles.textInput, width: '100%', borderColor:'green' }}
+                                />
+                            </View>
+                        </View>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <View style={{ flex: 1, flexDirection: 'column', marginRight: 5, marginBottom: 20 }}>
+                                <Text style={styles.supText}>Klase ng Lupa</Text>
+                                <TextInput
+                                    editable
+                                    placeholder={farm.soil}
+                                    style={{ ...styles.textInput, borderColor:'green' }}
+                                />
+                            </View>
+                            <View style={{ flex: 1, flexDirection: 'column', marginLeft: 5, marginBottom: 20 }}>
+                                <Text style={styles.supText}>NPK</Text>
+                                <TextInput
+                                    editable
+                                    placeholder={farm.sex}
+                                    style={{ ...styles.textInput, width: '100%', borderColor:'green' }}
                                 />
                             </View>
                         </View>

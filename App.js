@@ -16,6 +16,7 @@ import Register from './component/Register';
 import Video from './component/Video';
 import Edit from './component/Edit'
 import { Button } from 'native-base';
+import YieldPredictor from './component/YieldPredictor'
 
 const Stack = createNativeStackNavigator();
 
@@ -104,6 +105,19 @@ const App = () => (
             />
 
             <Stack.Screen
+                name='Yield'
+                component={YieldPredictor}
+                options={{
+                    title: 'Tungkol sa QP Farming',
+                    headerTintColor: '#E8E7E7',
+                    headerBackTitleVisible: false,
+                    headerStyle: {
+                        backgroundColor: '#4DAF50',
+                    }
+                }}
+            />
+
+            <Stack.Screen
                 name='Register'
                 component={Register}
                 options={{
@@ -115,7 +129,7 @@ const App = () => (
                     }
                 }}
             />
-           
+
 
             <Stack.Screen name='Charts' component={Charts} />
             <Stack.Screen name='DataInputs' component={DataInputs} />

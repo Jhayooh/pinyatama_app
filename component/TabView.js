@@ -2,24 +2,25 @@ import React from 'react';
 import {
   ActivityIndicator,
   Image,
-  ImageBackground,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
+  Dimensions
 } from 'react-native';
 
+const windowWidth = Dimensions.get('window').width;
 
 const Card = ({ imageSource, title, description, startDate, endDate, onPress }) => {
   return (
     <TouchableOpacity onPress={onPress} style={styles.card}>
-      <Image source={{uri: imageSource}} style={styles.cardImage} />
+      <Image source={imageSource} style={styles.cardImage} />
       <View style={styles.cardContent}>
         <Text style={styles.cardTitle}>{title}</Text>
         <Text style={styles.cardDescription}>{description}</Text>
-        <Text style={styles.cardDate}> Date of Planting: {startDate}  </Text>
-        <Text style={styles.cardDate}> Date of Harvest: {endDate}  </Text>
+        <Text style={styles.cardDate}>Date of Planting: {startDate}</Text>
+        <Text style={styles.cardDate}>Date of Harvest: {endDate}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -27,48 +28,51 @@ const Card = ({ imageSource, title, description, startDate, endDate, onPress }) 
 
 const TabView = ({ route, navigation }) => {
   const { farms = [], imageUrls = {} } = route.params;
-  const farm = farms[0]
 
   const handleCardPress = (farm) => {
-    navigation.navigate("ProductionInput", { farms: [farm] })
+    navigation.navigate("ProductionInput", { farms: [farm] });
   };
 
   function dateFormatter(date) {
-    const d = new Date(date.toMillis())
-    return d.toLocaleDateString()
+    const d = new Date(date.toMillis());
+    return d.toLocaleDateString();
   }
 
   return (
     <>
-      {
-        farms.length === 0 && Object.keys(imageUrls).length != 0
-          ?
-          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-            <ActivityIndicator />
+      {farms.length === 0 && Object.keys(imageUrls).length !== 0 ? (
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator size="large" color="#4DAF50" />
+        </View>
+      ) : (
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <View style={styles.container}>
+            {farms.map((farm) => (
+              <Card
+                key={farm.id}
+                title={farm.title}
+                description={`${farm.brgy}, ${farm.mun}`}
+                startDate={dateFormatter(farm.start_date)}
+                endDate={dateFormatter(farm.harvest_date)}
+                imageSource={imageUrls[farm.id] ? { uri: imageUrls[farm.id] } : require('../assets/p.jpg')}
+                onPress={() => handleCardPress(farm)}
+              />
+            ))}
           </View>
-          :
-          <ScrollView showsVerticalScrollIndicator={false}>
-            <View style={styles.container}>
-              {farms.map((farm) => (
-                <Card
-                  key={farm.id}
-                  title={farm.title}
-                  description={` ${farm.brgy}, ${farm.mun} `}
-                  startDate={dateFormatter(farm.start_date)}
-                  endDate={dateFormatter(farm.harvest_date)}
-                  imageSource={imageUrls[farm.id]}
-                  onPress={() => { handleCardPress(farm) }}
-                />
-              ))}
-            </View>
-          </ScrollView>
-      }
+        </ScrollView>
+      )}
     </>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 10,
+  },
+  loaderContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
@@ -91,33 +95,30 @@ const styles = StyleSheet.create({
     borderColor: 'green',
   },
   cardImage: {
-    width: 350,
+    width: '100%',
     height: 120,
     borderRadius: 5,
     marginBottom: 10,
+    resizeMode: 'cover',
+  },
+  cardContent: {
+    flex: 1,
+    alignItems: 'flex-start',
   },
   cardTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
-    color: 'green'
+    color: 'green',
   },
   cardDescription: {
     fontSize: 16,
     lineHeight: 18,
-    alignItems: 'flex-start'
+    marginBottom: 10,
   },
-
   cardDate: {
-    mt: 3,
-    fontSize: 10,
+    fontSize: 12,
     lineHeight: 20,
-    alignItems: 'flex-start',
-    marginLeft:5
-  },
-  backgroundImage: {
-    flex: 1,
-    resizeMode: 'cover',
   },
 });
 
