@@ -659,7 +659,7 @@ export const Calculator = ({ navigation }) => {
                 </View>
                 <View style={{ ...styles.section, marginBottom: 32, paddingTop: 14 }}>
                   <View style={{ ...styles.buttonContainer }}>
-                    {calculating && <BottomButton />}
+                    {table && <BottomButton />}
                   </View>
                 </View>
               </> :
