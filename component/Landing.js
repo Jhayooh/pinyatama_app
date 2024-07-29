@@ -449,13 +449,16 @@ const styles = StyleSheet.create({
         height: 128,
         padding: 12,
         position: 'absolute',
-        top: -64
+        top: -64,
+        resizeMode:'contain'
     },
     appTitle: {
-        fontSize: 48,
+        fontSize: windowWidth * 0.1,
         color: '#fff',
         fontWeight: '600',
-        textAlign: 'center'
+        textAlign: 'center',
+        fontFamily:'serif',
+        padding:5
     },
     btnContainer: {
         flex: 1,
@@ -472,8 +475,8 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection: 'row',
         justifyContent: 'space-evenly',
-        // backgroundColor: 'blue',
-        gap: 12
+        gap: 12,
+        marginBottom: 10,
     },
     btnbtn: {
         flex: 1,
@@ -518,10 +521,11 @@ const styles = StyleSheet.create({
     },
     btnImage: {
         width: 64,
-        height: 64
+        height: 64,
+        resizeMode:'contain'
     },
     buttonText: {
-        fontSize: 18,
+        fontSize: windowWidth * 0.04,
         textAlign: 'center',
         fontFamily: 'serif',
         fontStyle: 'italic',
@@ -721,3 +725,6 @@ const registerStyle = StyleSheet.create({
         flexDirection: 'row'
     },
 })
+
+
+

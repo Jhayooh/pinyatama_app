@@ -476,7 +476,7 @@ export default function Register({ navigation }) {
 
                             </Box>
                         </ProgressStep>
-                        <ProgressStep
+                        <ProgressStep style={{flexDirection:'row', display:'flex', justifyContent:'space-between'}}
                             label="Location"
                             onNext={onSecondStep}
                             onPrevious={onPreviousStep}
