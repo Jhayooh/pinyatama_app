@@ -35,7 +35,8 @@ import { TableBuilder } from './TableBuilder';
 
 
 const soilType = [
-  { label: 'Sandy Loam', value: 'Sandy Loam' },
+  { label: 'Sandy', value: 'Sandy' }, 
+   { label: 'Loam', value: 'Loam' },
   { label: 'Clay', value: 'Clay' },
 ]
 
