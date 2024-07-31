@@ -345,10 +345,10 @@ export const Calculator = ({ navigation }) => {
       const vegetativeDate = new Date(Date.parse(startDate));
 
       const floweringDate = new Date(vegetativeDate);
-      floweringDate.setMonth(vegetativeDate.getMonth() + 10);
+      floweringDate.setMonth(vegetativeDate.getMonth() + 9);
 
       const fruitingDate = new Date(floweringDate);
-      fruitingDate.setMonth(floweringDate.getMonth() + 3);
+      fruitingDate.setMonth(floweringDate.getMonth() + 1);
 
       const harvestDate = new Date(fruitingDate);
       harvestDate.setMonth(fruitingDate.getMonth() + 5);
@@ -773,7 +773,7 @@ export const Calculator = ({ navigation }) => {
                       editable={isAddFarm}
                       maxLength={40}
                       onChangeText={(text) => {
-                        setFarmName(text);
+                        setFarmName(text);  
                         if (text.trim() === '') {
                           setFarmnameError('This is a required field');
                         } else {
