@@ -36,9 +36,9 @@ import { TableBuilder } from './TableBuilder';
 
 
 const soilType = [
-  { label: 'Sandy', value: 'Sandy' },
   { label: 'Loam', value: 'Loam' },
   { label: 'Clay', value: 'Clay' },
+  { label: 'Sandy', value: 'Sandy' }
 ]
 
 const npkType = [
@@ -996,7 +996,6 @@ export const Calculator = ({ navigation }) => {
                       editable={isAddFarm}
                       maxLength={40}
                       onChangeText={(text) => {
-                        setFarmName(text);
                         setFarmName(text);
                         if (text.trim() === '') {
                           setFarmnameError('This is a required field');
