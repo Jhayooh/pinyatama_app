@@ -35,10 +35,31 @@ import { TableBuilder } from './TableBuilder';
 
 
 const soilType = [
-  { label: 'Sandy', value: 'Sandy' }, 
-   { label: 'Loam', value: 'Loam' },
+  { label: 'Sandy', value: 'Sandy' },
+  { label: 'Loam', value: 'Loam' },
   { label: 'Clay', value: 'Clay' },
 ]
+
+const npkType = [
+  { label: 'HHS', value: 'HHS' }, //40 20 45
+  { label: 'HMS', value: 'HMS' }, //40 40 45
+  { label: 'HLS', value: 'HLS' }, //40 60 45
+  { label: 'HHD', value: 'HHD' }, //40 20 225
+  { label: 'HMD', value: 'HMD' }, //40 40 225
+  { label: 'HLD', value: 'HLD' }, //40 60 225
+  { label: 'MMS', value: 'MMS' }, //100 20 45
+  { label: 'MLS', value: 'MLS' }, //100 40 45
+  { label: 'MHD', value: 'MHD' }, //100 60 45
+  { label: 'MMD', value: 'MMD' }, //100 20 45
+  { label: 'MLD', value: 'MLD' }, //100 40 225
+  { label: 'LHS', value: 'LHS' }, //100 60 225
+  { label: 'LMS', value: 'LMS' }, //150 20 45
+  { label: 'LLS', value: 'LLS' }, //150 40 45
+  { label: 'LHD', value: 'LHD' }, //150 20 225
+  { label: 'LMD', value: 'LMD' }, //150 40 225
+  { label: 'LLD', value: 'LLD' }, //150 60 225
+]
+
 
 export const Calculator = ({ navigation }) => {
   const [user] = useAuthState(auth)
@@ -648,14 +669,15 @@ export const Calculator = ({ navigation }) => {
                 <View style={{ ...styles.section, marginHorizontal: table ? 0 : 14, paddingHorizontal: 8 }}>
                   <Text style={styles.header}>CALCULATE</Text>
                   <View style={styles.subsection}>
-                    <Text style={styles.supText}>Nitrogen Phosporus Potassium</Text>
+                    <Text style={styles.supText}>NPK</Text>
                     <View style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
-                      <TextInput
-                        editable
-                        placeholder='Enter NPK '
-                        keyboardType='numeric'
+                      <Dropdown
+                        data={npkType}
+                        labelField='label'
+                        valueField='value'
+                        placeholder='Select NPK'
                         value={npk}
-                    
+                        onChange={item => {setNpk(item.value) }}
                         style={{ ...styles.textInput, borderBottomRightRadius: 0, borderTopRightRadius: 0 }}
                       />
                     </View>
@@ -711,7 +733,7 @@ export const Calculator = ({ navigation }) => {
                   </View>
 
                 </View>
-                <View style={{margin:5}} >
+                <View style={{ margin: 5 }} >
                   <View style={{ ...styles.buttonContainer }}>
                     {table && <BottomButton />}
                   </View>
@@ -774,7 +796,7 @@ export const Calculator = ({ navigation }) => {
                       editable={isAddFarm}
                       maxLength={40}
                       onChangeText={(text) => {
-                        setFarmName(text);  
+                        setFarmName(text);
                         if (text.trim() === '') {
                           setFarmnameError('This is a required field');
                         } else {
@@ -1001,19 +1023,19 @@ export const Calculator = ({ navigation }) => {
 
                       }
                     </View>
-                    <View style={{ display:'flex', flexDirection: 'row', justifyContent:'space-between' }}>
+                    <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
                       <TouchableOpacity
-                        style={{ ...styles.button, borderTopLeftRadius: 0, borderTopRightRadius: 0, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 22, paddingVertical: 8, justifyContent: 'center', gap:10 }} onPress={() => {
+                        style={{ ...styles.button, borderTopLeftRadius: 0, borderTopRightRadius: 0, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 22, paddingVertical: 8, justifyContent: 'center', gap: 10 }} onPress={() => {
                           setShowAddImage(true)
                         }}>
-                        <Image source={require('../assets/up.png')} style={{resizeMode:'contain'}} />
+                        <Image source={require('../assets/up.png')} style={{ resizeMode: 'contain' }} />
                         <Text style={{ color: '#E8E7E7', fontSize: 18, }}>Add Image</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
-                        style={{ ...styles.button, borderTopLeftRadius: 0, borderTopRightRadius: 0, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 22, paddingVertical: 8, justifyContent: 'center',gap:10 }}
+                        style={{ ...styles.button, borderTopLeftRadius: 0, borderTopRightRadius: 0, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 22, paddingVertical: 8, justifyContent: 'center', gap: 10 }}
                         onPress={deleteLastImage}
                       >
-                        <Image source={require('../assets/trash.png')} style={{resizeMode:'contain'}}/>
+                        <Image source={require('../assets/trash.png')} style={{ resizeMode: 'contain' }} />
                         <Text style={{ color: '#E8E7E7', fontSize: 18, }}>Delete Image</Text>
                       </TouchableOpacity>
                     </View>
@@ -1078,8 +1100,8 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: '#FAFAFA',
-    height:'100%',
-    padding:2
+    height: '100%',
+    padding: 2
     // paddingHorizontal: 14,
   },
   section: {
