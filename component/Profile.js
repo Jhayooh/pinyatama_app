@@ -96,10 +96,11 @@ export default function Profile({ route, navigation }) {
                                 <Text style={styles.supText}>NPK</Text>
                                 <TextInput
                                     editable
-                                    placeholder={farm.sex}
+                                    placeholder={farm.npk}
                                     style={{ ...styles.textInput, width: '100%', borderColor:'green' }}
                                 />
                             </View>
+                          
                         </View>
                     </View>
                 </View>
