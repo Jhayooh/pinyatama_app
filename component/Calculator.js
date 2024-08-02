@@ -25,6 +25,7 @@ import {
 import { RadioButton } from 'react-native-paper';
 import { HeaderBackButton } from '@react-navigation/elements'
 import _ from 'lodash'
+import { WEATHER_KEY } from '../utils/API_KEY';
 
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import MapView, { Marker } from 'react-native-maps';
@@ -155,6 +156,33 @@ export const Calculator = ({ navigation }) => {
 
   const [isAddFarm, setIsAddFarm] = useState(false)
 
+  const [weather, setWeather] = useState({
+    loading: false,
+    current: {},
+    forecast: [],
+    error: false,
+  });
+
+  const capitalize = (str, lower = false) =>
+    (lower ? str.toLowerCase() : str).replace(/(?:^|\s|["'([{])+\S/g, match => match.toUpperCase());
+
+  const toDateFunction = (timestamp) => {
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June', 'July',
+      'August', 'September', 'October', 'November', 'December',
+    ];
+    const weekDays = [
+      'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday',
+      'Friday', 'Saturday',
+    ];
+    const dateObj = timestamp ? new Date(timestamp * 1000) : new Date();
+    const dayOfWeek = weekDays[dateObj.getDay()];
+    const day = dateObj.getDate();
+    const month = months[dateObj.getMonth()];
+    const year = dateObj.getFullYear();
+    return `${dayOfWeek}, ${day} ${month} ${year}`;
+  };
+
   useEffect(() => {
     console.log("numOne")
     if (!isNext) {
@@ -184,7 +212,6 @@ export const Calculator = ({ navigation }) => {
   }, [isNext, isAddFarm])
 
   useEffect(() => {
-    console.log('numTwo');
     if (!lastname) return
     setFieldId(lastname + uniqueId)
   }, [lastname])
@@ -192,15 +219,6 @@ export const Calculator = ({ navigation }) => {
   function uniqueID() {
     return Math.floor(Math.random() * Date.now())
   }
-
-  useEffect(() => {
-    console.log('numThree');
-    if (!isAddFarm) return
-    const idid = '-FID' + uniqueID()
-    setUniqueId(idid);
-    setFieldId(idid);
-  }, [isAddFarm])
-
 
   function GetIndObj(object, id, key) {
     return object.filter((obj) => {
@@ -219,6 +237,9 @@ export const Calculator = ({ navigation }) => {
   useEffect(() => {
     if (!isAddFarm) return
 
+    const idid = '-FID' + uniqueID()
+    setUniqueId(idid);
+    setFieldId(idid);
     setMunicipality(indUser.mun)
     setBrgyCode(indUser.brgy)
     setFarmName('')
@@ -226,7 +247,91 @@ export const Calculator = ({ navigation }) => {
     setLastname('')
     setSex('Male')
 
+    fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${capitalize(indUser.mun)},Camarines Norte,PH&appid=${WEATHER_KEY}`)
+      .then(response => response.json())
+      .then(json => {
+        setUserLocation(new GeoPoint(json[0].lat, json[0].lon))
+        console.log("locatioooonn:", json)
+      })
+
   }, [isAddFarm])
+
+  // {
+  //   "base": "stations",
+  //   "clouds": {
+  //     "all": 84
+  //   },
+  //   "cod": 200,
+  //   "coord": {
+  //     "lat": 14.1066,
+  //     "lon": 122.8732
+  //   },
+  //   "dt": 1722450813,
+  //   "id": 1687428,
+  //   "main": {
+  //     "feels_like": 26.14,
+  //     "grnd_level": 1007,
+  //     "humidity": 91,
+  //     "pressure": 1010,
+  //     "sea_level": 1010,
+  //     "temp": 25.19,
+  //     "temp_max": 25.19,
+  //     "temp_min": 25.19
+  //   },
+  //   "name": "San Vicente",
+  //   "sys": {
+  //     "country": "PH",
+  //     "sunrise": 1722461546,
+  //     "sunset": 1722507427
+  //   },
+  //   "timezone": 28800,
+  //   "visibility": 10000,
+  //   "weather": [
+  //     {
+  //       "description": "broken clouds",
+  //       "icon": "04n",
+  //       "id": 803,
+  //       "main": "Clouds"
+  //     }
+  //   ],
+  //   "wind": {
+  //     "deg": 217,
+  //     "gust": 0.9,
+  //     "speed": 0.79
+  //   }
+  // }
+
+
+  useEffect(() => {
+    if (!userLocation) return
+    fetch(`http://api.openweathermap.org/data/2.5/weather?lat=${userLocation.latitude}&lon=${userLocation.longitude}&APPID=${WEATHER_KEY}&units=metric`)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("dataaa curreeeent:", data)
+        setWeather((prev) => ({
+          ...prev,
+          current: data
+        }));
+      })
+      .catch((err) => {
+        console.log("error", err);
+      });
+
+    fetch(`http://api.openweathermap.org/data/2.5/forecast?lat=${userLocation.latitude}&lon=${userLocation.longitude}&appid=${WEATHER_KEY}&units=metric`)
+      .then((res) => res.json())
+      .then((data) => {
+        const dailyForecast = data.list.filter(item => new Date(item.dt_txt).getHours() === 12);
+        console.log("data forecaaaastt:", dailyForecast)
+        setWeather((prev) => ({
+          ...prev,
+          forecast: dailyForecast
+        }));
+      })
+      .catch((error) => {
+        console.log("error sa forecast:", error)
+      })
+
+  }, [userLocation]);
 
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
@@ -273,7 +378,6 @@ export const Calculator = ({ navigation }) => {
 
   const uploadImages = async (uri, fileType, newFarm) => {
     try {
-      console.log("number 1");
       const response = await fetch(uri);
       const blob = await response.blob();
       const filename = uri.substring(uri.lastIndexOf('/') + 1);
@@ -507,9 +611,9 @@ export const Calculator = ({ navigation }) => {
     )
   }
 
-  useEffect(() => {
-    getLocationAsync();
-  }, []);
+  // useEffect(() => {
+  //   getLocationAsync();
+  // }, []);
 
   const getLocationAsync = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -641,10 +745,15 @@ export const Calculator = ({ navigation }) => {
       setSex(f['sex'])
       setMunicipality(e.mun)
       setBrgyCode(e.brgy)
+      // setUserLocation(f['Geopoint'])
     }
   }
 
-
+  const getDayOfWeek = (timestamp) => {
+    const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const date = new Date(timestamp * 1000); // Convert from seconds to milliseconds
+    return daysOfWeek[date.getDay()]; // Get day of the week as a string
+  };
 
   return (
     <>
@@ -653,19 +762,110 @@ export const Calculator = ({ navigation }) => {
           {
             isNext ?
               <>
-                {/* <View style={{ ...styles.section, paddingHorizontal: 8 }}>
+                <View style={{ ...styles.section, paddingHorizontal: 8 }}>
                   <Text style={styles.header}>WEATHER</Text>
                   <View style={styles.subsection}>
-                    <Text style={styles.supText}>Weather</Text>
-                    <View style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
-                      <TextInput
-                        editable
-                        placeholder='Weather'
-                        style={{ ...styles.textInput, borderBottomRightRadius: 0, borderTopRightRadius: 0 }}
-                      />
-                    </View>
+                    {/* weather */}
+                    {weather.loading && (
+                      <ActivityIndicator />
+                    )}
+                    {weather.current.main && (
+                      <>
+                        <View style={styles.weatherCurrent}>
+                          <View style={styles.weatherCurrentMain}>
+                            <Text>{capitalize(municipality)}, Camarines Norte</Text>
+                            <View style={{ display: 'flex', flexDirection: 'row', flex: 1 }}>
+                              <Image
+                                style={{ width: 25, height: 25 }}
+                                source={{
+                                  uri: `https://openweathermap.org/img/wn/${weather.current.weather[0].icon}@2x.png`,
+                                }}
+                              />
+                              <Text>{weather.current.main.temp}&deg;C</Text>
+                            </View>
+                            <Text>{weather.current.weather[0].description}</Text>
+                          </View>
+                          <View style={styles.weatherCurrDetails}>
+                            <View style={styles.weatherChild}>
+                              <View>
+                                <Text>
+                                  Feels
+                                </Text>
+                                <Text>
+                                  {weather.current.main.feels_like}&deg;C
+                                </Text>
+                              </View>
+                              <View>
+                                <Text>
+                                  Low
+                                </Text>
+                                <Text>
+                                  {weather.current.main.temp_min}&deg;C
+                                </Text>
+                              </View>
+                              <View>
+                                <Text>
+                                  High
+                                </Text>
+                                <Text>
+                                  {weather.current.main.temp_max}&deg;C
+                                </Text>
+                              </View>
+                            </View>
+                            <View style={styles.weatherChild}>
+                              <View>
+                                <Text>
+                                  Wind
+                                </Text>
+                                <Text>
+                                  {weather.current.wind.speed} m/s
+                                </Text>
+                              </View>
+                              <View>
+                                <Text>
+                                  Humidity
+                                </Text>
+                                <Text>
+                                  {weather.current.main.humidity}%
+                                </Text>
+                              </View>
+                              <View>
+                                <Text>
+                                  Rain
+                                </Text>
+                                <Text>
+                                  {weather.current.rain ? weather.current.rain['1h'] : 'N/A'} mm
+                                </Text>
+                              </View>
+                            </View>
+                          </View>
+                        </View>
+                        <View style={styles.weatherForecast}>
+                          {weather.forecast.map((day, index) => (
+                            <View style={styles.forecastChild}>
+                              <Text>
+                                {getDayOfWeek(day.dt)}
+                              </Text>
+                              <View style={{ display: 'flex', flexDirection: 'row', flex: 1 }}>
+                                <Image
+                                  style={{ width: 25, height: 25 }}
+                                  source={{
+                                    uri: `https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png`,
+                                  }}
+                                />
+                                <Text>{day.weather[0].description}</Text>
+                              </View>
+                              <View>
+                                <Text>{day.main.temp}&deg;C</Text>
+                                <Text>Feels {day.main.feels_like}&deg;C</Text>
+                              </View>
+                            </View>
+                          ))}
+                        </View>
+                      </>
+                    )}
                   </View>
-                </View> */}
+                </View>
                 <View style={{ ...styles.section, marginHorizontal: table ? 0 : 14, paddingHorizontal: 8 }}>
                   <Text style={styles.header}>CALCULATE</Text>
                   <View style={styles.subsection}>
@@ -677,7 +877,7 @@ export const Calculator = ({ navigation }) => {
                         valueField='value'
                         placeholder='Select NPK'
                         value={npk}
-                        onChange={item => {setNpk(item.value) }}
+                        onChange={item => { setNpk(item.value) }}
                         style={{ ...styles.textInput, borderBottomRightRadius: 0, borderTopRightRadius: 0 }}
                       />
                     </View>
@@ -796,6 +996,7 @@ export const Calculator = ({ navigation }) => {
                       editable={isAddFarm}
                       maxLength={40}
                       onChangeText={(text) => {
+                        setFarmName(text);
                         setFarmName(text);
                         if (text.trim() === '') {
                           setFarmnameError('This is a required field');
@@ -1240,6 +1441,28 @@ const styles = StyleSheet.create({
     elevation: 5,
     marginVertical: 8,
   },
+  weatherCurrent: {
+
+  },
+  weatherCurrentMain: {
+    alignItems: 'center'
+  },
+  weatherCurrDetails: {
+    width: 'auto',
+    gap: 6,
+    padding: 8,
+  },
+  weatherChild: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  weatherForecast: {
+
+  },
+  forecastChild: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    flexDirection: 'row'
+  }
 })
-
-
