@@ -125,6 +125,7 @@ export const Calculator = ({ navigation }) => {
   const [npk, setNpk] = useState('')
   const [soil, setSoil] = useState('');
 
+
   const [uniqueId, setUniqueId] = useState(0)
   // end ng data natin
 
@@ -449,9 +450,14 @@ export const Calculator = ({ navigation }) => {
 
       })
 
+      const weatherCol = collection(db, `farms/${newFarm.id}/weather`);
       const farmComp = collection(db, `farms/${newFarm.id}/components`);
       const eventsRef = collection(db, `farms/${newFarm.id}/events`);
       const roiRef = collection(db, `farms/${newFarm.id}/roi`);
+
+      const newWeather = await addDoc(weatherCol, weather.current)
+      await updateDoc(newWeather, { id: newWeather.id })
+
       components.forEach(async (component) => {
         try {
           const newComp = await addDoc(farmComp, {
@@ -773,7 +779,7 @@ export const Calculator = ({ navigation }) => {
                       <>
                         <View style={styles.weatherCurrent}>
                           <View style={styles.weatherCurrentMain}>
-                            <Text>{capitalize(municipality)}, Camarines Norte</Text>
+                            {/* <Text>{capitalize(municipality)}, Camarines Norte</Text> */}
                             <View style={{ display: 'flex', flexDirection: 'row', flex: 1 }}>
                               <Image
                                 style={{ width: 25, height: 25 }}
@@ -781,11 +787,11 @@ export const Calculator = ({ navigation }) => {
                                   uri: `https://openweathermap.org/img/wn/${weather.current.weather[0].icon}@2x.png`,
                                 }}
                               />
-                              <Text>{weather.current.main.temp}&deg;C</Text>
+                              <Text style={{ fontSize: 25, fontFamily: 'serif' }}> {weather.current.main.temp}&deg;C</Text>
                             </View>
-                            <Text>{weather.current.weather[0].description}</Text>
+                            <Text style={{ fontSize: 15, fontFamily: 'serif' }}>{capitalize(weather.current.weather[0].description)}</Text>
                           </View>
-                          <View style={styles.weatherCurrDetails}>
+                          <View style={{ ...styles.weatherCurrDetails, borderRadius: 20, backgroundColor: '#E7F3E7', marginBottom: 5, marginTop: 5, padding: 15 }}>
                             <View style={styles.weatherChild}>
                               <View>
                                 <Text>
@@ -842,22 +848,22 @@ export const Calculator = ({ navigation }) => {
                         </View>
                         <View style={styles.weatherForecast}>
                           {weather.forecast.map((day, index) => (
-                            <View style={styles.forecastChild}>
-                              <Text>
+                            <View key={index} style={{ ...styles.forecastChild, borderRadius: 10, backgroundColor: '#E7F3E7', marginBottom: 5, marginTop: 5, padding: 15, }}>
+                              <Text style={{ fontFamily: 'serif', justifyContent: 'flex-start' }}>
                                 {getDayOfWeek(day.dt)}
                               </Text>
-                              <View style={{ display: 'flex', flexDirection: 'row', flex: 1 }}>
+                              <View style={{ display: 'flex', flexDirection: 'row', flex: 1, justifyContent: 'center' }}>
                                 <Image
                                   style={{ width: 25, height: 25 }}
                                   source={{
                                     uri: `https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png`,
                                   }}
                                 />
-                                <Text>{day.weather[0].description}</Text>
+                                <Text>{capitalize(day.weather[0].description)}</Text>
                               </View>
                               <View>
-                                <Text>{day.main.temp}&deg;C</Text>
-                                <Text>Feels {day.main.feels_like}&deg;C</Text>
+                                <Text style={{ fontSize: 20 }}>{day.main.temp}&deg;C</Text>
+                                <Text style={{ color: 'gray' }}>Feels {day.main.feels_like}&deg;C</Text>
                               </View>
                             </View>
                           ))}
