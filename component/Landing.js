@@ -381,7 +381,7 @@ export const Landing = ({ navigation }) => {
                                     ?
                                     <TouchableHighlight style={styles.btnbtn} onPress={handleLogout}>
                                         <View style={styles.btnbtnChild2}>
-                                            {/* {
+                                            {
                                                 logUser.photoURL ? (
                                                     <Image
                                                         source={{ uri: logUser.photoURL }}
@@ -392,7 +392,7 @@ export const Landing = ({ navigation }) => {
                                                         source={logonLogo}
                                                         style={styles.btnImage}
                                                     />
-                                                )} */}
+                                                )}
 
                                             <Text style={{ ...styles.buttonText, color: '#fff' }}>Log out</Text>
                                         </View>
