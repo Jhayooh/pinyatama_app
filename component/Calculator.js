@@ -42,25 +42,87 @@ const soilType = [
 ]
 
 const npkType = [
-  { label: 'HHS', value: 'HHS' }, //40 20 45
-  { label: 'HMS', value: 'HMS' }, //40 40 45
-  { label: 'HLS', value: 'HLS' }, //40 60 45
-  { label: 'HHD', value: 'HHD' }, //40 20 225
-  { label: 'HMD', value: 'HMD' }, //40 40 225
-  { label: 'HLD', value: 'HLD' }, //40 60 225
-  { label: 'MMS', value: 'MMS' }, //100 20 45
-  { label: 'MLS', value: 'MLS' }, //100 40 45
-  { label: 'MHD', value: 'MHD' }, //100 60 45
-  { label: 'MMD', value: 'MMD' }, //100 20 45
-  { label: 'MLD', value: 'MLD' }, //100 40 225
-  { label: 'LHS', value: 'LHS' }, //100 60 225
-  { label: 'LMS', value: 'LMS' }, //150 20 45
-  { label: 'LLS', value: 'LLS' }, //150 40 45
-  { label: 'LHD', value: 'LHD' }, //150 20 225
-  { label: 'LMD', value: 'LMD' }, //150 40 225
-  { label: 'LLD', value: 'LLD' }, //150 60 225
+  // { label: 'HHS', value: 'HHS' }, //40 20 45
+  // { label: 'HMS', value: 'HMS' }, //40 40 45
+  // { label: 'HLS', value: 'HLS' }, //40 60 45
+  // { label: 'HHD', value: 'HHD' }, //40 20 225
+  // { label: 'HMD', value: 'HMD' }, //40 40 225
+  // { label: 'HLD', value: 'HLD' }, //40 60 225
+  // { label: 'MMS', value: 'MMS' }, //100 20 45
+  // { label: 'MLS', value: 'MLS' }, //100 40 45
+  // { label: 'MHD', value: 'MHD' }, //100 60 45
+  // { label: 'MMD', value: 'MMD' }, //100 20 45
+  // { label: 'MLD', value: 'MLD' }, //100 40 225
+  // { label: 'LHS', value: 'LHS' }, //100 60 225
+  // { label: 'LMS', value: 'LMS' }, //150 20 45
+  // { label: 'LLS', value: 'LLS' }, //150 40 45
+  // { label: 'LHD', value: 'LHD' }, //150 20 225
+  // { label: 'LMD', value: 'LMD' }, //150 40 225
+  {
+    label: 'LMD',
+    value: 'LMD',
+    data: {
+      oranicFert: 8,
+      first: {
+        nutrients: {
+          N: 150,
+          P: 40,
+          K: 225
+        },
+        list: {
+          '14-14-14': 3.0,
+          '16-20-0': 0,
+          '46-0-0': 2.5,
+          '0-0-60': 3.0
+        }
+      },
+      second: {
+        nutrients: {
+          N: 150,
+          P: 0,
+          K: 75,
+        },
+        list: {
+          '17-0-17': 4.5, //water soluble solution
+          '46-0-0': 1.5,
+          '0-0-60': 0,
+        }
+      }
+    }
+  }, //150 60 225
+  {
+    label: 'LLD',
+    value: 'LLD',
+    data: {
+      oranicFert: 4,
+      first: {
+        nutrients: {
+          N: 150,
+          P: 60,
+          K: 225
+        },
+        list: {
+          '14-14-14': 4.0,
+          '16-20-0': 0,
+          '46-0-0': 2.0,
+          '0-0-60': 3.0
+        }
+      },
+      second: {
+        nutrients: {
+          N: 150,
+          P: 0,
+          K: 75,
+        },
+        list: {
+          '17-0-17': 4.5, //water soluble solution
+          '46-0-0': 1.5,
+          '0-0-60': 0,
+        }
+      }
+    }
+  }, //150 60 225
 ]
-
 
 export const Calculator = ({ navigation }) => {
   const [user] = useAuthState(auth)
@@ -321,7 +383,6 @@ export const Calculator = ({ navigation }) => {
       .then((res) => res.json())
       .then((data) => {
         const dailyForecast = data.list.filter(item => new Date(item.dt_txt).getHours() === 12);
-        console.log("data forecaaaastt:", dailyForecast)
         setWeather((prev) => ({
           ...prev,
           forecast: dailyForecast
@@ -666,9 +727,50 @@ export const Calculator = ({ navigation }) => {
       return;
     }
 
-    const newComponents = qParti.map(item => {
-      const newQnty = getMult(area, item.defQnty)
-      return { ...item, qntyPrice: newQnty, totalPrice: getMult(newQnty, item.price), price: parseInt(item.price), foreignId: item.id };
+    const newComponents = qParti?.flatMap(item => {
+      if (item.parent.toLowerCase() === 'fertilizer') {
+        const fertilizers = npkType.find((npkItem) => npkItem.value === npk)
+        const firstList = fertilizers.data.first.list
+        const secondList = fertilizers.data.second.list
+
+        // Update item based on firstList
+        let items = [];
+
+        Object.keys(firstList).forEach(list => {
+          if (item.name.includes(list)) {
+            console.log("indeeeeexxOne:", firstList[list]);
+            const newQnty = getMult(area, firstList[list]);
+            items.push({
+              ...item,
+              qntyPrice: newQnty,
+              totalPrice: getMult(newQnty, item.price),
+              foreinId: item.id,
+              label: 'first'
+            });
+          }
+        });    
+
+        // Update item based on secondList
+        Object.keys(secondList).forEach(list => {
+          if (item.name.includes(list)) {
+            console.log("indeeeeexxTwo:", secondList[list]);
+            const newQnty = getMult(area, secondList[list]);
+            items.push({
+              ...item,
+              qntyPrice: newQnty,
+              totalPrice: getMult(newQnty, item.price),
+              foreinId: item.id,
+              label: 'second'
+            });
+          }
+        });
+
+        return items
+
+      } else {
+        const newQnty = getMult(area, item.defQnty)
+        return [{ ...item, qntyPrice: newQnty, totalPrice: getMult(newQnty, item.price), price: parseInt(item.price), foreignId: item.id }]
+      }
     });
 
     setComponents(newComponents);
@@ -877,7 +979,7 @@ export const Calculator = ({ navigation }) => {
                         valueField='value'
                         placeholder='Select NPK'
                         value={npk}
-                        onChange={item => { setNpk(item.value) }}
+                        onChange={item => { console.log("value ng NPK:", item.value); setNpk(item.value) }}
                         style={{ ...styles.textInput, borderBottomRightRadius: 0, borderTopRightRadius: 0 }}
                       />
                     </View>
@@ -929,7 +1031,7 @@ export const Calculator = ({ navigation }) => {
 
                       }
                     </View>
-                    {table && qPine && <TableBuilder components={components} area={area} setRoiDetails={setRoiDetails} pineapple={qPine} setComponents={setComponents} />}
+                    {table && qPine && <TableBuilder components={components} area={area} setRoiDetails={setRoiDetails} pineapple={qPine} setComponents={setComponents} fertilizers={npkType.find((npkItem) => npkItem.value === npk)} />}
                   </View>
 
                 </View>
@@ -1039,13 +1141,13 @@ export const Calculator = ({ navigation }) => {
                       style={styles.textInput}
                     />
                   </View>
-                  {/* <View style={styles.subsection}>
+                  <View style={styles.subsection}>
                     <View style={{ flexDirection: 'row', gap: 1 }}>
                       <Text style={styles.supText}>Location</Text>
                       <Text style={{ color: 'red' }}>*</Text>
                     </View>
                     <View style={styles.container1}>
-                      <MapView style={styles.map} region={region} onPress={handleMapPress}>
+                      {/* <MapView style={styles.map} region={region} onPress={handleMapPress}>
                         {userLocation && (
                           <Marker
                             coordinate={{
@@ -1058,18 +1160,9 @@ export const Calculator = ({ navigation }) => {
                             onDragEnd={(e) => setUserLocation(e.nativeEvent.coordinate)}
                           />
                         )}
-                      </MapView>
-                      <View>
-                        <TouchableOpacity style={{ ...styles.button, borderTopLeftRadius: 0, borderTopRightRadius: 0, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 22, paddingVertical: 8, justifyContent: 'center', gap: 12 }} onPress={() => {
-                          handleUpdateLocation()
-                        }}>
-                          <Image source={require('../assets/loc.png')} style={{}} />
-                          <Text style={{ color: '#E8E7E7', fontSize: 18 }}>Update Location</Text>
-                        </TouchableOpacity>
-                        <Button title="Update Location" onPress={handleUpdateLocation} />
-                      </View>
+                      </MapView> */}
                     </View>
-                  </View> */}
+                  </View>
                 </View>
 
                 {/* Farmer Detail */}
