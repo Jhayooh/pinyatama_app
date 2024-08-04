@@ -1,6 +1,6 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { signOut } from "firebase/auth";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { Avatar } from "native-base";
@@ -20,7 +20,7 @@ import {
     Alert,
     TextInput,
     FlatList,
-
+    DrawerLayoutAndroid
 } from 'react-native';
 import { auth, db } from '../firebase/Config';
 
@@ -51,7 +51,6 @@ export const Landing = ({ navigation }) => {
     const [user] = useAuthState(auth)
 
     const logUser = user && users?.find(item => item.id === user.uid)
-
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(user => {
@@ -323,95 +322,145 @@ export const Landing = ({ navigation }) => {
         );
     }
 
+    //drawer
+    const drawer = useRef(null);
+    const [drawerPosition, setdrawerPosition] = useState('left')
+
+    const drawerView = (logUser) => (
+        <>
+            <View style={styles.drawerContainer}>
+                <Image source={appLogo}
+                    style={{
+                        width: 128,
+                        height: 128,
+                    }} />
+                <Text style={styles.drawerTitle} >Queen Pineapple Farming</Text>
+                {/* <Button
+                title='Close'
+                onPress={() => drawer.current.closeDrawer()}
+            /> */}
+                <View>
+                    {logUser && (
+                        <TouchableOpacity style={loginStyle.createAccountButton}>
+                            <Text
+                                style={loginStyle.createAccountButtonText}
+                                onPress={() => {
+                                    navigation.navigate('Extensionist', { logUser: logUser });
+                                }}
+                            >
+                                Edit Profile
+                            </Text>
+                        </TouchableOpacity>
+                    )}
+                </View>
+
+                <Button
+                    title='Logout'
+                    onPress={handleLogout}
+                    style={styles.drawerLogoutBtn}
+                />
+            </View>
+        </>
+    )
+
     return (
         <>
-            <View style={styles.bgOut}>
-                <View style={styles.logoBg} >
-                    <Text style={styles.appTitle} >Queen Pineapple Farming</Text>
-                </View>
-                <View style={styles.btnBg}>
-                    <Image source={appLogo} style={styles.appLogo} />
-                    <View style={styles.btnContainer}>
-                        <View style={styles.btnRow}>
-                            <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn} onPress={() =>
-                                user
-                                    ?
-                                    navigation.navigate('Calculator')
-                                    :
-                                    setShowLogin(true)
-                            }>
-                                <View style={styles.btnbtnChild}>
-                                    <Image source={calcLogo} style={styles.btnImage} />
-                                    <Text style={styles.buttonText}>Kalkulador ng gastos</Text>
-                                </View>
-                            </TouchableHighlight>
-                            <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn} onPress={() => navigation.navigate('Yield')}>
-                                <View style={styles.btnbtnChild}>
-                                    <Image source={yieldLogo} style={styles.btnImage} />
-                                    <Text style={styles.buttonText}>Tagapagukit ng Pinya</Text>
-                                </View>
-                            </TouchableHighlight>
-                        </View>
-                        <View style={styles.btnRow}>
-                            <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn} onPress={() => {
-                                navigation.navigate('Gallery', { farms: farms })
-                            }}>
-                                <View style={styles.btnbtnChild}>
-                                    <Image source={galleryLogo} style={styles.btnImage} />
-                                    <Text style={styles.buttonText}>Mga Bukid ng Pinya</Text>
-                                </View>
-                            </TouchableHighlight>
-                            <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn} onPress={() => navigation.navigate('Video')}>
-                                <View style={styles.btnbtnChild}>
-                                    <Image source={videoLogo} style={styles.btnImage} />
-                                    <Text style={styles.buttonText}>Mga Bidyo</Text>
-                                </View>
-                            </TouchableHighlight>
-                        </View>
-                        <View style={styles.btnRow}>
-                            <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn} onPress={() => navigation.navigate('About')}>
-                                <View style={styles.btnbtnChild}>
-                                    <Image source={aboutLogo} style={styles.btnImage} />
-                                    <Text style={styles.buttonText}>Tungkol</Text>
-                                </View>
-                            </TouchableHighlight>
-                            {
+            <DrawerLayoutAndroid
+                ref={drawer}
+                drawerWidth={300}
+                drawerPosition={drawerPosition}
+                renderNavigationView={() => drawerView({ logUser})}
+            >
+                <View style={styles.bgOut}>
+                    <View style={styles.logoBg} >
+                        <Text style={styles.appTitle} >Queen Pineapple Farming</Text>
+                    </View>
+                    <View style={styles.btnBg}>
+                        <Image source={appLogo} style={styles.appLogo} />
+                        <View style={styles.btnContainer}>
+                            <View style={styles.btnRow}>
+                                <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn} onPress={() =>
+                                    user
+                                        ?
+                                        navigation.navigate('Calculator')
+                                        :
+                                        setShowLogin(true)
+                                }>
+                                    <View style={styles.btnbtnChild}>
+                                        <Image source={calcLogo} style={styles.btnImage} />
+                                        <Text style={styles.buttonText}>Kalkulador ng gastos</Text>
+                                    </View>
+                                </TouchableHighlight>
+                                <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn} onPress={() => navigation.navigate('Yield')}>
+                                    <View style={styles.btnbtnChild}>
+                                        <Image source={yieldLogo} style={styles.btnImage} />
+                                        <Text style={styles.buttonText}>Tagapagukit ng Pinya</Text>
+                                    </View>
+                                </TouchableHighlight>
+                            </View>
+                            <View style={styles.btnRow}>
+                                <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn} onPress={() => {
+                                    navigation.navigate('Gallery', { farms: farms })
+                                }}>
+                                    <View style={styles.btnbtnChild}>
+                                        <Image source={galleryLogo} style={styles.btnImage} />
+                                        <Text style={styles.buttonText}>Mga Bukid ng Pinya</Text>
+                                    </View>
+                                </TouchableHighlight>
+                                <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn} onPress={() => navigation.navigate('Video')}>
+                                    <View style={styles.btnbtnChild}>
+                                        <Image source={videoLogo} style={styles.btnImage} />
+                                        <Text style={styles.buttonText}>Mga Bidyo</Text>
+                                    </View>
+                                </TouchableHighlight>
+                            </View>
+                            <View style={styles.btnRow}>
+                                <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn} onPress={() => navigation.navigate('About')}>
+                                    <View style={styles.btnbtnChild}>
+                                        <Image source={aboutLogo} style={styles.btnImage} />
+                                        <Text style={styles.buttonText}>Tungkol</Text>
+                                    </View>
+                                </TouchableHighlight>
+                                {
+                                    user
+                                        ?
+                                        <TouchableHighlight
+                                            style={styles.btnbtn}
+                                            onPress={() => drawer.current.openDrawer()}
+                                        // onPress={handleLogout}
+                                        >
+                                            <View style={styles.btnbtnChild2}>
+                                                {
+                                                    logUser?.photoURL ? (
+                                                        <Image
+                                                            source={{ uri: logUser.photoURL }}
+                                                            style={{ ...styles.btnImage, borderRadius: 50 }}
+                                                        />
+                                                    ) : (
+                                                        <Image
+                                                            source={logonLogo}
+                                                            style={styles.btnImage}
+                                                        />
+                                                    )}
+                                                {/* <Text style={{ ...styles.buttonText, color: '#fff' }}>Log out</Text>  */}
+                                            </View>
+                                        </TouchableHighlight>
+                                        :
+                                        <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn} onPress={() => setShowLogin(true)}>
+                                            <View style={styles.btnbtnChild}>
+                                                <Image source={logonLogo} style={styles.btnImage} />
+                                                <Text style={styles.buttonText}>Log in</Text>
+                                            </View>
+                                        </TouchableHighlight>
 
-                                user
-                                    ?
-                                    <TouchableHighlight style={styles.btnbtn} onPress={handleLogout}>
-                                        <View style={styles.btnbtnChild2}>
-                                            {
-                                                logUser.photoURL ? (
-                                                    <Image
-                                                        source={{ uri: logUser.photoURL }}
-                                                        style={{ ...styles.btnImage, borderRadius: 50 }}
-                                                    />
-                                                ) : (
-                                                    <Image
-                                                        source={logonLogo}
-                                                        style={styles.btnImage}
-                                                    />
-                                                )}
-
-                                            <Text style={{ ...styles.buttonText, color: '#fff' }}>Log out</Text>
-                                        </View>
-                                    </TouchableHighlight>
-                                    :
-                                    <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn} onPress={() => setShowLogin(true)}>
-                                        <View style={styles.btnbtnChild}>
-                                            <Image source={logonLogo} style={styles.btnImage} />
-                                            <Text style={styles.buttonText}>Log in</Text>
-                                        </View>
-                                    </TouchableHighlight>
-
-                            }
+                                }
+                            </View>
                         </View>
                     </View>
                 </View>
-            </View>
-            <LoginModal />
-            {/* <RegistrationModal /> */}
+                <LoginModal />
+                {/* <RegistrationModal /> */}
+            </DrawerLayoutAndroid>
         </>
     );
 }
@@ -450,15 +499,15 @@ const styles = StyleSheet.create({
         padding: 12,
         position: 'absolute',
         top: -64,
-        resizeMode:'contain'
+        resizeMode: 'contain'
     },
     appTitle: {
         fontSize: windowWidth * 0.1,
         color: '#fff',
         fontWeight: '600',
         textAlign: 'center',
-        fontFamily:'serif',
-        padding:5
+        fontFamily: 'serif',
+        padding: 5
     },
     btnContainer: {
         flex: 1,
@@ -522,14 +571,35 @@ const styles = StyleSheet.create({
     btnImage: {
         width: 64,
         height: 64,
-        resizeMode:'contain'
+        resizeMode: 'contain'
     },
     buttonText: {
         fontSize: windowWidth * 0.04,
         textAlign: 'center',
         fontFamily: 'serif',
         fontStyle: 'italic',
-    }
+    },
+    drawerContainer: {
+        padding: 20,
+        marginTop: '10%',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    drawerTitle: {
+        // fontSize: windowWidth * 0.1,
+        fontSize: 30,
+        color: 'green',
+        fontWeight: '300',
+        textAlign: 'center',
+        fontFamily: 'serif',
+        padding: 5
+    },
+    drawerLogoutBtn: {
+        fontFamily: 'serif'
+    },
+
 })
 
 const loginStyle = StyleSheet.create({
@@ -616,8 +686,6 @@ const loginStyle = StyleSheet.create({
         fontSize: 15,
         fontWeight: 'bold',
         justifyContent: 'center'
-
-
     },
 })
 
