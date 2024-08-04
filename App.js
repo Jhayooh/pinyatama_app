@@ -17,6 +17,7 @@ import Video from './component/Video';
 import Edit from './component/Edit'
 import { Button } from 'native-base';
 import YieldPredictor from './component/YieldPredictor'
+import { EditProfile } from './component/EditProfile';
 
 const Stack = createNativeStackNavigator();
 
@@ -130,6 +131,18 @@ const App = () => (
                 }}
             />
 
+            <Stack.Screen
+                name='Extensionist'
+                component={EditProfile}
+                options={{
+                    title: 'Profile',
+                    headerTintColor: '#E8E7E7',
+                    headerBackTitleVisible: false,
+                    headerStyle: {
+                        backgroundColor: '#4DAF50',
+                    }
+                }}
+            />
 
             <Stack.Screen name='Charts' component={Charts} />
             <Stack.Screen name='DataInputs' component={DataInputs} />
