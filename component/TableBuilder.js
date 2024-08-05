@@ -11,7 +11,7 @@ import {
 import { db } from '../firebase/Config';
 import { AddDataRow } from './AddDataRow';
 
-export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setComponents }) => {
+export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setComponents, fertilizers }) => {
   const [comps, setComps] = useState(components)
   const [laborTotal, setLaborTotal] = useState(0)
   const [materialTotal, setMaterialTotal] = useState(0)
@@ -23,11 +23,16 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
   const [roi, setRoi] = useState(0)
   const [pinePrice, setPinePrice] = useState(0)
   const [butterPrice, setButterPrice] = useState(0)
-  const [trial, setTrial] = useState(0)
+  const [trial, setTrial] = useState({})
 
   function getPinePrice(pine) {
     const newPine = pineapple.filter(thePine => thePine.name.toLowerCase() === pine.toLowerCase())[0]
     return parseInt(newPine.price.toFixed())
+  }
+
+  const getMult = (numOne, numTwo) => {
+    const num = numOne * numTwo
+    return Math.round(num * 10) / 10
   }
 
   useEffect(() => {
@@ -118,6 +123,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
       setQntyPrice(v)
       setTotalPrice(v * price)
     }
+
     return (
       <View style={styles.tableData}>
         <View style={{ ...styles.tableHeadLabel3, alignItems: 'flex-start' }}>
@@ -183,12 +189,29 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
           <View style={{ ...styles.tableHead }}>
             <Text styles={{ fontWeight: 900, fontSize: '32px' }}>Materials Inputs:</Text>
           </View>
-          <View style={{ ...styles.tableHead }}>
-            <Text styles={{ fontWeight: 'bold' }}>Fertilizers</Text>
+
+          <View style={{ ...styles.tableHead, marginTop: 12 }}>
+            <Text styles={{ fontWeight: 'bold' }}>Apply during the 1st and 7th month</Text>
           </View>
           {
             comps?.map((comp) => {
-              if (comp.parent.toLowerCase() === 'fertilizer') {
+              if (comp.parent.toLowerCase() === 'fertilizer' && comp.label === 'first') {
+                return (
+                  <TableData
+                    key={comp.id}
+                    component={comp}
+                    editable={true}
+                  />
+                )
+              }
+            })
+          }
+          <View style={{ ...styles.tableHead, marginTop: 12 }}>
+            <Text styles={{ fontWeight: 'bold' }}>Apply during the 4th and 10th month</Text>
+          </View>
+          {
+            comps?.map((comp) => {
+              if (comp.parent.toLowerCase() === 'fertilizer' && comp.label === 'second') {
                 return (
                   <TableData
                     key={comp.id}
