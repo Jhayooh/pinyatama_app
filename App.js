@@ -135,7 +135,7 @@ const App = () => (
                 name='Extensionist'
                 component={EditProfile}
                 options={{
-                    title: 'Profile',
+                    title: 'Edit Personal Info',
                     headerTintColor: '#E8E7E7',
                     headerBackTitleVisible: false,
                     headerStyle: {
