@@ -1037,7 +1037,7 @@ export const Calculator = ({ navigation }) => {
 
                       }
                     </View>
-                    {table && qPine && <TableBuilder components={components} area={area} setRoiDetails={setRoiDetails} pineapple={qPine} setComponents={setComponents} fertilizers={npkType.find((npkItem) => npkItem.value === npk)} />}
+                    {table && qPine && <TableBuilder components={components} area={area} setRoiDetails={setRoiDetails} pineapple={qPine} setComponents={setComponents} fertilizers={npkType.find((npkItem) => npkItem.value === npk)} soil={soil} />}
                   </View>
 
                 </View>

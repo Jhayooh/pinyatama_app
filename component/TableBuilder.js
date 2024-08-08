@@ -11,7 +11,7 @@ import {
 import { db } from '../firebase/Config';
 import { AddDataRow } from './AddDataRow';
 
-export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setComponents, fertilizers }) => {
+export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setComponents, fertilizers, soil }) => {
   const [comps, setComps] = useState(components)
   const [laborTotal, setLaborTotal] = useState(0)
   const [materialTotal, setMaterialTotal] = useState(0)
@@ -44,12 +44,35 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
       if (component.particular.toLowerCase() === 'material') {
         if (component.name.toLowerCase() === 'planting materials') {
           const qntyPrice = parseInt(component.qntyPrice)
-          setGrossReturn(getPercentage(90, qntyPrice));
-          setBatterBall(getPercentage(10, qntyPrice));
+          let gr = getPercentage(90, qntyPrice)
+          let bb = getPercentage(10, qntyPrice)
+          switch (soil.toLowerCase()) {
+            case 'loam':
+              setGrossReturn(getPercentage(100, gr));
+              setBatterBall(getPercentage(100, bb));
+              break
+
+            case 'clay':
+              setGrossReturn(getPercentage(85, gr));
+              setBatterBall(getPercentage(85, bb));
+              break
+
+            case 'sandy':
+              setGrossReturn(getPercentage(70, gr));
+              setBatterBall(getPercentage(70, bb));
+              break
+
+            default:
+              setGrossReturn(gr)
+              setBatterBall(bb)
+              break;
+          }
+
         }
         if (component.parent.toLowerCase() === 'fertilizer') {
           fertilizerSum += parseInt(component.totalPrice)
         }
+        
         materialSum += parseInt(component.totalPrice);
       } else if (component.particular.toLowerCase() === 'labor') {
         laborSum += parseInt(component.totalPrice);
