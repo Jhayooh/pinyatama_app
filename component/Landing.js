@@ -340,25 +340,28 @@ export const Landing = ({ navigation }) => {
                 onPress={() => drawer.current.closeDrawer()}
             /> */}
                 <View>
-                    {logUser && (
-                        <TouchableOpacity style={loginStyle.createAccountButton}>
-                            <Text
-                                style={loginStyle.createAccountButtonText}
-                                onPress={() => {
-                                    navigation.navigate('Extensionist', { logUser: logUser });
-                                }}
-                            >
-                                Edit Profile
-                            </Text>
-                        </TouchableOpacity>
-                    )}
+                    <TouchableOpacity style={loginStyle.createAccountButton}>
+                        <Text
+                            style={{
+                                ...loginStyle.createAccountButtonText,
+                                display: logUser ? 'flex' : 'none'
+                            }}
+                            onPress={() => {
+                                navigation.navigate('Extensionist', { logUser: logUser });
+                            }}
+                        >
+                            Edit Profile
+                        </Text>
+                    </TouchableOpacity>
                 </View>
-
                 <Button
                     title='Logout'
+                    color="green"
                     onPress={handleLogout}
                     style={styles.drawerLogoutBtn}
                 />
+
+
             </View>
         </>
     )
@@ -366,10 +369,11 @@ export const Landing = ({ navigation }) => {
     return (
         <>
             <DrawerLayoutAndroid
+                // drawerBackgroundColor="rgba(0,0,0,0.5)"
                 ref={drawer}
                 drawerWidth={300}
                 drawerPosition={drawerPosition}
-                renderNavigationView={() => drawerView({ logUser})}
+                renderNavigationView={() => drawerView({ logUser })}
             >
                 <View style={styles.bgOut}>
                     <View style={styles.logoBg} >
@@ -585,7 +589,9 @@ const styles = StyleSheet.create({
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
+        backgroundColor: 'transparent'
+
     },
     drawerTitle: {
         // fontSize: windowWidth * 0.1,
@@ -597,7 +603,8 @@ const styles = StyleSheet.create({
         padding: 5
     },
     drawerLogoutBtn: {
-        fontFamily: 'serif'
+        fontFamily: 'serif',
+        padding: 10,
     },
 
 })
@@ -685,7 +692,7 @@ const loginStyle = StyleSheet.create({
         color: 'green',
         fontSize: 15,
         fontWeight: 'bold',
-        justifyContent: 'center'
+        justifyContent: 'center',
     },
 })
 
