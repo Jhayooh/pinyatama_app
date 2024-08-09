@@ -404,7 +404,7 @@ export const Landing = ({ navigation }) => {
                             </View>
                             <View style={styles.btnRow}>
                                 <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn} onPress={() => {
-                                    navigation.navigate('Gallery', { farms: farms })
+                                    navigation.navigate('Gallery', { farms: farms, user: logUser })
                                 }}>
                                     <View style={styles.btnbtnChild}>
                                         <Image source={galleryLogo} style={styles.btnImage} />
