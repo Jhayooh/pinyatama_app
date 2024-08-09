@@ -5,30 +5,50 @@ import {
   ActivityIndicator,
   StyleSheet,
   Text,
-  View
+  View,
+  TextInput
 } from "react-native";
 import { db } from '../firebase/Config';
 import { AddDataRow } from './AddDataRow';
 
-export const TableBuilder = ({ components, area, setRoiDetails }) => {
+export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setComponents, fertilizers }) => {
+  const [comps, setComps] = useState(components)
   const [laborTotal, setLaborTotal] = useState(0)
   const [materialTotal, setMaterialTotal] = useState(0)
+  const [fertilizerTotal, setFertlizerTotal] = useState(0)
   const [costTotal, setCostTotal] = useState(0)
   const [grossReturn, setGrossReturn] = useState(0)
-  const [batterBall, setBatterBall] = useState(0)
+  const [butterBall, setBatterBall] = useState(0)
   const [netReturn, setNetReturn] = useState(0)
   const [roi, setRoi] = useState(0)
+  const [pinePrice, setPinePrice] = useState(0)
+  const [butterPrice, setButterPrice] = useState(0)
+  const [trial, setTrial] = useState({})
+
+  function getPinePrice(pine) {
+    const newPine = pineapple.filter(thePine => thePine.name.toLowerCase() === pine.toLowerCase())[0]
+    return parseInt(newPine.price.toFixed())
+  }
+
+  const getMult = (numOne, numTwo) => {
+    const num = numOne * numTwo
+    return Math.round(num * 10) / 10
+  }
 
   useEffect(() => {
-    let materialSum = 5000;
+    let materialSum = 0;
     let laborSum = 0;
+    let fertilizerSum = 0;
 
-    components.forEach((component) => {
+    comps.forEach((component) => {
       if (component.particular.toLowerCase() === 'material') {
         if (component.name.toLowerCase() === 'planting materials') {
           const qntyPrice = parseInt(component.qntyPrice)
-          setGrossReturn(getPercentage(90, qntyPrice)*8);
-          setBatterBall(getPercentage(10, qntyPrice)*2);
+          setGrossReturn(getPercentage(90, qntyPrice));
+          setBatterBall(getPercentage(10, qntyPrice));
+        }
+        if (component.parent.toLowerCase() === 'fertilizer') {
+          fertilizerSum += parseInt(component.totalPrice)
         }
         materialSum += parseInt(component.totalPrice);
       } else if (component.particular.toLowerCase() === 'labor') {
@@ -38,33 +58,42 @@ export const TableBuilder = ({ components, area, setRoiDetails }) => {
 
     setMaterialTotal(materialSum);
     setLaborTotal(laborSum);
+    setFertlizerTotal(fertilizerSum);
     setCostTotal(materialSum + laborSum);
-  }, [components]);
+  }, [comps, pineapple]);
 
   useEffect(() => {
-    const grossReturnAndBatter = grossReturn + batterBall
+    const pineapplePrice = getPinePrice('pineapple')
+    const butterballPrice = getPinePrice('butterball')
+    const grossReturnAndBatter = (grossReturn * pineapplePrice) + (butterBall * butterballPrice)
     const netReturnValue = grossReturnAndBatter - costTotal;
     const roiValue = (netReturnValue / grossReturnAndBatter) * 100;
+    setPinePrice(pineapplePrice)
+    setButterPrice(butterballPrice)
     setNetReturn(netReturnValue);
-    setRoi(roiValue);
-  }, [grossReturn, batterBall, costTotal]);
+    setRoi(Math.round(roiValue * 100) / 100);
+  }, [grossReturn, butterBall, costTotal]);
 
   useEffect(() => {
     const roiDetails = {
       laborTotal,
       materialTotal,
+      fertilizerTotal,
       costTotal,
       grossReturn,
-      batterBall,
+      butterBall,
       netReturn,
-      roi
+      roi,
+      pinePrice,
+      butterPrice
     };
-  
+
+    setComponents(comps)
     setRoiDetails(roiDetails);
-  }, [laborTotal, materialTotal, costTotal, grossReturn, batterBall, netReturn, roi]);
+  }, [laborTotal, materialTotal, costTotal, grossReturn, butterBall, netReturn, roi, pineapple]);
 
   const getPercentage = (pirsint, nambir) => {
-    return (pirsint / 100) * nambir
+    return Math.round((nambir / 100) * pirsint)
   }
 
   const formatter = (num) => {
@@ -75,14 +104,43 @@ export const TableBuilder = ({ components, area, setRoiDetails }) => {
     })
   }
 
-  const TableData = ({ name, qnty, unit, price, totalPrice }) => {
+  const TableData = ({ component, editable }) => {
+    const [name, setName] = useState(component.name)
+    const [qntyPrice, setQntyPrice] = useState(component.qntyPrice)
+    const [unit, setUnit] = useState(component.unit)
+    const [price, setPrice] = useState(component.price)
+    const [totalPrice, setTotalPrice] = useState(component.totalPrice)
+
+    const handleEnter = () => {
+      setComps((prev) =>
+        prev.map((c) =>
+          c.id === component.id ? { ...c, qntyPrice: qntyPrice, totalPrice: qntyPrice * price } : c
+        ))
+    }
+
+    const handleEdit = (e) => {
+      const v = e || 0
+      setQntyPrice(v)
+      setTotalPrice(v * price)
+    }
+
     return (
       <View style={styles.tableData}>
         <View style={{ ...styles.tableHeadLabel3, alignItems: 'flex-start' }}>
           <Text>{name}</Text>
         </View>
-        <View style={{ ...styles.tableHeadLabel2, alignItems: 'center' }}>
-          <Text>{qnty.toLocaleString()}</Text>
+        <View style={{ ...styles.tableHeadLabel3, alignItems: 'center' }}>
+          <TextInput
+            editable={editable}
+            keyboardType='numeric'
+            maxLength={3}
+            onChangeText={handleEdit}
+            onSubmitEditing={handleEnter}
+            placeholder={component ? qntyPrice.toString() : ""}
+            value={qntyPrice}
+            style={editable ? { ...styles.textInput, borderColor: 'orange', borderWidth: 1 } : styles.textInput}
+          />
+          {/* <Text>{qnty.toLocaleString()}</Text> */}
         </View>
         <View style={{ ...styles.tableHeadLabel2, alignItems: 'center' }}>
           <Text>{unit}</Text>
@@ -100,60 +158,83 @@ export const TableBuilder = ({ components, area, setRoiDetails }) => {
 
   return (
     <>
-      <View style={{ ...styles.container, minHeight: 300, borderRadius: 10, paddingBottom: 12 }}>
-        <View style={{ alignItems: 'center', margin: 8 }}>
-          <Text style={{ width: '100%', backgroundColor: '#3bcd6b', padding: 8, alignItems: 'center', textAlign: 'center' }}>COST AND RETURN ANALYSIS {area.toFixed(2)} HA PINEAPPLE PRODUCTION</Text>
+      <View style={{ ...styles.container, minHeight: 300, borderRadius: 10, paddingBottom: 12, margin: 10 }}>
+        <View style={{ alignItems: 'center', backgroundColor: '#4DAF50', margin: 8, marginBottom: 12, borderRadius: 6, }}>
+          <Text style={{ width: '100%', padding: 8, alignItems: 'center', textAlign: 'center', color: '#FFF' }}>
+            COST AND RETURN ANALYSIS {typeof area === 'number' ? area.toFixed(2) : area} HA PINEAPPLE PRODUCTION
+          </Text>
+
         </View>
         <View style={{ flex: 1, marginTop: 6, marginHorizontal: 12 }}>
           {/* Header */}
           <View style={{ ...styles.tableHead, borderBottomWidth: 2, borderColor: '#000', }}>
             <View style={{ ...styles.tableHeadLabel3, alignItems: 'center' }}>
-              <Text>PARTICULARS</Text>
-            </View>
-            <View style={{ ...styles.tableHeadLabel2, alignItems: 'center' }}>
-              <Text>QUANTITY</Text>
-            </View>
-            <View style={{ ...styles.tableHeadLabel2, alignItems: 'center' }}>
-              <Text>UNIT</Text>
+              <Text style={{ fontSize: 12, fontWeight: '600' }}>PARTICULARS</Text>
             </View>
             <View style={{ ...styles.tableHeadLabel3, alignItems: 'center' }}>
-              <Text>PRICE/UNIT</Text>
+              <Text style={{ fontSize: 12 }}>QNTY</Text>
+            </View>
+            <View style={{ ...styles.tableHeadLabel2, alignItems: 'center' }}>
+              <Text style={{ fontSize: 12 }}>UNIT</Text>
+            </View>
+            <View style={{ ...styles.tableHeadLabel3, alignItems: 'center' }}>
+              <Text style={{ fontSize: 12 }}>PRICE/UNIT</Text>
             </View>
             <View style={{ ...styles.tableHeadLabel3, alignItems: 'flex-end' }}>
-              <Text>TOTAL PRICE</Text>
+              <Text style={{ fontSize: 12 }}>TOTAL PRICE</Text>
             </View>
           </View>
 
           {/* Body */}
           <View style={{ ...styles.tableHead }}>
-            <Text styles={{ fontWeight: 'bold' }}>Materials Inputs:</Text>
+            <Text styles={{ fontWeight: 900, fontSize: '32px' }}>Materials Inputs:</Text>
+          </View>
+
+          <View style={{ ...styles.tableHead, marginTop: 12 }}>
+            <Text styles={{ fontWeight: 'bold' }}>Apply during the 1st and 7th month</Text>
           </View>
           {
-            components.map((component) => {
-              if (component.particular.toLowerCase() === 'material') {
+            comps?.map((comp) => {
+              if (comp.parent.toLowerCase() === 'fertilizer' && comp.label === 'first') {
                 return (
                   <TableData
-                    key={component.id}
-                    name={component.name}
-                    qnty={component.qntyPrice}
-                    unit={component.unit}
-                    price={component.price}
-                    totalPrice={component.totalPrice}
+                    key={comp.id}
+                    component={comp}
+                    editable={true}
                   />
                 )
               }
             })
           }
-          <View style={styles.tableHead}>
-            <View style={{ flex: 4 }}>
-              <Text styles={{ fontWeight: 'bold' }}>Land Rental</Text>
-            </View>
-            <View style={{ flex: 1, alignItems: 'flex-end' }}>
-              <Text styles={{ fontWeight: 'bold' }}>
-                {formatter(5000)}
-              </Text>
-            </View>
+          <View style={{ ...styles.tableHead, marginTop: 12 }}>
+            <Text styles={{ fontWeight: 'bold' }}>Apply during the 4th and 10th month</Text>
           </View>
+          {
+            comps?.map((comp) => {
+              if (comp.parent.toLowerCase() === 'fertilizer' && comp.label === 'second') {
+                return (
+                  <TableData
+                    key={comp.id}
+                    component={comp}
+                    editable={true}
+                  />
+                )
+              }
+            })
+          }
+          {
+            comps?.map((comp) => {
+              if (comp.particular.toLowerCase() === 'material' && comp.parent.toLowerCase() !== 'fertilizer') {
+                return (
+                  <TableData
+                    key={comp.id}
+                    component={comp}
+                    editable={false}
+                  />
+                )
+              }
+            })
+          }
           <View style={{ ...styles.tableHead, borderTopWidth: 2, borderBottomWidth: 2, marginBottom: 12 }}>
             <View style={{ flex: 4 }}>
               <Text styles={{ fontWeight: 'bold' }}>Total Material Input: </Text>
@@ -168,16 +249,13 @@ export const TableBuilder = ({ components, area, setRoiDetails }) => {
             <Text styles={{ fontWeight: 'bold' }}>Labor Inputs:</Text>
           </View>
           {
-            components.map((component) => {
-              if (component.particular.toLowerCase() === 'labor') {
+            comps?.map((comp) => {
+              if (comp.particular.toLowerCase() === 'labor') {
                 return (
                   <TableData
-                    key={component.id}
-                    name={component.name}
-                    qnty={component.qntyPrice}
-                    unit={component.unit}
-                    price={component.price}
-                    totalPrice={component.totalPrice}
+                    key={comp.id}
+                    component={comp}
+                    editable={false}
                   />
                 )
               }
@@ -204,18 +282,24 @@ export const TableBuilder = ({ components, area, setRoiDetails }) => {
             </View>
           </View>
           <TableData
-            name={'Gross Return'}
-            qnty={grossReturn}
-            unit={'pcs'}
-            price={8}
-            totalPrice={formatter(grossReturn * 8)}
+            component={{
+              name: 'Gross Return',
+              qntyPrice: grossReturn,
+              unit: 'pcs',
+              price: pinePrice,
+              totalPrice: grossReturn * pinePrice
+            }}
+            editable={false}
           />
           <TableData
-            name={'Good Butterball'}
-            qnty={batterBall}
-            unit={'pcs'}
-            price={2}
-            totalPrice={formatter(batterBall * 2)}
+            component={{
+              name: 'Good Butterball',
+              qntyPrice: butterBall,
+              unit: 'pcs',
+              price: butterPrice,
+              totalPrice: butterBall * butterPrice
+            }}
+            editable={false}
           />
           <View style={styles.tableHead}>
             <View style={{ flex: 4 }}>
@@ -233,7 +317,7 @@ export const TableBuilder = ({ components, area, setRoiDetails }) => {
             </View>
             <View style={{ flex: 1, alignItems: 'flex-end' }}>
               <Text styles={{ fontWeight: 'bold' }}>
-                {`%${roi.toFixed(2)}`}
+                {`${roi.toFixed(2)} %`}
               </Text>
             </View>
           </View>
@@ -253,6 +337,19 @@ const styles = StyleSheet.create({
     opacity: .8,
     paddingVertical: 36,
     paddingHorizontal: 12,
+  },
+  textInput: {
+    flex: 1,
+    height: 42,
+    opacity: 1.0,
+    borderColor: '#E8E7E7',
+    borderWidth: 1,
+    backgroundColor: '#FBFBFB',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    color: '#3C3C3B',
+    fontSize: 16,
+    width: '100%'
   },
   name: {
     fontSize: 32,
@@ -297,7 +394,8 @@ const styles = StyleSheet.create({
   },
   tableHeadLabel3: {
     flex: 2,
-    alignSelf: 'stretch'
+    alignSelf: 'stretch',
+    fontSize: 12
   },
   tableData: {
     alignItems: 'center',

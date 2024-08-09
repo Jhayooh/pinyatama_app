@@ -2,65 +2,77 @@ import React from 'react';
 import {
   ActivityIndicator,
   Image,
-  ImageBackground,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
+  Dimensions
 } from 'react-native';
 
-const Card = ({ imageSource, title, description, onPress }) => {
+const windowWidth = Dimensions.get('window').width;
+
+const Card = ({ imageSource, title, description, startDate, endDate, onPress }) => {
   return (
     <TouchableOpacity onPress={onPress} style={styles.card}>
       <Image source={imageSource} style={styles.cardImage} />
       <View style={styles.cardContent}>
         <Text style={styles.cardTitle}>{title}</Text>
         <Text style={styles.cardDescription}>{description}</Text>
+        <Text style={styles.cardDate}>Date of Planting: {startDate}</Text>
+        <Text style={styles.cardDate}>Date of Harvest: {endDate}</Text>
       </View>
     </TouchableOpacity>
   );
 };
 
 const TabView = ({ route, navigation }) => {
-  const { farms = [] } = route.params;
-  const farm = farms[0]
-  console.log("farms from tabview", farms);
-  const handleCardPress = (farm) => {
-    navigation.navigate("ProductionInput", { farms: [farm] })
-  };
-  return (
-    // <ImageBackground source={require('../assets/p1.jpg')} resizeMode="cover" style={styles.backgroundImage}>
-    <>
-      {
-        farms.length === 0
-          ?
-          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-            <ActivityIndicator />
-          </View>
-          :
-          <ScrollView showsVerticalScrollIndicator={false}>
-            <View style={styles.container}>
-              {farms.map((farm) => (
-                <Card
-                  key={farm.id} // Make sure to provide a unique key for each item
-                  title={farm.title}
-                  description="This is the example of React Native Card view. This is the easiest way to adding a card view on your screen."
-                  imageSource={require('../assets/pine.jpg')}
-                  onPress={() => { handleCardPress(farm) }}
-                />
-              ))}
-            </View>
-          </ScrollView>
-      }
-    </>
+  const { farms = [], imageUrls = {} } = route.params;
 
-    // </ImageBackground>
+  const handleCardPress = (farm) => {
+    navigation.navigate("ProductionInput", { farms: [farm] });
+  };
+
+  function dateFormatter(date) {
+    const d = new Date(date.toMillis());
+    return d.toLocaleDateString();
+  }
+
+  return (
+    <>
+      {farms.length === 0 && Object.keys(imageUrls).length !== 0 ? (
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator size="large" color="#4DAF50" />
+        </View>
+      ) : (
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <View style={styles.container}>
+            {farms.map((farm) => (
+              <Card
+                key={farm.id}
+                title={farm.title}
+                description={`${farm.brgy}, ${farm.mun}`}
+                startDate={dateFormatter(farm.start_date)}
+                endDate={dateFormatter(farm.harvest_date)}
+                imageSource={imageUrls[farm.id] ? { uri: imageUrls[farm.id] } : require('../assets/p.jpg')}
+                onPress={() => handleCardPress(farm)}
+              />
+            ))}
+          </View>
+        </ScrollView>
+      )}
+    </>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 10,
+  },
+  loaderContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
@@ -80,27 +92,33 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
     width: '90%',
-    alignItems: 'center',
     borderColor: 'green',
   },
   cardImage: {
-    width: 350,
+    width: '100%',
     height: 120,
     borderRadius: 5,
     marginBottom: 10,
+    resizeMode: 'cover',
+  },
+  cardContent: {
+    flex: 1,
+    alignItems: 'flex-start',
   },
   cardTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
+    color: 'green',
   },
   cardDescription: {
     fontSize: 16,
-    lineHeight: 24,
+    lineHeight: 18,
+    marginBottom: 10,
   },
-  backgroundImage: {
-    flex: 1,
-    resizeMode: 'cover',
+  cardDate: {
+    fontSize: 12,
+    lineHeight: 20,
   },
 });
 

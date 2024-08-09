@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { address } from 'addresspinas';
+import _ from 'lodash'
 import {
     View,
     Text,
@@ -10,7 +11,8 @@ import {
     StyleSheet,
     Alert,
     Modal,
-    Platform
+    Platform,
+    TextInput
 } from 'react-native'
 import {
     Input,
@@ -24,6 +26,8 @@ import {
 import { ProgressSteps, ProgressStep } from 'react-native-progress-steps';
 import * as ImagePicker from 'expo-image-picker';
 import { collection, addDoc, updateDoc } from "firebase/firestore";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { storage } from '../firebase/Config';
 
 import backIcon from '../assets/back.png'
 import noProf from '../assets/noProf.png'
@@ -52,9 +56,20 @@ const styles = StyleSheet.create({
     },
     textTitle: {
         fontSize: 26,
-        fontWeight: '600'
+        fontWeight: '600',
+
     },
     input: {
+        color: '#333',
+        fontSize: 20,
+        borderRadius: 8,
+        borderWidth: 1,
+        height: 50,
+        padding: 10,
+        borderColor: '#E8E7E7',
+
+    },
+    input1: {
         color: '#333',
         fontSize: 20,
     },
@@ -84,17 +99,20 @@ const styles = StyleSheet.create({
     },
     addProfTitle: {
         fontSize: 20,
-        fontWeight: '600'
+        fontWeight: '600',
+
 
     },
     addProfBtn: {
         padding: 8,
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+
     },
     addProfBtnText: {
         fontSize: 16,
         marginTop: 12
+
         // fontWeight: '600'
     }
 })
@@ -117,6 +135,21 @@ export default function Register({ navigation }) {
     const [displayName, setDisplayName] = useState('')
 
     const [profShow, setProfShow] = useState(false)
+    const [nextShow, setNextShow] = useState(false)
+    const [secondShow, setSecondShow] = useState(false)
+    const [thirdShow, setThirdShow] = useState(false)
+
+    const [firstnameError, setFirstnameError] = useState('');
+    const [lastnameError, setLastnameError] = useState('');
+    const [munError, setMunError] = useState('');
+    const [brgyError, setBrgyError] = useState('');
+    const [emailError, setEmailError] = useState('');
+    const [phoneError, setPhoneError] = useState('');
+    const [displayError, setDisplayError] = useState('');
+    const [passwordError, setPasswordError] = useState('');
+
+    const [saving, setSaving] = useState(false)
+
 
     const handleRegister = async () => {
         const usersRef = collection(db, 'users')
@@ -124,17 +157,18 @@ export default function Register({ navigation }) {
             const docRef = await addDoc(usersRef, {
                 brgy: barangay,
                 disabled: false,
+                firstname: firstName,
+                lastname: lastName,
                 displayName: displayName,
                 email: email,
-                isRegistered: false,
+                status: 'pending',
                 mun: mun,
                 password: password,
                 phoneNumber: phoneNumber,
-                photoURL: photoUrl
+                photoURL: photoUrl,
+                uid: '1'
             });
-            await updateDoc(docRef, {
-                uid: docRef.id
-            })
+            await uploadImages(docRef)
             navigation.goBack()
         } catch (e) {
         }
@@ -144,12 +178,15 @@ export default function Register({ navigation }) {
         try {
 
             let result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.All,
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                aspect: [1, 1],
                 quality: .6,
             });
 
             if (!result.canceled) {
-                addImage(result.assets[0].uri, result.assets[0].height, result.assets[0].width)
+                setImageUri(result.assets[0].uri)
+                setProfShow(false)
             }
         } catch (e) {
             console.log(e);
@@ -161,24 +198,26 @@ export default function Register({ navigation }) {
             await ImagePicker.requestCameraPermissionsAsync();
             let result = await ImagePicker.launchCameraAsync({
                 cameraType: ImagePicker.CameraType.back,
+                allowsEditing: true,
+                aspect: [1, 1],
                 quality: .6
             })
 
             if (!result.canceled) {
-                addImage(result.assets[0].uri, result.assets[0].height, result.assets[0].width)
+                setImageUri(result.assets[0].uri)
+                setProfShow(false)
             }
         } catch (e) {
             console.log(e);
         }
     }
 
-    const uploadImages = async (uri, fileType) => {
+    const uploadImages = async (docRef) => {
         try {
-            const response = await fetch(uri);
+            const response = await fetch(imageUri);
             const blob = await response.blob();
-            const filename = uri.substring(uri.lastIndexOf('/') + 1);
 
-            const storageRef = ref(storage, `FarmImages/${user.uid}/${filename}`);
+            const storageRef = ref(storage, `ProfileImages/${docRef.id}`);
             const uploadTask = uploadBytesResumable(storageRef, blob);
 
             uploadTask.on('state_changed',
@@ -190,9 +229,11 @@ export default function Register({ navigation }) {
                 },
                 () => {
                     // Upload completed successfully, get download URL
-                    getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-                        console.log('File available at', downloadURL);
-                        setUploadedImg((uImg) => [...uImg, { url: downloadURL, uid: user.uid }]);
+                    getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
+                        await updateDoc(docRef, {
+                            uid: docRef.id,
+                            photoURL: downloadURL
+                        })
                     }).catch((error) => {
                         console.error("Error getting download URL: ", error);
                     });
@@ -216,13 +257,49 @@ export default function Register({ navigation }) {
         flex: 1,
     };
     const nxtButton = {
-        backgroundColor: '#22b14c',
-        borderRadius: 12,
-        paddingHorizontal: 32,
+        backgroundColor: '#FFF',
+        borderWidth: 1,
+        backgroundColor: '#4DAF50',
+        borderColor: '#4DAF50',
+        paddingHorizontal: 35,
         paddingVertical: 12,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+        marginVertical: 8,
+        marginLeft: 20,
+        marginBottom: .1
+
     };
     const nxtButtonText = {
-        color: '#fff',
+        color: 'white',
+        fontSize: 16
+    };
+    const prvButton = {
+        backgroundColor: '#FFF',
+        borderWidth: 1,
+        borderColor: '#4DAF50',
+        paddingHorizontal: 20,
+        paddingVertical: 12,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+        marginVertical: 8,
+        marginBottom: .1
+    }
+    const prvButtonText = {
+        color: '#4DAF50',
+        fontSize: 16
     }
 
     const AddProfile = () => {
@@ -235,11 +312,11 @@ export default function Register({ navigation }) {
                     <View style={styles.addProfCenter}>
                         <Text style={styles.addProfTitle}>Display Photo</Text>
                         <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 24, marginTop: 16 }}>
-                            <TouchableOpacity style={styles.addProfBtn}>
+                            <TouchableOpacity style={styles.addProfBtn} onPress={openCamera}>
                                 <Image source={camera} />
                                 <Text style={styles.addProfBtnText}>Camera</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={styles.addProfBtn}>
+                            <TouchableOpacity style={styles.addProfBtn} onPress={openGallery}>
                                 <Image source={gallery} />
                                 <Text style={styles.addProfBtnText}>Gallery</Text>
                             </TouchableOpacity>
@@ -254,43 +331,179 @@ export default function Register({ navigation }) {
         )
     }
 
+    const onNextStep = () => {
+        if (!firstName || !lastName || !phoneNumber) {
+            Alert.alert('Incomplete Form', 'Please fill in all required fields.');
+            return;
+        }
+        setNextShow(true)
+    };
+    const onPreviousStep = () => {
+        setNextShow(false)
+    }
+
+    const onSecondStep = () => {
+        if (!munCode || !barangay) {
+            Alert.alert('Incomplete Form', 'Please fill in all required fields.');
+            return;
+        }
+        setSecondShow(true)
+    };
+
+    const onSecondPrevious = () => {
+        setSecondShow(false)
+    }
+
+    const onThirdStep = () => {
+        if (!email || !password) {
+            Alert.alert('Incomplete Form', 'Please fill in all required fields.');
+            return;
+        }
+        setThirdShow(true)
+    };
+    const onThirdPrevious = () => {
+        setThirdShow(false)
+    }
+
+    const onLastStep = () => {
+        if (!displayName || !imageUri) {
+            Alert.alert('Incomplete Form', 'Please fill in all required fields.');
+            return;
+        }
+        confirmSave()
+    };
+
+    const confirmSave = () => {
+        Alert.alert(
+            'Sign up account.',
+            'Are you sure you want to sign up this account?',
+            [
+                {
+                    text: 'Cancel',
+                    onPress: () => console.log('Cancel Pressed'),
+                    style: 'cancel',
+                },
+                {
+                    text: 'Yes',
+                    onPress: () => {
+                        setSaving(true);
+                        handleRegister();
+                    },
+                },
+            ]
+        );
+    }
+
+
 
     return (
         <NativeBaseProvider>
             <SafeAreaView style={styles.safeArea}>
-                <View style={styles.topContainer}>
+                {/* <View style={styles.topContainer}>
                     <TouchableOpacity onPress={() => navigation.goBack()}>
                         <Image source={backIcon} style={{ width: 40, height: 40 }} />
                     </TouchableOpacity>
-                </View>
+                </View> */}
                 <View style={styles.bottomContainer}>
                     <Text style={styles.textTitle}>Create an Account</Text>
                     <ProgressSteps >
                         <ProgressStep
                             label="Personal Information"
-                            scrollable={false}
+                            // scrollable={false}
                             viewProps={viewProps}
                             nextBtnStyle={nxtButton}
-                            nextBtnTextStyle={nxtButtonText}>
+                            nextBtnTextStyle={nxtButtonText}
+                            onNext={onNextStep}
+                            errors={!nextShow}
+                        >
                             <Box style={{ flex: 1 }}>
                                 <FormControl isRequired style={styles.formcontrol}>
                                     <FormControl.Label>Firstname</FormControl.Label>
-                                    <Input size='xl' value={firstName} placeholder='Enter firstname' style={styles.input} onChangeText={(fName) => setFirstName(fName)} />
+                                    <TextInput
+                                        editable
+                                        value={firstName}
+                                        placeholder='Enter Firstname'
+                                        style={[styles.input, firstnameError ? { borderColor: 'red', borderWidth: 1 } : null]}
+                                        onChangeText={(fName) => {
+                                            setFirstName(fName);
+                                            if (fName.trim() === '') {
+                                                setFirstnameError('This is a required field');
+                                            } else {
+                                                setFirstnameError('');
+                                            }
+                                        }}
+                                    />
+                                    {firstnameError ? <Text style={{ color: 'red', fontSize: 12 }}>{firstnameError}</Text> : null}
                                 </FormControl>
 
                                 <FormControl isRequired style={styles.formcontrol}>
                                     <FormControl.Label>Lastname</FormControl.Label>
-                                    <Input size='xl' value={lastName} placeholder='Enter lastname' style={styles.input} onChangeText={(lName) => setLastName(lName)} />
+                                    <TextInput
+                                        editable
+                                        value={lastName}
+                                        placeholder='Enter Lastname'
+                                        style={[styles.input, lastnameError ? { borderColor: 'red', borderWidth: 1 } : null]}
+                                        onChangeText={(lName) => {
+                                            setLastName(lName);
+                                            if (lName.trim() === '') {
+                                                setLastnameError('This is a required field');
+                                            } else {
+                                                setLastnameError('');
+                                            }
+                                        }}
+                                    />
+                                    {lastnameError ? <Text style={{ color: 'red', fontSize: 12 }}>{lastnameError}</Text> : null}
+                                </FormControl>
+                                <FormControl isRequired style={styles.formcontrol}>
+                                    <FormControl.Label>Phone Number</FormControl.Label>
+                                    <TextInput
+                                        editable
+                                        keyboardType='numeric'
+                                        value={phoneNumber}
+                                        placeholder='Enter your Phone Number'
+                                        style={[styles.input, phoneError ? { borderColor: 'red', borderWidth: 1 } : null]}
+                                        onChangeText={(pNum) => {
+                                            setPhoneNumber(pNum)
+                                            if (pNum.trim() === '') {
+                                                setPhoneError('This is a required field');
+                                            } else {
+                                                setPhoneError('');
+                                            }
+                                        }
+                                        } />
+                                    {phoneError ? <Text style={{ color: 'red', fontSize: 12 }}>{phoneError}</Text> : null}
                                 </FormControl>
 
+                            </Box>
+                        </ProgressStep>
+                        <ProgressStep style={{flexDirection:'row', display:'flex', justifyContent:'space-between'}}
+                            label="Location"
+                            onNext={onSecondStep}
+                            onPrevious={onPreviousStep}
+                            errors={!secondShow}
+                            viewProps={viewProps}
+                            nextBtnStyle={nxtButton}
+                            nextBtnTextStyle={nxtButtonText}
+                            previousBtnStyle={prvButton}
+                            previousBtnTextStyle={prvButtonText}
+                        >
+                            <Box style={{ flex: 1 }}>
                                 <FormControl isRequired style={styles.formcontrol}>
                                     <FormControl.Label>Select Municipality</FormControl.Label>
-                                    <Select selectedValue={munCode} style={styles.input} minWidth="200" accessibilityLabel="Choose Municipality" placeholder="Choose Municipality" _selectedItem={{
-                                        bg: "teal.600",
-                                        endIcon: <CheckIcon size={5} />
-                                    }}
-                                        onValueChange={(item) => {
+                                    <Select
+                                        selectedValue={munCode}
+                                        style={styles.input1}
+                                        minWidth="200"
+                                        accessibilityLabel="Municipality"
+                                        placeholder="Choose Municipality"
+                                        _selectedItem={{
+                                            bg: "teal.600",
+                                            endIcon: <CheckIcon size={5} />
+                                        }}
+                                        onValueChange={item => {
                                             setMunCode(item)
+                                            const foundItem = municipalities.cityAndMun.find(entry => entry.mun_code === item);
+                                            setMun(foundItem ? foundItem.name : '');
                                         }}
                                     >
                                         {
@@ -300,13 +513,13 @@ export default function Register({ navigation }) {
                                                 )
                                             })
                                         }
-                                        <Select.Item label="UX Research" value="ux" />
+
                                     </Select>
                                 </FormControl>
 
                                 <FormControl isRequired style={styles.formcontrol}>
-                                    <FormControl.Label>Choose service</FormControl.Label>
-                                    <Select selectedValue={barangay} style={styles.input} minWidth="200" accessibilityLabel="Choose Service" placeholder="Choose Service" _selectedItem={{
+                                    <FormControl.Label>Select Barangay</FormControl.Label>
+                                    <Select selectedValue={barangay} style={styles.input1} minWidth="200" accessibilityLabel="Barangay" placeholder="Baranggay" _selectedItem={{
                                         bg: "teal.600",
                                         endIcon: <CheckIcon size={5} />
                                     }} onValueChange={(item) => setBarangay(item)}>
@@ -319,56 +532,102 @@ export default function Register({ navigation }) {
                                         }
                                     </Select>
                                 </FormControl>
+
                             </Box>
-                        </ProgressStep>
+                        </ProgressStep >
+
                         <ProgressStep
-                            label="Second Step"
+                            label="Email/Password"
+                            onNext={onThirdStep}
+                            onPrevious={onThirdPrevious}
+                            errors={!secondShow}
+                            viewProps={viewProps}
                             nextBtnStyle={nxtButton}
-                            nextBtnTextStyle={nxtButtonText}>
+                            nextBtnTextStyle={nxtButtonText}
+                            previousBtnStyle={prvButton}
+                            previousBtnTextStyle={prvButtonText}
+                        >
                             <Box style={{ flex: 1 }}>
                                 <FormControl isRequired style={styles.formcontrol}>
                                     <FormControl.Label>Email</FormControl.Label>
-                                    <Input size='xl' value={email} placeholder='Enter your email' style={styles.input} onChangeText={(e) => setEmail(e)} />
+                                    <TextInput
+                                        editable
+                                        value={email}
+                                        keyboardType="email-address"
+                                        placeholder='Enter your Email'
+                                        style={[styles.input, emailError ? { borderColor: 'red', borderWidth: 1 } : null]}
+                                        onChangeText={(e) => {
+                                            setEmail(e);
+                                            if (e.trim() === '') {
+                                                setEmailError('This is a required field');
+                                            } else {
+                                                setEmailError('');
+                                            }
+                                        }
+                                        }
+                                    />
+                                    {emailError ? <Text style={{ color: 'red', fontSize: 12 }}>{emailError}</Text> : null}
                                 </FormControl>
                                 <FormControl isRequired style={styles.formcontrol}>
-                                    <FormControl.Label>Phone Number</FormControl.Label>
-                                    <Input size='xl' type='' value={phoneNumber} placeholder='Enter your phone number' style={styles.input} onChangeText={(pNum) => setPhoneNumber(pNum)} />
+                                    <FormControl.Label>Password</FormControl.Label>
+                                    <TextInput
+                                        editable
+                                        size='xl'
+                                        value={password}
+                                        type='password'
+                                        secureTextEntry={true}
+                                        placeholder='Enter your password'
+                                        style={[styles.input, passwordError ? { borderColor: 'red', borderWidth: 1 } : null]}
+                                        onChangeText={(pWord) => {
+                                            setPassword(pWord);
+                                            if (pWord.trim() === '') {
+                                                setPasswordError('This is a required field');
+                                            } else {
+                                                setPasswordError('');
+                                            }
+                                        }
+                                        }
+                                    />
+                                    {passwordError ? <Text style={{ color: 'red', fontSize: 12 }}>{passwordError}</Text> : null}
                                 </FormControl>
                             </Box>
-                        </ProgressStep>
-                        <ProgressStep label="Account Information" onSubmit={() => {
-                            Alert.alert(
-                                'Sign up account.',
-                                'are you sure you want to sign up this account?',
-                                [
-                                    {
-                                        text: 'Cancel',
-                                        onPress: () => console.log('Cancel Pressed'),
-                                        style: 'cancel',
-                                    },
-                                    {
-                                        text: 'Yes',
-                                        onPress: handleRegister,
-                                    }
-                                ]
-                            )
-                        }}
+                        </ProgressStep >
+                        <ProgressStep
+                            label="Submit"
+                            onSubmit={onLastStep}
+                            onPrevious={onSecondPrevious}
+                            viewProps={viewProps}
                             nextBtnStyle={nxtButton}
-                            nextBtnTextStyle={nxtButtonText}>
+                            nextBtnTextStyle={nxtButtonText}
+                            previousBtnStyle={prvButton}
+                            previousBtnTextStyle={prvButtonText}
+                        >
                             <Box style={{ flex: 1 }} >
                                 <Box style={{ width: '100%', alignItems: 'center', justifyContent: 'center' }}>
-                                    <Image source={imageUri ? imageUri : noProf} style={styles.avatar} />
+                                    <Image source={imageUri ? { uri: imageUri } : noProf} style={styles.avatar} />
                                     <Button title='add profile' onPress={() => setProfShow(true)} />
                                 </Box>
                                 <Box style={{}}>
                                     <FormControl isRequired style={styles.formcontrol}>
                                         <FormControl.Label>Display Name</FormControl.Label>
-                                        <Input size='xl' value={displayName} placeholder='Enter desired display name' style={styles.input} onChangeText={(dName) => setDisplayName(dName)} />
+                                        <TextInput
+                                            editable
+                                            size='xl'
+                                            value={displayName}
+                                            placeholder='Enter desired display name'
+                                            style={[styles.input, displayError ? { borderColor: 'red', borderWidth: 1 } : null]}
+                                            onChangeText={(dName) => {
+                                                setDisplayName(dName);
+                                                if (dName.trim() === '') {
+                                                    setDisplayError('This is a required field');
+                                                } else {
+                                                    setDisplayError('');
+                                                }
+                                            }}
+                                        />
+                                        {displayError ? <Text style={{ color: 'red', fontSize: 12 }}>{displayError}</Text> : null}
                                     </FormControl>
-                                    <FormControl isRequired style={styles.formcontrol}>
-                                        <FormControl.Label>Password</FormControl.Label>
-                                        <Input size='xl' value={password} type='password' placeholder='Enter your password' style={styles.input} onChangeText={(pWord) => setPassword(pWord)} />
-                                    </FormControl>
+
                                 </Box>
                             </Box>
                         </ProgressStep>

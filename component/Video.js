@@ -4,7 +4,7 @@ import YoutubePlayer from 'react-native-youtube-iframe';
 
 const Video = ({ navigation }) => {
     return (
-        <ImageBackground source={require('../assets/p1.jpg')} style={styles.background} >
+        // <ImageBackground source={require('../assets/p1.jpg')} style={styles.background} >
             <ScrollView showsVerticalScrollIndicator={false}>
                 <View style={styles.videoContainer}>
                     <VideoCard title="Pagaani ng Pinya sa Labo, Camarines Norte " subtitle='loremipsum hahaaha' videoId="oS5xvukokSw" />
@@ -12,7 +12,7 @@ const Video = ({ navigation }) => {
                     <VideoCard title="The sweetest Pineapple in Camarines Norte" videoId="gCCu6xwi2f4" />
                 </View>
             </ScrollView>
-        </ImageBackground>
+        // </ImageBackground>
     );
 };
 
