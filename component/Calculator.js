@@ -1077,7 +1077,7 @@ export const Calculator = ({ navigation }) => {
                           labelField='fieldId'
                           valueField='fieldId'
                           onChange={fieldIdChange}
-                          placeholder={!fieldidFocus ? 'Select Farm Field ID' : '...'}
+                          placeholder={!fieldidFocus ? 'Select Farm Field ID' : fieldId }
                           searchPlaceholder="Search..."
                           value={fieldId}
                           style={fieldidFocus ? styles.textInputFocus : styles.textInput}
