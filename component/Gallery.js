@@ -36,8 +36,13 @@ export default function Gallery({ route }) {
 
   useEffect(() => {
     const filteredFarms = farms.filter((farm) => {
-      const matchesMunicipality = user.mun ? farm.mun === user.mun : true;
-      const matchesBrgy = user.brgy ? farm.brgy === user.brgy : true;
+      let matchesMunicipality = farm;
+      let matchesBrgy = farm;
+
+      if (user) {
+        matchesMunicipality = user.mun ? farm.mun === user.mun : true;
+        matchesBrgy = user.brgy ? farm.brgy === user.brgy : true;
+      }
       const matchesSearch = farm.title.toLowerCase().includes(search.toLowerCase());
       return matchesSearch && matchesMunicipality && matchesBrgy
     })
@@ -73,7 +78,7 @@ export default function Gallery({ route }) {
       />
       {filteredFarms && Object.keys(imageUrls).length !== 0 &&
         <Tab.Navigator
-          initialRouteName="Notifications"
+          initialRouteName="Lahat"
           tabBarOptions={{
             activeTintColor: 'green',
             labelStyle: { fontSize: 11 },
@@ -82,7 +87,7 @@ export default function Gallery({ route }) {
           }}
         >
           <Tab.Screen
-            name="Notifications"
+            name="Lahat"
             // component={TabView}
             // options={{ tabBarLabel: 'Lahat' }}
             // setParams={{
@@ -106,7 +111,7 @@ export default function Gallery({ route }) {
             //   imageUrls: imageUrls
             // }}
             children={props => (
-              <TabView {...props} farms={filteredFarms.filter(obj => obj.cropStage.toLowerCase() === 'vegetative' )} imageUrls={imageUrls} />
+              <TabView {...props} farms={filteredFarms.filter(obj => obj.cropStage.toLowerCase() === 'vegetative')} imageUrls={imageUrls} />
             )}
           />
           <Tab.Screen
@@ -120,7 +125,7 @@ export default function Gallery({ route }) {
             //   imageUrls: imageUrls
             // }}
             children={props => (
-              <TabView {...props} farms={filteredFarms.filter(obj => obj.cropStage.toLowerCase() === 'flowering' )} imageUrls={imageUrls} />
+              <TabView {...props} farms={filteredFarms.filter(obj => obj.cropStage.toLowerCase() === 'flowering')} imageUrls={imageUrls} />
             )}
           />
           <Tab.Screen
@@ -134,7 +139,7 @@ export default function Gallery({ route }) {
             //   imageUrls: imageUrls
             // }}
             children={props => (
-              <TabView {...props} farms={filteredFarms.filter(obj => obj.cropStage.toLowerCase() === 'fruiting' )} imageUrls={imageUrls} />
+              <TabView {...props} farms={filteredFarms.filter(obj => obj.cropStage.toLowerCase() === 'fruiting')} imageUrls={imageUrls} />
             )}
           />
           <Tab.Screen
@@ -148,7 +153,7 @@ export default function Gallery({ route }) {
             //   imageUrls: imageUrls
             // }}
             children={props => (
-              <TabView {...props} farms={filteredFarms.filter(obj => obj.cropStage.toLowerCase() === 'complete' )} imageUrls={imageUrls} />
+              <TabView {...props} farms={filteredFarms.filter(obj => obj.cropStage.toLowerCase() === 'complete')} imageUrls={imageUrls} />
             )}
           />
         </Tab.Navigator>
