@@ -117,7 +117,8 @@ const styles = StyleSheet.create({
     }
 })
 
-export default function Register({ navigation }) {
+export default function Register({ navigation, route }) {
+    const { users } = route.params
     const [munCode, setMunCode] = useState(null)
     const [imageUri, setImageUri] = useState(null)
 
@@ -331,10 +332,27 @@ export default function Register({ navigation }) {
         )
     }
 
+    function checkPhone(num) {
+        var phoneRegex = /^(09)\d{9}$/
+        return phoneRegex.test(num)
+    }
+
+    function isNotAvailable(email, userEmails) {
+        return userEmails.some(umail => umail.email === email);
+    }
+
     const onNextStep = () => {
         if (!firstName || !lastName || !phoneNumber) {
             Alert.alert('Incomplete Form', 'Please fill in all required fields.');
             return;
+
+        }
+        console.log("phone", phoneNumber);
+        console.log("phone check", checkPhone(phoneNumber))
+
+        if (!checkPhone(phoneNumber)) {
+            Alert.alert('Maling numero','Mali ang format ng iyong numero.')
+            return
         }
         setNextShow(true)
     };
@@ -357,6 +375,10 @@ export default function Register({ navigation }) {
     const onThirdStep = () => {
         if (!email || !password) {
             Alert.alert('Incomplete Form', 'Please fill in all required fields.');
+            return;
+        }
+        if (isNotAvailable(email, users)) {
+            Alert.alert('Email already exist', 'May gumagamit na ng iyong email')
             return;
         }
         setThirdShow(true)
@@ -476,7 +498,7 @@ export default function Register({ navigation }) {
 
                             </Box>
                         </ProgressStep>
-                        <ProgressStep style={{flexDirection:'row', display:'flex', justifyContent:'space-between'}}
+                        <ProgressStep style={{ flexDirection: 'row', display: 'flex', justifyContent: 'space-between' }}
                             label="Location"
                             onNext={onSecondStep}
                             onPrevious={onPreviousStep}

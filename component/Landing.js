@@ -141,7 +141,7 @@ export const Landing = ({ navigation }) => {
                             <TouchableOpacity style={loginStyle.createAccountButton}>
                                 <Text style={loginStyle.createAccountButtonText} onPress={() => {
                                     setShowLogin(false)
-                                    navigation.navigate('Register')
+                                    navigation.navigate('Register', { users: users })
                                 }}>
                                     Create Account?</Text>
                             </TouchableOpacity>
