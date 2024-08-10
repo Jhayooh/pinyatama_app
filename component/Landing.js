@@ -1,10 +1,10 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { signOut } from "firebase/auth";
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { Avatar } from "native-base";
-
+import { Divider } from 'react-native-paper';
 import {
     Button,
     Dimensions,
@@ -20,7 +20,7 @@ import {
     Alert,
     TextInput,
     FlatList,
-    DrawerLayoutAndroid
+    DrawerLayoutAndroid,
 } from 'react-native';
 import { auth, db } from '../firebase/Config';
 
@@ -49,6 +49,9 @@ export const Landing = ({ navigation }) => {
     const [farms] = useCollectionData(farmsColl)
 
     const [user] = useAuthState(auth)
+
+    const drawer = useRef(null);
+    const [drawerPosition, setdrawerPosition] = useState('left')
 
     const logUser = user && users?.find(item => item.id === user.uid)
 
@@ -321,25 +324,77 @@ export const Landing = ({ navigation }) => {
             </Modal>
         );
     }
-
+    const drawerLockMode = logUser ? 'unlocked' : 'locked-closed';
     //drawer
-    const drawer = useRef(null);
-    const [drawerPosition, setdrawerPosition] = useState('left')
 
-    const drawerView = (logUser) => (
+
+    const drawerView = () => (
         <>
-            <View style={styles.drawerContainer}>
+            {
+                user
+                    ?
+                    <View style={styles.drawerContainer}>
+                        <View style={styles.drawerSubcontainer}>
+                            {
+                                logUser?.photoURL ? (
+                                    <Image
+                                        source={{ uri: logUser.photoURL }}
+                                        style={{ ...styles.drawerImg, }}
+                                    />
+                                ) : (
+                                    <Image
+                                        source={logonLogo}
+                                        style={styles.drawerImg}
+                                    />
+                                )
+                            }
+                            <Text style={styles.drawerTitle}>{logUser?.displayName}</Text>
+                        </View>
+                        <View style={styles.drawerViewText}>
+                            <Image source={require('../assets/user.png')} style={styles.drawerBtnText} />
+                            <Text
+                                style={styles.drawerBtnText}
+                                onPress={() => {
+                                    navigation.navigate('Extensionist', { logUser: logUser });
+                                }}>
+                                My Profile
+                            </Text>
+                        </View>
+                        <Divider />
+                        <View style={styles.drawerLogoutContainer}>
+                            <Image source={require('../assets/logout.png')} style={styles.drawerBtnText} />
+                            <Text
+                                onPress={handleLogout}
+                                style={styles.drawerLogoutBtn}
+                            >
+                                Logout
+                            </Text>
+
+                        </View>
+
+
+
+
+                    </View>
+                    :
+                    <></>
+            }
+
+            {/* <View style={styles.drawerContainer}>
                 <Image source={appLogo}
                     style={{
                         width: 128,
                         height: 128,
                     }} />
-                <Text style={styles.drawerTitle} >Queen Pineapple Farming</Text>
-                {/* <Button
+                <Text style={styles.drawerTitle} >Queen Pineapple Farming</Text> */}
+            {/* <Button
                 title='Close'
                 onPress={() => drawer.current.closeDrawer()}
             /> */}
-                <View>
+
+
+            {/* <View>
+                    <Divider />
                     <TouchableOpacity style={loginStyle.createAccountButton}>
                         <Text
                             style={{
@@ -353,6 +408,7 @@ export const Landing = ({ navigation }) => {
                             Edit Profile
                         </Text>
                     </TouchableOpacity>
+                    <Divider />
                 </View>
                 <Button
                     title='Logout'
@@ -362,18 +418,19 @@ export const Landing = ({ navigation }) => {
                 />
 
 
-            </View>
+            </View> */}
         </>
     )
 
     return (
         <>
             <DrawerLayoutAndroid
-                // drawerBackgroundColor="rgba(0,0,0,0.5)"
+                //drawerBackgroundColor="rgba(0,0,0,0.6)"
                 ref={drawer}
                 drawerWidth={300}
                 drawerPosition={drawerPosition}
-                renderNavigationView={() => drawerView({ logUser })}
+                renderNavigationView={() => drawerView()}
+                drawerLockMode={drawerLockMode}
             >
                 <View style={styles.bgOut}>
                     <View style={styles.logoBg} >
@@ -430,7 +487,7 @@ export const Landing = ({ navigation }) => {
                                         ?
                                         <TouchableHighlight
                                             style={styles.btnbtn}
-                                            onPress={() => drawer.current.openDrawer()}
+                                            onPress={() => { console.log("the draweeeer", drawer); drawer.current?.openDrawer() }}
                                         // onPress={handleLogout}
                                         >
                                             <View style={styles.btnbtnChild2}>
@@ -584,27 +641,63 @@ const styles = StyleSheet.create({
         fontStyle: 'italic',
     },
     drawerContainer: {
-        padding: 20,
-        marginTop: '10%',
+        // padding: 20,
+        // marginTop: '10%',
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'transparent'
+        flex: 1,
 
+        // alignItems: 'center',
+        // backgroundColor: 'transparent'
+
+    },
+    drawerSubcontainer: {
+        backgroundColor: '#22b14c',
+        padding: 20,
+        height: '30%'
+    },
+    drawerViewText: {
+        backgroundColor: '#fff',
+        padding: 20,
+        height: '60%',
+        flexDirection: 'row',
+
+    },
+    drawerImg: {
+        borderRadius: 100,
+        width: 130,
+        height: 130,
+        marginTop: 50
     },
     drawerTitle: {
         // fontSize: windowWidth * 0.1,
         fontSize: 30,
-        color: 'green',
+        color: '#fff',
         fontWeight: '300',
-        textAlign: 'center',
+        // textAlign: 'center',
         fontFamily: 'serif',
-        padding: 5
+        // marginLeft:5,
+        marginTop: 10
+
+    },
+    drawerBtnText: {
+        color: '#000',
+        marginLeft: 30,
+        marginTop: 5,
+        fontFamily: 'serif',
+        fontSize: 15
+    },
+    drawerLogoutContainer: {
+        flexDirection: 'row',
+        padding: 20
+
     },
     drawerLogoutBtn: {
+        color: '#000',
+        marginLeft: 30,
+        marginTop: 5,
         fontFamily: 'serif',
-        padding: 10,
+        fontSize: 20
     },
 
 })
