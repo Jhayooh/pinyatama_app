@@ -337,21 +337,27 @@ export default function Register({ navigation, route }) {
         return phoneRegex.test(num)
     }
 
-    function isNotAvailable(email, userEmails) {
+    function checkEmail(email) {
+        var emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        return emailRegex.test(email);
+    }
+
+    function isExisting(email, userEmails) {
         return userEmails.some(umail => umail.email === email);
+    }
+
+    function validatePassword(password) {
+        return password.length >= 6;
     }
 
     const onNextStep = () => {
         if (!firstName || !lastName || !phoneNumber) {
             Alert.alert('Incomplete Form', 'Please fill in all required fields.');
             return;
-
         }
-        console.log("phone", phoneNumber);
-        console.log("phone check", checkPhone(phoneNumber))
 
         if (!checkPhone(phoneNumber)) {
-            Alert.alert('Maling numero','Mali ang format ng iyong numero.')
+            Alert.alert('Maling numero', 'Mali ang format ng iyong numero.')
             return
         }
         setNextShow(true)
@@ -377,12 +383,25 @@ export default function Register({ navigation, route }) {
             Alert.alert('Incomplete Form', 'Please fill in all required fields.');
             return;
         }
-        if (isNotAvailable(email, users)) {
-            Alert.alert('Email already exist', 'May gumagamit na ng iyong email')
+
+        if (!checkEmail(email)) {
+            Alert.alert("Maling email", 'Mali ang format ng iyong email address');
             return;
         }
+
+        if (isExisting(email, users)) {
+            Alert.alert('Email already exist', 'May gumagamit na ng iyong email');
+            return;
+        }
+
+        if (!validatePassword(password)) {
+            Alert.alert('Mahinang password', 'Kulang ang lakas ng iyong password');
+            return;
+        }
+
         setThirdShow(true)
     };
+
     const onThirdPrevious = () => {
         setThirdShow(false)
     }
