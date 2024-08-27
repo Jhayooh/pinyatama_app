@@ -117,7 +117,8 @@ const styles = StyleSheet.create({
     }
 })
 
-export default function Register({ navigation }) {
+export default function Register({ navigation, route }) {
+    const { users } = route.params
     const [munCode, setMunCode] = useState(null)
     const [imageUri, setImageUri] = useState(null)
 
@@ -331,10 +332,33 @@ export default function Register({ navigation }) {
         )
     }
 
+    function checkPhone(num) {
+        var phoneRegex = /^(09)\d{9}$/
+        return phoneRegex.test(num)
+    }
+
+    function checkEmail(email) {
+        var emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        return emailRegex.test(email);
+    }
+
+    function isExisting(email, userEmails) {
+        return userEmails.some(umail => umail.email === email);
+    }
+
+    function validatePassword(password) {
+        return password.length >= 6;
+    }
+
     const onNextStep = () => {
         if (!firstName || !lastName || !phoneNumber) {
             Alert.alert('Incomplete Form', 'Please fill in all required fields.');
             return;
+        }
+
+        if (!checkPhone(phoneNumber)) {
+            Alert.alert('Maling numero', 'Mali ang format ng iyong numero.')
+            return
         }
         setNextShow(true)
     };
@@ -359,8 +383,25 @@ export default function Register({ navigation }) {
             Alert.alert('Incomplete Form', 'Please fill in all required fields.');
             return;
         }
+
+        if (!checkEmail(email)) {
+            Alert.alert("Maling email", 'Mali ang format ng iyong email address');
+            return;
+        }
+
+        if (isExisting(email, users)) {
+            Alert.alert('Email already exist', 'May gumagamit na ng iyong email');
+            return;
+        }
+
+        if (!validatePassword(password)) {
+            Alert.alert('Mahinang password', 'Kulang ang lakas ng iyong password');
+            return;
+        }
+
         setThirdShow(true)
     };
+
     const onThirdPrevious = () => {
         setThirdShow(false)
     }
@@ -476,7 +517,7 @@ export default function Register({ navigation }) {
 
                             </Box>
                         </ProgressStep>
-                        <ProgressStep style={{flexDirection:'row', display:'flex', justifyContent:'space-between'}}
+                        <ProgressStep style={{ flexDirection: 'row', display: 'flex', justifyContent: 'space-between' }}
                             label="Location"
                             onNext={onSecondStep}
                             onPrevious={onPreviousStep}
