@@ -811,36 +811,24 @@ export const Calculator = ({ navigation }) => {
   };
 
   useEffect(() => {
-    console.log("numOne")
-    if (!isNext) {
-      navigation.setOptions({
-        headerLeft: (props) => (
-          <HeaderBackButton
-            {...props}
-            onPress={() => navigation.goBack()}
-
-          />
-        ),
-        headerRight: () => (
-          <Button color='orange' title={isAddFarm ? 'Cancel' : 'Add New Farm'} onPress={() => { setIsAddFarm(!isAddFarm) }} />
-        )
-      });
-
-    } else {
-      navigation.setOptions({
-        headerLeft: (props) => (
-          <HeaderBackButton
-            {...props}
-            onPress={() => setIsNext(false)}
-          />
-        ),
-      });
-    }
+    navigation.setOptions({
+      headerLeft: (props) => (
+        <HeaderBackButton
+          {...props}
+          onPress={() => isNext ? setIsNext(false) : navigation.goBack()}
+        />
+      ),
+      headerRight: () => (
+        !isNext && <Button color='orange' title={isAddFarm ? 'Cancel' : 'Add New Farm'} onPress={() => { setIsAddFarm(!isAddFarm) }} />
+      )
+    });
   }, [isNext, isAddFarm])
 
   useEffect(() => {
     if (!lastname) return
-    setFieldId(lastname + uniqueId)
+    if (isAddFarm) {
+      setFieldId(lastname + uniqueId)
+    }
   }, [lastname])
 
   function uniqueID() {
@@ -1037,7 +1025,7 @@ export const Calculator = ({ navigation }) => {
     navigation.goBack()
   }
 
-  // important function
+  // important function (saving)
   const saveInputs = async () => {
     try {
       const newAccount = await addDoc(farmerColl, {
@@ -1072,7 +1060,6 @@ export const Calculator = ({ navigation }) => {
         farmerId: newAccount.id,
         npk: npk,
         soil: soil
-
       })
 
       const weatherCol = collection(db, `farms/${newFarm.id}/weather`);
@@ -1246,45 +1233,45 @@ export const Calculator = ({ navigation }) => {
   //   getLocationAsync();
   // }, []);
 
-  const getLocationAsync = async () => {
-    let { status } = await Location.requestForegroundPermissionsAsync();
+  // const getLocationAsync = async () => {
+  //   let { status } = await Location.requestForegroundPermissionsAsync();
 
-    if (status !== 'granted') {
-      Alert.alert('Permission to access location was denied');
-      return;
-    }
+  //   if (status !== 'granted') {
+  //     Alert.alert('Permission to access location was denied');
+  //     return;
+  //   }
 
-    let location = await Location.getCurrentPositionAsync({});
-    const lat = location.coords.latitude
-    const long = location.coords.latitude
-    setUserLocation(new GeoPoint(lat, long));
-    setRegion({
-      latitude: location.coords.latitude,
-      longitude: location.coords.longitude,
-      latitudeDelta: 0.0922,
-      longitudeDelta: 0.0421,
-    });
-  };
+  //   let location = await Location.getCurrentPositionAsync({});
+  //   const lat = location.coords.latitude
+  //   const long = location.coords.latitude
+  //   setUserLocation(new GeoPoint(lat, long));
+  //   setRegion({
+  //     latitude: location.coords.latitude,
+  //     longitude: location.coords.longitude,
+  //     latitudeDelta: 0.0922,
+  //     longitudeDelta: 0.0421,
+  //   });
+  // };
 
-  const handleUpdateLocation = async () => {
-    let location = await Location.getCurrentPositionAsync({});
-    setUserLocation(location.coords);
-    setRegion({
-      latitude: location.coords.latitude,
-      longitude: location.coords.longitude,
-      latitudeDelta: 0.0922,
-      longitudeDelta: 0.0421,
-    });
-  };
+  // const handleUpdateLocation = async () => {
+  //   let location = await Location.getCurrentPositionAsync({});
+  //   setUserLocation(location.coords);
+  //   setRegion({
+  //     latitude: location.coords.latitude,
+  //     longitude: location.coords.longitude,
+  //     latitudeDelta: 0.0922,
+  //     longitudeDelta: 0.0421,
+  //   });
+  // };
 
-  const hideDatePicker = () => {
-    setDatePickerVisibility(false)
-  }
+  // const hideDatePicker = () => {
+  //   setDatePickerVisibility(false)
+  // }
 
-  const showMode = (currentMode) => {
-    setShow(true);
-    setMode(currentMode);
-  };
+  // const showMode = (currentMode) => {
+  //   setShow(true);
+  //   setMode(currentMode);
+  // };
 
   const getMult = (numOne, numTwo) => {
     const num = numOne * numTwo
@@ -1308,7 +1295,6 @@ export const Calculator = ({ navigation }) => {
 
         Object.keys(firstList).forEach(list => {
           if (item.name.includes(list)) {
-            console.log("indeeeeexxOne:", firstList[list]);
             const newQnty = getMult(area, firstList[list]);
             items.push({
               ...item,
@@ -1318,12 +1304,11 @@ export const Calculator = ({ navigation }) => {
               label: 'first'
             });
           }
-        });    
+        });
 
         // Update item based on secondList
         Object.keys(secondList).forEach(list => {
           if (item.name.includes(list)) {
-            console.log("indeeeeexxTwo:", secondList[list]);
             const newQnty = getMult(area, secondList[list]);
             items.push({
               ...item,
@@ -1381,6 +1366,20 @@ export const Calculator = ({ navigation }) => {
   };
 
   const fieldIdChange = (e) => {
+    setFieldId(e.fieldId)
+    const f = farmerData?.find(fd => fd.id === e.farmerId)
+    if (f) {
+      setFarmName(f['farmName'])
+      setFirstname(f['firstname'])
+      setLastname(f['lastname'])
+      setSex(f['sex'])
+    }
+    setMunicipality(e.mun)
+    setBrgyCode(e.brgy)
+    setFieldidFocus(false)
+    console.log("eeeeeeeeeee:", e)
+    // setUserLocation(f['Geopoint'])
+
     // Index: 0
     // Area: 1.00
     // Barangay: Iraya Sur
@@ -1407,19 +1406,11 @@ export const Calculator = ({ navigation }) => {
     // farmName,
 
     // if (!farmerData) return
-
-    const f = farmerData?.find(fd => fd.id === e.farmerId)
-    if (f) {
-      setFieldId(e.fieldId)
-      setFarmName(f['farmName'])
-      setFirstname(f['firstname'])
-      setLastname(f['lastname'])
-      setSex(f['sex'])
-      setMunicipality(e.mun)
-      setBrgyCode(e.brgy)
-      // setUserLocation(f['Geopoint'])
-    }
   }
+
+
+  dataFarms && console.log("datafarms:", dataFarms)
+  indUser && console.log("indUser:", indUser)
 
   const getDayOfWeek = (timestamp) => {
     const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -1601,7 +1592,7 @@ export const Calculator = ({ navigation }) => {
 
                       }
                     </View>
-                    {table && qPine && <TableBuilder components={components} area={area} setRoiDetails={setRoiDetails} pineapple={qPine} setComponents={setComponents} fertilizers={npkType.find((npkItem) => npkItem.value === npk)} />}
+                    {table && qPine && <TableBuilder components={components} area={area} setRoiDetails={setRoiDetails} pineapple={qPine} setComponents={setComponents} fertilizers={npkType.find((npkItem) => npkItem.value === npk)} soil={soil} />}
                   </View>
 
                 </View>
@@ -1650,7 +1641,7 @@ export const Calculator = ({ navigation }) => {
                           labelField='fieldId'
                           valueField='fieldId'
                           onChange={fieldIdChange}
-                          placeholder={!fieldidFocus ? 'Select Farm Field ID' : '...'}
+                          placeholder={!fieldidFocus ? 'Select Farm Field ID' : fieldId }
                           searchPlaceholder="Search..."
                           value={fieldId}
                           style={fieldidFocus ? styles.textInputFocus : styles.textInput}

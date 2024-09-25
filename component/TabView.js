@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -26,9 +26,7 @@ const Card = ({ imageSource, title, description, startDate, endDate, onPress }) 
   );
 };
 
-const TabView = ({ route, navigation }) => {
-  const { farms = [], imageUrls = {} } = route.params;
-
+const TabView = ({ route, navigation, farms, imageUrls }) => {
   const handleCardPress = (farm) => {
     navigation.navigate("ProductionInput", { farms: [farm] });
   };
@@ -36,13 +34,13 @@ const TabView = ({ route, navigation }) => {
   function dateFormatter(date) {
     const d = new Date(date.toMillis());
     return d.toLocaleDateString();
-  }
+  }  
 
   return (
     <>
       {farms.length === 0 && Object.keys(imageUrls).length !== 0 ? (
         <View style={styles.loaderContainer}>
-          <ActivityIndicator size="large" color="#4DAF50" />
+          <Text>Walang nakitang farm</Text>
         </View>
       ) : (
         <ScrollView showsVerticalScrollIndicator={false}>

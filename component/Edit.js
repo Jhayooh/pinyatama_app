@@ -73,7 +73,7 @@ const Edit = ({ route, navigation }) => {
                     >
                         {() => (
                             <ScrollView>
-                                {qPine && <TableBuilder components={comp} area={farm.area} setRoiDetails={setRoiDetails} pineapple={qPine} setComponents={setComp}/>}
+                                {qPine && <TableBuilder components={comp} area={farm.area} setRoiDetails={setRoiDetails} pineapple={qPine} setComponents={setComp} soil={farm.soil}/>}
                             </ScrollView>
                         )}
                     </Tab.Screen>
