@@ -114,8 +114,8 @@ const npkType = [
           K: 75
         },
         list: {
-          '17-0-17': 4.5, //water soluble solution
-          '46-0-0': 1.5,
+          '17-0-17': 1.0, //water soluble solution
+          '46-0-0': 0.5,
           '0-0-60': 0
         }
       }
@@ -147,8 +147,8 @@ const npkType = [
           K: 75
         },
         list: {
-          '17-0-17': 4.5, //water soluble solution
-          '46-0-0': 1.5,
+          '17-0-17': 1.0, //water soluble solution
+          '46-0-0': 0.5,
           '0-0-60': 0
         }
       }
@@ -180,8 +180,8 @@ const npkType = [
           K: 75
         },
         list: {
-          '17-0-17': 4.5, // water soluble solution
-          '46-0-0': 1.5,
+          '17-0-17': 1.0, // water soluble solution
+          '46-0-0': 0.5,
           '0-0-60': 0
         }
       }
@@ -213,9 +213,9 @@ const npkType = [
             K: 75
           },
           list: {
-            '17-0-17': 4.5, // water soluble solution
-            '46-0-0': 1.5,
-            '0-0-60': 0
+            '17-0-17': 2.5, // water soluble solution
+            '46-0-0': 0.0,
+            '0-0-60': 0.5
           }
         }
       }
@@ -246,9 +246,9 @@ const npkType = [
             K: 75
           },
           list: {
-            '17-0-17': 4.5, // water soluble solution
-            '46-0-0': 1.5,
-            '0-0-60': 0
+            '17-0-17': 2.5, // water soluble solution
+            '46-0-0': 0,  
+            '0-0-60': 0.5
           }
         }
       }
@@ -279,9 +279,9 @@ const npkType = [
             K: 75
           },
           list: {
-            '17-0-17': 4.5, // water soluble solution
-            '46-0-0': 1.5,
-            '0-0-60': 0
+            '17-0-17': 2.5, // water soluble solution
+            '46-0-0': 0,
+            '0-0-60': 0.5
           }
         }
       }
@@ -314,8 +314,8 @@ const npkType = [
             K: 75
           },
           list: {
-            '17-0-17': 4.5, // water soluble solution
-            '46-0-0': 1.5,
+            '17-0-17': 1.0, // water soluble solution
+            '46-0-0': 2.0,
             '0-0-60': 0
           }
         }
@@ -347,8 +347,8 @@ const npkType = [
             K: 75
           },
           list: {
-            '17-0-17': 4.5, // water soluble solution
-            '46-0-0': 1.5,
+            '17-0-17': 1.0, // water soluble solution
+            '46-0-0': 2.0,
             '0-0-60': 0
           }
         }
@@ -380,8 +380,8 @@ const npkType = [
             K: 75
           },
           list: {
-            '17-0-17': 4.5, // water soluble solution
-            '46-0-0': 1.5,
+            '17-0-17': 1.0, // water soluble solution
+            '46-0-0': 2.0,
             '0-0-60': 0
           }
         }
@@ -415,7 +415,7 @@ const npkType = [
           },
           list: {
             '17-0-17': 4.5, // water soluble solution
-            '46-0-0': 1.5,
+            '46-0-0': 0.5,
             '0-0-60': 0
           }
         }
@@ -448,7 +448,7 @@ const npkType = [
           },
           list: {
             '17-0-17': 4.5, // water soluble solution
-            '46-0-0': 1.5,
+            '46-0-0': 0.5,
             '0-0-60': 0
           }
         }
@@ -481,7 +481,7 @@ const npkType = [
           },
           list: {
             '17-0-17': 4.5, // water soluble solution
-            '46-0-0': 1.5,
+            '46-0-0': 0.5,
             '0-0-60': 0
           }
         }
@@ -514,8 +514,8 @@ const npkType = [
             K: 75,
           },
           list: {
-            '17-0-17': 4.5, // water soluble solution
-            '46-0-0': 1.5,
+            '17-0-17': 1.0, // water soluble solution
+            '46-0-0': 3.0,
             '0-0-60': 0,
           },
         },
@@ -547,8 +547,8 @@ const npkType = [
             K: 75,
           },
           list: {
-            '17-0-17': 4.5, // water soluble solution
-            '46-0-0': 1.5,
+            '17-0-17': 1.0, // water soluble solution
+            '46-0-0': 3.0,
             '0-0-60': 0,
           },
         },
@@ -580,8 +580,8 @@ const npkType = [
             K: 75,
           },
           list: {
-            '17-0-17': 4.5, // water soluble solution
-            '46-0-0': 1.5,
+            '17-0-17': 1.0, // water soluble solution
+            '46-0-0': 3.0,
             '0-0-60': 0,
           },
         },
