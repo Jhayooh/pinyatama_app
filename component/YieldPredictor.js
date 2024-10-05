@@ -6,41 +6,34 @@ import { useCollectionData } from 'react-firebase-hooks/firestore';
 import { db } from '../firebase/Config';
 import { ActivityIndicator } from 'react-native-paper';
 
-const YieldPredictor = () => {
+const YieldPredictor = ({route}) => {
     const [productionData, setProductionData] = useState([]);
     const [totalProduction, setTotalProduction] = useState(0);
     const [pieChartData, setPieChartData] = useState([]);
     const [combinedData2, setCombinedData2] = useState([]);
-    const [roiData, setRoiData] = useState([]); // State to store ROI data
+    const [roiData, setRoiData] = useState([]);
 
-
-    // Fetch farms data from Firestore
     const farmsColl = collection(db, 'farms');
     const [farmsData, farmsLoading, farmsError] = useCollectionData(farmsColl);
 
-    // Fetch ROI data for each farm
     useEffect(() => {
         const fetchRoiData = async () => {
             if (!farmsData || farmsData.length === 0) return;
 
             let roiDataArray = [];
             for (const farm of farmsData) {
-                // Ensure each farm has an id
                 if (!farm.id) {
                     console.error(`Farm is missing an id: ${JSON.stringify(farm)}`);
                     continue;
                 }
 
-                // Dynamically fetch the ROI sub-collection for each farm
                 try {
                     const roiColl = collection(db, `farms/${farm.id}/roi`);
-                    const roiSnapshot = await getDocs(roiColl);  // getDocs to fetch sub-collection
-
-                    // Assuming only one document exists in the roi sub-collection
+                    const roiSnapshot = await getDocs(roiColl);  
                     roiSnapshot.forEach(doc => {
                         roiDataArray.push({
                             farmId: farm.id,
-                            ...doc.data(), // Spread the roi data (including grossReturn)
+                            ...doc.data(), 
                         });
                     });
                 } catch (error) {

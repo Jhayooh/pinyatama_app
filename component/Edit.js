@@ -11,6 +11,7 @@ import Profile from './Profile';
 import Images from './ImagesTab';
 import { TableBuilder } from './TableBuilder';
 import Activities from './Activities';
+import Report from './Report'
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -81,6 +82,11 @@ const Edit = ({ route, navigation }) => {
                         name="Activities"
                         component={Activities}
                         options={{ tabBarLabel: 'Activities' }}
+                    />
+                     <Tab.Screen
+                        name="Report"
+                        component={Report}
+                        options={{ tabBarLabel: 'Report' }}
                     />
                 </Tab.Navigator>
             }

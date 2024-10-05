@@ -453,7 +453,12 @@ export const Landing = ({ navigation }) => {
                                     </View>
                                 </TouchableHighlight>
                                 <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn} onPress={() =>
-                                     navigation.navigate('Yield', {farms:farms})}>
+                                      user
+                                      ?
+                                      navigation.navigate('Yield', {farms:farms})
+                                      :
+                                      setShowLogin(true)
+                                }>
                                     <View style={styles.btnbtnChild}>
                                         <Image source={yieldLogo} style={styles.btnImage} />
                                         <Text style={styles.buttonText}>Tagapagukit ng Pinya</Text>
