@@ -176,518 +176,33 @@ const npkType = [
       second: {
         nutrients: {
           N: 150,
-          P: 0,
-          K: 75
+          P: 60,
+          K: 225
         },
         list: {
-          '17-0-17': 1.0, // water soluble solution
-          '46-0-0': 0.5,
-          '0-0-60': 0
+          '14-14-14': 4.0,
+          '16-20-0': 0,
+          '46-0-0': 2.0,
+          '0-0-60': 3.0
+        }
+      },
+      second: {
+        nutrients: {
+          N: 150,
+          P: 0,
+          K: 75,
+        },
+        list: {
+          '17-0-17': 4.5, //water soluble solution
+          '46-0-0': 1.5,
+          '0-0-60': 0,
         }
       }
     }
-  },
-    {
-      label: 'HHD',
-      value: 'HHD',
-      data: {
-        oranicFert: 4,
-        first: {
-          nutrients: {
-            N: 40,
-            P: 20,
-            K: 225
-          },
-          lists: [
-            { '14-14-14': 1.43, '16-20-0': 1.25, '0-0-60': 3.42 },
-            { '14-14-14': 1.43, '46-0-0': 0.43, '0-0-60': 3.42 },
-            { '46-0-0': 0.43, '16-20-0': 1.00, '14-14-14': 1.43 },
-            { '16-20-0': 1.0, '46-0-0': 0.43, '14-14-14': 1.46 },
-            { '16-20-0': 1.0, '46-0-0': 0.43, '0-0-60': 3.75 }
-          ]
-        },
-        second: {
-          nutrients: {
-            N: 150,
-            P: 0,
-            K: 75
-          },
-          list: {
-            '17-0-17': 2.5, // water soluble solution
-            '46-0-0': 0.0,
-            '0-0-60': 0.5
-          }
-        }
-      }
-    },
-    {
-      label: 'HMD',
-      value: 'HMD',
-      data: {
-        oranicFert: 4,
-        first: {
-          nutrients: {
-            N: 40,
-            P: 40,
-            K: 225
-          },
-          lists: [
-            { '14-14-14': 2.86, '16-20-0': 2.0, '0-0-60': 3.08 },
-            { '16-20-0': 2.5, '14-14-14': 0.0, '0-0-60': 3.08 },
-            { '46-0-0': 0.87, '0-0-60': 3.08, '14-14-14': 0.00 },
-            { '16-20-0': 0.87, '46-0-0': 0.43, '14-14-14': 13.21 },
-            { '46-0-0': 0.87, '16-20-0': 0.0, '0-0-60': 3.75 }
-          ]
-        },
-        second: {
-          nutrients: {
-            N: 150,
-            P: 0,
-            K: 75
-          },
-          list: {
-            '17-0-17': 2.5, // water soluble solution
-            '46-0-0': 0,  
-            '0-0-60': 0.5
-          }
-        }
-      }
-    },
-    {
-      label: 'HLD',
-      value: 'HLD',
-      data: {
-        oranicFert: 4,
-        first: {
-          nutrients: {
-            N: 40,
-            P: 60,
-            K: 225
-          },
-          lists: [
-            { '14-14-14': 2.86, '16-20-0': 3.0, '0-0-60': 3.08 },
-            { '16-20-0': 2.5, '14-14-14': 1.43, '0-0-60': 2.75 },
-            { '46-0-0': 0.87, '14-14-14': 1.43, '0-0-60': 2.75 },
-            { '46-0-0': 0.87, '16-20-0': 0, '14-14-14': 13.21 },
-            { '46-0-0': 0.87, '16-20-0': 0.0, '0-0-60': 3.75 }
-          ]
-        },
-        second: {
-          nutrients: {
-            N: 150,
-            P: 0,
-            K: 75
-          },
-          list: {
-            '17-0-17': 2.5, // water soluble solution
-            '46-0-0': 0,
-            '0-0-60': 0.5
-          }
-        }
-      }
-    },
-  
-
-    {
-      label: 'MHS',
-      value: 'MHS',
-      data: {
-        oranicFert: 4,
-        first: {
-          nutrients: {
-            N: 100,
-            P: 20,
-            K: 45
-          },
-          lists: [
-            { '14-14-14': 1.43, '0-0-60': 0.42, '16-20-0': 5.0 },
-            { '14-14-14': 1.43, '0-0-60': 0.42, '46-0-0': 1.74 },
-            { '16-20-0': 1.0, '0-0-60': 0.75, '14-14-14': 5.71 },
-            { '16-20-0': 1.0, '14-14-14': 3.21, '46-0-0': 1.74 },
-            { '16-20-0': 1.0, '0-0-60': 0.75, '46-0-0': 1.74 }
-          ]
-        },
-        second: {
-          nutrients: {
-            N: 150,
-            P: 0,
-            K: 75
-          },
-          list: {
-            '17-0-17': 1.0, // water soluble solution
-            '46-0-0': 2.0,
-            '0-0-60': 0
-          }
-        }
-      }
-    },
-    {
-      label: 'MMS',
-      value: 'MMS',
-      data: {
-        oranicFert: 4,
-        first: {
-          nutrients: {
-            N: 100,
-            P: 40,
-            K: 45
-          },
-          lists: [
-            { '14-14-14': 2.86, '0-0-60': 0.08, '16-20-0': 3.75 },
-            { '14-14-14': 2.86, '0-0-60': 0.08, '46-0-0': 1.3 },
-            { '16-20-0': 2.0, '0-0-60': 0.75, '14-14-14': 4.29 },
-            { '16-20-0': 2.0, '14-14-14': 3.21, '46-0-0': 1.3 },
-            { '16-20-0': 2.0, '0-0-60': 0.75, '46-0-0': 1.3 }
-          ]
-        },
-        second: {
-          nutrients: {
-            N: 150,
-            P: 0,
-            K: 75
-          },
-          list: {
-            '17-0-17': 1.0, // water soluble solution
-            '46-0-0': 2.0,
-            '0-0-60': 0
-          }
-        }
-      }
-    },
-    {
-      label: 'MLS',
-      value: 'MLS',
-      data: {
-        oranicFert: 4,
-        first: {
-          nutrients: {
-            N: 100,
-            P: 60,
-            K: 45
-          },
-          lists: [
-            { '14-14-14': 3.21, '15-20-0': 3.0, '46-0-0': 2.17 },
-            { '0-0-60': 0.75, '16-20-0': 3.0, '14-14-14': 7.14 },
-            { '0-0-60': 0.75, '14-14-14': 4.29, '16-20-0': 6.25 },
-            { '0-0-60': 0.75, '14-14-14': 4.29, '46-0-0': 2.17 },
-            { '0-0-60': 0.75, '16-20-0': 3.0, '46-0-0': 2.17 }
-          ]
-        },
-        second: {
-          nutrients: {
-            N: 150,
-            P: 0,
-            K: 75
-          },
-          list: {
-            '17-0-17': 1.0, // water soluble solution
-            '46-0-0': 2.0,
-            '0-0-60': 0
-          }
-        }
-      }
-    },
-
-    {
-      label: 'MHD',
-      value: 'MHD',
-      data: {
-        oranicFert: 4,
-        first: {
-          nutrients: {
-            N: 100,
-            P: 20,
-            K: 225
-          },
-          lists: [
-            { '14-14-14': 1.43, '16-20-0': 5.0, '0-0-60': 3.42 },
-            { '0-0-60': 0.75, '16-20-0': 3.0, '14-14-14': 7.14 },
-            { '0-0-60': 0.75, '14-14-14': 4.29, '16-20-0': 6.25 },
-            { '0-0-60': 0.75, '14-14-14': 4.29, '46-0-0': 2.17 },
-            { '0-0-60': 0.75, '16-20-0': 3.0, '46-0-0': 2.17 }
-          ]
-        },
-        second: {
-          nutrients: {
-            N: 150,
-            P: 0,
-            K: 75
-          },
-          list: {
-            '17-0-17': 4.5, // water soluble solution
-            '46-0-0': 0.5,
-            '0-0-60': 0
-          }
-        }
-      }
-    },
-    {
-      label: 'MMD',
-      value: 'MMD',
-      data: {
-        oranicFert: 4,
-        first: {
-          nutrients: {
-            N: 100,
-            P: 40,
-            K: 225
-          },
-          lists: [
-            { '14-14-14': 2.86, '16-20-0': 3.75, '0-0-60': 3.08 },
-            { '14-14-14': 2.86, '46-0-0': 1.3, '0-0-60': 3.08 },
-            { '16-20-0': 2.0, '14-14-14': 4.29, '0-0-60': 3.75 },
-            { '16-20-0': 0.75, '14-14-14': 13.21, '46-0-0': 1.3 },
-            { '0-0-60': 3.75, '16-20-0': 2.0, '46-0-0': 1.3 }
-          ]
-        },
-        second: {
-          nutrients: {
-            N: 150,
-            P: 0,
-            K: 75
-          },
-          list: {
-            '17-0-17': 4.5, // water soluble solution
-            '46-0-0': 0.5,
-            '0-0-60': 0
-          }
-        }
-      }
-    },
-    {
-      label: 'MLD',
-      value: 'MLD',
-      data: {
-        oranicFert: 4,
-        first: {
-          nutrients: {
-            N: 100,
-            P: 60,
-            K: 225
-          },
-          lists: [
-            { '14-14-14': 4.26, '16-20-0': 2.5, '0-0-60': 2.75 },
-            { '14-14-14': 4.29, '46-0-0': 0.87, '0-0-60': 2.75 },
-            { '16-20-0': 3.0, '14-14-14': 2.86, '0-0-60': 3.75 },
-            { '16-20-0': 3.0, '14-14-14': 11.79, '46-0-0': 0.87 },
-            { '0-0-60': 3.75, '16-20-0': 3.0, '46-0-0': 0.87 }
-          ]
-        },
-        second: {
-          nutrients: {
-            N: 150,
-            P: 0,
-            K: 75
-          },
-          list: {
-            '17-0-17': 4.5, // water soluble solution
-            '46-0-0': 0.5,
-            '0-0-60': 0
-          }
-        }
-      }
-    },
-                                    
-    {
-      label: 'LHS',
-      value: 'LHS',
-      data: {
-        oranicFert: 4,
-        first: {
-          nutrients: {
-            N: 150,
-            P: 20,
-            K: 45,
-          },
-          lists: [
-            { '14-14-14': 1.43, '16-20-0': 0.42, '0-0-60': 8.12 },
-            { '14-14-14': 1.43, '46-0-0': 2.83, '0-0-60': 0.42 },
-            { '16-20-0': 1.0, '14-14-14': 9.29, '0-0-60': 0.75 },
-            { '16-20-0': 1.0, '14-14-14': 3.21, '46-0-0': 2.83 },
-            { '0-0-60': 0.75, '16-20-0': 1.0, '46-0-0': 2.83 },
-          ],
-        },
-        second: {
-          nutrients: {
-            N: 150,
-            P: 0,
-            K: 75,
-          },
-          list: {
-            '17-0-17': 1.0, // water soluble solution
-            '46-0-0': 3.0,
-            '0-0-60': 0,
-          },
-        },
-      },
-    },
-    {
-      label: 'LMS',
-      value: 'LMS',
-      data: {
-        oranicFert: 4,
-        first: {
-          nutrients: {
-            N: 150,
-            P: 40,
-            K: 45,
-          },
-          lists: [
-            { '14-14-14': 2.86, '16-20-0': 6.88, '0-0-60': 0.8 },
-            { '14-14-14': 2.86, '46-0-0': 2.39, '0-0-60': 0.75 },
-            { '16-20-0': 2.0, '14-14-14': 7.86, '0-0-60': 0.75 },
-            { '16-20-0': 2.0, '14-14-14': 3.21, '46-0-0': 2.39 },
-            { '0-0-60': 0.75, '16-20-0': 2.0, '46-0-0': 2.39 },
-          ],
-        },
-        second: {
-          nutrients: {
-            N: 150,
-            P: 0,
-            K: 75,
-          },
-          list: {
-            '17-0-17': 1.0, // water soluble solution
-            '46-0-0': 3.0,
-            '0-0-60': 0,
-          },
-        },
-      },
-    },
-    {
-      label: 'LLS',
-      value: 'LLS',
-      data: {
-        oranicFert: 4,
-        first: {
-          nutrients: {
-            N: 150,
-            P: 60,
-            K: 45,
-          },
-          lists: [
-            { '14-14-14': 3.21, '16-20-0': 3.0, '46-0-0': 3.26 },
-            { '14-14-14': 10.71, '16-20-0': 3.0, '0-0-60': 0.75 },
-            { '16-20-0': 9.38, '14-14-14': 4.29, '0-0-60': 0.75 },
-            { '0-0-60': 0.75, '14-14-14': 4.29, '46-0-0': 3.26 },
-            { '0-0-60': 0.75, '16-20-0': 3.0, '46-0-0': 3.26 },
-          ],
-        },
-        second: {
-          nutrients: {
-            N: 150,
-            P: 0,
-            K: 75,
-          },
-          list: {
-            '17-0-17': 1.0, // water soluble solution
-            '46-0-0': 3.0,
-            '0-0-60': 0,
-          },
-        },
-      },
-    },
-    {
-      label: 'LHD',
-      value: 'LHD',
-      data: {
-        oranicFert: 4,
-        first: {
-          nutrients: {
-            N: 150,
-            P: 20,
-            K: 225,
-          },
-          lists: [
-            { '14-14-14': 1.43, '16-20-0': 8.12, '46-0-0': 3.42 },
-            { '14-14-14': 1.43, '46-0-0': 2.83, '0-0-60': 3.42 },
-            { '16-20-0': 1.0, '14-14-14': 9.29, '0-0-60': 3.75 },
-            { '16-20-0': 1.0, '14-14-14': 14.64, '46-0-0': 2.83 },
-            { '0-0-60': 3.75, '16-20-0': 1.0, '46-0-0': 2.83 },
-          ],
-        },
-        second: {
-          nutrients: {
-            N: 150,
-            P: 0,
-            K: 75,
-          },
-          list: {
-            '17-0-17': 4.5, // water soluble solution
-            '46-0-0': 1.5,
-            '0-0-60': 0,
-          },
-        },
-      },
-    },
-    {
-      label: 'LMD',
-      value: 'LMD',
-      data: {
-        oranicFert: 4,
-        first: {
-          nutrients: {
-            N: 150,
-            P: 40,
-            K: 225,
-          },
-          lists: [
-            { '14-14-14': 2.86, '16-20-0': 6.88, '0-0-60': 3.08 },
-            { '14-14-14': 2.86, '46-0-0': 2.39, '0-0-60': 3.08 },
-            { '16-20-0': 2.0, '14-14-14': 7.86, '0-0-60': 3.75 },
-            { '16-20-0': 2.0, '14-14-14': 13.21, '46-0-0': 2.39 },
-            { '0-0-60': 3.75, '16-20-0': 2.0, '46-0-0': 2.39 },
-          ],
-        },
-        second: {
-          nutrients: {
-            N: 150,
-            P: 0,
-            K: 75,
-          },
-          list: {
-            '17-0-17': 4.5, // water soluble solution
-            '46-0-0': 1.5,
-            '0-0-60': 0,
-          },
-        },
-      },
-    },
-    {
-      label: 'LLD',
-      value: 'LLD',
-      data: {
-        oranicFert: 4,
-        first: {
-          nutrients: {
-            N: 150,
-            P: 60,
-            K: 225,
-          },
-          lists: [
-            { '14-14-14': 4.29, '16-20-0': 5.62, '0-0-60': 2.75 },
-            { '14-14-14': 4.29, '46-0-0': 1.96, '0-0-60': 2.75 },
-            { '16-20-0': 3.0, '14-14-14': 6.43, '0-0-60': 3.75 },
-            { '16-20-0': 3.0, '14-14-14': 11.79, '46-0-0': 1.96 },
-            { '0-0-60': 3.75, '16-20-0': 3.0, '46-0-0': 1.96 },
-          ],
-        },
-        second: {
-          nutrients: {
-            N: 150,
-            P: 0,
-            K: 75,
-          },
-          list: {
-            '17-0-17': 4.5, // water soluble solution
-            '46-0-0': 1.5,
-            '0-0-60': 0,
-          },
-        },
-      },
-    },
+  }, //150 60 225
 ]
-//150 60 225
+
+
 export const Calculator = ({ navigation }) => {
   const [user] = useAuthState(auth)
   const farmsColl = collection(db, 'farms')
@@ -1059,7 +574,9 @@ export const Calculator = ({ navigation }) => {
         fieldId: fieldId,
         farmerId: newAccount.id,
         npk: npk,
-        soil: soil
+        soil: soil,
+        ethrel: 0,
+        isEthrel: null
       })
 
       const weatherCol = collection(db, `farms/${newFarm.id}/weather`);
@@ -1086,16 +603,18 @@ export const Calculator = ({ navigation }) => {
       })
       await updateDoc(newRoi, { id: newRoi.id })
 
+      const currDate = new Date()
+
       const vegetativeDate = new Date(Date.parse(startDate));
 
       const floweringDate = new Date(vegetativeDate);
       floweringDate.setMonth(vegetativeDate.getMonth() + 9);
 
       const fruitingDate = new Date(floweringDate);
-      fruitingDate.setMonth(floweringDate.getMonth() + 1);
+      fruitingDate.setMonth(floweringDate.getMonth() + 2);
 
       const harvestDate = new Date(fruitingDate);
-      harvestDate.setMonth(fruitingDate.getMonth() + 5);
+      harvestDate.setMonth(fruitingDate.getMonth() + 6);
       await updateDoc(newFarm, {
         id: newFarm.id,
         harvest_date: harvestDate
@@ -1106,25 +625,28 @@ export const Calculator = ({ navigation }) => {
         title: "Vegetative",
         className: "vegetative",
         start_time: Timestamp.fromDate(vegetativeDate),
-        end_time: Timestamp.fromDate(floweringDate)
+        end_time: Timestamp.fromDate(floweringDate),
+        createdAt: currDate,
       });
       await updateDoc(eRef_vegetative, { id: eRef_vegetative.id })
-
+      
       const eRef_flowering = await addDoc(eventsRef, {
         group: newFarm.id,
         title: "Flowering",
         className: "flowering",
         start_time: Timestamp.fromDate(floweringDate),
-        end_time: Timestamp.fromDate(fruitingDate)
+        end_time: Timestamp.fromDate(fruitingDate),
+        createdAt: currDate,
       })
       await updateDoc(eRef_flowering, { id: eRef_flowering.id })
-
+      
       const eRef_fruiting = await addDoc(eventsRef, {
         group: newFarm.id,
         title: "Fruiting",
         className: "fruiting",
         start_time: Timestamp.fromDate(fruitingDate),
-        end_time: Timestamp.fromDate(harvestDate)
+        end_time: Timestamp.fromDate(harvestDate),
+        createdAt: currDate,
       })
       await updateDoc(eRef_fruiting, { id: eRef_fruiting.id })
 
@@ -1300,7 +822,7 @@ export const Calculator = ({ navigation }) => {
               ...item,
               qntyPrice: newQnty,
               totalPrice: getMult(newQnty, item.price),
-              foreinId: item.id,
+              foreignId: item.id,
               label: 'first'
             });
           }
@@ -1314,7 +836,7 @@ export const Calculator = ({ navigation }) => {
               ...item,
               qntyPrice: newQnty,
               totalPrice: getMult(newQnty, item.price),
-              foreinId: item.id,
+              foreignId: item.id,
               label: 'second'
             });
           }
