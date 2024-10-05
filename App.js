@@ -109,7 +109,7 @@ const App = () => (
                 name='Yield'
                 component={YieldPredictor}
                 options={{
-                    title: 'Tungkol sa QP Farming',
+                    title: 'Tagapagukit ng Pinya',
                     headerTintColor: '#E8E7E7',
                     headerBackTitleVisible: false,
                     headerStyle: {
