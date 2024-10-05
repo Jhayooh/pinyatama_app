@@ -452,7 +452,8 @@ export const Landing = ({ navigation }) => {
                                         <Text style={styles.buttonText}>Kalkulador ng gastos</Text>
                                     </View>
                                 </TouchableHighlight>
-                                <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn} onPress={() => navigation.navigate('Yield')}>
+                                <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn} onPress={() =>
+                                     navigation.navigate('Yield', {farms:farms})}>
                                     <View style={styles.btnbtnChild}>
                                         <Image source={yieldLogo} style={styles.btnImage} />
                                         <Text style={styles.buttonText}>Tagapagukit ng Pinya</Text>
@@ -468,7 +469,8 @@ export const Landing = ({ navigation }) => {
                                         <Text style={styles.buttonText}>Mga Bukid ng Pinya</Text>
                                     </View>
                                 </TouchableHighlight>
-                                <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn} onPress={() => navigation.navigate('Video')}>
+                                <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn} onPress={() => 
+                                    navigation.navigate('Video')}>
                                     <View style={styles.btnbtnChild}>
                                         <Image source={videoLogo} style={styles.btnImage} />
                                         <Text style={styles.buttonText}>Mga Bidyo</Text>
