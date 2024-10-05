@@ -26,9 +26,9 @@ import { RadioButton } from 'react-native-paper';
 import { HeaderBackButton } from '@react-navigation/elements'
 import _ from 'lodash'
 import { WEATHER_KEY } from '../utils/API_KEY';
-
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import MapView, { Marker } from 'react-native-maps';
+import { WebView } from 'react-native-webview';
 
 import { Dropdown } from 'react-native-element-dropdown';
 import { auth, db, storage } from '../firebase/Config';
@@ -40,22 +40,22 @@ const soilType = [
   { label: 'Clay', value: 'Clay' },
   { label: 'Sandy', value: 'Sandy' }
 ]
- // { label: 'HHS', value: 'HHS' }, //40 20 45
-  // { label: 'HMS', value: 'HMS' }, //40 40 45
-  // { label: 'HLS', value: 'HLS' }, //40 60 45
-  // { label: 'HHD', value: 'HHD' }, //40 20 225
-  // { label: 'HMD', value: 'HMD' }, //40 40 225
-  // { label: 'HLD', value: 'HLD' }, //40 60 225
-  // { label: 'MMS', value: 'MMS' }, //100 20 45
-  // { label: 'MLS', value: 'MLS' }, //100 40 45
-  // { label: 'MHD', value: 'MHD' }, //100 60 45
-  // { label: 'MMD', value: 'MMD' }, //100 20 45
-  // { label: 'MLD', value: 'MLD' }, //100 40 225
-  // { label: 'LHS', value: 'LHS' }, //100 60 225
-  // { label: 'LMS', value: 'LMS' }, //150 20 45
-  // { label: 'LLS', value: 'LLS' }, //150 40 45
-  // { label: 'LHD', value: 'LHD' }, //150 20 225
-  // { label: 'LMD', value: 'LMD' }, //150 40 225
+// { label: 'HHS', value: 'HHS' }, //40 20 45
+// { label: 'HMS', value: 'HMS' }, //40 40 45
+// { label: 'HLS', value: 'HLS' }, //40 60 45
+// { label: 'HHD', value: 'HHD' }, //40 20 225
+// { label: 'HMD', value: 'HMD' }, //40 40 225
+// { label: 'HLD', value: 'HLD' }, //40 60 225
+// { label: 'MMS', value: 'MMS' }, //100 20 45
+// { label: 'MLS', value: 'MLS' }, //100 40 45
+// { label: 'MHD', value: 'MHD' }, //100 60 45
+// { label: 'MMD', value: 'MMD' }, //100 20 45
+// { label: 'MLD', value: 'MLD' }, //100 40 225
+// { label: 'LHS', value: 'LHS' }, //100 60 225
+// { label: 'LMS', value: 'LMS' }, //150 20 45
+// { label: 'LLS', value: 'LLS' }, //150 40 45
+// { label: 'LHD', value: 'LHD' }, //150 20 225
+// { label: 'LMD', value: 'LMD' }, //150 40 225
 const npkType = [
   {
     label: 'HHS',
@@ -121,7 +121,7 @@ const npkType = [
       }
     }
   },
-    {
+  {
     label: 'HMS',
     value: 'HMS',
     data: {
@@ -629,7 +629,7 @@ export const Calculator = ({ navigation }) => {
         createdAt: currDate,
       });
       await updateDoc(eRef_vegetative, { id: eRef_vegetative.id })
-      
+
       const eRef_flowering = await addDoc(eventsRef, {
         group: newFarm.id,
         title: "Flowering",
@@ -639,7 +639,7 @@ export const Calculator = ({ navigation }) => {
         createdAt: currDate,
       })
       await updateDoc(eRef_flowering, { id: eRef_flowering.id })
-      
+
       const eRef_fruiting = await addDoc(eventsRef, {
         group: newFarm.id,
         title: "Fruiting",
@@ -1163,7 +1163,7 @@ export const Calculator = ({ navigation }) => {
                           labelField='fieldId'
                           valueField='fieldId'
                           onChange={fieldIdChange}
-                          placeholder={!fieldidFocus ? 'Select Farm Field ID' : fieldId }
+                          placeholder={!fieldidFocus ? 'Select Farm Field ID' : fieldId}
                           searchPlaceholder="Search..."
                           value={fieldId}
                           style={fieldidFocus ? styles.textInputFocus : styles.textInput}
@@ -1229,6 +1229,7 @@ export const Calculator = ({ navigation }) => {
                       <Text style={{ color: 'red' }}>*</Text>
                     </View>
                     <View style={styles.container1}>
+                      <WebView source={{ uri: 'https://reactnative.dev/' }} style={{ flex: 1 }} />;
                       {/* <MapView style={styles.map} region={region} onPress={handleMapPress}>
                         {userLocation && (
                           <Marker
