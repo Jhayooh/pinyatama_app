@@ -124,6 +124,7 @@ const npkType = [
   }, //150 60 225
 ]
 
+
 export const Calculator = ({ navigation }) => {
   const [user] = useAuthState(auth)
   const farmsColl = collection(db, 'farms')
@@ -495,7 +496,9 @@ export const Calculator = ({ navigation }) => {
         fieldId: fieldId,
         farmerId: newAccount.id,
         npk: npk,
-        soil: soil
+        soil: soil,
+        ethrel: 0,
+        isEthrel: null
       })
 
       const weatherCol = collection(db, `farms/${newFarm.id}/weather`);
@@ -522,16 +525,18 @@ export const Calculator = ({ navigation }) => {
       })
       await updateDoc(newRoi, { id: newRoi.id })
 
+      const currDate = new Date()
+
       const vegetativeDate = new Date(Date.parse(startDate));
 
       const floweringDate = new Date(vegetativeDate);
       floweringDate.setMonth(vegetativeDate.getMonth() + 9);
 
       const fruitingDate = new Date(floweringDate);
-      fruitingDate.setMonth(floweringDate.getMonth() + 1);
+      fruitingDate.setMonth(floweringDate.getMonth() + 2);
 
       const harvestDate = new Date(fruitingDate);
-      harvestDate.setMonth(fruitingDate.getMonth() + 5);
+      harvestDate.setMonth(fruitingDate.getMonth() + 6);
       await updateDoc(newFarm, {
         id: newFarm.id,
         harvest_date: harvestDate
@@ -542,25 +547,28 @@ export const Calculator = ({ navigation }) => {
         title: "Vegetative",
         className: "vegetative",
         start_time: Timestamp.fromDate(vegetativeDate),
-        end_time: Timestamp.fromDate(floweringDate)
+        end_time: Timestamp.fromDate(floweringDate),
+        createdAt: currDate,
       });
       await updateDoc(eRef_vegetative, { id: eRef_vegetative.id })
-
+      
       const eRef_flowering = await addDoc(eventsRef, {
         group: newFarm.id,
         title: "Flowering",
         className: "flowering",
         start_time: Timestamp.fromDate(floweringDate),
-        end_time: Timestamp.fromDate(fruitingDate)
+        end_time: Timestamp.fromDate(fruitingDate),
+        createdAt: currDate,
       })
       await updateDoc(eRef_flowering, { id: eRef_flowering.id })
-
+      
       const eRef_fruiting = await addDoc(eventsRef, {
         group: newFarm.id,
         title: "Fruiting",
         className: "fruiting",
         start_time: Timestamp.fromDate(fruitingDate),
-        end_time: Timestamp.fromDate(harvestDate)
+        end_time: Timestamp.fromDate(harvestDate),
+        createdAt: currDate,
       })
       await updateDoc(eRef_fruiting, { id: eRef_fruiting.id })
 
@@ -736,7 +744,7 @@ export const Calculator = ({ navigation }) => {
               ...item,
               qntyPrice: newQnty,
               totalPrice: getMult(newQnty, item.price),
-              foreinId: item.id,
+              foreignId: item.id,
               label: 'first'
             });
           }
@@ -750,7 +758,7 @@ export const Calculator = ({ navigation }) => {
               ...item,
               qntyPrice: newQnty,
               totalPrice: getMult(newQnty, item.price),
-              foreinId: item.id,
+              foreignId: item.id,
               label: 'second'
             });
           }
