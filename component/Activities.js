@@ -102,7 +102,7 @@ const Activities = ({ roi }) => {
               value={quantity}
               onChangeText={setQuantity}
             />
-            <View style={{ display: 'flex', flexDirection: 'row', alignContent: 'center', gap: 2 }}>
+            <View style={{ display: 'flex', flexDirection: 'row', alignContent: 'center', gap: 2 , width:'100%'}}>
               <TouchableOpacity
                 onPress={() => setIsAdd(false)}
                 style={styles.cancelButton}
@@ -201,6 +201,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     alignItems: 'center',
+    flex:1
   },
   saveButtonText: {
     color: '#fff',
@@ -211,6 +212,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     alignItems: 'center',
+    flex:1
   },
   cancelButtonText: {
     color: '#fff',

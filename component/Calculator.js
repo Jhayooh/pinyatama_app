@@ -28,7 +28,6 @@ import _ from 'lodash'
 import { WEATHER_KEY } from '../utils/API_KEY';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import MapView, { Marker } from 'react-native-maps';
-import { WebView } from 'react-native-webview';
 
 import { Dropdown } from 'react-native-element-dropdown';
 import { auth, db, storage } from '../firebase/Config';
@@ -1229,7 +1228,6 @@ export const Calculator = ({ navigation }) => {
                       <Text style={{ color: 'red' }}>*</Text>
                     </View>
                     <View style={styles.container1}>
-                      <WebView source={{ uri: 'https://reactnative.dev/' }} style={{ flex: 1 }} />;
                       {/* <MapView style={styles.map} region={region} onPress={handleMapPress}>
                         {userLocation && (
                           <Marker
