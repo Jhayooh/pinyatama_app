@@ -19,10 +19,15 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage":  "./assets/logo.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.jhayooh.Pinyatama"
+      "package": "com.jhayooh.Pinyatama",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyAzFWK1P1jA_RBYAq3z5roLbxD-KE1znGs"
+        }
+      }
     },
     "extra": {
       "eas": {

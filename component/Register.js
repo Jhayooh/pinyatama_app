@@ -125,6 +125,8 @@ export default function Register({ navigation, route }) {
     const municipalities = address.getCityMunOfProvince('0516')
     const brgy = address.getBarangaysOfCityMun(munCode)
 
+    console.log("muni", municipalities)
+
     const [barangay, setBarangay] = useState('')
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
