@@ -522,6 +522,7 @@ export const Calculator = ({ navigation }) => {
 
       const weatherCol = collection(db, `farms/${newFarm.id}/weather`);
       const farmComp = collection(db, `farms/${newFarm.id}/components`);
+      const farmCompActual = collection
       const eventsRef = collection(db, `farms/${newFarm.id}/events`);
       const roiRef = collection(db, `farms/${newFarm.id}/roi`);
 
@@ -764,7 +765,8 @@ export const Calculator = ({ navigation }) => {
               qntyPrice: newQnty,
               totalPrice: getMult(newQnty, item.price),
               foreignId: item.id,
-              label: 'first'
+              label: 1,
+              type: 'p'
             });
           }
         });
@@ -778,7 +780,8 @@ export const Calculator = ({ navigation }) => {
               qntyPrice: newQnty,
               totalPrice: getMult(newQnty, item.price),
               foreignId: item.id,
-              label: 'second'
+              label: 2,
+              type: 'p'
             });
           }
         });
@@ -787,7 +790,7 @@ export const Calculator = ({ navigation }) => {
 
       } else {
         const newQnty = getMult(area, item.defQnty)
-        return [{ ...item, qntyPrice: newQnty, totalPrice: getMult(newQnty, item.price), price: parseInt(item.price), foreignId: item.id }]
+        return [{ ...item, qntyPrice: newQnty, totalPrice: getMult(newQnty, item.price), price: parseInt(item.price), foreignId: item.id, type:  item.id === '26nzrfWyeWAPHriACtP4' ? 'p' : 'b' }]
       }
     });
 
@@ -1174,7 +1177,7 @@ export const Calculator = ({ navigation }) => {
                       <Text style={{ color: 'red' }}>*</Text>
                     </View>
                     <View >
-                      <Button onPress={() => setModalVisible(true)} title="Open Map" />
+                      <Button color='green' onPress={() => setModalVisible(true)} title="Open Map" />
                       <Modal
                         animationType="slide"
                         transparent={true}

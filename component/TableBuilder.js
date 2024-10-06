@@ -218,7 +218,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
           </View>
           {
             comps?.map((comp) => {
-              if (comp.parent.toLowerCase() === 'fertilizer' && comp.label === 'first') {
+              if (comp.parent.toLowerCase() === 'fertilizer' && comp.label === 1) {
                 return (
                   <TableData
                     key={comp.id}
@@ -234,7 +234,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
           </View>
           {
             comps?.map((comp) => {
-              if (comp.parent.toLowerCase() === 'fertilizer' && comp.label === 'second') {
+              if (comp.parent.toLowerCase() === 'fertilizer' && comp.label === 2) {
                 return (
                   <TableData
                     key={comp.id}

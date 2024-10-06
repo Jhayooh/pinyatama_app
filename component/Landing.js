@@ -391,7 +391,7 @@ export const Landing = ({ navigation }) => {
             >
                 <View style={styles.bgOut}>
                     <View style={styles.logoBg} >
-                        <Text style={styles.appTitle} >Queen Pineapple HAHAH</Text>
+                        <Text style={styles.appTitle} >Queen Pineapple Farming</Text>
                     </View>
                     <View style={styles.btnBg}>
                         <Image source={appLogo} style={styles.appLogo} />
