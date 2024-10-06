@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
 import StepIndicator from 'react-native-step-indicator';
 import { Dropdown } from 'react-native-element-dropdown';
-import moment from 'moment';  
+import moment from 'moment';
 import { addDoc, collection } from 'firebase/firestore';
 import { db } from '../firebase/Config';
 
@@ -17,7 +17,7 @@ const ferti = [
 const customStyles = {
   stepIndicatorSize: 10,
   currentStepIndicatorSize: 40,
-  separatorStrokeWidth: 1, 
+  separatorStrokeWidth: 1,
   currentStepStrokeWidth: 3,
   stepStrokeCurrentColor: '#fe7013',
   stepStrokeWidth: 3,
@@ -41,15 +41,16 @@ const customStyles = {
 
 const Activities = ({ route }) => {
   const { farm } = route.params;
-
-  CON
-
-  const [dynamicSteps, setDynamicSteps] = useState([{ text: "Pineapple has been planted", date: farm.start_date }]);
+  const [dynamicSteps, setDynamicSteps] = useState([{ text: "Pineapple has been planted", date: farm.start_date.toDate() }]);
   const [currentStep, setCurrentStep] = useState(0);
   const [isAdd, setIsAdd] = useState(false);
   const [fertilizer, setFertilizer] = useState('');
   const [quantity, setQuantity] = useState('');
   const [saving, setSaving] = useState(false);
+
+  // const activityColl = collection(db, `farms/${farm.id}/activities`)
+  // const activityQuery = query(activityColl, orderBy('createdAt'))
+  // const [activities] = useCollectionData(activityQuery)
 
   const handleChange = (text) => {
     if (/^\d*$/.test(text)) {
@@ -63,7 +64,7 @@ const Activities = ({ route }) => {
       setTimeout(() => {
         const newStep = {
           text: `${quantity}kg, ${fertilizer},`,
-          date: new Date(), 
+          date: new Date(),
         };
         setDynamicSteps(prevSteps => [...prevSteps, newStep]);
         setSaving(false);
@@ -90,7 +91,7 @@ const Activities = ({ route }) => {
             customStyles={customStyles}
             currentPosition={currentStep}
             stepCount={dynamicSteps.length}
-            labels={dynamicSteps.map(step => step.text)}  
+            labels={dynamicSteps.map(step => step.text)}
             direction='vertical'
           />
         </View>
@@ -98,7 +99,7 @@ const Activities = ({ route }) => {
         <View style={styles.dateColumn}>
           {dynamicSteps.map((step, index) => (
             <Text key={index} style={styles.dateText}>
-              {moment(step.date).format('MMM DD, YYYY')}  
+              {moment(step.date).format('MMM DD, YYYY')}
             </Text>
           ))}
         </View>
@@ -121,7 +122,7 @@ const Activities = ({ route }) => {
               placeholder='Select Fertilizer'
               value={fertilizer}
               style={styles.input}
-              onChange={item => setFertilizer(item.value)} 
+              onChange={item => setFertilizer(item.value)}
             />
             <View style={styles.quantyContainer}>
               <TextInput
