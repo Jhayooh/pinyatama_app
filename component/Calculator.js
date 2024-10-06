@@ -310,6 +310,8 @@ export const Calculator = ({ navigation }) => {
       newMun = "daet";
     } else if (indUser.mun.toLowerCase().includes("san lorenzo ruiz")) {
       newMun = "san lorenzo ruiz";
+    } else {
+      newMun = indUser.mun
     }
     
     console.log("muni", capitalize(newMun))
