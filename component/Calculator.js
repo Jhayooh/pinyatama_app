@@ -20,15 +20,17 @@ import {
   View,
   ActivityIndicator,
   Alert,
-  Switch
+  Switch,
+  SafeAreaView
 } from 'react-native';
 import { RadioButton } from 'react-native-paper';
 import { HeaderBackButton } from '@react-navigation/elements'
 import _ from 'lodash'
 import { WEATHER_KEY } from '../utils/API_KEY';
-
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import MapView, { Marker } from 'react-native-maps';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import { LatLng, LeafletView } from 'react-native-leaflet-view';
+// import LeafletMapView from 'react-native-leaflet-map';
 
 import { Dropdown } from 'react-native-element-dropdown';
 import { auth, db, storage } from '../firebase/Config';
@@ -40,140 +42,61 @@ const soilType = [
   { label: 'Clay', value: 'Clay' },
   { label: 'Sandy', value: 'Sandy' }
 ]
- // { label: 'HHS', value: 'HHS' }, //40 20 45
-  // { label: 'HMS', value: 'HMS' }, //40 40 45
-  // { label: 'HLS', value: 'HLS' }, //40 60 45
-  // { label: 'HHD', value: 'HHD' }, //40 20 225
-  // { label: 'HMD', value: 'HMD' }, //40 40 225
-  // { label: 'HLD', value: 'HLD' }, //40 60 225
-  // { label: 'MMS', value: 'MMS' }, //100 20 45
-  // { label: 'MLS', value: 'MLS' }, //100 40 45
-  // { label: 'MHD', value: 'MHD' }, //100 60 45
-  // { label: 'MMD', value: 'MMD' }, //100 20 45
-  // { label: 'MLD', value: 'MLD' }, //100 40 225
-  // { label: 'LHS', value: 'LHS' }, //100 60 225
-  // { label: 'LMS', value: 'LMS' }, //150 20 45
-  // { label: 'LLS', value: 'LLS' }, //150 40 45
-  // { label: 'LHD', value: 'LHD' }, //150 20 225
-  // { label: 'LMD', value: 'LMD' }, //150 40 225
+// { label: 'HHS', value: 'HHS' }, //40 20 45
+// { label: 'HMS', value: 'HMS' }, //40 40 45
+// { label: 'HLS', value: 'HLS' }, //40 60 45
+// { label: 'HHD', value: 'HHD' }, //40 20 225
+// { label: 'HMD', value: 'HMD' }, //40 40 225
+// { label: 'HLD', value: 'HLD' }, //40 60 225
+// { label: 'MMS', value: 'MMS' }, //100 20 45
+// { label: 'MLS', value: 'MLS' }, //100 40 45
+// { label: 'MHD', value: 'MHD' }, //100 60 45
+// { label: 'MMD', value: 'MMD' }, //100 20 45
+// { label: 'MLD', value: 'MLD' }, //100 40 225
+// { label: 'LHS', value: 'LHS' }, //100 60 225
+// { label: 'LMS', value: 'LMS' }, //150 20 45
+// { label: 'LLS', value: 'LLS' }, //150 40 45
+// { label: 'LHD', value: 'LHD' }, //150 20 225
+// { label: 'LMD', value: 'LMD' }, //150 40 225
 const npkType = [
   {
-    label: 'HHS',
-    value: 'HHS',
+    label: 'LMD',
+    value: 'LMD',
     data: {
       oranicFert: 8,
       first: {
         nutrients: {
-          N: 40,
-          P: 20,
-          K: 45
-        },
-        lists: [
-          { '14-14-14': 1.43, '16-20-0': 1.25, '0-0-60': 0.42 },
-          { '14-14-14': 1.43, '46-0-0': 0.43, '0-0-60': 0.42 },
-          { '16-20-0': 1.0, '14-14-14': 1.43, '0-0-60': 0.75 },
-          { '16-20-0': 1.0, '46-0-0': 0.43, '14-14-14': 1.79 },
-          { '16-20-0': 1.0, '46-0-0': 0.43, '0-0-60': 0.75 }
-        ]
-      },
-      second: {
-        nutrients: {
           N: 150,
-          P: 0,
-          K: 75
-        },
-        lists: [
-          { '17-0-17': 4.5, '46-0-0': 1.5, '0-0-60': 0 }
-        ]
-      }
-    }
-  },//150 60 225
-  {
-    label: 'HMS',
-    value: 'HMS',
-    data: {
-      oranicFert: 4,
-      first: {
-        nutrients: {
-          N: 40,
           P: 40,
-          K: 45
-        },
-        lists: [
-          { '14-14-14': 2.86, '16-20-0': 2.0, '0-0-60': 0.08 },
-          { '14-14-14': 0, '16-20-0': 2.5, '0-0-60': 0.08 },
-          { '14-14-14': 0, '16-20-0': 2.5, '0-0-60': 0.08 },
-          { '14-14-14': 0, '16-20-0': 2.5, '0-0-60': 0.08 },
-          { '14-14-14': 0, '16-20-0': 2.5, '0-0-60': 0.08 }
-        ]
-      },
-      second: {
-        nutrients: {
-          N: 150,
-          P: 0,
-          K: 75
+          K: 225
         },
         list: {
-          '17-0-17': 1.0, //water soluble solution
-          '46-0-0': 0.5,
-          '0-0-60': 0
+          '14-14-14': 3.0,
+          '16-20-0': 0,
+          '46-0-0': 2.5,
+          '0-0-60': 3.0
+        }
+      },
+      second: {
+        nutrients: {
+          N: 150,
+          P: 0,
+          K: 75,
+        },
+        list: {
+          '17-0-17': 4.5, //water soluble solution
+          '46-0-0': 1.5,
+          '0-0-60': 0,
         }
       }
     }
-  },
-    {
-    label: 'HMS',
-    value: 'HMS',
-    data: {
-      oranicFert: 4,
-      first: {
-        nutrients: {
-          N: 40,
-          P: 40,
-          K: 45
-        },
-        lists: [
-          { '14-14-14': 2.86, '16-20-0': 2.0, '0-0-60': 0.08 },
-          { '14-14-14': 0, '16-20-0': 2.5, '0-0-60': 0.08 },
-          { '14-14-14': 0, '16-20-0': 2.5, '0-0-60': 0.08 },
-          { '14-14-14': 0, '16-20-0': 2.5, '0-0-60': 0.08 },
-          { '14-14-14': 0, '16-20-0': 2.5, '0-0-60': 0.08 }
-        ]
-      },
-      second: {
-        nutrients: {
-          N: 150,
-          P: 0,
-          K: 75
-        },
-        list: {
-          '17-0-17': 1.0, //water soluble solution
-          '46-0-0': 0.5,
-          '0-0-60': 0
-        }
-      }
-    }
-  },
+  }, //150 60 225
   {
-    label: 'HLS',
-    value: 'HLS',
+    label: 'LLD',
+    value: 'LLD',
     data: {
       oranicFert: 4,
       first: {
-        nutrients: {
-          N: 40,
-          P: 60,
-          K: 45
-        },
-        lists: [
-          { '14-14-14': 2.86, '0-0-60': 0.08, '16-20-0': 1.0 },
-          { '16-20-0': 2.5, '0-0-60': 0.75, '14-14-14': 1.43 },
-          { '46-0-0': 0.87, '14-14-14': 0.36, '0-0-60': 0 },
-          { '46-0-0': 0.87, '0-0-60': 0.75, '14-14-14': 1.43 },
-          { '46-0-0': 0.87, '0-0-60': 0.75, '16-20-0': 1.0 }
-        ]
-      },
-      second: {
         nutrients: {
           N: 150,
           P: 60,
@@ -230,6 +153,8 @@ export const Calculator = ({ navigation }) => {
 
   const focusNumplants = useRef(null)
   const focusCropstage = useRef(null)
+
+  const [modalVisible, setModalVisible] = useState(false)
 
   const getDate = () => {
     let tempDate = date.toString().split(' ');
@@ -297,6 +222,8 @@ export const Calculator = ({ navigation }) => {
   const [fieldIdError, setFieldIdError] = useState('');
 
   const [isAddFarm, setIsAddFarm] = useState(false)
+
+  const [mapEvent, setMapEvent] = useState(null)
 
   const [weather, setWeather] = useState({
     loading: false,
@@ -377,11 +304,23 @@ export const Calculator = ({ navigation }) => {
     setLastname('')
     setSex('Male')
 
-    fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${capitalize(indUser.mun)},Camarines Norte,PH&appid=${WEATHER_KEY}`)
+    let newMun = ""
+
+    if (indUser.mun.toLowerCase().includes("daet")) {
+      newMun = "daet";
+    } else if (indUser.mun.toLowerCase().includes("san lorenzo ruiz")) {
+      newMun = "san lorenzo ruiz";
+    }
+    
+    console.log("muni", capitalize(newMun))
+
+    fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${capitalize(newMun)},Camarines Norte,PH&appid=${WEATHER_KEY}`)
       .then(response => response.json())
       .then(json => {
-        setUserLocation(new GeoPoint(json[0].lat, json[0].lon))
         console.log("locatioooonn:", json)
+        setUserLocation(new GeoPoint(json[0].lat, json[0].lon))
+      }).catch(e => {
+        console.log("error fetching lat and lng", e)
       })
 
   }, [isAddFarm])
@@ -434,10 +373,11 @@ export const Calculator = ({ navigation }) => {
 
   useEffect(() => {
     if (!userLocation) return
+    console.log(`the locationnnnn: ${userLocation.latitude}`);
+
     fetch(`http://api.openweathermap.org/data/2.5/weather?lat=${userLocation.latitude}&lon=${userLocation.longitude}&APPID=${WEATHER_KEY}&units=metric`)
       .then((res) => res.json())
       .then((data) => {
-        console.log("dataaa curreeeent:", data)
         setWeather((prev) => ({
           ...prev,
           current: data
@@ -466,6 +406,7 @@ export const Calculator = ({ navigation }) => {
   const [show, setShow] = useState(false);
 
   const handleMapPress = (e) => {
+    console.log("the eeeeeeeeeeee:", e)
     setUserLocation(e.nativeEvent.coordinate);
   };
 
@@ -629,7 +570,7 @@ export const Calculator = ({ navigation }) => {
         createdAt: currDate,
       });
       await updateDoc(eRef_vegetative, { id: eRef_vegetative.id })
-      
+
       const eRef_flowering = await addDoc(eventsRef, {
         group: newFarm.id,
         title: "Flowering",
@@ -639,7 +580,7 @@ export const Calculator = ({ navigation }) => {
         createdAt: currDate,
       })
       await updateDoc(eRef_flowering, { id: eRef_flowering.id })
-      
+
       const eRef_fruiting = await addDoc(eventsRef, {
         group: newFarm.id,
         title: "Fruiting",
@@ -930,15 +871,19 @@ export const Calculator = ({ navigation }) => {
     // if (!farmerData) return
   }
 
-
-  dataFarms && console.log("datafarms:", dataFarms)
-  indUser && console.log("indUser:", indUser)
-
   const getDayOfWeek = (timestamp) => {
     const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const date = new Date(timestamp * 1000); // Convert from seconds to milliseconds
     return daysOfWeek[date.getDay()]; // Get day of the week as a string
   };
+
+  function normalizeLongitude(lng) {
+    return ((lng + 180) % 360 + 360) % 360 - 180;
+  }
+
+  function reverseNormalizeLongitude(lng) {
+    return lng > 0 ? lng - 360 : lng; // Adjusting for positive longitudes
+  }
 
   return (
     <>
@@ -1163,7 +1108,7 @@ export const Calculator = ({ navigation }) => {
                           labelField='fieldId'
                           valueField='fieldId'
                           onChange={fieldIdChange}
-                          placeholder={!fieldidFocus ? 'Select Farm Field ID' : fieldId }
+                          placeholder={!fieldidFocus ? 'Select Farm Field ID' : fieldId}
                           searchPlaceholder="Search..."
                           value={fieldId}
                           style={fieldidFocus ? styles.textInputFocus : styles.textInput}
@@ -1228,8 +1173,65 @@ export const Calculator = ({ navigation }) => {
                       <Text style={styles.supText}>Location</Text>
                       <Text style={{ color: 'red' }}>*</Text>
                     </View>
-                    <View style={styles.container1}>
-                      {/* <MapView style={styles.map} region={region} onPress={handleMapPress}>
+                    <View >
+                      <Button onPress={() => setModalVisible(true)} title="Open Map" />
+                      <Modal
+                        animationType="slide"
+                        transparent={true}
+                        visible={modalVisible}
+                        onRequestClose={() => {
+                          setModalVisible(!modalVisible);
+                        }}>
+                        <View
+                          style={{
+                            flex: 1,
+                          }}
+                        >
+                          <View style={{
+                            flex: 1,
+                            borderWidth: 1,
+                            borderColor: '#fff'
+                          }}>
+
+                            <LeafletView
+                              mapMarkers={[
+                                {
+                                  position: userLocation
+                                    ? { lat: userLocation.latitude, lng: reverseNormalizeLongitude(userLocation.longitude) }
+                                    : mapEvent
+                                      ? { lat: mapEvent.lat, lng: mapEvent.lng }
+                                      : { lat: 14.192259401369892, lng: -237.2101928677876 },
+                                  icon: '📍',
+                                  size: [32, 32],
+                                },
+                              ]}
+                              onMessageReceived={(e) => {
+                                if (e.event === "onMapClicked") {
+                                  setMapEvent(e.payload.touchLatLng)
+                                  setUserLocation(new GeoPoint(e.payload.touchLatLng.lat, normalizeLongitude(e.payload.touchLatLng.lng)))
+                                }
+                              }}
+                              mapCenterPosition={
+                                userLocation
+                                  ? { lat: userLocation.latitude, lng: reverseNormalizeLongitude(userLocation.longitude) }
+                                  : mapEvent
+                                    ? { lat: mapEvent.lat, lng: mapEvent.lng }
+                                    : { lat: 14.192259401369892, lng: -237.2101928677876 }
+                              }
+                              zoom={12}
+                            />
+
+                          </View>
+                          <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
+                            <Button title='cancel' onPress={() => setModalVisible(false)} />
+                            <Button title='ok' onPress={() => setModalVisible(false)} />
+                          </View>
+                        </View>
+
+                      </Modal>
+                      {/* <MapView
+                        provider={PROVIDER_GOOGLE}
+                        style={styles.map} region={region} onPress={handleMapPress}>
                         {userLocation && (
                           <Marker
                             coordinate={{
@@ -1434,8 +1436,8 @@ export const Calculator = ({ navigation }) => {
                 </View>
               </>
           }
-        </ScrollView>
-      </View>
+        </ScrollView >
+      </View >
       <Modal animationType='fade' visible={showAddImage} transparent={true}>
         <View style={styles.addImage}>
           <View style={styles.modalContainer}>
