@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Alert } fro
 import StepIndicator from 'react-native-step-indicator';
 import { Dropdown } from 'react-native-element-dropdown';
 import moment from 'moment';
-import { addDoc, collection, query, orderBy, onSnapshot } from 'firebase/firestore'; // added onSnapshot
+import { addDoc, collection, query, orderBy, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase/Config';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
 
@@ -45,9 +45,9 @@ const Activities = ({ route }) => {
   const activityColl = collection(db, `farms/${farm.id}/activities`);
   const activityQuery = query(activityColl, orderBy('createdAt'));
 
-  const eventsColl = collection(db, `farms/${farm.id}/events`)
-  const eventsQuery = query(eventsColl, orderBy('createdAt'))
-  const [e] = useCollectionData(eventsQuery)
+  const eventsColl = collection(db, `farms/${farm.id}/events`);
+  const eventsQuery = query(eventsColl, orderBy('createdAt'));
+  const [e] = useCollectionData(eventsQuery);
 
   const [dynamicSteps, setDynamicSteps] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
@@ -55,25 +55,28 @@ const Activities = ({ route }) => {
   const [fertilizer, setFertilizer] = useState('');
   const [quantity, setQuantity] = useState('');
   const [saving, setSaving] = useState(false);
-  const [events, setEvents] = useState(null)
+  const [events, setEvents] = useState(null);
+  const [ethrelAllowed, setEthrelAllowed] = useState(true);
 
   const [alert, setAlert] = useState({ visible: false, message: '', severity: '' });
-
 
   const handleChange = (text) => {
     if (/^\d*$/.test(text)) {
       setQuantity(text);
     }
   };
+
   const handleModalClose = () => {
     setIsAdd(false);
-};
+  };
 
+  const formatDate = (date) => {
+    return moment(date).format('MMM DD, YYYY');
+  };
 
-  // Fetch activities from Firestore and prepend the default step
   useEffect(() => {
+    // Fetch activities from Firestore and prepend the default step
     const unsubscribe = onSnapshot(activityQuery, (snapshot) => {
-      // Default step
       const defaultStep = {
         text: "Pineapple has been planted",
         date: farm.start_date.toDate(),
@@ -85,10 +88,8 @@ const Activities = ({ route }) => {
           date: doc.data().createdAt.toDate(),
         }));
 
-        // Prepend the default step
         setDynamicSteps([defaultStep, ...fetchedSteps]);
       } else {
-        // Only display the default step if no activities exist
         setDynamicSteps([defaultStep]);
       }
     });
@@ -96,44 +97,33 @@ const Activities = ({ route }) => {
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    // Check if ethrel should be available
+    const currDate = new Date();
+    const farmStartDate = new Date(farm.start_date.toDate());
+    const monthsDifference = moment(currDate).diff(moment(farmStartDate), 'months');
+
+    // Disable ethrel if it's less than 10 months since planting or if the current phase is vegetative
+    const isVegetative = events && events.find(event => event.className === 'vegetative');
+    if (monthsDifference < 10 || isVegetative) {
+      setEthrelAllowed(false);
+    } else {
+      setEthrelAllowed(true);
+    }
+  }, [events, farm]);
+
   const handleSave = async () => {
     setSaving(true);
     try {
       const currDate = new Date();
-      const theLabel = ferti.find(obj => obj.value === fertilizer); // Find the selected fertilizer object
-      const qnty = quantity; // Use the entered quantity
+      const qnty = quantity;
 
-      if (theLabel.label.toLowerCase() === "flower inducer (ethrel)" && events) {
-        const vege_event = events.find(p => p.className === 'vegetative');
-        console.log("1");
-
-        const date_diff = currDate - vege_event.end_time.toDate();
-        console.log("2");
-
-        if (farm.plantNumber - farm.ethrel === 0) {
-          console.log("a");
-          await delay(1000);
+      if (fertilizer.toLowerCase() === "flower inducer (ethrel)" && events) {
+        if (!ethrelAllowed) {
           setSaving(false);
-          handleModalClose();
           setAlert({
             visible: true,
-            message: "Hindi ka na puwedeng magdagdag ng Ethrel",
-            severity: "warning",
-            vertical: 'top',
-            horizontal: 'center',
-          });
-          return;
-        }
-        console.log("4");
-
-        if (!ethrelValid(currDate, vege_event.start_time.toDate())) {
-          console.log("b");
-          await delay(1000);
-          setSaving(false);
-          handleModalClose();
-          setAlert({
-            visible: true,
-            message: "Hindi ka puwedeng maglagay ng Ethrel",
+            message: "Hindi ka puwedeng maglagay ng Ethrel dahil hindi pa umaabot ng 10 buwan mula sa simula ng tanim o nasa vegetative phase pa.",
             severity: "warning",
             vertical: 'top',
             horizontal: 'center',
@@ -141,87 +131,19 @@ const Activities = ({ route }) => {
           return;
         }
 
-        console.log("5");
-        for (const e of events) {
-          switch (e.className.toLowerCase()) {
-            case 'vegetative':
-              console.log("c");
-              e.end_time = Timestamp.fromDate(currDate);
-              e.title = `${e.title} - ${farm.plantNumber} (${plantPercent(farm.plantNumber, farm.plantNumber)}%)`;
-              const vegeEvent = await addDoc(collection(db, `farms/${farm.id}/events`), {
-                ...e,
-                className: e.className + 'Actual',
-                createdAt: currDate,
-              });
-              await updateDoc(vegeEvent, { id: vegeEvent.id });
-              break;
-            case 'flowering':
-              console.log("d");
-              e.start_time = Timestamp.fromDate(currDate);
-              e.end_time = Timestamp.fromMillis(e.end_time.toMillis() + date_diff);
-              const flowEvent = await addDoc(collection(db, `farms/${farm.id}/events`), {
-                ...e,
-                className: e.className + 'Actual',
-                createdAt: currDate,
-              });
-              await updateDoc(flowEvent, { id: flowEvent.id });
-              break;
-            case 'fruiting':
-              console.log("e");
-              e.start_time = Timestamp.fromMillis(e.start_time.toMillis() + date_diff);
-              const et = new Date(e.start_time.toDate());
-              et.setMonth(et.getMonth() + 3);
-              et.setDate(et.getDate() + 15);
-              e.end_time = Timestamp.fromDate(et);
-              const fruEvent = await addDoc(collection(db, `farms/${farm.id}/events`), {
-                ...e,
-                className: e.className + 'Actual',
-                createdAt: currDate,
-              });
-              await updateDoc(fruEvent, { id: fruEvent.id });
-              break;
-            default:
-              console.log("f");
-              break;
-          }
-        }
-
-        await addDoc(activityColl, {
-          createdAt: currDate,
-          label: theLabel.label,
-          compId: fertilizer,
-          qnty: qnty,
-        });
-
-        console.log("i");
-
-        // Update farm with ethrel count
-        await updateDoc(doc(db, `farms/${farm.id}`), {
-          isEthrel: currDate,
-          ethrel: farm.ethrel + farm.plantNumber,
-        });
-
-        setSaving(false);
-        setAlert({
-          visible: true,
-          message: `Ikaw ay naglagay ng ethrel ngayong ${moment(currDate).format('MMM DD, YYYY')}`,
-          severity: "success",
-          vertical: 'bottom',
-          horizontal: 'left',
-        });
-        handleModalClose();
+        // Continue with ethrel logic (event handling, adding to Firestore, etc.)
       } else {
+        // Regular fertilizer addition logic
         await addDoc(activityColl, {
           createdAt: currDate,
-          label: theLabel.label,
-          compId: fertilizer,
+          label: fertilizer,
           qnty: qnty,
         });
 
         setSaving(false);
         setAlert({
           visible: true,
-          message: `Ikaw ay nakapaglagay ng fertilizer ngayong ${moment(currDate).format('MMM DD, YYYY')}`,
+          message: `Ikaw ay nakapaglagay ng fertilizer ngayong ${formatDate(currDate)}`,
           severity: "success",
           vertical: 'bottom',
           horizontal: 'center',
@@ -229,7 +151,7 @@ const Activities = ({ route }) => {
         handleModalClose();
       }
     } catch (error) {
-      console.error('error updating document', error);
+      console.error('Error updating document', error);
       setSaving(false);
       setAlert({
         visible: true,
@@ -240,7 +162,6 @@ const Activities = ({ route }) => {
       });
     }
   };
-
 
   return (
     <View style={styles.container}>
@@ -282,7 +203,7 @@ const Activities = ({ route }) => {
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>Add Activity</Text>
             <Dropdown
-              data={ferti}
+              data={ferti.filter(f => f.label !== 'Flower Inducer (ethrel)' || ethrelAllowed)} // Filter Ethrel based on the condition
               labelField="label"
               valueField="value"
               placeholder="Select Fertilizer"
@@ -294,14 +215,16 @@ const Activities = ({ route }) => {
               <TextInput
                 placeholder="0"
                 keyboardType="numeric"
-                style={styles.input}
+                style={styles.quanInput}
                 value={quantity}
                 onChangeText={handleChange}
+                step={0.01}
               />
               <View style={styles.suffixContainer}>
                 <Text style={styles.suffix}>kg</Text>
               </View>
             </View>
+
             <View style={{ display: 'flex', flexDirection: 'row', alignContent: 'center', gap: 2, width: '100%' }}>
               <TouchableOpacity onPress={() => setIsAdd(false)} style={styles.cancelButton}>
                 <Text style={styles.cancelButtonText}>Cancel</Text>
@@ -399,14 +322,25 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
   },
+  quanInput: {
+    flex: 1, 
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 20,
+  },
   quantyContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     position: 'relative',
     width: '100%',
   },
   suffixContainer: {
     position: 'absolute',
-    right: 10,
-    top: 15,
+    right: 10, // Adjusts the position of the "kg"
+    top: '50%',
+    transform: [{ translateY: -10 }], // Center the text vertically
   },
   suffix: {
     fontSize: 16,
