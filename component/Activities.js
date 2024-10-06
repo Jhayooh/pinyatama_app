@@ -1,15 +1,23 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
 import StepIndicator from 'react-native-step-indicator';
-// import Carousel from 'react-native-snap-carousel';
-// import Doughnut from '../chart/Doughnut'; // Ensure you have the correct library for charts
+import { Dropdown } from 'react-native-element-dropdown';
+import moment from 'moment';  
+import { addDoc, collection } from 'firebase/firestore';
+import { db } from '../firebase/Config';
 
-const steps = ["Step 1", "Step 2", "Step 3", "Step 4"];
+const ferti = [
+  { label: 'Ammouphus (16-20-0)', value: 'Ammouphus (16-20-0)' },
+  { label: 'Muriate of Potash (0-0-60)', value: 'Muriate of Potash (0-0-60)' },
+  { label: 'Urea Granular (46-0-0)', value: 'Urea Granular (46-0-0)' },
+  { label: 'Water Soluble Calcium Nitrate (17-0-17)', value: 'Water Soluble Calcium Nitrate (17-0-17)' },
+  { label: 'Flower Inducer (ethrel)', value: 'Flower Inducer (ethrel)' },
+];
 
 const customStyles = {
-  stepIndicatorSize: 30,
+  stepIndicatorSize: 10,
   currentStepIndicatorSize: 40,
-  separatorStrokeWidth: 2,
+  separatorStrokeWidth: 1, 
   currentStepStrokeWidth: 3,
   stepStrokeCurrentColor: '#fe7013',
   stepStrokeWidth: 3,
@@ -27,22 +35,41 @@ const customStyles = {
   stepIndicatorLabelUnFinishedColor: '#aaaaaa',
   labelColor: '#999999',
   labelSize: 13,
-  currentStepLabelColor: '#fe7013'
+  currentStepLabelColor: '#fe7013',
 };
 
-const Activities = ({ roi }) => {
+
+const Activities = ({ route }) => {
+  const { farm } = route.params;
+
+  CON
+
+  const [dynamicSteps, setDynamicSteps] = useState([{ text: "Pineapple has been planted", date: farm.start_date }]);
   const [currentStep, setCurrentStep] = useState(0);
   const [isAdd, setIsAdd] = useState(false);
   const [fertilizer, setFertilizer] = useState('');
   const [quantity, setQuantity] = useState('');
   const [saving, setSaving] = useState(false);
 
+  const handleChange = (text) => {
+    if (/^\d*$/.test(text)) {
+      setQuantity(text);
+    }
+  };
+
   const handleSave = () => {
     setSaving(true);
     if (fertilizer && quantity) {
       setTimeout(() => {
+        const newStep = {
+          text: `${quantity}kg, ${fertilizer},`,
+          date: new Date(), 
+        };
+        setDynamicSteps(prevSteps => [...prevSteps, newStep]);
         setSaving(false);
         setIsAdd(false);
+        setFertilizer('');
+        setQuantity('');
         Alert.alert("Success", "Activity added successfully!");
       }, 1000);
     } else {
@@ -53,31 +80,29 @@ const Activities = ({ roi }) => {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-        onPress={() => setIsAdd(true)}
-        style={styles.addButton}
-      >
+      <TouchableOpacity onPress={() => setIsAdd(true)} style={styles.addButton}>
         <Text style={styles.addButtonText}>Add Activities</Text>
       </TouchableOpacity>
-      <StepIndicator
-        customStyles={customStyles}
-        currentPosition={currentStep}
-        stepCount={steps.length}
-        labels={steps}
-        direction='vertical'
-      />
 
+      <View style={styles.stepContainer}>
+        <View style={{ flex: 1 }}>
+          <StepIndicator
+            customStyles={customStyles}
+            currentPosition={currentStep}
+            stepCount={dynamicSteps.length}
+            labels={dynamicSteps.map(step => step.text)}  
+            direction='vertical'
+          />
+        </View>
 
-      {/* <ScrollView style={{ marginTop: 20 }}>
-        <Text style={styles.stepText}>Activity Details for {steps[currentStep]}</Text>
-      </ScrollView> */}
-      {/* 
-      <TouchableOpacity
-        onPress={() => setCurrentStep((currentStep + 1) % steps.length)}
-        style={styles.nextButtonContainer}
-      >
-        <Text style={styles.nextButton}>Next</Text>
-      </TouchableOpacity>
+        <View style={styles.dateColumn}>
+          {dynamicSteps.map((step, index) => (
+            <Text key={index} style={styles.dateText}>
+              {moment(step.date).format('MMM DD, YYYY')}  
+            </Text>
+          ))}
+        </View>
+      </View>
 
       {/* Modal for adding activity */}
       <Modal
@@ -89,24 +114,29 @@ const Activities = ({ roi }) => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>Add Activity</Text>
-            <TextInput
-              placeholder="Fertilizer Name"
-              style={styles.input}
+            <Dropdown
+              data={ferti}
+              labelField='label'
+              valueField='value'
+              placeholder='Select Fertilizer'
               value={fertilizer}
-              onChangeText={setFertilizer}
-            />
-            <TextInput
-              placeholder="Quantity"
-              keyboardType="numeric"
               style={styles.input}
-              value={quantity}
-              onChangeText={setQuantity}
+              onChange={item => setFertilizer(item.value)} 
             />
-            <View style={{ display: 'flex', flexDirection: 'row', alignContent: 'center', gap: 2 }}>
-              <TouchableOpacity
-                onPress={() => setIsAdd(false)}
-                style={styles.cancelButton}
-              >
+            <View style={styles.quantyContainer}>
+              <TextInput
+                placeholder="0"
+                keyboardType="numeric"
+                style={styles.input}
+                value={quantity}
+                onChangeText={handleChange}
+              />
+              <View style={styles.suffixContainer}>
+                <Text style={styles.suffix}>kg</Text>
+              </View>
+            </View>
+            <View style={{ display: 'flex', flexDirection: 'row', alignContent: 'center', gap: 2, width: '100%' }}>
+              <TouchableOpacity onPress={() => setIsAdd(false)} style={styles.cancelButton}>
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -117,25 +147,9 @@ const Activities = ({ roi }) => {
                 <Text style={styles.saveButtonText}>{saving ? 'Saving...' : 'Save'}</Text>
               </TouchableOpacity>
             </View>
-
           </View>
         </View>
       </Modal>
-
-      {/* Carousel for ROI */}
-      {/* <Carousel
-        data={roi}
-        renderItem={({ item }) => (
-          <View>
-            <Doughnut
-              data={[item.netReturn, item.costTotal]}
-              labels={["Net Return", "Production Cost"]}
-            />
-          </View>
-        )}
-        sliderWidth={300}
-        itemWidth={300}
-      /> */}
     </View>
   );
 };
@@ -145,10 +159,8 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
-  stepText: {
-    marginVertical: 20,
-    fontSize: 18,
-    textAlign: 'center',
+  stepContainer: {
+    flexDirection: 'row',
   },
   addButton: {
     backgroundColor: 'green',
@@ -161,17 +173,14 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
   },
-  nextButtonContainer: {
-    backgroundColor: '#fe7013',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-    alignSelf: 'center',
-    marginTop: 20,
+  dateColumn: {
+    justifyContent: 'flex-start',
+    marginLeft: 10, // Add spacing between the step indicator and dates
   },
-  nextButton: {
-    color: '#fff',
-    fontSize: 18,
+  dateText: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 20, // Space out the dates
   },
   modalOverlay: {
     flex: 1,
@@ -201,6 +210,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     alignItems: 'center',
+    flex: 1,
   },
   saveButtonText: {
     color: '#fff',
@@ -211,10 +221,23 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     alignItems: 'center',
+    flex: 1,
   },
   cancelButtonText: {
     color: '#fff',
     fontSize: 18,
+  },
+  quantyContainer: {
+    position: 'relative',
+    width: '100%',
+  },
+  suffixContainer: {
+    position: 'absolute',
+    right: 10,
+    top: 15,
+  },
+  suffix: {
+    fontSize: 16,
   },
 });
 

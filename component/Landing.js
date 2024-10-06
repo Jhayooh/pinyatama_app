@@ -371,54 +371,11 @@ export const Landing = ({ navigation }) => {
                             </Text>
 
                         </View>
-
-
-
-
                     </View>
                     :
                     <></>
             }
 
-            {/* <View style={styles.drawerContainer}>
-                <Image source={appLogo}
-                    style={{
-                        width: 128,
-                        height: 128,
-                    }} />
-                <Text style={styles.drawerTitle} >Queen Pineapple Farming</Text> */}
-            {/* <Button
-                title='Close'
-                onPress={() => drawer.current.closeDrawer()}
-            /> */}
-
-
-            {/* <View>
-                    <Divider />
-                    <TouchableOpacity style={loginStyle.createAccountButton}>
-                        <Text
-                            style={{
-                                ...loginStyle.createAccountButtonText,
-                                display: logUser ? 'flex' : 'none'
-                            }}
-                            onPress={() => {
-                                navigation.navigate('Extensionist', { logUser: logUser });
-                            }}
-                        >
-                            Edit Profile
-                        </Text>
-                    </TouchableOpacity>
-                    <Divider />
-                </View>
-                <Button
-                    title='Logout'
-                    color="green"
-                    onPress={handleLogout}
-                    style={styles.drawerLogoutBtn}
-                />
-
-
-            </View> */}
         </>
     )
 

@@ -40,22 +40,22 @@ const soilType = [
   { label: 'Clay', value: 'Clay' },
   { label: 'Sandy', value: 'Sandy' }
 ]
- // { label: 'HHS', value: 'HHS' }, //40 20 45
-  // { label: 'HMS', value: 'HMS' }, //40 40 45
-  // { label: 'HLS', value: 'HLS' }, //40 60 45
-  // { label: 'HHD', value: 'HHD' }, //40 20 225
-  // { label: 'HMD', value: 'HMD' }, //40 40 225
-  // { label: 'HLD', value: 'HLD' }, //40 60 225
-  // { label: 'MMS', value: 'MMS' }, //100 20 45
-  // { label: 'MLS', value: 'MLS' }, //100 40 45
-  // { label: 'MHD', value: 'MHD' }, //100 60 45
-  // { label: 'MMD', value: 'MMD' }, //100 20 45
-  // { label: 'MLD', value: 'MLD' }, //100 40 225
-  // { label: 'LHS', value: 'LHS' }, //100 60 225
-  // { label: 'LMS', value: 'LMS' }, //150 20 45
-  // { label: 'LLS', value: 'LLS' }, //150 40 45
-  // { label: 'LHD', value: 'LHD' }, //150 20 225
-  // { label: 'LMD', value: 'LMD' }, //150 40 225
+// { label: 'HHS', value: 'HHS' }, //40 20 45
+// { label: 'HMS', value: 'HMS' }, //40 40 45
+// { label: 'HLS', value: 'HLS' }, //40 60 45
+// { label: 'HHD', value: 'HHD' }, //40 20 225
+// { label: 'HMD', value: 'HMD' }, //40 40 225
+// { label: 'HLD', value: 'HLD' }, //40 60 225
+// { label: 'MMS', value: 'MMS' }, //100 20 45
+// { label: 'MLS', value: 'MLS' }, //100 40 45
+// { label: 'MHD', value: 'MHD' }, //100 60 45
+// { label: 'MMD', value: 'MMD' }, //100 20 45
+// { label: 'MLD', value: 'MLD' }, //100 40 225
+// { label: 'LHS', value: 'LHS' }, //100 60 225
+// { label: 'LMS', value: 'LMS' }, //150 20 45
+// { label: 'LLS', value: 'LLS' }, //150 40 45
+// { label: 'LHD', value: 'LHD' }, //150 20 225
+// { label: 'LMD', value: 'LMD' }, //150 40 225
 const npkType = [
   {
     label: 'HHS',
@@ -121,7 +121,7 @@ const npkType = [
       }
     }
   },
-    {
+  {
     label: 'HMS',
     value: 'HMS',
     data: {
@@ -629,7 +629,7 @@ export const Calculator = ({ navigation }) => {
         createdAt: currDate,
       });
       await updateDoc(eRef_vegetative, { id: eRef_vegetative.id })
-      
+
       const eRef_flowering = await addDoc(eventsRef, {
         group: newFarm.id,
         title: "Flowering",
@@ -639,7 +639,7 @@ export const Calculator = ({ navigation }) => {
         createdAt: currDate,
       })
       await updateDoc(eRef_flowering, { id: eRef_flowering.id })
-      
+
       const eRef_fruiting = await addDoc(eventsRef, {
         group: newFarm.id,
         title: "Fruiting",
@@ -1163,7 +1163,7 @@ export const Calculator = ({ navigation }) => {
                           labelField='fieldId'
                           valueField='fieldId'
                           onChange={fieldIdChange}
-                          placeholder={!fieldidFocus ? 'Select Farm Field ID' : fieldId }
+                          placeholder={!fieldidFocus ? 'Select Farm Field ID' : fieldId}
                           searchPlaceholder="Search..."
                           value={fieldId}
                           style={fieldidFocus ? styles.textInputFocus : styles.textInput}
@@ -1366,13 +1366,15 @@ export const Calculator = ({ navigation }) => {
                       <DateTimePickerModal
                         isVisible={startPicker}
                         mode="date"
+                        maximumDate={new Date()}
                         onConfirm={(date) => {
-                          setStartDate(date)
-                          setStartPicker(false)
+                          setStartDate(date);
+                          setStartPicker(false);
                         }}
                         onCancel={() => setStartPicker(false)}
                         style={{ marginBottom: 10 }}
                       />
+
                     </View>
                   </View>
                 </View>
@@ -1399,16 +1401,35 @@ export const Calculator = ({ navigation }) => {
 
                       }
                     </View>
-                    <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <View style={{ flex: 1, gap: 2, flexDirection: 'row', justifyContent: 'space-between' }}>
                       <TouchableOpacity
-                        style={{ ...styles.button, borderTopLeftRadius: 0, borderTopRightRadius: 0, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 22, paddingVertical: 8, justifyContent: 'center', gap: 10 }} onPress={() => {
+                        style={{
+                          ...styles.button,
+                          borderTopLeftRadius: 0,
+                          borderTopRightRadius: 0,
+                          alignItems: 'center',
+                          paddingHorizontal: 22,
+                          paddingVertical: 8,
+                          width: '100%',
+                          flex: 1
+                        }}
+                        onPress={() => {
                           setShowAddImage(true)
                         }}>
                         <Image source={require('../assets/up.png')} style={{ resizeMode: 'contain' }} />
                         <Text style={{ color: '#E8E7E7', fontSize: 18, }}>Add Image</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
-                        style={{ ...styles.button, borderTopLeftRadius: 0, borderTopRightRadius: 0, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 22, paddingVertical: 8, justifyContent: 'center', gap: 10 }}
+                        style={{
+                          ...styles.button,
+                          borderTopLeftRadius: 0,
+                          borderTopRightRadius: 0,
+                          alignItems: 'center',
+                          paddingHorizontal: 22,
+                          paddingVertical: 8,
+                          width: '100%',
+                          flex: 1
+                        }}
                         onPress={deleteLastImage}
                       >
                         <Image source={require('../assets/trash.png')} style={{ resizeMode: 'contain' }} />
@@ -1569,6 +1590,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     // padding: 12,
     borderRadius: 8,
+
   },
   switchContainer: {
     flexDirection: 'row',

@@ -7,7 +7,7 @@ const Video = ({ navigation }) => {
         // <ImageBackground source={require('../assets/p1.jpg')} style={styles.background} >
             <ScrollView showsVerticalScrollIndicator={false}>
                 <View style={styles.videoContainer}>
-                    <VideoCard title="Pagaani ng Pinya sa Labo, Camarines Norte " subtitle='loremipsum hahaaha' videoId="oS5xvukokSw" />
+                    <VideoCard title="Pagaani ng Pinya sa Labo, Camarines Norte "  videoId="oS5xvukokSw" />
                     <VideoCard title="Semilya ng Pinya, Daet, Camarines Norte" videoId="K9WfCeUL4AM" />
                     <VideoCard title="The sweetest Pineapple in Camarines Norte" videoId="gCCu6xwi2f4" />
                 </View>
