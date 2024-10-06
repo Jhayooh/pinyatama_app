@@ -74,7 +74,7 @@ const Edit = ({ route, navigation }) => {
                     >
                         {() => (
                             <ScrollView>
-                                {qPine && <TableBuilder components={comp} area={farm.area} setRoiDetails={setRoiDetails} pineapple={qPine} setComponents={setComp} soil={farm.soil}/>}
+                                {qPine && <TableBuilder components={comp} area={farm.area} setRoiDetails={setRoiDetails} pineapple={qPine} setComponents={setComp} soil={farm.soil} />}
                             </ScrollView>
                         )}
                     </Tab.Screen>
@@ -82,12 +82,15 @@ const Edit = ({ route, navigation }) => {
                         name="Activities"
                         component={Activities}
                         options={{ tabBarLabel: 'Activities' }}
+                        initialParams={{
+                            farm: farm,
+                        }}
                     />
-                     <Tab.Screen
+                    {/* <Tab.Screen
                         name="Report"
                         component={Report}
                         options={{ tabBarLabel: 'Report' }}
-                    />
+                    /> */}
                 </Tab.Navigator>
             }
         </>

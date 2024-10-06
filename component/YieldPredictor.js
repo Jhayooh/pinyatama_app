@@ -5,16 +5,28 @@ import { collection, getDocs } from 'firebase/firestore';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
 import { db } from '../firebase/Config';
 import { ActivityIndicator } from 'react-native-paper';
+import { Calendar } from 'react-native-calendars';
+import moment from 'moment';
 
-const YieldPredictor = ({route}) => {
+
+const YieldPredictor = ({ route }) => {
+
     const [productionData, setProductionData] = useState([]);
     const [totalProduction, setTotalProduction] = useState(0);
     const [pieChartData, setPieChartData] = useState([]);
     const [combinedData2, setCombinedData2] = useState([]);
     const [roiData, setRoiData] = useState([]);
+    const [markedDates, setMarkedDates] = useState({
+        '2021-01-20': { textColor: 'green' },
+        '2021-01-22': { startingDay: true, color: 'green' },
+        '2021-01-23': { selected: true, endingDay: true, color: 'green', textColor: 'gray' },
+        '2021-01-04': { disabled: true, startingDay: true, color: 'green', endingDay: true }
+    });
+
 
     const farmsColl = collection(db, 'farms');
     const [farmsData, farmsLoading, farmsError] = useCollectionData(farmsColl);
+
 
     useEffect(() => {
         const fetchRoiData = async () => {
@@ -29,11 +41,11 @@ const YieldPredictor = ({route}) => {
 
                 try {
                     const roiColl = collection(db, `farms/${farm.id}/roi`);
-                    const roiSnapshot = await getDocs(roiColl);  
+                    const roiSnapshot = await getDocs(roiColl);
                     roiSnapshot.forEach(doc => {
                         roiDataArray.push({
                             farmId: farm.id,
-                            ...doc.data(), 
+                            ...doc.data(),
                         });
                     });
                 } catch (error) {
@@ -48,16 +60,12 @@ const YieldPredictor = ({route}) => {
     }, [farmsData]);
 
     useEffect(() => {
-        if (!farmsData || farmsData.length === 0 || roiData.length === 0) {
-            return;
-        }
+        if (!farmsData || farmsData.length === 0 || roiData.length === 0) return;
 
-        // Group farms by title and municipality (mun)
         const groupedByTitle = farmsData.reduce((acc, farm) => {
             const title = farm.title || 'Unknown Title';
             if (!acc[title]) acc[title] = [];
 
-            // Find the ROI data for this farm
             const farmRoiData = roiData.find(data => data.farmId === farm.id);
             const grossReturn = farmRoiData?.grossReturn || 0;
 
@@ -69,7 +77,6 @@ const YieldPredictor = ({route}) => {
             const mun = farm.mun || 'Unknown Municipality';
             if (!acc[mun]) acc[mun] = [];
 
-            // Find the ROI data for this farm
             const farmRoiData = roiData.find(data => data.farmId === farm.id);
             const grossReturn = farmRoiData?.grossReturn || 0;
 
@@ -77,7 +84,6 @@ const YieldPredictor = ({route}) => {
             return acc;
         }, {});
 
-        // Combine data based on the grouping
         const combinedData = Object.keys(groupedByTitle).map(title => ({
             title,
             data: groupedByTitle[title].reduce((sum, value) => sum + value, 0),
@@ -88,19 +94,16 @@ const YieldPredictor = ({route}) => {
             data: groupedByMun[mun].reduce((sum, value) => sum + value, 0),
         }));
 
-        // Create pie chart data for farms
         const pieChartData = combinedData.map((item) => ({
             label: item.title,
             value: item.data,
         }));
 
-        // Create pie chart data for municipalities
         const pieChartData1 = combinedData1.map((item) => ({
             label: item.mun,
             value: item.data,
         }));
 
-        // Total production and formatted data for municipalities
         const totalProduction = combinedData1.reduce((sum, item) => sum + item.data, 0);
         const combinedData2 = combinedData1.map(item => ({
             label: item.mun,
@@ -113,30 +116,73 @@ const YieldPredictor = ({route}) => {
         setCombinedData2(combinedData2);
     }, [farmsData, roiData]);
 
-    // Prepare series and labels for the Pie charts
-    const series1 = combinedData2.map(item => item.value);
-    const labels1 = combinedData2.map(item => item.label);
-    const series2 = pieChartData.map(item => item.value);
-    const labels2 = pieChartData.map(item => item.label);
 
-    console.log('serrriees1', series1)
-    console.log('l1', labels1)
-    console.log('serrriees2', series2)
-    console.log('l2', labels2)
+
+    const handleDayPress = (day) => {
+        const startDate = moment(day.dateString); // The selected date
+        const newMarkedDates = {
+            '2024-10-01': { dots: [{ key: 'vacation', color: 'blue' }] },
+            '2024-10-02': { dots: [{ key: 'work', color: 'red' }, { key: 'study', color: 'green' }] }
+        }; 
+
+        // First 10 months - green dot
+        for (let i = 0; i < 10; i++) {
+            const date = startDate.clone().add(i, 'months').format('YYYY-MM-DD');
+            newMarkedDates[date] = {
+                dots: [{ key: `green-${i}`, color: 'green' }],
+                ...newMarkedDates[date] // Preserve any previous markings
+            };
+        }
+
+        // Next 2 months - orange dot
+        for (let i = 10; i < 12; i++) {
+            const date = startDate.clone().add(i, 'months').format('YYYY-MM-DD');
+            newMarkedDates[date] = {
+                dots: [{ key: `orange-${i}`, color: 'orange' }],
+                ...newMarkedDates[date]
+            };
+        }
+
+        // Next 6 months - blue dot
+        for (let i = 12; i < 18; i++) {
+            const date = startDate.clone().add(i, 'months').format('YYYY-MM-DD');
+            newMarkedDates[date] = {
+                dots: [{ key: `blue-${i}`, color: 'blue' }],
+                ...newMarkedDates[date]
+            };
+        }
+
+        // Set the updated markedDates state
+        setMarkedDates(newMarkedDates);
+    };
+
 
     if (farmsLoading || roiData.length === 0) {
-        return <View style={{flex:1, justifyContent:'center', alignItems:'center',}}>
-            <ActivityIndicator />
-        </View>;
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <ActivityIndicator />
+            </View>
+        );
     }
 
     if (farmsError) {
         return <View><Text>Error loading data...</Text></View>;
     }
 
+    const series1 = combinedData2.map(item => item.value);
+    const labels1 = combinedData2.map(item => item.label);
+    const series2 = pieChartData.map(item => item.value);
+    const labels2 = pieChartData.map(item => item.label);
+
     return (
         <ScrollView>
-            <View style={{ padding: 16, flex: 1, height: '100%' }}>
+            <View style={{ padding: 16, flex: 1, height: '100%', gap: 5 }}>
+                {/* <Calendar
+                    markedDates={markedDates}
+                    markingType={'dots'}
+                    onDayPress={handleDayPress}
+                    style={{borderRadius:20, elevation:5, backgroundColor:'#fff', padding:10}}
+                /> */}
                 <View style={{
                     backgroundColor: '#fff',
                     borderRadius: 20,
@@ -150,7 +196,7 @@ const YieldPredictor = ({route}) => {
                     borderRadius: 20,
                     elevation: 5,
                     padding: 10,
-                    marginTop:20
+                    marginTop: 20
                 }}>
                     <Pie labels={labels2} data={series2} title="Farms" />
                 </View>

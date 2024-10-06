@@ -1368,13 +1368,15 @@ export const Calculator = ({ navigation }) => {
                       <DateTimePickerModal
                         isVisible={startPicker}
                         mode="date"
+                        maximumDate={new Date()}
                         onConfirm={(date) => {
-                          setStartDate(date)
-                          setStartPicker(false)
+                          setStartDate(date);
+                          setStartPicker(false);
                         }}
                         onCancel={() => setStartPicker(false)}
                         style={{ marginBottom: 10 }}
                       />
+
                     </View>
                   </View>
                 </View>
@@ -1401,16 +1403,35 @@ export const Calculator = ({ navigation }) => {
 
                       }
                     </View>
-                    <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <View style={{ flex: 1, gap: 2, flexDirection: 'row', justifyContent: 'space-between' }}>
                       <TouchableOpacity
-                        style={{ ...styles.button, borderTopLeftRadius: 0, borderTopRightRadius: 0, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 22, paddingVertical: 8, justifyContent: 'center', gap: 10 }} onPress={() => {
+                        style={{
+                          ...styles.button,
+                          borderTopLeftRadius: 0,
+                          borderTopRightRadius: 0,
+                          alignItems: 'center',
+                          paddingHorizontal: 22,
+                          paddingVertical: 8,
+                          width: '100%',
+                          flex: 1
+                        }}
+                        onPress={() => {
                           setShowAddImage(true)
                         }}>
                         <Image source={require('../assets/up.png')} style={{ resizeMode: 'contain' }} />
                         <Text style={{ color: '#E8E7E7', fontSize: 18, }}>Add Image</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
-                        style={{ ...styles.button, borderTopLeftRadius: 0, borderTopRightRadius: 0, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 22, paddingVertical: 8, justifyContent: 'center', gap: 10 }}
+                        style={{
+                          ...styles.button,
+                          borderTopLeftRadius: 0,
+                          borderTopRightRadius: 0,
+                          alignItems: 'center',
+                          paddingHorizontal: 22,
+                          paddingVertical: 8,
+                          width: '100%',
+                          flex: 1
+                        }}
                         onPress={deleteLastImage}
                       >
                         <Image source={require('../assets/trash.png')} style={{ resizeMode: 'contain' }} />
@@ -1571,6 +1592,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     // padding: 12,
     borderRadius: 8,
+
   },
   switchContainer: {
     flexDirection: 'row',
