@@ -304,11 +304,23 @@ export const Calculator = ({ navigation }) => {
     setLastname('')
     setSex('Male')
 
-    fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${capitalize(indUser.mun)},Camarines Norte,PH&appid=${WEATHER_KEY}`)
+    let newMun = ""
+
+    if (indUser.mun.toLowerCase().includes("daet")) {
+      newMun = "daet";
+    } else if (indUser.mun.toLowerCase().includes("san lorenzo ruiz")) {
+      newMun = "san lorenzo ruiz";
+    }
+    
+    console.log("muni", capitalize(newMun))
+
+    fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${capitalize(newMun)},Camarines Norte,PH&appid=${WEATHER_KEY}`)
       .then(response => response.json())
       .then(json => {
-        setUserLocation(new GeoPoint(json[0].lat, json[0].lon))
         console.log("locatioooonn:", json)
+        setUserLocation(new GeoPoint(json[0].lat, json[0].lon))
+      }).catch(e => {
+        console.log("error fetching lat and lng", e)
       })
 
   }, [isAddFarm])
