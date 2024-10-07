@@ -219,7 +219,7 @@ const Activities = ({ route }) => {
         // Update farm with ethrel count
         await updateDoc(doc(db, `farms/${farm.id}`), {
           isEthrel: currDate,
-          ethrel: farm.ethrel + bilang,
+          ethrel: farm.ethrel + parseInt(bilang),
         });
 
         setSaving(false);
@@ -311,7 +311,7 @@ const Activities = ({ route }) => {
               style={styles.input}
               onChange={item => {
                 setFertilizer(item.value)
-                setBilang(parseInt(farm.plantNumber) - parseInt(farm.ethrel))
+                setBilang((parseInt(farm.plantNumber) - parseInt(farm.ethrel)).toString())
               }}
             />
             {
@@ -339,7 +339,7 @@ const Activities = ({ route }) => {
               </View>
             </View>
             <View style={{ display: 'flex', flexDirection: 'row', alignContent: 'center', gap: 2, width: '100%' }}>
-              <TouchableOpacity onPress={() => setIsAdd(false)} style={styles.cancelButton}>
+              <TouchableOpacity onPress={handleModalClose} style={styles.cancelButton}>
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
