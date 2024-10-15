@@ -191,7 +191,7 @@ const YieldPredictor = ({ route }) => {
                 }}>
                     <Pie labels={labels1} data={series1} title="Municipalities" />
                 </View>
-                <View style={{
+                {/* <View style={{
                     backgroundColor: '#fff',
                     borderRadius: 20,
                     elevation: 5,
@@ -199,7 +199,7 @@ const YieldPredictor = ({ route }) => {
                     marginTop: 20
                 }}>
                     <Pie labels={labels2} data={series2} title="Farms" />
-                </View>
+                </View> */}
             </View>
         </ScrollView>
     );

@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Alert } fro
 import StepIndicator from 'react-native-step-indicator';
 import { Dropdown } from 'react-native-element-dropdown';
 import moment from 'moment';
-import { addDoc, collection, query, orderBy, onSnapshot } from 'firebase/firestore'; // added onSnapshot
+import { addDoc, collection, query, orderBy, onSnapshot, Timestamp, updateDoc, doc } from 'firebase/firestore'; // added onSnapshot
 import { db } from '../firebase/Config';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
 
@@ -56,18 +56,47 @@ const Activities = ({ route }) => {
   const [quantity, setQuantity] = useState('');
   const [saving, setSaving] = useState(false);
   const [events, setEvents] = useState(null)
+  const [bilang, setBilang] = useState(0)
+
+  const [bilangError, setBilangError] = useState(false)
 
   const [alert, setAlert] = useState({ visible: false, message: '', severity: '' });
 
+  useEffect(() => {
+    if (!e) return
+    console.log('eveeennntttsss', e);
+    setEvents(e)
+  }, [e])
+
+  function plantPercent(part, total) {
+    return Math.round((parseInt(part) / total) * 100)
+  }
 
   const handleChange = (text) => {
-    if (/^\d*$/.test(text)) {
-      setQuantity(text);
+    // Allow numbers and at most one decimal point
+    const decimalRegex = /^[0-9]*\.?[0-9]*$/;
+
+    // Validate input and update value if it matches the decimal format
+    if (decimalRegex.test(text)) {
+      setQuantity(parseFloat(text));
     }
   };
+
+  const handleBilang = (e) => {
+    if (isNaN(e) || e > (parseInt(farm.plantNumber) - parseInt(farm.ethrel)) || e <= 0) {
+      setBilangError(true)
+    } else {
+      setBilangError(false)
+    }
+    setBilang(e)
+  }
+
   const handleModalClose = () => {
+    setFertilizer('')
+    setQuantity(0)
+    setBilang(0)
     setIsAdd(false);
-};
+  };
 
 
   // Fetch activities from Firestore and prepend the default step
@@ -75,7 +104,7 @@ const Activities = ({ route }) => {
     const unsubscribe = onSnapshot(activityQuery, (snapshot) => {
       // Default step
       const defaultStep = {
-        text: "Pineapple has been planted",
+        text: "Planting of pineapple",
         date: farm.start_date.toDate(),
       };
 
@@ -96,6 +125,13 @@ const Activities = ({ route }) => {
     return () => unsubscribe();
   }, []);
 
+  function ethrelValid(currdate, start_date) {
+    const monthEight = new Date(start_date.setMonth(start_date.getMonth() + 8))
+    const monthTwelve = new Date(start_date.setMonth(start_date.getMonth() + 12))
+    const bool = currdate >= monthEight && currdate <= monthTwelve
+    return bool
+  }
+
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -105,13 +141,10 @@ const Activities = ({ route }) => {
 
       if (theLabel.label.toLowerCase() === "flower inducer (ethrel)" && events) {
         const vege_event = events.find(p => p.className === 'vegetative');
-        console.log("1");
 
         const date_diff = currDate - vege_event.end_time.toDate();
-        console.log("2");
 
         if (farm.plantNumber - farm.ethrel === 0) {
-          console.log("a");
           await delay(1000);
           setSaving(false);
           handleModalClose();
@@ -124,10 +157,7 @@ const Activities = ({ route }) => {
           });
           return;
         }
-        console.log("4");
-
         if (!ethrelValid(currDate, vege_event.start_time.toDate())) {
-          console.log("b");
           await delay(1000);
           setSaving(false);
           handleModalClose();
@@ -140,12 +170,9 @@ const Activities = ({ route }) => {
           });
           return;
         }
-
-        console.log("5");
         for (const e of events) {
           switch (e.className.toLowerCase()) {
             case 'vegetative':
-              console.log("c");
               e.end_time = Timestamp.fromDate(currDate);
               e.title = `${e.title} - ${farm.plantNumber} (${plantPercent(farm.plantNumber, farm.plantNumber)}%)`;
               const vegeEvent = await addDoc(collection(db, `farms/${farm.id}/events`), {
@@ -156,7 +183,6 @@ const Activities = ({ route }) => {
               await updateDoc(vegeEvent, { id: vegeEvent.id });
               break;
             case 'flowering':
-              console.log("d");
               e.start_time = Timestamp.fromDate(currDate);
               e.end_time = Timestamp.fromMillis(e.end_time.toMillis() + date_diff);
               const flowEvent = await addDoc(collection(db, `farms/${farm.id}/events`), {
@@ -167,7 +193,6 @@ const Activities = ({ route }) => {
               await updateDoc(flowEvent, { id: flowEvent.id });
               break;
             case 'fruiting':
-              console.log("e");
               e.start_time = Timestamp.fromMillis(e.start_time.toMillis() + date_diff);
               const et = new Date(e.start_time.toDate());
               et.setMonth(et.getMonth() + 3);
@@ -181,7 +206,6 @@ const Activities = ({ route }) => {
               await updateDoc(fruEvent, { id: fruEvent.id });
               break;
             default:
-              console.log("f");
               break;
           }
         }
@@ -192,13 +216,10 @@ const Activities = ({ route }) => {
           compId: fertilizer,
           qnty: qnty,
         });
-
-        console.log("i");
-
         // Update farm with ethrel count
         await updateDoc(doc(db, `farms/${farm.id}`), {
           isEthrel: currDate,
-          ethrel: farm.ethrel + farm.plantNumber,
+          ethrel: farm.ethrel + parseInt(bilang),
         });
 
         setSaving(false);
@@ -288,12 +309,27 @@ const Activities = ({ route }) => {
               placeholder="Select Fertilizer"
               value={fertilizer}
               style={styles.input}
-              onChange={item => setFertilizer(item.value)}
+              onChange={item => {
+                setFertilizer(item.value)
+                setBilang((parseInt(farm.plantNumber) - parseInt(farm.ethrel)).toString())
+              }}
             />
+            {
+              fertilizer.toLocaleLowerCase() === "flower inducer (ethrel)" &&
+              <View style={styles.quantyContainer}>
+                <TextInput
+                  placeholder="Bilang ng tanim"
+                  keyboardType="numeric"
+                  style={{ ...styles.input, borderColor: bilangError ? 'red' : '#ccc' }}
+                  value={bilang}
+                  onChangeText={handleBilang}
+                />
+              </View>
+            }
             <View style={styles.quantyContainer}>
               <TextInput
-                placeholder="0"
-                keyboardType="numeric"
+                placeholder="0.0"
+                keyboardType="decimal-pad"
                 style={styles.input}
                 value={quantity}
                 onChangeText={handleChange}
@@ -303,7 +339,7 @@ const Activities = ({ route }) => {
               </View>
             </View>
             <View style={{ display: 'flex', flexDirection: 'row', alignContent: 'center', gap: 2, width: '100%' }}>
-              <TouchableOpacity onPress={() => setIsAdd(false)} style={styles.cancelButton}>
+              <TouchableOpacity onPress={handleModalClose} style={styles.cancelButton}>
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity

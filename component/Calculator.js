@@ -42,23 +42,521 @@ const soilType = [
   { label: 'Clay', value: 'Clay' },
   { label: 'Sandy', value: 'Sandy' }
 ]
-// { label: 'HHS', value: 'HHS' }, //40 20 45
-// { label: 'HMS', value: 'HMS' }, //40 40 45
-// { label: 'HLS', value: 'HLS' }, //40 60 45
-// { label: 'HHD', value: 'HHD' }, //40 20 225
-// { label: 'HMD', value: 'HMD' }, //40 40 225
-// { label: 'HLD', value: 'HLD' }, //40 60 225
-// { label: 'MMS', value: 'MMS' }, //100 20 45
-// { label: 'MLS', value: 'MLS' }, //100 40 45
-// { label: 'MHD', value: 'MHD' }, //100 60 45
-// { label: 'MMD', value: 'MMD' }, //100 20 45
-// { label: 'MLD', value: 'MLD' }, //100 40 225
-// { label: 'LHS', value: 'LHS' }, //100 60 225
-// { label: 'LMS', value: 'LMS' }, //150 20 45
-// { label: 'LLS', value: 'LLS' }, //150 40 45
-// { label: 'LHD', value: 'LHD' }, //150 20 225
-// { label: 'LMD', value: 'LMD' }, //150 40 225
+
 const npkType = [
+  {
+    label: 'HHS',
+    value: 'HHS',
+    data: {
+      oranicFert: 4,
+      first: {
+        nutrients: {
+          N: 40,
+          P: 20,
+          K: 45
+        },
+        list: {
+          '14-14-14': 1.5,
+          '16-20-0': 0,
+          '46-0-0': 0.5,
+          '0-0-60': 0.5
+        }
+      },
+      second: {
+        nutrients: {
+          N: 40,
+          P: 0,
+          K: 15,
+        },
+        list: {
+          '17-0-17': 1.0, //water soluble solution
+          '46-0-0': 0.5,
+          '0-0-60': 0,
+        }
+      }
+    }
+  },
+  {
+    label: 'HMS',
+    value: 'HMS',
+    data: {
+      oranicFert: 4,
+      first: {
+        nutrients: {
+          N: 40,
+          P: 40,
+          K: 45
+        },
+        list: {
+          '14-14-14': 3,
+          '16-20-0': 0,
+          '46-0-0': 0,
+          '0-0-60': 0
+        }
+      },
+      second: {
+        nutrients: {
+          N: 40,
+          P: 0,
+          K: 15,
+        },
+        list: {
+          '17-0-17': 1.0, //water soluble solution
+          '46-0-0': 0.5,
+          '0-0-60': 0,
+        }
+      }
+    }
+  },
+  {
+    label: 'HLS',
+    value: 'HLS',
+    data: {
+      oranicFert: 4,
+      first: {
+        nutrients: {
+          N: 40,
+          P: 60,
+          K: 45
+        },
+        list: {
+          '14-14-14': 0,
+          '16-20-0': 3.0,
+          '46-0-0': 0,
+          '0-0-60': 0.75
+        }
+      },
+      second: {
+        nutrients: {
+          N: 40,
+          P: 0,
+          K: 15,
+        },
+        list: {
+          '17-0-17': 1.0, //water soluble solution
+          '46-0-0': 0.5,
+          '0-0-60': 0,
+        }
+      }
+    }
+  },
+  {
+    label: 'HHD',
+    value: 'HHD',
+    data: {
+      oranicFert: 4,
+      first: {
+        nutrients: {
+          N: 40,
+          P: 20,
+          K: 225
+        },
+        list: {
+          '14-14-14': 1.5,
+          '16-20-0': 0,
+          '46-0-0': 0.5,
+          '0-0-60': 3.0
+        }
+      },
+      second: {
+        nutrients: {
+          N: 40,
+          P: 0,
+          K: 75,
+        },
+        list: {
+          '17-0-17': 2.5, //water soluble solution
+          '46-0-0': 0,
+          '0-0-60': 0.5,
+        }
+      }
+    }
+  },
+  {
+    label: 'HMD',
+    value: 'HMD',
+    data: {
+      oranicFert: 4,
+      first: {
+        nutrients: {
+          N: 40,
+          P: 40,
+          K: 225
+        },
+        list: {
+          '14-14-14': 3.0,
+          '16-20-0': 0,
+          '46-0-0': 0,
+          '0-0-60': 3.0
+        }
+      },
+      second: {
+        nutrients: {
+          N: 40,
+          P: 0,
+          K: 75,
+        },
+        list: {
+          '17-0-17': 2.5, //water soluble solution
+          '46-0-0': 0,
+          '0-0-60': 0.5,
+        }
+      }
+    }
+  },
+  {
+    label: 'HLD',
+    value: 'HLD',
+    data: {
+      oranicFert: 4,
+      first: {
+        nutrients: {
+          N: 40,
+          P: 60,
+          K: 225
+        },
+        list: {
+          '14-14-14': 0,
+          '16-20-0': 3.0,
+          '46-0-0': 0,
+          '0-0-60': 4.0
+        }
+      },
+      second: {
+        nutrients: {
+          N: 40,
+          P: 0,
+          K: 75,
+        },
+        list: {
+          '17-0-17': 2.5, //water soluble solution
+          '46-0-0': 0,
+          '0-0-60': 0.5,
+        }
+      }
+    }
+  },
+  {
+    label: 'MHS',
+    value: 'MHS',
+    data: {
+      oranicFert: 6,
+      first: {
+        nutrients: {
+          N: 100,
+          P: 20,
+          K: 45
+        },
+        list: {
+          '14-14-14': 1.5,
+          '16-20-0': 0,
+          '46-0-0': 1.75,
+          '0-0-60': 0.5
+        }
+      },
+      second: {
+        nutrients: {
+          N: 100,
+          P: 0,
+          K: 15,
+        },
+        list: {
+          '17-0-17': 1.0, //water soluble solution
+          '46-0-0': 2.0,
+          '0-0-60': 0,
+        }
+      }
+    }
+  },
+  {
+    label: 'MMS',
+    value: 'MMS',
+    data: {
+      oranicFert: 6,
+      first: {
+        nutrients: {
+          N: 100,
+          P: 40,
+          K: 45
+        },
+        list: {
+          '14-14-14': 3.0,
+          '16-20-0': 0,
+          '46-0-0': 1.5,
+          '0-0-60': 0
+        }
+      },
+      second: {
+        nutrients: {
+          N: 100,
+          P: 0,
+          K: 15,
+        },
+        list: {
+          '17-0-17': 1.0, //water soluble solution
+          '46-0-0': 2.0,
+          '0-0-60': 0,
+        }
+      }
+    }
+  },
+  {
+    label: 'MLS',
+    value: 'MLS',
+    data: {
+      oranicFert: 6,
+      first: {
+        nutrients: {
+          N: 100,
+          P: 60,
+          K: 45
+        },
+        list: {
+          '14-14-14': 3.0,
+          '16-20-0': 1.0,
+          '46-0-0': 1.0,
+          '0-0-60': 0
+        }
+      },
+      second: {
+        nutrients: {
+          N: 100,
+          P: 0,
+          K: 15,
+        },
+        list: {
+          '17-0-17': 1.0, //water soluble solution
+          '46-0-0': 2.0,
+          '0-0-60': 0,
+        }
+      }
+    }
+  },
+  {
+    label: 'MHD',
+    value: 'MHD',
+    data: {
+      oranicFert: 6,
+      first: {
+        nutrients: {
+          N: 100,
+          P: 20,
+          K: 225
+        },
+        list: {
+          '14-14-14': 1.5,
+          '16-20-0': 0,
+          '46-0-0': 1.75,
+          '0-0-60': 3.0
+        }
+      },
+      second: {
+        nutrients: {
+          N: 100,
+          P: 0,
+          K: 75,
+        },
+        list: {
+          '17-0-17': 4.5, //water soluble solution
+          '46-0-0': 0.5,
+          '0-0-60': 0,
+        }
+      }
+    }
+  },
+  {
+    label: 'MMD',
+    value: 'MMD',
+    data: {
+      oranicFert: 6,
+      first: {
+        nutrients: {
+          N: 100,
+          P: 40,
+          K: 225
+        },
+        list: {
+          '14-14-14': 3.0,
+          '16-20-0': 0,
+          '46-0-0': 1.0,
+          '0-0-60': 3.0
+        }
+      },
+      second: {
+        nutrients: {
+          N: 100,
+          P: 0,
+          K: 75,
+        },
+        list: {
+          '17-0-17': 4.5, //water soluble solution
+          '46-0-0': 0.5,
+          '0-0-60': 0,
+        }
+      }
+    }
+  },
+  {
+    label: 'MLD',
+    value: 'MLD',
+    data: {
+      oranicFert: 6,
+      first: {
+        nutrients: {
+          N: 100,
+          P: 60,
+          K: 225
+        },
+        list: {
+          '14-14-14': 4.0,
+          '16-20-0': 0,
+          '46-0-0': 1.0,
+          '0-0-60': 3.0
+        }
+      },
+      second: {
+        nutrients: {
+          N: 100,
+          P: 0,
+          K: 75,
+        },
+        list: {
+          '17-0-17': 4.5, //water soluble solution
+          '46-0-0': 0.5,
+          '0-0-60': 0,
+        }
+      }
+    }
+  },
+  {
+    label: 'LHS',
+    value: 'LHS',
+    data: {
+      oranicFert: 8,
+      first: {
+        nutrients: {
+          N: 150,
+          P: 20,
+          K: 45
+        },
+        list: {
+          '14-14-14': 1.5,
+          '16-20-0': 0,
+          '46-0-0': 3.0,
+          '0-0-60': 0.7
+        }
+      },
+      second: {
+        nutrients: {
+          N: 150,
+          P: 0,
+          K: 15,
+        },
+        list: {
+          '17-0-17': 1.0, //water soluble solution
+          '46-0-0': 3.0,
+          '0-0-60': 0,
+        }
+      }
+    }
+  },
+  {
+    label: 'LMS',
+    value: 'LMS',
+    data: {
+      oranicFert: 8,
+      first: {
+        nutrients: {
+          N: 150,
+          P: 40,
+          K: 45
+        },
+        list: {
+          '14-14-14': 3.0,
+          '16-20-0': 0,
+          '46-0-0': 2.5,
+          '0-0-60': 0
+        }
+      },
+      second: {
+        nutrients: {
+          N: 150,
+          P: 0,
+          K: 15,
+        },
+        list: {
+          '17-0-17': 1.0, //water soluble solution
+          '46-0-0': 3.0,
+          '0-0-60': 0,
+        }
+      }
+    }
+  },
+  {
+    label: 'LLS',
+    value: 'LLS',
+    data: {
+      oranicFert: 8,
+      first: {
+        nutrients: {
+          N: 150,
+          P: 60,
+          K: 45
+        },
+        list: {
+          '14-14-14': 3.0,
+          '16-20-0': 1.0,
+          '46-0-0': 2.0,
+          '0-0-60': 0
+        }
+      },
+      second: {
+        nutrients: {
+          N: 150,
+          P: 0,
+          K: 15,
+        },
+        list: {
+          '17-0-17': 1.0, //water soluble solution
+          '46-0-0': 3.0,
+          '0-0-60': 0,
+        }
+      }
+    }
+  },
+  {
+    label: 'LHD',
+    value: 'LHD',
+    data: {
+      oranicFert: 8,
+      first: {
+        nutrients: {
+          N: 150,
+          P: 20,
+          K: 225
+        },
+        list: {
+          '14-14-14': 1.5,
+          '16-20-0': 0,
+          '46-0-0': 3.0,
+          '0-0-60': 3.5
+        }
+      },
+      second: {
+        nutrients: {
+          N: 150,
+          P: 0,
+          K: 75,
+        },
+        list: {
+          '17-0-17': 4.5, //water soluble solution
+          '46-0-0': 1.5,
+          '0-0-60': 0,
+        }
+      }
+    }
+  },
+
   {
     label: 'LMD',
     value: 'LMD',
@@ -95,7 +593,7 @@ const npkType = [
     label: 'LLD',
     value: 'LLD',
     data: {
-      oranicFert: 4,
+      oranicFert: 8,
       first: {
         nutrients: {
           N: 150,
@@ -313,7 +811,7 @@ export const Calculator = ({ navigation }) => {
     } else {
       newMun = indUser.mun
     }
-    
+
     console.log("muni", capitalize(newMun))
 
     fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${capitalize(newMun)},Camarines Norte,PH&appid=${WEATHER_KEY}`)
@@ -792,7 +1290,7 @@ export const Calculator = ({ navigation }) => {
 
       } else {
         const newQnty = getMult(area, item.defQnty)
-        return [{ ...item, qntyPrice: newQnty, totalPrice: getMult(newQnty, item.price), price: parseInt(item.price), foreignId: item.id, type:  item.id === '26nzrfWyeWAPHriACtP4' ? 'p' : 'b' }]
+        return [{ ...item, qntyPrice: newQnty, totalPrice: getMult(newQnty, item.price), price: parseInt(item.price), foreignId: item.id, type: item.id === '26nzrfWyeWAPHriACtP4' ? 'p' : 'b' }]
       }
     });
 
@@ -1227,10 +1725,22 @@ export const Calculator = ({ navigation }) => {
                             />
 
                           </View>
-                          <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
-                            <Button title='cancel' onPress={() => setModalVisible(false)} />
-                            <Button title='ok' onPress={() => setModalVisible(false)} />
+                          <View style={{ flexDirection: 'row', justifyContent: 'space-between', display: 'flex', width: '100%' }}>
+                            <TouchableOpacity
+                              style={{ backgroundColor: 'red', padding: 10, flex: 1, alignItems: 'center' }}
+                              onPress={() => setModalVisible(false)}
+                            >
+                              <Text style={{ color: 'white', fontFamily: 'serif', fontSize: 20 }}>Cancel</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                              style={{ backgroundColor: 'green', padding: 10, flex: 1, alignItems: 'center' }}
+                              onPress={() => setModalVisible(false)}
+                            >
+                              <Text style={{ color: 'white', fontFamily: 'serif', fontSize: 20 }}>OK</Text>
+                            </TouchableOpacity>
                           </View>
+
                         </View>
 
                       </Modal>
