@@ -41,7 +41,7 @@ const Pie = ({ labels = [], data = [], colors, title }) => {
     return (
         <View style={{ alignItems: 'center', justifyContent: 'center', minHeight: 80, flex: 1 }}>
             <Text style={{ fontSize: 20, textAlign: 'left', marginBottom: 10, fontFamily:'serif', color:'green' }}>
-                {`${title} Pineapple Production`}
+                {`${title} Pineapple Plantation`}
             </Text>
             {
                 chartData.length === 0

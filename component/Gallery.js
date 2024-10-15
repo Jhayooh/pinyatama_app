@@ -143,7 +143,7 @@ export default function Gallery({ route }) {
             )}
           />
           <Tab.Screen
-            name="Archive"
+            name="Complete"
             // component={TabView}
             // options={{ tabBarLabel: 'Archive' }}
             // initialParams={{

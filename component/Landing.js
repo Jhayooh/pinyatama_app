@@ -418,7 +418,7 @@ export const Landing = ({ navigation }) => {
                                 }>
                                     <View style={styles.btnbtnChild}>
                                         <Image source={yieldLogo} style={styles.btnImage} />
-                                        <Text style={styles.buttonText}>Tagapagukit ng Pinya</Text>
+                                        <Text style={styles.buttonText}>Dami ng Ani</Text>
                                     </View>
                                 </TouchableHighlight>
                             </View>
