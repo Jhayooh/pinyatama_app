@@ -107,7 +107,7 @@ const Charts = ({ farms }) => {
         setPineTotal([
             {
                 name: 'Good size',
-                sum: roiData[0].grossReturn * getPinePrice('pineapple', pineData),
+                sum: roiData[0].grossReturn * getPinePrice('good size', pineData),
                 color: '#F7BF0B',
                 legendFontColor: "#7F7F7F",
                 legendFontSize: 16

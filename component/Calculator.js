@@ -623,6 +623,11 @@ const npkType = [
   }, //150 60 225
 ]
 
+const buttType = [
+  { label: 'Farmer Practice', value: 'Farmer Practice' },
+  { label: 'Gap', value: 'Gap' },
+]
+
 
 export const Calculator = ({ navigation }) => {
   const [user] = useAuthState(auth)
@@ -688,6 +693,7 @@ export const Calculator = ({ navigation }) => {
   const [uploadedImg, setUploadedImg] = useState([])
   const [npk, setNpk] = useState('')
   const [soil, setSoil] = useState('');
+  const [butterballType, setButterballType] = useState('')
 
 
   const [uniqueId, setUniqueId] = useState(0)
@@ -1050,13 +1056,13 @@ export const Calculator = ({ navigation }) => {
       const vegetativeDate = new Date(Date.parse(startDate));
 
       const floweringDate = new Date(vegetativeDate);
-      floweringDate.setMonth(vegetativeDate.getMonth() + 9);
+      floweringDate.setMonth(vegetativeDate.getMonth() + 12);
 
       const fruitingDate = new Date(floweringDate);
-      fruitingDate.setMonth(floweringDate.getMonth() + 2);
+      fruitingDate.setMonth(floweringDate.getMonth() + 1);
 
       const harvestDate = new Date(fruitingDate);
-      harvestDate.setMonth(fruitingDate.getMonth() + 6);
+      harvestDate.setMonth(fruitingDate.getMonth() + 5);
       await updateDoc(newFarm, {
         id: newFarm.id,
         harvest_date: harvestDate
@@ -1262,10 +1268,24 @@ export const Calculator = ({ navigation }) => {
             const newQnty = getMult(area, firstList[list]);
             items.push({
               ...item,
-              qntyPrice: newQnty,
-              totalPrice: getMult(newQnty, item.price),
+              qntyPrice: newQnty / 2,
+              totalPrice: getMult(newQnty / 2, item.price),
               foreignId: item.id,
               label: 1,
+              type: 'p'
+            });
+          }
+        });
+
+        Object.keys(firstList).forEach(list => {
+          if (item.name.includes(list)) {
+            const newQnty = getMult(area, firstList[list]);
+            items.push({
+              ...item,
+              qntyPrice: newQnty / 2,
+              totalPrice: getMult(newQnty / 2, item.price),
+              foreignId: item.id,
+              label: 7,
               type: 'p'
             });
           }
@@ -1277,10 +1297,24 @@ export const Calculator = ({ navigation }) => {
             const newQnty = getMult(area, secondList[list]);
             items.push({
               ...item,
-              qntyPrice: newQnty,
-              totalPrice: getMult(newQnty, item.price),
+              qntyPrice: newQnty / 2,
+              totalPrice: getMult(newQnty / 2, item.price),
               foreignId: item.id,
-              label: 2,
+              label: 4,
+              type: 'p'
+            });
+          }
+        });
+
+        Object.keys(secondList).forEach(list => {
+          if (item.name.includes(list)) {
+            const newQnty = getMult(area, secondList[list]);
+            items.push({
+              ...item,
+              qntyPrice: newQnty / 2,
+              totalPrice: getMult(newQnty / 2, item.price),
+              foreignId: item.id,
+              label: 10,
               type: 'p'
             });
           }
@@ -1530,6 +1564,20 @@ export const Calculator = ({ navigation }) => {
                     </View>
                   </View>
                   <View style={styles.subsection}>
+                    <Text style={styles.supText}>Percentage of Butterball</Text>
+                    <View style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
+                      <Dropdown
+                        data={buttType}
+                        labelField='label'
+                        valueField='value'
+                        placeholder='Select Percentage'
+                        value={butterballType}
+                        onChange={item => { setButterballType(item.value) }}
+                        style={{ ...styles.textInput, borderBottomRightRadius: 0, borderTopRightRadius: 0 }}
+                      />
+                    </View>
+                  </View>
+                  <View style={styles.subsection}>
                     <Text style={styles.supText}>Number of Plants</Text>
                     <View style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
                       <TextInput
@@ -1562,7 +1610,16 @@ export const Calculator = ({ navigation }) => {
 
                       }
                     </View>
-                    {table && qPine && <TableBuilder components={components} area={area} setRoiDetails={setRoiDetails} pineapple={qPine} setComponents={setComponents} fertilizers={npkType.find((npkItem) => npkItem.value === npk)} soil={soil} />}
+                    {table && qPine && <TableBuilder
+                      components={components}
+                      area={area}
+                      setRoiDetails={setRoiDetails}
+                      pineapple={qPine}
+                      setComponents={setComponents}
+                      fertilizers={npkType.find((npkItem) => npkItem.value === npk)}
+                      soil={soil}
+                      bbType={butterballType}
+                    />}
                   </View>
 
                 </View>
@@ -1717,9 +1774,9 @@ export const Calculator = ({ navigation }) => {
                               mapCenterPosition={
                                 userLocation
                                   ? { lat: userLocation.latitude, lng: reverseNormalizeLongitude(userLocation.longitude) }
-                                  : mapEvent
-                                    ? { lat: mapEvent.lat, lng: mapEvent.lng }
-                                    : { lat: 14.192259401369892, lng: -237.2101928677876 }
+                                  // : mapEvent
+                                  //   ? { lat: mapEvent.lat, lng: mapEvent.lng }
+                                  : { lat: 14.192259401369892, lng: -237.2101928677876 }
                               }
                               zoom={12}
                             />

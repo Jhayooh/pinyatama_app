@@ -11,7 +11,7 @@ import {
 import { db } from '../firebase/Config';
 import { AddDataRow } from './AddDataRow';
 
-export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setComponents, fertilizers, soil }) => {
+export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setComponents, fertilizers, soil, bbType }) => {
   const [comps, setComps] = useState(components)
   const [laborTotal, setLaborTotal] = useState(0)
   const [materialTotal, setMaterialTotal] = useState(0)
@@ -86,7 +86,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
   }, [comps, pineapple]);
 
   useEffect(() => {
-    const pineapplePrice = getPinePrice('pineapple')
+    const pineapplePrice = getPinePrice('good size')
     const butterballPrice = getPinePrice('butterball')
     const grossReturnAndBatter = (grossReturn * pineapplePrice) + (butterBall * butterballPrice)
     const netReturnValue = grossReturnAndBatter - costTotal;
@@ -137,7 +137,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
     const handleEnter = () => {
       setComps((prev) =>
         prev.map((c) =>
-          c.id === component.id ? { ...c, qntyPrice: qntyPrice, totalPrice: qntyPrice * price } : c
+          c.id === component.id && c.label === component.label ? { ...c, qntyPrice: qntyPrice, totalPrice: qntyPrice * price } : c
         ))
     }
 
@@ -181,7 +181,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
 
   return (
     <>
-      <View style={{ ...styles.container, minHeight: 300, borderRadius: 10, paddingBottom: 12, margin: 10 }}>
+      <View style={{ ...styles.container, minHeight: 300, borderRadius: 10, paddingBottom: 12, marginTop: 2 }}>
         <View style={{ alignItems: 'center', backgroundColor: '#4DAF50', margin: 8, marginBottom: 12, borderRadius: 6, }}>
           <Text style={{ width: '100%', padding: 8, alignItems: 'center', textAlign: 'center', color: '#FFF' }}>
             COST AND RETURN ANALYSIS {typeof area === 'number' ? area.toFixed(2) : area} HA PINEAPPLE PRODUCTION
@@ -214,7 +214,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
           </View>
 
           <View style={{ ...styles.tableHead, marginTop: 12 }}>
-            <Text styles={{ fontWeight: 'bold' }}>Apply during the 1st and 7th month</Text>
+            <Text styles={{ fontWeight: 'bold' }}>Apply during the 1st month</Text>
           </View>
           {
             comps?.map((comp) => {
@@ -230,11 +230,43 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
             })
           }
           <View style={{ ...styles.tableHead, marginTop: 12 }}>
-            <Text styles={{ fontWeight: 'bold' }}>Apply during the 4th and 10th month</Text>
+            <Text styles={{ fontWeight: 'bold' }}>Apply during the 4th month</Text>
           </View>
           {
             comps?.map((comp) => {
-              if (comp.parent.toLowerCase() === 'fertilizer' && comp.label === 2) {
+              if (comp.parent.toLowerCase() === 'fertilizer' && comp.label === 4) {
+                return (
+                  <TableData
+                    key={comp.id}
+                    component={comp}
+                    editable={true}
+                  />
+                )
+              }
+            })
+          }
+          <View style={{ ...styles.tableHead, marginTop: 12 }}>
+            <Text styles={{ fontWeight: 'bold' }}>Apply during the 7th month</Text>
+          </View>
+          {
+            comps?.map((comp) => {
+              if (comp.parent.toLowerCase() === 'fertilizer' && comp.label === 7) {
+                return (
+                  <TableData
+                    key={comp.id}
+                    component={comp}
+                    editable={true}
+                  />
+                )
+              }
+            })
+          }
+          <View style={{ ...styles.tableHead, marginTop: 12 }}>
+            <Text styles={{ fontWeight: 'bold' }}>Apply during the 10th month</Text>
+          </View>
+          {
+            comps?.map((comp) => {
+              if (comp.parent.toLowerCase() === 'fertilizer' && comp.label === 10) {
                 return (
                   <TableData
                     key={comp.id}
