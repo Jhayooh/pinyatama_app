@@ -109,7 +109,7 @@ const App = () => (
                 name='Yield'
                 component={YieldPredictor}
                 options={{
-                    title: 'Tagapagukit ng Pinya',
+                    title: 'Bilang ng Inaasahang Ani',
                     headerTintColor: '#E8E7E7',
                     headerBackTitleVisible: false,
                     headerStyle: {

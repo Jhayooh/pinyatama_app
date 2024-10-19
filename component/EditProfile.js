@@ -7,10 +7,12 @@ import {
     Image,
     ScrollView,
     Modal,
-    TouchableOpacity
+    TouchableOpacity,
+    Alert
 } from "react-native";
 import * as ImagePicker from 'expo-image-picker';
-import { updateDoc, doc } from 'firebase/firestore';
+import { updateDoc, doc, deleteDoc, getDoc} from 'firebase/firestore';
+import { db } from "../firebase/Config";
 
 //icon
 import edit from '../assets/edit-text.png';
@@ -18,8 +20,9 @@ import { Button } from "native-base";
 
 export const EditProfile = ({ navigation, route }) => {
     const { logUser } = route.params;
-    logUser && console.log("loguserrrrrr", logUser)
+    logUser && console.log("loguserrrrrr", logUser);
     const [showAddImage, setShowAddImage] = useState(false);
+    
     //user details
     const [photoURL, setphotoURL] = useState(null);
     const [displayName, setDisplayName] = useState('');
@@ -32,63 +35,91 @@ export const EditProfile = ({ navigation, route }) => {
     const [confirmPassword, setConfirmPassword] = useState('');
 
     useEffect(() => {
-        if (!logUser) return
-        const lu = logUser
-        setphotoURL(lu.photoURL || null)
-        setDisplayName(lu.displayName)
-        setFirstname(lu.firstname)
-        setLastname(lu.lastname)
-        setphoneNumber(lu.phoneNumber)
-        setEmail(lu.email)
-    }, [logUser])
+        if (!logUser) return;
+        const lu = logUser;
+        setphotoURL(lu.photoURL || null);
+        setDisplayName(lu.displayName);
+        setFirstname(lu.firstname);
+        setLastname(lu.lastname);
+        setphoneNumber(lu.phoneNumber);
+        setEmail(lu.email);
+    }, [logUser]);
 
     const validatePasswords = () => {
-        if (password !== password) {
-            Alert.alert('Error', 'Password is not correct');
+        if (password !== logUser.password) {
+            Alert.alert('Error', 'Current password is not correct');
             return false;
         }
-        if (newPassword !== confirmPassword) {
+        if (newPassword && newPassword !== confirmPassword) {
             Alert.alert('Error', 'New password and confirm password do not match.');
             return false;
         }
-        if (newPassword.length < 6) {
+        if (newPassword && newPassword.length < 6) {
             Alert.alert('Error', 'New password must be at least 6 characters long.');
             return false;
         }
         return true;
     };
 
-
     const saveProfile = async () => {
-        if (password && validatePasswords()) {
-            try {
-                const userDocRef = doc(db, 'users', logUser.id);
-                await updateDoc(userDocRef, {
-                    photoURL: photoURL,
-                    displayName: displayName,
-                    firstname: firstname,
-                    lastname: lastname,
-                    phoneNumber: phoneNumber,
-                    email: email,
-                    password: newPassword,
-                });
-                Alert.alert('Success', 'Profile updated successfully!');
-                navigation.goBack();
-            } catch (e) {
-                console.log(e);
-                Alert.alert('Error', 'Failed to update profile.');
+        if (!logUser || !logUser.id) {
+            Alert.alert('Error', 'User not found or document ID is missing.');
+            console.log('ussseeerrr', logUser.id)
+            return;
+        }
+    
+        try {
+            const userDocRef = doc(db, 'users', logUser.id);
+    
+            // Check if document exists before attempting update
+            const docSnapshot = await getDoc(userDocRef);
+            if (!docSnapshot.exists()) {
+                Alert.alert('Error', 'No user profile found to update.');
+                return;
             }
-        } else if (!password) {
-            Alert.alert('Error', 'Please enter your current password.');
+    
+            // Prepare the updated profile data
+            const updates = {
+                photoURL: photoURL,
+                displayName: displayName,
+                firstname: firstname,
+                lastname: lastname,
+                phoneNumber: phoneNumber,
+                email: email
+            };
+    
+            if (newPassword && validatePasswords()) {
+                updates.password = newPassword;
+            }
+    
+            // Proceed with the update
+            await updateDoc(userDocRef, updates);
+            Alert.alert('Success', 'Profile updated successfully!');
+            navigation.goBack();
+        } catch (e) {
+            console.log('Error while updating profile:', e);
+            Alert.alert('Error', 'Failed to update profile.');
         }
     };
+    
 
+    const deleteAccount = async () => {
+        try {
+            const userDocRef = doc(db, 'users', logUser.id);
+            await deleteDoc(userDocRef);
+            Alert.alert('Success', 'Account deleted successfully!');
+            navigation.navigate('Login');
+        } catch (e) {
+            console.log(e);
+            Alert.alert('Error', 'Failed to delete account.');
+        }
+    };
 
     const openGallery = async () => {
         try {
             let result = await ImagePicker.launchImageLibraryAsync({
                 mediaTypes: ImagePicker.MediaTypeOptions.All,
-                quality: .6,
+                quality: 0.6,
             });
 
             if (!result.canceled) {
@@ -97,15 +128,15 @@ export const EditProfile = ({ navigation, route }) => {
         } catch (e) {
             console.log(e);
         }
-    }
+    };
 
     const openCamera = async () => {
         try {
             await ImagePicker.requestCameraPermissionsAsync();
             let result = await ImagePicker.launchCameraAsync({
                 cameraType: ImagePicker.CameraType.back,
-                quality: .6
-            })
+                quality: 0.6
+            });
 
             if (!result.canceled) {
                 setphotoURL(result.assets[0].uri);
@@ -113,7 +144,7 @@ export const EditProfile = ({ navigation, route }) => {
         } catch (e) {
             console.log(e);
         }
-    }
+    };
 
     React.useEffect(() => {
         navigation.setOptions({
@@ -130,9 +161,8 @@ export const EditProfile = ({ navigation, route }) => {
     return (
         <>
             <ScrollView>
-                {
-                    logUser &&
-                    <View >
+                {logUser && (
+                    <View>
                         <View style={styles.imgContainer}>
                             <TouchableOpacity style={styles.editIcon} onPress={() => setShowAddImage(true)}>
                                 <Image source={edit} />
@@ -142,25 +172,6 @@ export const EditProfile = ({ navigation, route }) => {
                             <Text style={styles.header}>Profile Photo</Text>
                         </View>
                         <View style={styles.container}>
-                            {/* <Text> Personal Information</Text> */}
-                            {/* <View style={styles.subContainer}>
-                                <Text style={styles.title}>Municipality</Text>
-                                <TextInput
-                                    editable={false}
-                                    value={logUser?.logUser.mun}
-                                    style={styles.disabledInput}
-                                    placeholder="Municipality"
-                                />
-                            </View>
-                            <View style={styles.subContainer}>
-                                <Text style={styles.title}>Barangay</Text>
-                                <TextInput
-                                    editable={false}
-                                    value={logUser?.logUser.brgy}
-                                    style={styles.disabledInput}
-                                    placeholder="Barangay"
-                                />
-                            </View> */}
                             <Text style={styles.title}>Display Name</Text>
                             <TextInput
                                 value={displayName}
@@ -234,15 +245,14 @@ export const EditProfile = ({ navigation, route }) => {
                                     secureTextEntry
                                 />
                             </View>
-                            <TouchableOpacity style={styles.btn}>
+                            <TouchableOpacity style={styles.btn} onPress={deleteAccount}>
                                 <Text style={styles.btnText}>Delete Account</Text>
                             </TouchableOpacity>
                         </View>
-
                     </View>
-                }
+                )}
             </ScrollView>
-            <Modal animationType='fade' visible={showAddImage} transparent={true}>
+            <Modal animationType="fade" visible={showAddImage} transparent={true}>
                 <View style={styles.addImage}>
                     <View style={styles.modalContainer}>
                         <TouchableOpacity style={styles.cam} onPress={openGallery}>
@@ -262,7 +272,7 @@ export const EditProfile = ({ navigation, route }) => {
             </Modal>
         </>
     );
-}
+};
 
 const styles = StyleSheet.create({
     container: {
@@ -312,9 +322,9 @@ const styles = StyleSheet.create({
     },
     disabledInput: {
         height: 40,
-        backgroundColor: '#EFEFEF', // Changed to a slightly different color
+        backgroundColor: '#EFEFEF',
         paddingHorizontal: 18,
-        color: '#A8A8A8', // Use gray color for text to indicate it's disabled
+        color: '#A8A8A8',
         fontSize: 16,
         borderBottomColor: '#C8C8C8',
         borderBottomWidth: 2,
@@ -334,17 +344,17 @@ const styles = StyleSheet.create({
         padding: 32,
         borderRadius: 8,
     },
-    btn:{
-        marginTop:20,
-        backgroundColor:'red',
-        padding:20
+    btn: {
+        marginTop: 20,
+        backgroundColor: 'red',
+        padding: 20,
     },
-    btnText:{
-        color:'#fff',
-        alignSelf:'center',
+    btnText: {
+        color: '#fff',
+        alignSelf: 'center',
         textTransform: 'uppercase',
-        fontSize:15,
-        fontWeight:'bold',
-        fontFamily:'serif'
-    }
+        fontSize: 15,
+        fontWeight: 'bold',
+        fontFamily: 'serif',
+    },
 });
