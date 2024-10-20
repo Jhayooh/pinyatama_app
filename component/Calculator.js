@@ -1429,10 +1429,9 @@ export const Calculator = ({ navigation }) => {
           {
             isNext ?
               <>
-                <View style={{ ...styles.section, paddingHorizontal: 8 }}>
+                {/* <View style={{ ...styles.section, paddingHorizontal: 8 }}>
                   <Text style={styles.header}>WEATHER</Text>
                   <View style={styles.subsection}>
-                    {/* weather */}
                     {weather.loading && (
                       <ActivityIndicator />
                     )}
@@ -1440,7 +1439,6 @@ export const Calculator = ({ navigation }) => {
                       <>
                         <View style={styles.weatherCurrent}>
                           <View style={styles.weatherCurrentMain}>
-                            {/* <Text>{capitalize(municipality)}, Camarines Norte</Text> */}
                             <View style={{ display: 'flex', flexDirection: 'row', flex: 1 }}>
                               <Image
                                 style={{ width: 25, height: 25 }}
@@ -1532,7 +1530,7 @@ export const Calculator = ({ navigation }) => {
                       </>
                     )}
                   </View>
-                </View>
+                </View> */}
                 <View style={{ ...styles.section, marginHorizontal: table ? 0 : 14, paddingHorizontal: 8 }}>
                   <Text style={styles.header}>CALCULATE</Text>
                   <View style={styles.subsection}>

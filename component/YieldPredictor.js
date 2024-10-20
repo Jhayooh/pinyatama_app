@@ -62,14 +62,14 @@ const YieldPredictor = ({ route }) => {
     useEffect(() => {
         if (!farmsData || farmsData.length === 0 || roiData.length === 0) return;
 
-        const groupedByTitle = farmsData.reduce((acc, farm) => {
-            const title = farm.title || 'Unknown Title';
-            if (!acc[title]) acc[title] = [];
+        const groupedByBrgy = farmsData.reduce((acc, farm) => {
+            const brgy = farm.brgy || 'Unknown Barangay';
+            if (!acc[brgy]) acc[brgy] = [];
 
             const farmRoiData = roiData.find(data => data.farmId === farm.id);
             const grossReturn = farmRoiData?.grossReturn || 0;
 
-            acc[title].push(grossReturn);
+            acc[brgy].push(grossReturn);
             return acc;
         }, {});
 
@@ -84,9 +84,9 @@ const YieldPredictor = ({ route }) => {
             return acc;
         }, {});
 
-        const combinedData = Object.keys(groupedByTitle).map(title => ({
-            title,
-            data: groupedByTitle[title].reduce((sum, value) => sum + value, 0),
+        const combinedData = Object.keys(groupedByBrgy).map(brgy => ({
+            brgy,
+            data: groupedByBrgy[brgy].reduce((sum, value) => sum + value, 0),
         }));
 
         const combinedData1 = Object.keys(groupedByMun).map(mun => ({
@@ -95,7 +95,7 @@ const YieldPredictor = ({ route }) => {
         }));
 
         const pieChartData = combinedData.map((item) => ({
-            label: item.title,
+            label: item.brgy,
             value: item.data,
         }));
 
@@ -191,15 +191,15 @@ const YieldPredictor = ({ route }) => {
                 }}>
                     <Pie labels={labels1} data={series1} title="Municipalities" />
                 </View>
-                {/* <View style={{
+                <View style={{
                     backgroundColor: '#fff',
                     borderRadius: 20,
                     elevation: 5,
                     padding: 10,
                     marginTop: 20
                 }}>
-                    <Pie labels={labels2} data={series2} title="Farms" />
-                </View> */}
+                    <Pie labels={labels2} data={series2} title="Per Barangay" />
+                </View>
             </View>
         </ScrollView>
     );

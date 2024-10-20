@@ -325,8 +325,6 @@ export const Landing = ({ navigation }) => {
         );
     }
     const drawerLockMode = logUser ? 'unlocked' : 'locked-closed';
-    //drawer
-
 
     const drawerView = () => (
         <>
@@ -610,7 +608,6 @@ const styles = StyleSheet.create({
         display: 'flex',
         flexDirection: 'column',
         flex: 1,
-
         // alignItems: 'center',
         // backgroundColor: 'transparent'
 

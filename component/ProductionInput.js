@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { SafeAreaView, StyleSheet, Text, TouchableOpacity,ScrollView, View, Image } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import Charts from './Charts';
+import { Dropdown } from 'react-native-element-dropdown';
 
 //db
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -12,6 +13,24 @@ import { Button } from 'native-base';
 
 const Tab = createMaterialTopTabNavigator();
 
+const moreOptions=[
+  {
+    label: 'Farm Profile', value:'Profile'
+  },
+  {
+    label:'Gallery', value:'Gallery'
+  },
+  {
+    label:'Cost and Return Analysis', value:'CRA'
+  },
+  {
+    label:'Activities', value:'Activities'
+  },
+  {
+    label:'Report', value:'Report'
+  }
+]
+
 const ProductionInput = ({ route, navigation }) => {
   const [edit, setEdit] = useState(false)
   const [user] = useAuthState(auth)
@@ -19,6 +38,7 @@ const ProductionInput = ({ route, navigation }) => {
   const { farms = [] } = route.params
   const farm = farms[0]
   const [roiDetails, setRoiDetails] = useState({})
+  const [options, setOptions] =useState()
   
   const componentsColl = collection(db, `farms/${farm.id}/components`)
   const [compData, compLoading, compError] = useCollectionData(componentsColl)
@@ -31,14 +51,18 @@ const ProductionInput = ({ route, navigation }) => {
       headerRight: () => (
         <TouchableOpacity
           onPress={() => navigation.navigate('Edit', {farm: farm, compData: compData})}
-          title="Info"
         >
           <View style={{display:'flex', justifyContent:'space-between', flexDirection:'row',gap:1}}>
-          <Image source={require('../assets/edit.png')} style={{width:20, height:20}}/>
-          <Text style={{color:'white',  fontSize:20}}>Edit</Text>
+          <Image source={require('../assets/more.png')} style={{width:20, height:20,}}/>
           </View>
          
         </TouchableOpacity>     
+        // <Dropdown
+        // data={moreOptions}
+        // labelField='label'
+        // valueField='value'
+        // value={options}/>
+          
       ),
     });
   }, [navigation, compData]);
