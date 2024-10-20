@@ -695,6 +695,8 @@ export const Calculator = ({ navigation }) => {
   const [soil, setSoil] = useState('');
   const [butterballType, setButterballType] = useState('')
 
+  const [fertilizer, setFertilizer] = useState({})
+
 
   const [uniqueId, setUniqueId] = useState(0)
   // end ng data natin
@@ -1023,7 +1025,8 @@ export const Calculator = ({ navigation }) => {
         npk: npk,
         soil: soil,
         ethrel: 0,
-        isEthrel: null
+        isEthrel: null,
+        data: fertilizer.data
       })
 
       const weatherCol = collection(db, `farms/${newFarm.id}/weather`);
@@ -1542,7 +1545,12 @@ export const Calculator = ({ navigation }) => {
                         valueField='value'
                         placeholder='Select NPK'
                         value={npk}
-                        onChange={item => { console.log("value ng NPK:", item.value); setNpk(item.value) }}
+                        onChange={item => {
+                          setFertilizer(item)
+                          console.log("the npk item:", item);
+                          
+                          setNpk(item.value)
+                        }}
                         style={{ ...styles.textInput, borderBottomRightRadius: 0, borderTopRightRadius: 0 }}
                       />
                     </View>
@@ -1557,20 +1565,6 @@ export const Calculator = ({ navigation }) => {
                         placeholder='Select soil type'
                         value={soil}
                         onChange={item => { setSoil(item.value) }}
-                        style={{ ...styles.textInput, borderBottomRightRadius: 0, borderTopRightRadius: 0 }}
-                      />
-                    </View>
-                  </View>
-                  <View style={styles.subsection}>
-                    <Text style={styles.supText}>Percentage of Butterball</Text>
-                    <View style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
-                      <Dropdown
-                        data={buttType}
-                        labelField='label'
-                        valueField='value'
-                        placeholder='Select Percentage'
-                        value={butterballType}
-                        onChange={item => { setButterballType(item.value) }}
                         style={{ ...styles.textInput, borderBottomRightRadius: 0, borderTopRightRadius: 0 }}
                       />
                     </View>
@@ -1614,7 +1608,7 @@ export const Calculator = ({ navigation }) => {
                       setRoiDetails={setRoiDetails}
                       pineapple={qPine}
                       setComponents={setComponents}
-                      fertilizers={npkType.find((npkItem) => npkItem.value === npk)}
+                      fertilizers={fertilizer}
                       soil={soil}
                       bbType={butterballType}
                     />}
@@ -1627,7 +1621,6 @@ export const Calculator = ({ navigation }) => {
                   </View>
                 </View>
               </> :
-
               <>
                 {/* Farm Location */}
                 <View style={styles.section}>

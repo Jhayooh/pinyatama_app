@@ -338,7 +338,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
           </View>
           <TableData
             component={{
-              name: 'Gross Return',
+              name: 'Good Size',
               qntyPrice: grossReturn,
               unit: 'pcs',
               price: pinePrice,
@@ -348,7 +348,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
           />
           <TableData
             component={{
-              name: 'Good Butterball',
+              name: 'Butterball',
               qntyPrice: butterBall,
               unit: 'pcs',
               price: butterPrice,
