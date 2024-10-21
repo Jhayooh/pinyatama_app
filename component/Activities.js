@@ -8,19 +8,36 @@ import { db } from '../firebase/Config';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
 
 const ferti = [
-  { label: 'Ammouphus (16-20-0)', value: 'Ammouphus (16-20-0)' },
-  { label: 'Muriate of Potash (0-0-60)', value: 'Muriate of Potash (0-0-60)' },
-  { label: 'Urea Granular (46-0-0)', value: 'Urea Granular (46-0-0)' },
-  { label: 'Water Soluble Calcium Nitrate (17-0-17)', value: 'Water Soluble Calcium Nitrate (17-0-17)' },
-  { label: 'Flower Inducer (ethrel)', value: 'Flower Inducer (ethrel)' },
+  { label: "Ammophos (16-20-0)", value: "Ammophos (16-20-0)" },
+  { label: "Muriate of Potash (0-0-60)", value: "Muriate of Potash (0-0-60)" },
+  { label: "Urea (Granular) (46-0-0)", value: "Urea (Granular) (46-0-0)" },
+  { label: "Ammosul (21-0-0)", value: "Ammosul (21-0-0)" },
+  { label: "Complete (14-14-14)", value: "Complete (14-14-14)" },
+  { label: "Water Soluble Calcium Nitrate (17-0-17)", value: "Water Soluble Calcium Nitrate (17-0-17)" },
+  { label: "Flower Inducer (ethrel)", value: "Flower Inducer (ethrel)" },
 ];
 
 
 const Activities = ({ route }) => {
-  const { farm } = route.params;
+  const [farm, setFarm] = useState(route.params.farm)
+
+  const componentsColl = collection(db, `farms/${farm.id}/components`)
+  const [components] = useCollectionData(componentsColl)
+
+  const farmColl = collection(db, '/farms')
+  const [farmData] = useCollectionData(farmColl)
+
+  const particularColl = collection(db, `/particulars`)
+  const [parts] = useCollectionData(particularColl)
+
+  const pineappleColl = collection(db, `/pineapple`)
+  const [localPine] = useCollectionData(pineappleColl)
 
   const activityColl = collection(db, `farms/${farm.id}/activities`);
   const activityQuery = query(activityColl, orderBy('createdAt'));
+
+  const roiColl = collection(db, `farms/${farm.id}/roi`)
+  const [roi] = useCollectionData(roiColl)
 
   const eventsColl = collection(db, `farms/${farm.id}/events`)
   const eventsQuery = query(eventsColl, orderBy('createdAt'))
@@ -36,6 +53,11 @@ const Activities = ({ route }) => {
   const [events, setEvents] = useState(null)
   const [bilang, setBilang] = useState(0)
 
+  const [laborMaterial, setLaborMaterial] = useState(null)
+  const [actualComponents, setActualComponents] = useState(null)
+
+  const [comps, setComps] = useState({ qntyPrice: 0, foreignId: '' })
+
   const [reportTitle, setReportTitle] = useState('')
   const [reportDesc, setReportDesc] = useState('')
   const [reportPer, setReportPer] = useState(0)
@@ -46,12 +68,22 @@ const Activities = ({ route }) => {
 
   useEffect(() => {
     if (!e) return
-    console.log('eveeennntttsss', e);
     setEvents(e)
   }, [e])
 
+  useEffect(() => {
+    if (farmData && farmData.length > 0) {
+      setFarm(farmData.find(f => f.id === farm.id))
+    }
+  }, [farmData])
+
   function plantPercent(part, total) {
     return Math.round((parseInt(part) / total) * 100)
+  }
+
+  const getMult = (numOne, numTwo) => {
+    const num = numOne * numTwo
+    return Math.round(num * 100) / 100
   }
 
   const handleChange = (text) => {
@@ -71,11 +103,15 @@ const Activities = ({ route }) => {
       setBilangError(false)
     }
     setBilang(e)
+    setComps(prev => ({
+      ...prev,
+      qntyPrice: getMult((e / 30000), prev.defQnty)
+    }))
   }
 
   const handleModalClose = () => {
     setFertilizer('')
-    setQuantity(0)
+    setComps({ qntyPrice: 0, foreignId: '' })
     setBilang(0)
     setIsAdd(false);
     setReport(false);
@@ -123,9 +159,59 @@ const Activities = ({ route }) => {
     }
   };
 
-  const handleSave = async (act) => {
-    console.log("typee:", act);
+  function getPinePrice(pine, pineObject) {
+    const newPine = pineObject.filter(thePine => thePine.name.toLowerCase() === pine.toLowerCase())[0]
+    return newPine.price
+  }
 
+  useEffect(() => {
+    async function calculateAndSaveData() {
+      if (!actualComponents) return;
+
+      console.log("actualComponent", actualComponents);
+      const actualRoi = roi.find(r => r.type === 'a');
+
+      // LABOR MATERIAL
+      const totalLabor = actualComponents
+        .filter(item => item.particular.toLowerCase() === 'labor')
+        .reduce((sum, item) => sum + item.totalPrice, 0);
+      const totalMaterial = actualComponents
+        .filter(item => item.particular.toLowerCase() === 'material')
+        .reduce((sum, item) => sum + item.totalPrice, 0);
+      const totalFertilizer = actualComponents
+        .filter(item => item.parent.toLowerCase() === "fertilizer")
+        .reduce((sum, item) => sum + item.totalPrice, 0);
+
+      console.log("arjay macalinao", totalFertilizer);
+
+      // ROI
+      const grossReturn = actualRoi.grossReturn * getPinePrice('good size', localPine) + actualRoi.butterBall * getPinePrice('butterball', localPine);
+      const costTotal = (totalMaterial - totalFertilizer) + totalLabor + totalFertilizer;
+      const netReturnValue = grossReturn - costTotal;
+      const roiValue = (netReturnValue / grossReturn) * 100;
+
+      const eventId = roi?.find(event => event.type === 'a')?.id || null;
+      if (eventId) {
+        await updateDoc(doc(db, `farms/${farm.id}/roi/${actualRoi.id}`), {
+          ...actualRoi,
+          roi: roiValue,
+          costTotal: costTotal,
+          laborTotal: totalLabor,
+          materialTotal: totalMaterial,
+          fertilizerTotal: totalFertilizer,
+          netReturn: netReturnValue
+        });
+      }
+    }
+
+    // Call the async function
+    calculateAndSaveData();
+
+  }, [actualComponents]);
+
+
+
+  const handleSave = async (act) => {
     setSaving(true);
     try {
       const currDate = new Date();
@@ -142,14 +228,12 @@ const Activities = ({ route }) => {
         )
       } else {
         const theLabel = ferti.find(obj => obj.value === fertilizer);
-        const qnty = quantity;
+        const qnty = comps.qntyPrice;
         if (theLabel.label.toLowerCase() === "flower inducer (ethrel)" && events) {
           const vege_event = events.find(p => p.className === 'vegetative');
-
           const date_diff = currDate - vege_event.end_time.toDate();
 
           if (farm.plantNumber - farm.ethrel === 0) {
-            await delay(1000);
             setSaving(false);
             handleModalClose();
             setAlert({
@@ -162,7 +246,6 @@ const Activities = ({ route }) => {
             return;
           }
           if (!ethrelValid(currDate, vege_event.start_time.toDate())) {
-            await delay(1000);
             setSaving(false);
             handleModalClose();
             setAlert({
@@ -213,20 +296,33 @@ const Activities = ({ route }) => {
                 break;
             }
           }
-          await addDoc(activityColl, {
-            type: act,
-            desc: '',
-            createdAt: currDate,
-            label: theLabel.label,
-            compId: fertilizer,
-            qnty: qnty,
-          });
           // Update farm with ethrel count
+          console.log("the billaaannggg", bilang)
           await updateDoc(doc(db, `farms/${farm.id}`), {
             isEthrel: currDate,
             ethrel: farm.ethrel + parseInt(bilang),
           });
+          await addDoc(activityColl,
+            {
+              type: act,
+              createdAt: currDate,
+              label: theLabel.label,
+              compId: fertilizer,
+              qnty: qnty,
+              desc: ''
+            }
+          );
 
+          const pComp = components.find(c => c.name === theLabel.label)
+          const actComp = {
+            ...pComp,
+            qntyPrice: comps.qntyPrice,
+            totalPrice: comps.qntyPrice * pComp.price,
+            type: "a"
+          }
+          setActualComponents([...components.filter(comp => comp.type !== 'p'), actComp]);
+          const newCompAct = await addDoc(componentsColl, actComp)
+          await updateDoc(newCompAct, { id: newCompAct.id })
           setSaving(false);
           setAlert({
             visible: true,
@@ -247,8 +343,20 @@ const Activities = ({ route }) => {
               desc: ''
             }
           );
+
+          const pComp = components.find(c => c.name === theLabel.label)
+          const actComp = {
+            ...pComp,
+            qntyPrice: comps.qntyPrice,
+            totalPrice: comps.qntyPrice * pComp.price,
+            type: "a"
+          }
+          setActualComponents([...components.filter(comp => comp.type !== 'p'), actComp]);
+          const newCompAct = await addDoc(componentsColl, actComp)
+          await updateDoc(newCompAct, { id: newCompAct.id })
         }
       }
+
       setSaving(false);
       setAlert({
         visible: true,
@@ -347,13 +455,16 @@ const Activities = ({ route }) => {
               value={fertilizer}
               style={styles.input}
               onChange={item => {
+                const obj = components?.find(obj => obj.name === item.value)
                 setFertilizer(item.value)
+                setComps(obj)
                 setBilang((parseInt(farm.plantNumber) - parseInt(farm.ethrel)).toString())
               }}
             />
             {
               fertilizer.toLocaleLowerCase() === "flower inducer (ethrel)" &&
               <View style={styles.quantyContainer}>
+                 <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Plant Number:</Text>
                 <TextInput
                   placeholder="Bilang ng tanim"
                   keyboardType="numeric"
@@ -367,10 +478,18 @@ const Activities = ({ route }) => {
             <View style={styles.quantyContainer}>
               <TextInput
                 placeholder="0.0"
-                keyboardType="decimal-pad"
+                keyboardType="numeric"
                 style={styles.input}
-                value={quantity}
-                onChangeText={handleChange}
+                value={comps.qntyPrice.toString()}
+                onChangeText={(e) => {
+                  const parsedValue = parseFloat(e) || 0;  // Handle NaN when input is empty or invalid
+                  console.log("theeee whatt???", parsedValue)
+                  setComps(prev => ({
+                    ...prev,
+                    qntyPrice: parsedValue
+                  }));
+                }
+                }
               />
               <View style={styles.suffixContainer}>
                 <Text style={styles.suffix}>kg</Text>
@@ -380,13 +499,16 @@ const Activities = ({ route }) => {
               <TouchableOpacity onPress={handleModalClose} style={styles.cancelButton}>
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => handleSave("a")}
-                style={[styles.saveButton, saving && { backgroundColor: 'gray' }]}
-                disabled={saving}
-              >
-                <Text style={styles.saveButtonText}>{saving ? 'Saving...' : 'Save'}</Text>
-              </TouchableOpacity>
+              {
+                components && roi &&
+                <TouchableOpacity
+                  onPress={() => handleSave("a")}
+                  style={[styles.saveButton, saving || bilangError && { backgroundColor: 'gray' }]}
+                  disabled={saving || bilangError}
+                >
+                  <Text style={styles.saveButtonText}>{saving ? 'Saving...' : 'Save'}</Text>
+                </TouchableOpacity>
+              }
             </View>
           </View>
         </View>
@@ -437,13 +559,16 @@ const Activities = ({ route }) => {
               <TouchableOpacity onPress={handleModalClose} style={styles.cancelButton2}>
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => handleSave("r")}
-                style={[styles.ReportButton, saving && { backgroundColor: 'gray' }]}
-                disabled={saving}
-              >
-                <Text style={styles.saveButtonText}>{saving ? 'Saving...' : 'Report'}</Text>
-              </TouchableOpacity>
+              {
+                components && roi &&
+                <TouchableOpacity
+                  onPress={() => handleSave("r")}
+                  style={[styles.ReportButton, saving && { backgroundColor: 'gray' }]}
+                  disabled={saving}
+                >
+                  <Text style={styles.saveButtonText}>{saving ? 'Saving...' : 'Report'}</Text>
+                </TouchableOpacity>
+              }
             </View>
           </View>
         </View>

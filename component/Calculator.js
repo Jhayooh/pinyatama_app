@@ -30,6 +30,7 @@ import { WEATHER_KEY } from '../utils/API_KEY';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { LatLng, LeafletView } from 'react-native-leaflet-view';
+
 // import LeafletMapView from 'react-native-leaflet-map';
 
 import { Dropdown } from 'react-native-element-dropdown';
@@ -659,6 +660,10 @@ export const Calculator = ({ navigation }) => {
 
   const [modalVisible, setModalVisible] = useState(false)
 
+  const apiKey = 'e30a4cb23a6a41028fcbd7df077cde27'
+  const custIcon = `https://api.geoapify.com/v1/icon/?type=material&color=%23f6a30b&size=small&icon=grass&iconSize=small&textSize=small&strokeColor=%23f6a30b&noWhiteCircle&apiKey=${apiKey}`
+
+
   const getDate = () => {
     let tempDate = date.toString().split(' ');
     return date !== ''
@@ -730,6 +735,7 @@ export const Calculator = ({ navigation }) => {
   const [isAddFarm, setIsAddFarm] = useState(false)
 
   const [mapEvent, setMapEvent] = useState(null)
+  const [zoom, setZoom] = useState(12)
 
   const [weather, setWeather] = useState({
     loading: false,
@@ -1050,9 +1056,16 @@ export const Calculator = ({ navigation }) => {
       })
 
       const newRoi = await addDoc(roiRef, {
-        ...roiDetails
+        ...roiDetails,
+        type: 'p'
       })
       await updateDoc(newRoi, { id: newRoi.id })
+
+      const actualRoi = await addDoc(roiRef, {
+        ...roiDetails,
+        type: 'a'
+      })
+      await updateDoc(actualRoi, { id: actualRoi.id })
 
       const currDate = new Date()
 
@@ -1548,7 +1561,7 @@ export const Calculator = ({ navigation }) => {
                         onChange={item => {
                           setFertilizer(item)
                           console.log("the npk item:", item);
-                          
+
                           setNpk(item.value)
                         }}
                         style={{ ...styles.textInput, borderBottomRightRadius: 0, borderTopRightRadius: 0 }}
@@ -1749,17 +1762,20 @@ export const Calculator = ({ navigation }) => {
                                 {
                                   position: userLocation
                                     ? { lat: userLocation.latitude, lng: reverseNormalizeLongitude(userLocation.longitude) }
-                                    : mapEvent
-                                      ? { lat: mapEvent.lat, lng: mapEvent.lng }
-                                      : { lat: 14.192259401369892, lng: -237.2101928677876 },
-                                  icon: '📍',
-                                  size: [32, 32],
+                                    // : mapEvent
+                                    //   ? { lat: mapEvent.lat, lng: mapEvent.lng }
+                                    : { lat: 14.192259401369892, lng: -237.2101928677876 },
+                                  icon: custIcon,
+                                  size: [28, 40],
                                 },
                               ]}
                               onMessageReceived={(e) => {
                                 if (e.event === "onMapClicked") {
-                                  setMapEvent(e.payload.touchLatLng)
                                   setUserLocation(new GeoPoint(e.payload.touchLatLng.lat, normalizeLongitude(e.payload.touchLatLng.lng)))
+                                }
+                                if (e.event === "onZoomEnd") {
+
+                                  setZoom(e.payload.zoom)
                                 }
                               }}
                               mapCenterPosition={
@@ -1769,7 +1785,7 @@ export const Calculator = ({ navigation }) => {
                                   //   ? { lat: mapEvent.lat, lng: mapEvent.lng }
                                   : { lat: 14.192259401369892, lng: -237.2101928677876 }
                               }
-                              zoom={12}
+                              zoom={zoom}
                             />
 
                           </View>
