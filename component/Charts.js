@@ -192,7 +192,7 @@ const Charts = ({ farms }) => {
                     <View>
                     </View>
                     {/* Calendar */}
-                    {/* <Calendar
+                    <Calendar
                         markingType='period'
                         style={{
                             borderRadius: 16,
@@ -212,7 +212,7 @@ const Charts = ({ farms }) => {
                             setSelectedDay(day.dateString);
                         }}
                         markedDates={activities}
-                    /> */}
+                    />
                     {/* ROI */}
                     {
                         roiLoading && !newRoi || Object.keys(newRoi).length === 0

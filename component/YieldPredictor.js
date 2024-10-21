@@ -1,32 +1,37 @@
 import React, { useState, useEffect } from 'react';
-import { View, ScrollView, Text } from 'react-native';
-import Pie from './Pie';
+import { View, ScrollView, Text, Modal, Button } from 'react-native';
+import Pie from './Pie';  // Assume this is a custom Pie chart component
 import { collection, getDocs } from 'firebase/firestore';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
 import { db } from '../firebase/Config';
 import { ActivityIndicator } from 'react-native-paper';
-import { Calendar } from 'react-native-calendars';
+import { Agenda } from 'react-native-calendars';
 import moment from 'moment';
 
-
 const YieldPredictor = ({ route }) => {
-
     const [productionData, setProductionData] = useState([]);
     const [totalProduction, setTotalProduction] = useState(0);
     const [pieChartData, setPieChartData] = useState([]);
     const [combinedData2, setCombinedData2] = useState([]);
     const [roiData, setRoiData] = useState([]);
-    const [markedDates, setMarkedDates] = useState({
-        '2021-01-20': { textColor: 'green' },
-        '2021-01-22': { startingDay: true, color: 'green' },
-        '2021-01-23': { selected: true, endingDay: true, color: 'green', textColor: 'gray' },
-        '2021-01-04': { disabled: true, startingDay: true, color: 'green', endingDay: true }
-    });
 
+    const [items, setItems] = useState({
+        '2024-10-23': [{ name: 'Meeting with client', time: '10:00 AM' }],
+        '2024-10-23': [{ name: 'Team brainstorming session', time: '9:00 AM' }, { name: 'Project presentation', time: '2:00 PM' }, { name: 'Project presentation', time: '5:00 PM' }],
+        '2024-10-01': [{ name: 'Team brainstorming session', time: '9:00 AM' }, { name: 'Project presentation', time: '2:00 PM' }],
+        '2024-10-02': [{ name: 'Team brainstorming session', time: '9:00 AM' }, { name: 'Project presentation', time: '2:00 PM' }],
+    });
+  
+    const renderEmptyData = () => {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <Text>No events for this day</Text>
+            </View>
+        );
+    };
 
     const farmsColl = collection(db, 'farms');
     const [farmsData, farmsLoading, farmsError] = useCollectionData(farmsColl);
-
 
     useEffect(() => {
         const fetchRoiData = async () => {
@@ -58,6 +63,7 @@ const YieldPredictor = ({ route }) => {
 
         fetchRoiData();
     }, [farmsData]);
+
 
     useEffect(() => {
         if (!farmsData || farmsData.length === 0 || roiData.length === 0) return;
@@ -117,46 +123,6 @@ const YieldPredictor = ({ route }) => {
     }, [farmsData, roiData]);
 
 
-
-    const handleDayPress = (day) => {
-        const startDate = moment(day.dateString); // The selected date
-        const newMarkedDates = {
-            '2024-10-01': { dots: [{ key: 'vacation', color: 'blue' }] },
-            '2024-10-02': { dots: [{ key: 'work', color: 'red' }, { key: 'study', color: 'green' }] }
-        }; 
-
-        // First 10 months - green dot
-        for (let i = 0; i < 10; i++) {
-            const date = startDate.clone().add(i, 'months').format('YYYY-MM-DD');
-            newMarkedDates[date] = {
-                dots: [{ key: `green-${i}`, color: 'green' }],
-                ...newMarkedDates[date] // Preserve any previous markings
-            };
-        }
-
-        // Next 2 months - orange dot
-        for (let i = 10; i < 12; i++) {
-            const date = startDate.clone().add(i, 'months').format('YYYY-MM-DD');
-            newMarkedDates[date] = {
-                dots: [{ key: `orange-${i}`, color: 'orange' }],
-                ...newMarkedDates[date]
-            };
-        }
-
-        // Next 6 months - blue dot
-        for (let i = 12; i < 18; i++) {
-            const date = startDate.clone().add(i, 'months').format('YYYY-MM-DD');
-            newMarkedDates[date] = {
-                dots: [{ key: `blue-${i}`, color: 'blue' }],
-                ...newMarkedDates[date]
-            };
-        }
-
-        // Set the updated markedDates state
-        setMarkedDates(newMarkedDates);
-    };
-
-
     if (farmsLoading || roiData.length === 0) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -175,33 +141,48 @@ const YieldPredictor = ({ route }) => {
     const labels2 = pieChartData.map(item => item.label);
 
     return (
-        <ScrollView>
-            <View style={{ padding: 16, flex: 1, height: '100%', gap: 5 }}>
-                {/* <Calendar
-                    markedDates={markedDates}
-                    markingType={'dots'}
-                    onDayPress={handleDayPress}
-                    style={{borderRadius:20, elevation:5, backgroundColor:'#fff', padding:10}}
-                /> */}
-                <View style={{
-                    backgroundColor: '#fff',
-                    borderRadius: 20,
-                    elevation: 5,
-                    padding: 10,
-                }}>
-                    <Pie labels={labels1} data={series1} title="Municipalities" />
+        <>
+            <ScrollView>
+                <View style={{ padding: 16, flex: 1, height: '100%', gap: 5 }}>
+                    <View style={{
+                        borderRadius: 20,
+                        padding: 10,
+                        // height:'100%'
+
+                    }}>
+                        <Agenda
+                            items={items}
+                            showOnlySelectedDayItems={true}
+                            renderEmptyData={renderEmptyData}
+                            renderItem={(item) => (
+                                <View style={{ marginVertical: 10, marginTop: 30, backgroundColor: 'white', marginHorizontal: 10, padding: 10, }}>
+                                    <Text style={{ fontWeight: 'bold' }}>{item.name}</Text>
+                                    <Text>{item.time}</Text>
+                                </View>
+                            )}
+                        />
+                    </View>
+                    <View style={{
+                        backgroundColor: '#fff',
+                        borderRadius: 20,
+                        elevation: 5,
+                        padding: 10,
+                    }}>
+                        <Pie labels={labels1} data={series1} title="Municipalities" />
+                    </View>
+                    <View style={{
+                        backgroundColor: '#fff',
+                        borderRadius: 20,
+                        elevation: 5,
+                        padding: 10,
+                        marginTop: 20
+                    }}>
+                        <Pie labels={labels2} data={series2} title="Barangay" />
+                    </View>
                 </View>
-                <View style={{
-                    backgroundColor: '#fff',
-                    borderRadius: 20,
-                    elevation: 5,
-                    padding: 10,
-                    marginTop: 20
-                }}>
-                    <Pie labels={labels2} data={series2} title="Per Barangay" />
-                </View>
-            </View>
-        </ScrollView>
+            </ScrollView>
+
+        </>
     );
 };
 
