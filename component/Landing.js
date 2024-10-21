@@ -379,14 +379,14 @@ export const Landing = ({ navigation }) => {
 
     return (
         <>
-            <DrawerLayoutAndroid
-                //drawerBackgroundColor="rgba(0,0,0,0.6)"
+            {/* <DrawerLayoutAndroid
+                drawerBackgroundColor="rgba(0,0,0,0.6)"
                 ref={drawer}
                 drawerWidth={300}
                 drawerPosition={drawerPosition}
                 renderNavigationView={() => drawerView()}
                 drawerLockMode={drawerLockMode}
-            >
+            > */}
                 <View style={styles.bgOut}>
                     <View style={styles.logoBg} >
                         <Text style={styles.appTitle} >Queen Pineapple Farming</Text>
@@ -408,11 +408,11 @@ export const Landing = ({ navigation }) => {
                                     </View>
                                 </TouchableHighlight>
                                 <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn} onPress={() =>
-                                      user
-                                      ?
-                                      navigation.navigate('Yield', {farms:farms})
-                                      :
-                                      setShowLogin(true)
+                                    user
+                                        ?
+                                        navigation.navigate('Yield', { farms: farms })
+                                        :
+                                        setShowLogin(true)
                                 }>
                                     <View style={styles.btnbtnChild}>
                                         <Image source={yieldLogo} style={styles.btnImage} />
@@ -429,7 +429,7 @@ export const Landing = ({ navigation }) => {
                                         <Text style={styles.buttonText}>Mga Bukid ng Pinya</Text>
                                     </View>
                                 </TouchableHighlight>
-                                <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn} onPress={() => 
+                                <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn} onPress={() =>
                                     navigation.navigate('Video')}>
                                     <View style={styles.btnbtnChild}>
                                         <Image source={videoLogo} style={styles.btnImage} />
@@ -449,8 +449,8 @@ export const Landing = ({ navigation }) => {
                                         ?
                                         <TouchableHighlight
                                             style={styles.btnbtn}
-                                            onPress={() => { console.log("the draweeeer", drawer); drawer.current?.openDrawer() }}
-                                        // onPress={handleLogout}
+                                            //onPress={() => { console.log("the draweeeer", drawer); drawer.current?.openDrawer() }}
+                                            onPress={handleLogout}
                                         >
                                             <View style={styles.btnbtnChild2}>
                                                 {
@@ -465,7 +465,7 @@ export const Landing = ({ navigation }) => {
                                                             style={styles.btnImage}
                                                         />
                                                     )}
-                                                {/* <Text style={{ ...styles.buttonText, color: '#fff' }}>Log out</Text>  */}
+                                                <Text style={{ ...styles.buttonText, color: '#fff' }}>Log out</Text> 
                                             </View>
                                         </TouchableHighlight>
                                         :
@@ -483,7 +483,7 @@ export const Landing = ({ navigation }) => {
                 </View>
                 <LoginModal />
                 {/* <RegistrationModal /> */}
-            </DrawerLayoutAndroid>
+            {/* </DrawerLayoutAndroid> */}
         </>
     );
 }
