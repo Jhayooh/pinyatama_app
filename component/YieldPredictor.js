@@ -7,6 +7,7 @@ import { db } from '../firebase/Config';
 import { ActivityIndicator } from 'react-native-paper';
 import { Agenda } from 'react-native-calendars';
 import moment from 'moment';
+import Timeline from './charts/Timeline';
 
 const YieldPredictor = ({ route }) => {
     const [productionData, setProductionData] = useState([]);
@@ -14,21 +15,6 @@ const YieldPredictor = ({ route }) => {
     const [pieChartData, setPieChartData] = useState([]);
     const [combinedData2, setCombinedData2] = useState([]);
     const [roiData, setRoiData] = useState([]);
-
-    const [items, setItems] = useState({
-        '2024-10-23': [{ name: 'Meeting with client', time: '10:00 AM' }],
-        '2024-10-23': [{ name: 'Team brainstorming session', time: '9:00 AM' }, { name: 'Project presentation', time: '2:00 PM' }, { name: 'Project presentation', time: '5:00 PM' }],
-        '2024-10-01': [{ name: 'Team brainstorming session', time: '9:00 AM' }, { name: 'Project presentation', time: '2:00 PM' }],
-        '2024-10-02': [{ name: 'Team brainstorming session', time: '9:00 AM' }, { name: 'Project presentation', time: '2:00 PM' }],
-    });
-  
-    const renderEmptyData = () => {
-        return (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <Text>No events for this day</Text>
-            </View>
-        );
-    };
 
     const farmsColl = collection(db, 'farms');
     const [farmsData, farmsLoading, farmsError] = useCollectionData(farmsColl);
@@ -145,12 +131,14 @@ const YieldPredictor = ({ route }) => {
             <ScrollView>
                 <View style={{ padding: 16, flex: 1, height: '100%', gap: 5 }}>
                     <View style={{
-                        borderRadius: 20,
+                        backgroundColor: '#fff',
+                        borderRadius: 12,
+                        elevation: 5,
                         padding: 10,
                         // height:'100%'
 
                     }}>
-                        <Agenda
+                        {/* <Agenda
                             items={items}
                             showOnlySelectedDayItems={true}
                             renderEmptyData={renderEmptyData}
@@ -160,24 +148,26 @@ const YieldPredictor = ({ route }) => {
                                     <Text>{item.time}</Text>
                                 </View>
                             )}
-                        />
+                        /> */}
+                        <Timeline />
                     </View>
                     <View style={{
                         backgroundColor: '#fff',
-                        borderRadius: 20,
+                        borderRadius: 12,
                         elevation: 5,
                         padding: 10,
+                        marginTop: 18
                     }}>
-                        <Pie labels={labels1} data={series1} title="Municipalities" />
+                        {/* <Pie labels={labels1} data={series1} title="Municipalities" /> */}
                     </View>
                     <View style={{
                         backgroundColor: '#fff',
-                        borderRadius: 20,
+                        borderRadius: 12,
                         elevation: 5,
                         padding: 10,
-                        marginTop: 20
+                        marginTop: 18
                     }}>
-                        <Pie labels={labels2} data={series2} title="Barangay" />
+                        {/* <Pie labels={labels2} data={series2} title="Barangay" /> */}
                     </View>
                 </View>
             </ScrollView>
