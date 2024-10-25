@@ -7,7 +7,7 @@ import { collection } from "firebase/firestore";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 
 
-const Timeline = ({navigation}) => {
+const Timeline = ({}) => {
     const farmsColl = collection(db, `/farms`);
     const [farms] = useCollectionData(farmsColl);
     const user = auth.currentUser;
