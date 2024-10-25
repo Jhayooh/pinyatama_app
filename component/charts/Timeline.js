@@ -1,91 +1,146 @@
-import { Text, Button, View } from 'react-native'
-import { Calendar } from 'react-native-big-calendar'
-import dayjs from 'dayjs'
-import { useState } from 'react'
-import { db, auth } from '../../firebase/Config'
-import { addDoc, collection } from "firebase/firestore";
+import { Text, Button, View, StyleSheet } from 'react-native';
+import { Calendar } from 'react-native-big-calendar';
+import dayjs from 'dayjs';
+import { useState } from 'react';
+import { db, auth } from '../../firebase/Config';
+import { collection } from "firebase/firestore";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 
-const Timeline = () => {
-    const farmsColl = collection(db, `/farms`)
-    const [farms] = useCollectionData(farmsColl)
 
-    const user = auth.currentUser
-    
-    const today = new Date()
-    const events = [
-        {
-            title: 'Meeting',
-            start: new Date(2024, 9, 22, 10, 0),
-            end: new Date(2024, 9, 29, 10, 30),
-        },
-        {
-            title: 'Coffee break',
-            start: new Date(2024, 9, 22, 15, 45),
-            end: new Date(2024, 9, 25, 16, 30),
-        },
-    ]
+const Timeline = ({navigation}) => {
+    const farmsColl = collection(db, `/farms`);
+    const [farms] = useCollectionData(farmsColl);
+    const user = auth.currentUser;
+    const today = new Date();
+    const [date, setDate] = useState(today);
+    const [mode, setMode] = useState('month');
 
-    const [date, setDate] = useState(today)
-    const [mode, setMode] = useState('month')
-
-    const _onToday = () => {
-        setDate(today)
-    }
-
+    const _onToday = () => setDate(today);
     const _onPrevDate = () => {
         if (mode === 'month') {
-            setDate(
-                dayjs(date)
-                    .add(dayjs(date).date() * -1, 'day')
-                    .toDate(),
-            )
+            setDate(dayjs(date).subtract(1, 'month').toDate());
         }
+    };
+    const _onNextDate = () => setDate(dayjs(date).add(1, 'month').toDate());
 
-    }
-
-    const _onNextDate = () => {
-        setDate(dayjs(date).add(1, 'month').toDate());
-    }
-
-    farms && console.log("faaarmsss", farms
-        .filter(f => f.brgyUID === user.uid)
-        .map(f => ({
-            start: new Date(f.start_date.toDate()),
-            end: new Date(f.harvest_date.toDate()),
-            title: f.title,
-            uid: f.brgyUID
-        })))
+    const filteredEvents = farms
+        ? farms
+            .filter(f => f.brgyUID === user?.uid)
+            .map(f => ({
+                start: f.start_date?.toDate() || new Date(),
+                end: f.harvest_date?.toDate() || new Date(),
+                title: f.title || 'No Title',
+                stage: f.cropStage || 'vegetative'
+            }))
+        : [];
 
     return (
         <>
-            <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', flex: 1, gap: 8 }}>
-                <Button title='<' onPress={_onPrevDate} />
-                <Button title='Today' onPress={_onToday} />
-                <View style={{ marginLeft: 4, flex: 1 }}>
-                    <Text style={{ fontWeight: 600 }}>{dayjs(date).format('MMMM YYYY')}</Text>
-                </View>
-                <Button title='>' onPress={_onNextDate} />
+            <View style={styles.navigationRow}>
+                <Button color="grey" title="<" onPress={_onPrevDate} />
+                <Text style={styles.monthTitle}>{dayjs(date).format('MMMM YYYY')}</Text>
+                <Button color="grey" title=">" onPress={_onNextDate} />
             </View>
-            {
-                farms &&
+
+            <View style={styles.todayButton}>
+                <Button color="orange" title="Today" onPress={_onToday} />
+            </View>
+
+            <View style={styles.viewMoreButton}>
+                <Button title="View More" />
+            </View>
+
+            {farms && (
                 <Calendar
                     date={date}
-                    events={
-                        farms
-                            .filter(f => f.brgyUID === user.uid)
-                            .map(f => ({
-                                start: new Date(f.start_date.toDate()),
-                                end: new Date(f.harvest_date.toDate()),
-                                title: f.title
-                            }))
-                    }
+                    events={filteredEvents}
                     height={500}
                     mode={mode}
+                    hourRowHeight={40}
+                    timeslots={2}
+                    eventCellStyle={(event) => ({
+                        backgroundColor:
+                            event.stage === 'vegetative' ? 'green' :
+                            event.stage === 'flowering' ? 'yellow' :
+                            event.stage === 'fruiting' ? 'orange' : 'grey',
+                        borderRadius: 10,
+                        padding: 5,
+                        fontSize: 12,
+                    })}
                 />
-            }
-        </>
-    )
-}
+            )}
 
-export default Timeline
+            <View style={styles.legendContainer}>
+                <View style={styles.legendItem}>
+                    <View style={styles.v}></View>
+                    <Text>Vegetative</Text>
+                </View>
+                <View style={styles.legendItem}>
+                    <View style={styles.fl}></View>
+                    <Text>Flowering</Text>
+                </View>
+                <View style={styles.legendItem}>
+                    <View style={styles.fr}></View>
+                    <Text>Fruiting</Text>
+                </View>
+            </View>
+        </>
+    );
+};
+
+const styles = StyleSheet.create({
+    navigationRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 10,
+        paddingHorizontal: 10,
+    },
+    monthTitle: {
+        fontWeight: '700',
+        fontSize: 20,
+        fontFamily: 'serif',
+        textAlign: 'center',
+        flex: 1,
+    },
+    todayButton: {
+        marginVertical: 10,
+        alignItems: 'center',
+        flex:1
+    },
+    viewMoreButton: {
+        alignItems: 'flex-end',
+        marginVertical: 10,
+        paddingRight: 10,
+    },
+    legendContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginTop: 20,
+    },
+    legendItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginHorizontal: 5,
+    },
+    v: {
+        width: 20,
+        height: 20,
+        backgroundColor: 'green',
+        marginRight: 5,
+    },
+    fl: {
+        width: 20,
+        height: 20,
+        backgroundColor: 'yellow',
+        marginRight: 5,
+    },
+    fr: {
+        width: 20,
+        height: 20,
+        backgroundColor: 'orange',
+        marginRight: 5,
+    },
+});
+
+export default Timeline;

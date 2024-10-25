@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, ScrollView, Text, Modal, Button } from 'react-native';
+import { View, ScrollView, Text, LogBox } from 'react-native';
 import Pie from './Pie';  // Assume this is a custom Pie chart component
 import { collection, getDocs } from 'firebase/firestore';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
-import { db } from '../firebase/Config';
+import { db, auth } from '../firebase/Config';
 import { ActivityIndicator } from 'react-native-paper';
-import { Agenda } from 'react-native-calendars';
-import moment from 'moment';
 import Timeline from './charts/Timeline';
 
 const YieldPredictor = ({ route }) => {
@@ -16,8 +14,15 @@ const YieldPredictor = ({ route }) => {
     const [combinedData2, setCombinedData2] = useState([]);
     const [roiData, setRoiData] = useState([]);
 
+    const [currentUser, setCurrentUser] = useState('')
+
+    const userAuth = auth.currentUser
+
     const farmsColl = collection(db, 'farms');
     const [farmsData, farmsLoading, farmsError] = useCollectionData(farmsColl);
+
+    const userColl = collection(db, '/users');
+    const [usersData, usersLoading, usersError] = useCollectionData(userColl);
 
     useEffect(() => {
         const fetchRoiData = async () => {
@@ -50,11 +55,15 @@ const YieldPredictor = ({ route }) => {
         fetchRoiData();
     }, [farmsData]);
 
-
     useEffect(() => {
-        if (!farmsData || farmsData.length === 0 || roiData.length === 0) return;
+        if (!farmsData || farmsData.length === 0 || roiData.length === 0 || !usersData || usersData.length === 0) return;
+        const user = usersData.find(u => u.id === userAuth.uid)
+        setCurrentUser(user)
+        console.log("the userrrr", user);
 
-        const groupedByBrgy = farmsData.reduce((acc, farm) => {
+        const filteredFarms = farmsData.filter(farm => farm.mun === user.mun);
+
+        const groupedByBrgy = filteredFarms.reduce((acc, farm) => {
             const brgy = farm.brgy || 'Unknown Barangay';
             if (!acc[brgy]) acc[brgy] = [];
 
@@ -86,13 +95,8 @@ const YieldPredictor = ({ route }) => {
             data: groupedByMun[mun].reduce((sum, value) => sum + value, 0),
         }));
 
-        const pieChartData = combinedData.map((item) => ({
+        const pieChartData = combinedData.map(item => ({
             label: item.brgy,
-            value: item.data,
-        }));
-
-        const pieChartData1 = combinedData1.map((item) => ({
-            label: item.mun,
             value: item.data,
         }));
 
@@ -106,20 +110,19 @@ const YieldPredictor = ({ route }) => {
         setTotalProduction(totalProduction);
         setPieChartData(pieChartData);
         setCombinedData2(combinedData2);
-    }, [farmsData, roiData]);
+    }, [farmsData, roiData, usersData]);
 
+    // if (farmsLoading || usersLoading || roiData.length === 0) {
+    //     return (
+    //         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    //             <ActivityIndicator />
+    //         </View>
+    //     );
+    // }
 
-    if (farmsLoading || roiData.length === 0) {
-        return (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <ActivityIndicator />
-            </View>
-        );
-    }
-
-    if (farmsError) {
-        return <View><Text>Error loading data...</Text></View>;
-    }
+    // if (farmsError || usersError) {
+    //     return <View><Text>Error loading data...</Text></View>;
+    // }
 
     const series1 = combinedData2.map(item => item.value);
     const labels1 = combinedData2.map(item => item.label);
@@ -127,52 +130,41 @@ const YieldPredictor = ({ route }) => {
     const labels2 = pieChartData.map(item => item.label);
 
     return (
-        <>
-            <ScrollView>
-                <View style={{ padding: 16, flex: 1, height: '100%', gap: 5 }}>
-                    <View style={{
-                        backgroundColor: '#fff',
-                        borderRadius: 12,
-                        elevation: 5,
-                        padding: 10,
-                        // height:'100%'
-
-                    }}>
-                        {/* <Agenda
-                            items={items}
-                            showOnlySelectedDayItems={true}
-                            renderEmptyData={renderEmptyData}
-                            renderItem={(item) => (
-                                <View style={{ marginVertical: 10, marginTop: 30, backgroundColor: 'white', marginHorizontal: 10, padding: 10, }}>
-                                    <Text style={{ fontWeight: 'bold' }}>{item.name}</Text>
-                                    <Text>{item.time}</Text>
-                                </View>
-                            )}
-                        /> */}
-                        <Timeline />
-                    </View>
-                    <View style={{
-                        backgroundColor: '#fff',
-                        borderRadius: 12,
-                        elevation: 5,
-                        padding: 10,
-                        marginTop: 18
-                    }}>
-                        <Pie labels={labels1} data={series1} title="Municipalities" />
-                    </View>
-                    <View style={{
-                        backgroundColor: '#fff',
-                        borderRadius: 12,
-                        elevation: 5,
-                        padding: 10,
-                        marginTop: 18
-                    }}>
-                        <Pie labels={labels2} data={series2} title="Barangay" />
-                    </View>
+        <ScrollView>
+            <View style={{ padding: 16, flex: 1, height: '100%', gap: 5 }}>
+                <View style={{
+                    backgroundColor: '#fff',
+                    borderRadius: 12,
+                    elevation: 5,
+                    padding: 10,
+                }}>
+                    <Pie labels={labels1} data={series1} title="Camarines Norte" />
                 </View>
-            </ScrollView>
+                <View style={{
+                    backgroundColor: '#fff',
+                    borderRadius: 12,
+                    elevation: 5,
+                    padding: 10,
+                    marginTop: 18
+                }}>
+                    <Pie
+                        labels={labels2}
+                        data={series2}
+                        title={currentUser.mun}
+                    />
 
-        </>
+                </View>
+                <View style={{
+                    backgroundColor: '#fff',
+                    borderRadius: 12,
+                    elevation: 5,
+                    padding: 10,
+                    marginTop: 18
+                }}>
+                    <Timeline />
+                </View>
+            </View>
+        </ScrollView>
     );
 };
 
