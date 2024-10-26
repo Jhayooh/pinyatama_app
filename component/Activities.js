@@ -167,8 +167,6 @@ const Activities = ({ route }) => {
   useEffect(() => {
     async function calculateAndSaveData() {
       if (!actualComponents) return;
-
-      console.log("actualComponent", actualComponents);
       const actualRoi = roi.find(r => r.type === 'a');
 
       // LABOR MATERIAL
@@ -181,8 +179,6 @@ const Activities = ({ route }) => {
       const totalFertilizer = actualComponents
         .filter(item => item.parent.toLowerCase() === "fertilizer")
         .reduce((sum, item) => sum + item.totalPrice, 0);
-
-      console.log("arjay macalinao", totalFertilizer);
 
       // ROI
       const grossReturn = actualRoi.grossReturn * getPinePrice('good size', localPine) + actualRoi.butterBall * getPinePrice('butterball', localPine);
@@ -229,10 +225,10 @@ const Activities = ({ route }) => {
       } else {
         const theLabel = ferti.find(obj => obj.value === fertilizer);
         const qnty = comps.qntyPrice;
+        let newHarvest = null
         if (theLabel.label.toLowerCase() === "flower inducer (ethrel)" && events) {
           const vege_event = events.find(p => p.className === 'vegetative');
           const date_diff = currDate - vege_event.end_time.toDate();
-
           if (farm.plantNumber - farm.ethrel === 0) {
             setSaving(false);
             handleModalClose();
@@ -291,13 +287,12 @@ const Activities = ({ route }) => {
                   createdAt: currDate,
                 });
                 await updateDoc(fruEvent, { id: fruEvent.id });
+                newHarvest = e.end_time
                 break;
               default:
                 break;
             }
           }
-          // Update farm with ethrel count
-          console.log("the billaaannggg", bilang)
           await updateDoc(doc(db, `farms/${farm.id}`), {
             isEthrel: currDate,
             ethrel: farm.ethrel + parseInt(bilang),
@@ -317,12 +312,26 @@ const Activities = ({ route }) => {
           const actComp = {
             ...pComp,
             qntyPrice: comps.qntyPrice,
-            totalPrice: comps.qntyPrice * pComp.price,
+            totalPrice: comps.qntyPrice * pComp.price23,
             type: "a"
           }
           setActualComponents([...components.filter(comp => comp.type !== 'p'), actComp]);
           const newCompAct = await addDoc(componentsColl, actComp)
           await updateDoc(newCompAct, { id: newCompAct.id })
+          console.log("the ee", e.length);
+
+          console.log(`bago mag update end_date ${e.length > 3}>${new Date(farm.harvest_date.toDate())}=${e.length > 3 && new Date(farm.harvest_date.toDate())}`);
+          if (e.length > 3 && newHarvest > new Date(farm.harvest_date.toDate())) {
+            await updateDoc(doc(db, `farms/${farm.id}`), {
+              harvest_date: newHarvest,
+            });
+          } else if (e.length <= 3) {
+            await updateDoc(doc(db, `farms/${farm.id}`), {
+              harvest_date: newHarvest,
+            });
+          }
+          console.log(`bago mag update end_date ${e.length > 3}>${new Date(farm.harvest_date.toDate())}=${e.length > 3 && new Date(farm.harvest_date.toDate())}`);
+
           setSaving(false);
           setAlert({
             visible: true,
@@ -464,7 +473,7 @@ const Activities = ({ route }) => {
             {
               fertilizer.toLocaleLowerCase() === "flower inducer (ethrel)" &&
               <View style={styles.quantyContainer}>
-                 <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Plant Number:</Text>
+                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Plant Number:</Text>
                 <TextInput
                   placeholder="Bilang ng tanim"
                   keyboardType="numeric"
@@ -482,8 +491,7 @@ const Activities = ({ route }) => {
                 style={styles.input}
                 value={comps.qntyPrice.toString()}
                 onChangeText={(e) => {
-                  const parsedValue = parseFloat(e) || 0;  // Handle NaN when input is empty or invalid
-                  console.log("theeee whatt???", parsedValue)
+                  const parsedValue = parseFloat(e) || 0;
                   setComps(prev => ({
                     ...prev,
                     qntyPrice: parsedValue
