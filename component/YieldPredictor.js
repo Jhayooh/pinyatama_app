@@ -7,7 +7,7 @@ import { db, auth } from '../firebase/Config';
 import { ActivityIndicator } from 'react-native-paper';
 import Timeline from './charts/Timeline';
 
-const YieldPredictor = ({ route }) => {
+const YieldPredictor = ({ route, navigation }) => {
     const [productionData, setProductionData] = useState([]);
     const [totalProduction, setTotalProduction] = useState(0);
     const [pieChartData, setPieChartData] = useState([]);
@@ -72,7 +72,10 @@ const YieldPredictor = ({ route }) => {
 
             acc[brgy].push(grossReturn);
             return acc;
-        }, {});
+        },
+            {});
+
+
 
         const groupedByMun = farmsData.reduce((acc, farm) => {
             const mun = farm.mun || 'Unknown Municipality';
@@ -89,6 +92,7 @@ const YieldPredictor = ({ route }) => {
             brgy,
             data: groupedByBrgy[brgy].reduce((sum, value) => sum + value, 0),
         }));
+
 
         const combinedData1 = Object.keys(groupedByMun).map(mun => ({
             mun,
@@ -147,11 +151,17 @@ const YieldPredictor = ({ route }) => {
                     padding: 10,
                     marginTop: 18
                 }}>
-                    <Pie
-                        labels={labels2}
-                        data={series2}
-                        title={currentUser.mun}
-                    />
+                    {series2.length === 0 ?
+                        (
+                            <Text style={{ display: 'flex', textAlign: 'center' }}> No Data to Display </Text>
+                        ) :
+
+                        <Pie
+                            labels={labels2}
+                            data={series2}
+                            title={currentUser.mun}
+                        />
+                    }
 
                 </View>
                 <View style={{
@@ -161,7 +171,7 @@ const YieldPredictor = ({ route }) => {
                     padding: 10,
                     marginTop: 18
                 }}>
-                    <Timeline />
+                    <Timeline navigation={navigation} />
                 </View>
             </View>
         </ScrollView>

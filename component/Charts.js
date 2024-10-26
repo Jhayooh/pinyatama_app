@@ -7,7 +7,9 @@ import {
     ScrollView,
     ActivityIndicator,
     Button,
-    Modal
+    Modal,
+    TouchableOpacity,
+    Image
 } from 'react-native'
 import { DoughnutAndPie } from './charts/DoughnutAndPie'
 import { Line } from './charts/Line'
@@ -16,27 +18,15 @@ import { Progress } from './charts/Progress'
 import { collection, getDocs } from 'firebase/firestore'
 import { db } from '../firebase/Config'
 import { useCollectionData } from 'react-firebase-hooks/firestore'
-import { Calendar, Agenda } from "react-native-calendars";
-import moment from 'moment'
-import DateTimePicker from '@react-native-community/datetimepicker';
+import { Calendar } from 'react-native-big-calendar';
+import dayjs from 'dayjs'
 
-const GastosSaPinya = () => {
-    const [gastos, setGastos] = useState([])
 
-    return (
-        <>
-
-        </>
-    )
-}
 
 const Charts = ({ farms }) => {
     const farm = farms[0]
     console.log('this is the farms from chart', farm);
-    const [isShow, setIsShow] = useState(false)
-    const [selectedDay, setSelectedDay] = useState('')
-    const [activities, setActivities] = useState({})
-    const [startDate, setStartDate] = useState('')
+
 
     const componentColl = collection(db, `farms/${farm.id}/components`)
     const [compData, compLoading, compError] = useCollectionData(componentColl)
@@ -46,6 +36,10 @@ const Charts = ({ farms }) => {
 
     const pineappleColl = collection(db, 'pineapple')
     const [pineData, pineLoading, pineError] = useCollectionData(pineappleColl)
+
+    const eventsColl = collection(db, `farms/${farm.id}/events`)
+    const [eventsData] = useCollectionData(eventsColl)
+
 
     const [partTotal, setPartTotal] = useState([])
     const [pineTotal, setPineTotal] = useState([])
@@ -131,50 +125,33 @@ const Charts = ({ farms }) => {
         ])
     }, [roiData, pineData]);
 
-    const getMaxSched = ({ date }) => {
-        return moment(date).add(2, 'month')
-    }
+    //all about calendaR
 
-    const onChange = (event, selectedDate) => {
-        const currentDate = selectedDate;
-        setShow(false);
-        setDate(currentDate);
-    };
+    const today = new Date();
+    const [date, setDate] = useState(today);
+    const [mode, setMode] = useState('month');
 
-    const showMode = (currentMode) => {
-        setShow(true);
-        setMode(currentMode);
-    };
+    const _onToday = () => setDate(today);
 
-    const showDatepicker = () => {
-        showMode('date');
-    };
-
-    const showTimepicker = () => {
-        showMode('time');
-    };
-
-    const formatDate = (toFormatDate) => {
-        return toFormatDate.toDate().toISOString().split('T')[0];
-    }
-
-    const generateDateRange = (startDate, endDate) => {
-        console.log("start:", startDate);
-        console.log("end:", endDate);
-        const dates = {};
-        let currentDate = moment(startDate);
-        const formattedEndDate = moment(endDate);
-
-        while (currentDate <= formattedEndDate) {
-            const formattedDate = currentDate.format('YYYY-MM-DD');
-            dates[formattedDate] = {
-                color: '#50cebb',
-                textColor: 'white',
-            };
-            currentDate = currentDate.add(1, 'days');
+    const _onPrevDate = () => {
+        if (mode === 'month') {
+            setDate(dayjs(date).subtract(1, 'month').toDate());
         }
-        return dates;
     };
+    const _onNextDate = () => setDate(dayjs(date).add(1, 'month').toDate());
+
+    // const filteredEvents = farms
+    //     ? farms
+    //         .filter(f => f.brgyUID === user?.uid)
+    //         .map(f => ({
+    //             start: f.start_date?.toDate() || new Date(),
+    //             end: f.harvest_date?.toDate() || new Date(),
+    //             title: f.title || 'No Title',
+    //             stage: f.cropStage || 'vegetative',
+    //             id:f.id
+    //         }))
+    //     : [];
+
 
     const color = ["rgb(0, 255, 0)", "rgb(0, 0, 255)", "rgb(255, 0, 0)"]
     return (
@@ -187,32 +164,65 @@ const Charts = ({ farms }) => {
                     flexDirection: 'column',
                     gap: 8,
                     paddingVertical: 8,
-                    margin: 15
+                    margin: 15,
                 }}>
-                    <View>
+                    <View style={{
+                        padding: 4,
+                        borderRadius: 5,
+                        backgroundColor: '#fff',
+                        shadowColor: 'green',
+                        shadowOffset: {
+                            width: 0,
+                            height: 2,
+                        },
+                        shadowOpacity: 0.25,
+                        shadowRadius: 3.84,
+                        elevation: 5
+                    }}>
+
+                        {/* Calendar */}
+
+                        <Text style={styles.monthTitle}>{dayjs(date).format('MMMM DD, YYYY')}</Text>
+
+                        <View style={styles.navigationRow}>
+                            <TouchableOpacity onPress={_onPrevDate} >
+                                <Image source={require('../assets/previous.png')} />
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={_onToday} style={styles.todayButton}>
+                                <Text style={{ fontSize: 15 }}>Today</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={_onNextDate}>
+                                <Image source={require('../assets/next.png')} />
+                            </TouchableOpacity>
+
+                        </View>
+                        {
+                            eventsData && (
+                                <Calendar
+                                    date={date}
+                                    events={eventsData.map(f => ({
+                                        start: f.start_time?.toDate() || new Date(),
+                                        end: f.end_time?.toDate() || new Date(),
+                                        title: f.title || 'No Title',
+                                        id: f.id
+                                    }))
+                                    }
+                                    height={500}
+                                    mode={mode}
+                                    hourRowHeight={40}
+                                    timeslots={2}
+                                    eventCellStyle={(event) => ({
+                                        backgroundColor: event.title === 'Vegetative' ? '#68c690' :
+                                            event.title === 'Flowering' ? '#FFDC2E' :
+                                                event.title === 'Fruiting' ? '#FF8D21' : 'grey',
+                                        borderRadius: 10,
+                                        padding: 5,
+                                        fontSize: 12,
+                                    })}
+                                />
+                            )
+                        }
                     </View>
-                    {/* Calendar */}
-                    <Calendar
-                        markingType='period'
-                        style={{
-                            borderRadius: 16,
-                            height: 380,
-                            backgroundColor: '#fff',
-                            shadowColor: 'green',
-                            shadowOffset: {
-                                width: 0,
-                                height: 2,
-                            },
-                            shadowOpacity: 0.25,
-                            shadowRadius: 3.84,
-                            elevation: 5
-                        }}
-                        onDayPress={day => {
-                            setIsShow(true)
-                            setSelectedDay(day.dateString);
-                        }}
-                        markedDates={activities}
-                    />
                     {/* ROI */}
                     {
                         roiLoading && !newRoi || Object.keys(newRoi).length === 0
@@ -223,7 +233,7 @@ const Charts = ({ farms }) => {
                                 padding: 4,
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                borderRadius: 16,
+                                borderRadius: 5,
                                 backgroundColor: '#fff',
                                 shadowColor: 'green',
                                 shadowOffset: {
@@ -258,7 +268,7 @@ const Charts = ({ farms }) => {
                                 shadowRadius: 3.84,
                                 elevation: 5,
                                 flex: 1,
-                                borderRadius: 16,
+                                borderRadius: 5,
 
                             }}>
                                 <Text style={{ fontSize: 20, marginVertical: 12, fontWeight: '600', color: 'green' }}>Gastos sa Pinya</Text>
@@ -285,7 +295,7 @@ const Charts = ({ farms }) => {
                                 shadowRadius: 3.84,
                                 elevation: 5,
                                 flex: 1,
-                                borderRadius: 16,
+                                borderRadius: 5,
                             }}>
                                 <Text style={{ fontSize: 20, marginVertical: 12, fontWeight: '600', color: 'green' }}>Gross Return</Text>
                                 <DoughnutAndPie data={pineTotal} col={"sum"} title="Gross Return" />
@@ -293,17 +303,6 @@ const Charts = ({ farms }) => {
                     }
                 </View>
             </ScrollView>
-
-            <Modal animationType='fade' transparent={true} visible={isShow} onRequestClose={() => (setIsShow(!isShow))}>
-                <View style={styles.modalContainer}>
-                    {
-                        activities.hasOwnProperty(selectedDay) ?
-                            <Text>Meron akong actibidades</Text> :
-                            <Text>No activity</Text>
-                    }
-                    <Button title='isarado mo ako' onPress={() => setIsShow(!isShow)} />
-                </View>
-            </Modal>
         </>
     )
 }
@@ -319,6 +318,29 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         padding: 24,
+    },
+    navigationRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 10,
+        paddingHorizontal: 10,
+        marginTop: 5,
+        borderWidth: 2,
+        borderColor: 'grey'
+    },
+
+    monthTitle: {
+        fontWeight: '700',
+        fontSize: 30,
+        fontFamily: 'serif',
+        textAlign: 'center',
+        flex: 1,
+    },
+    todayButton: {
+        marginVertical: 10,
+        alignItems: 'center',
+        flex: 1,
     },
 })
 

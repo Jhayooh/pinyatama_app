@@ -1,13 +1,14 @@
-import { Text, Button, View, StyleSheet } from 'react-native';
+import { Text, Button, View, StyleSheet, Image } from 'react-native';
 import { Calendar } from 'react-native-big-calendar';
 import dayjs from 'dayjs';
 import { useState } from 'react';
 import { db, auth } from '../../firebase/Config';
 import { collection } from "firebase/firestore";
 import { useCollectionData } from "react-firebase-hooks/firestore";
+import { TouchableOpacity } from 'react-native';
 
 
-const Timeline = ({}) => {
+const Timeline = ({ navigation }) => {
     const farmsColl = collection(db, `/farms`);
     const [farms] = useCollectionData(farmsColl);
     const user = auth.currentUser;
@@ -16,6 +17,7 @@ const Timeline = ({}) => {
     const [mode, setMode] = useState('month');
 
     const _onToday = () => setDate(today);
+    
     const _onPrevDate = () => {
         if (mode === 'month') {
             setDate(dayjs(date).subtract(1, 'month').toDate());
@@ -36,39 +38,23 @@ const Timeline = ({}) => {
 
     return (
         <>
+
+            <Text style={styles.monthTitle}>{dayjs(date).format('MMMM DD, YYYY')}</Text>
+
             <View style={styles.navigationRow}>
-                <Button color="grey" title="<" onPress={_onPrevDate} />
-                <Text style={styles.monthTitle}>{dayjs(date).format('MMMM YYYY')}</Text>
-                <Button color="grey" title=">" onPress={_onNextDate} />
+                <TouchableOpacity onPress={_onPrevDate} >
+                    <Image source={require('../../assets/previous.png')} />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={_onToday} style={styles.todayButton}>
+                    <Text style={{fontSize:15}}>Today</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={_onNextDate}>
+                    <Image source={require('../../assets/next.png')} />
+                </TouchableOpacity>
+
             </View>
 
-            <View style={styles.todayButton}>
-                <Button color="orange" title="Today" onPress={_onToday} />
-            </View>
 
-            <View style={styles.viewMoreButton}>
-                <Button title="View More" />
-            </View>
-
-            {farms && (
-                <Calendar
-                    date={date}
-                    events={filteredEvents}
-                    height={500}
-                    mode={mode}
-                    hourRowHeight={40}
-                    timeslots={2}
-                    eventCellStyle={(event) => ({
-                        backgroundColor:
-                            event.stage === 'vegetative' ? 'green' :
-                            event.stage === 'flowering' ? 'yellow' :
-                            event.stage === 'fruiting' ? 'orange' : 'grey',
-                        borderRadius: 10,
-                        padding: 5,
-                        fontSize: 12,
-                    })}
-                />
-            )}
 
             <View style={styles.legendContainer}>
                 <View style={styles.legendItem}>
@@ -84,6 +70,32 @@ const Timeline = ({}) => {
                     <Text>Fruiting</Text>
                 </View>
             </View>
+            {farms && (
+                <Calendar
+                    date={date}
+                    events={filteredEvents}
+                    height={500}
+                    mode={mode}
+                    hourRowHeight={40}
+                    timeslots={2}
+                    eventCellStyle={(event) => ({
+                        backgroundColor:
+                            event.stage === 'vegetative' ? '#68c690' :
+                                event.stage === 'flowering' ? '#FFDC2E' :
+                                    event.stage === 'fruiting' ? '#FF8D21' : 'grey',
+                        borderRadius: 10,
+                        padding: 5,
+                        fontSize: 12,
+                    })}
+                />
+            )}
+            <View style={styles.viewMoreButton}>
+                <TouchableOpacity
+                // onPress={() => navigation.navigate('Gallery')}
+                >
+                    <Text style={styles.more}> View More</Text>
+                </TouchableOpacity>
+            </View>
         </>
     );
 };
@@ -95,10 +107,14 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 10,
         paddingHorizontal: 10,
+        marginTop: 5,
+        borderWidth:2,
+        borderColor:'grey'
     },
+
     monthTitle: {
         fontWeight: '700',
-        fontSize: 20,
+        fontSize: 30,
         fontFamily: 'serif',
         textAlign: 'center',
         flex: 1,
@@ -106,39 +122,51 @@ const styles = StyleSheet.create({
     todayButton: {
         marginVertical: 10,
         alignItems: 'center',
-        flex:1
+        flex: 1,
     },
     viewMoreButton: {
         alignItems: 'flex-end',
-        marginVertical: 10,
         paddingRight: 10,
+        marginTop: 20,
+    },
+    more: {
+        fontFamily: 'seric',
+        fontSize: 20,
+        backgroundColor: 'orange',
+        color: '#fff',
+        padding: 10,
+        borderRadius: 8,
+        marginBottom: 5
     },
     legendContainer: {
         flexDirection: 'row',
         justifyContent: 'center',
-        marginTop: 20,
+        marginBottom: 15,
+        marginTop: 15
+
     },
     legendItem: {
         flexDirection: 'row',
         alignItems: 'center',
         marginHorizontal: 5,
     },
+
     v: {
         width: 20,
         height: 20,
-        backgroundColor: 'green',
+        backgroundColor: '#68c690',
         marginRight: 5,
     },
     fl: {
         width: 20,
         height: 20,
-        backgroundColor: 'yellow',
+        backgroundColor: '#FFDC2E',
         marginRight: 5,
     },
     fr: {
         width: 20,
         height: 20,
-        backgroundColor: 'orange',
+        backgroundColor: '#FF8D21',
         marginRight: 5,
     },
 });
