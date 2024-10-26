@@ -1,20 +1,20 @@
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import React, { useState, useEffect } from 'react';
-import { ImageBackground, StyleSheet } from 'react-native';
+import { ImageBackground, StyleSheet, View } from 'react-native';
 import { SearchBar } from 'react-native-elements';
 import TabView from './TabView';
 import { ref, listAll, getDownloadURL } from 'firebase/storage';
 import { storage } from '../firebase/Config';
-
-//image
-import Default from '../assets/p.jpg'
+import { ActivityIndicator } from 'react-native-paper';
 
 const Tab = createMaterialTopTabNavigator();
 
-export default function Gallery({ route }) {
+export default function Gallery({ route, }) {
   const [search, setSearch] = useState('');
   const [imageUrls, setImageUrls] = useState({});
   const { farms = [], user } = route.params
+  const [loading, setLoading] = useState(true);
+
 
   const [filteredFarms, setFilteredFarms] = useState(farms)
 
@@ -30,41 +30,49 @@ export default function Gallery({ route }) {
       const downloadUrl = await getDownloadURL(result.items[0])
       return downloadUrl
     } catch (error) {
-      console.error('Error fetching images: ', error);
+      // console.error('Error fetching images: ', error);
+      <ActivityIndicator />
     }
   }
-
-  useEffect(() => {
-    const filteredFarms = farms.filter((farm) => {
-      let matchesMunicipality = farm;
-      let matchesBrgy = farm;
-
-      if (user) {
-        matchesMunicipality = user.mun ? farm.mun === user.mun : true;
-        matchesBrgy = user.brgy ? farm.brgy === user.brgy : true;
-      }
-      const matchesSearch = farm.title.toLowerCase().includes(search.toLowerCase());
-      return matchesSearch && matchesMunicipality && matchesBrgy
-    })
-
-    setFilteredFarms(filteredFarms)
-    console.log("filtered farmsssss", filteredFarms);
-  }, [search, farms])
 
   useEffect(() => {
     async function fetchImageUrls() {
       if (!filteredFarms) return
       const urls = {};
+      const defaultImageUrl = '../assets/p.jpg';
+      console.log('immmagggee', defaultImageUrl)
+
       for (const marker of filteredFarms) {
         const url = await getImage(marker.id);
         if (url) {
           urls[marker.id] = url;
         }
+        else defaultImageUrl
       }
       setImageUrls(urls);
+      setLoading(false);
     }
     fetchImageUrls();
   }, [filteredFarms]);
+
+  // useEffect(() => {
+  //   async function fetchImageUrls() {
+  //     if (!filteredFarms) return;
+  //     const urls = {};
+  //     const defaultImageUrl = '../assets/p.jpg';
+  //     console.log('immmagggee', defaultImageUrl)
+
+  //     for (const marker of filteredFarms) {
+  //       const url = await getImage(marker.id);
+  //       urls[marker.id] = url || defaultImageUrl;
+  //     }
+
+  //     setImageUrls(urls);
+  //   }
+
+  //   fetchImageUrls();
+  // }, [filteredFarms]);
+
 
   return (
     <ImageBackground style={styles.background} >
@@ -76,88 +84,105 @@ export default function Gallery({ route }) {
         inputContainerStyle={styles.searchInputContainer}
         inputStyle={styles.searchInput}
       />
-      {filteredFarms && Object.keys(imageUrls).length !== 0 &&
-        <Tab.Navigator
-          initialRouteName="Lahat"
-          tabBarOptions={{
-            activeTintColor: 'green',
-            labelStyle: { fontSize: 11 },
-            style: { backgroundColor: 'white' },
-            fontWeight: 'bold',
-          }}
-        >
-          <Tab.Screen
-            name="Lahat"
-            // component={TabView}
-            // options={{ tabBarLabel: 'Lahat' }}
-            // setParams={{
-            //   farms: filteredFarms,
-            //   imageUrls: imageUrls,
-            // }}
-            children={props => (
-              <TabView {...props} farms={filteredFarms} imageUrls={imageUrls} />
-            )}
+      {
+        loading ? (
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <ActivityIndicator size="large" color="orange" />
+          </View>
+        ) : (
+          filteredFarms && Object.keys(imageUrls).length !== 0 &&
+          <Tab.Navigator
+            initialRouteName="Lahat"
+            tabBarOptions={{
+              activeTintColor: 'green',
+              labelStyle: { fontSize: 11 },
+              style: { backgroundColor: 'white' },
+              fontWeight: 'bold',
+            }}
+          >
+            <Tab.Screen
+              name="Lahat"
+              // component={TabView}
+              // options={{ tabBarLabel: 'Lahat' }}
+              // setParams={{
+              //   farms: filteredFarms,
+              //   imageUrls: imageUrls,
+              // }}
+              children={props => (
+                <TabView
+                  {...props}
+                  farms={filteredFarms.filter(
+                    obj =>
+                      obj.cropStage.toLowerCase() === 'vegetative' ||
+                      obj.cropStage.toLowerCase() === 'flowering' ||
+                      obj.cropStage.toLowerCase() === 'fruiting'
+                  )}
+                  imageUrls={imageUrls}
+                />
+              )}
 
-          />
+            />
 
-          <Tab.Screen
-            name="Vegetative"
-            // component={TabView}
-            // options={{ tabBarLabel: 'Vegetative' }}
-            // initialParams={{
-            //   farms: filteredFarms.filter(obj =>
-            //     obj.cropStage.toLowerCase() === 'vegetative'
-            //   ),
-            //   imageUrls: imageUrls
-            // }}
-            children={props => (
-              <TabView {...props} farms={filteredFarms.filter(obj => obj.cropStage.toLowerCase() === 'vegetative')} imageUrls={imageUrls} />
-            )}
-          />
-          <Tab.Screen
-            name="Flowering"
-            // component={TabView}
-            // options={{ tabBarLabel: 'Flowering' }}
-            // initialParams={{
-            //   farms: filteredFarms.filter(obj =>
-            //     obj.cropStage.toLowerCase() === 'flowering'
-            //   ),
-            //   imageUrls: imageUrls
-            // }}
-            children={props => (
-              <TabView {...props} farms={filteredFarms.filter(obj => obj.cropStage.toLowerCase() === 'flowering')} imageUrls={imageUrls} />
-            )}
-          />
-          <Tab.Screen
-            name="Fruiting"
-            // component={TabView}
-            // options={{ tabBarLabel: 'Fruiting' }}
-            // initialParams={{
-            //   farms: filteredFarms.filter(obj =>
-            //     obj.cropStage.toLowerCase() === 'fruiting'
-            //   ),
-            //   imageUrls: imageUrls
-            // }}
-            children={props => (
-              <TabView {...props} farms={filteredFarms.filter(obj => obj.cropStage.toLowerCase() === 'fruiting')} imageUrls={imageUrls} />
-            )}
-          />
-          <Tab.Screen
-            name="Complete"
-            // component={TabView}
-            // options={{ tabBarLabel: 'Archive' }}
-            // initialParams={{
-            //   farms: filteredFarms.filter(obj =>
-            //     obj.cropStage.toLowerCase() === 'complete'
-            //   ),
-            //   imageUrls: imageUrls
-            // }}
-            children={props => (
-              <TabView {...props} farms={filteredFarms.filter(obj => obj.cropStage.toLowerCase() === 'complete')} imageUrls={imageUrls} />
-            )}
-          />
-        </Tab.Navigator>
+            <Tab.Screen
+              name="Vegetative"
+              // component={TabView}
+              // options={{ tabBarLabel: 'Vegetative' }}
+              // initialParams={{
+              //   farms: filteredFarms.filter(obj =>
+              //     obj.cropStage.toLowerCase() === 'vegetative'
+              //   ),
+              //   imageUrls: imageUrls
+              // }}
+              children={props => (
+                <TabView {...props} farms={filteredFarms.filter(obj => obj.cropStage.toLowerCase() === 'vegetative')} imageUrls={imageUrls} />
+              )}
+            />
+            <Tab.Screen
+              name="Flowering"
+              // component={TabView}
+              // options={{ tabBarLabel: 'Flowering' }}
+              // initialParams={{
+              //   farms: filteredFarms.filter(obj =>
+              //     obj.cropStage.toLowerCase() === 'flowering'
+              //   ),
+              //   imageUrls: imageUrls
+              // }}
+              children={props => (
+                <TabView {...props} farms={filteredFarms.filter(obj => obj.cropStage.toLowerCase() === 'flowering')} imageUrls={imageUrls} />
+              )}
+            />
+            <Tab.Screen
+              name="Fruiting"
+              // component={TabView}
+              // options={{ tabBarLabel: 'Fruiting' }}
+              // initialParams={{
+              //   farms: filteredFarms.filter(obj =>
+              //     obj.cropStage.toLowerCase() === 'fruiting'
+              //   ),
+              //   imageUrls: imageUrls
+              // }}
+              children={props => (
+                <TabView {...props} farms={filteredFarms.filter(obj => obj.cropStage.toLowerCase() === 'fruiting')} imageUrls={imageUrls} />
+              )}
+            />
+            <Tab.Screen
+              name="Complete"
+              // component={TabView}
+              // options={{ tabBarLabel: 'Archive' }}
+              // initialParams={{
+              //   farms: filteredFarms.filter(obj =>
+              //     obj.cropStage.toLowerCase() === 'complete'
+              //   ),
+              //   imageUrls: imageUrls
+              // }}
+              children={props => (
+                <TabView {...props} farms={filteredFarms.filter(obj => obj.cropStage.toLowerCase() === 'complete')} imageUrls={imageUrls} />
+              )}
+            />
+          </Tab.Navigator>
+        )
       }
+
     </ImageBackground>
   );
 }
