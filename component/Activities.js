@@ -52,6 +52,7 @@ const Activities = ({ route }) => {
   const [saving, setSaving] = useState(false);
   const [events, setEvents] = useState(null)
   const [bilang, setBilang] = useState(0)
+  const [qntyPrice, setQntyPrice] = useState(0)
 
   const [laborMaterial, setLaborMaterial] = useState(null)
   const [actualComponents, setActualComponents] = useState(null)
@@ -103,6 +104,7 @@ const Activities = ({ route }) => {
       setBilangError(false)
     }
     setBilang(e)
+    setQntyPrice(getMult((e / 30000), comps.defQnty))
     setComps(prev => ({
       ...prev,
       qntyPrice: getMult((e / 30000), prev.defQnty)
@@ -112,6 +114,7 @@ const Activities = ({ route }) => {
   const handleModalClose = () => {
     setFertilizer('')
     setComps({ qntyPrice: 0, foreignId: '' })
+    setQntyPrice(0)
     setBilang(0)
     setIsAdd(false);
     setReport(false);
@@ -303,24 +306,24 @@ const Activities = ({ route }) => {
               createdAt: currDate,
               label: theLabel.label,
               compId: fertilizer,
-              qnty: qnty,
+              qnty: qntyPrice,
               desc: ''
             }
           );
 
-          const pComp = components.find(c => c.name === theLabel.label)
+          const pComp = parts.find(c => c.name === theLabel.label)
+          const newQnty = getMult(farm.area, pComp.defQnty)
           const actComp = {
             ...pComp,
-            qntyPrice: comps.qntyPrice,
-            totalPrice: comps.qntyPrice * pComp.price23,
+            qntyPrice: newQnty,
+            totalPrice: getMult(newQnty, pComp.price),
+            foreignId: pComp.id,
             type: "a"
           }
           setActualComponents([...components.filter(comp => comp.type !== 'p'), actComp]);
           const newCompAct = await addDoc(componentsColl, actComp)
           await updateDoc(newCompAct, { id: newCompAct.id })
-          console.log("the ee", e.length);
 
-          console.log(`bago mag update end_date ${e.length > 3}>${new Date(farm.harvest_date.toDate())}=${e.length > 3 && new Date(farm.harvest_date.toDate())}`);
           if (e.length > 3 && newHarvest > new Date(farm.harvest_date.toDate())) {
             await updateDoc(doc(db, `farms/${farm.id}`), {
               harvest_date: newHarvest,
@@ -330,7 +333,6 @@ const Activities = ({ route }) => {
               harvest_date: newHarvest,
             });
           }
-          console.log(`bago mag update end_date ${e.length > 3}>${new Date(farm.harvest_date.toDate())}=${e.length > 3 && new Date(farm.harvest_date.toDate())}`);
 
           setSaving(false);
           setAlert({
@@ -348,18 +350,21 @@ const Activities = ({ route }) => {
               createdAt: currDate,
               label: theLabel.label,
               compId: fertilizer,
-              qnty: qnty,
+              qnty: qntyPrice,
               desc: ''
             }
           );
 
-          const pComp = components.find(c => c.name === theLabel.label)
+          const pComp = parts.find(p => p.name === theLabel.label)
+          const newQnty = getMult(farm.area, pComp.defQnty)
           const actComp = {
             ...pComp,
-            qntyPrice: comps.qntyPrice,
-            totalPrice: comps.qntyPrice * pComp.price,
+            qntyPrice: newQnty,
+            totalPrice: getMult(newQnty, pComp.price),
+            foreignId: pComp.id,
             type: "a"
           }
+
           setActualComponents([...components.filter(comp => comp.type !== 'p'), actComp]);
           const newCompAct = await addDoc(componentsColl, actComp)
           await updateDoc(newCompAct, { id: newCompAct.id })
@@ -464,9 +469,10 @@ const Activities = ({ route }) => {
               value={fertilizer}
               style={styles.input}
               onChange={item => {
-                const obj = components?.find(obj => obj.name === item.value)
+                const obj = parts?.find(obj => obj.name === item.value)
                 setFertilizer(item.value)
                 setComps(obj)
+                setQntyPrice(getMult(farm.area, obj.defQnty))
                 setBilang((parseInt(farm.plantNumber) - parseInt(farm.ethrel)).toString())
               }}
             />
@@ -489,9 +495,10 @@ const Activities = ({ route }) => {
                 placeholder="0.0"
                 keyboardType="numeric"
                 style={styles.input}
-                value={comps.qntyPrice.toString()}
+                value={qntyPrice.toString()}
                 onChangeText={(e) => {
                   const parsedValue = parseFloat(e) || 0;
+                  setQntyPrice(parsedValue)
                   setComps(prev => ({
                     ...prev,
                     qntyPrice: parsedValue
@@ -502,6 +509,9 @@ const Activities = ({ route }) => {
               <View style={styles.suffixContainer}>
                 <Text style={styles.suffix}>kg</Text>
               </View>
+            </View>
+            <View>
+
             </View>
             <View style={{ display: 'flex', flexDirection: 'row', alignContent: 'center', gap: 2, width: '100%' }}>
               <TouchableOpacity onPress={handleModalClose} style={styles.cancelButton}>
