@@ -18,6 +18,7 @@ import Edit from './component/Edit'
 import { Button } from 'native-base';
 import YieldPredictor from './component/YieldPredictor'
 import { EditProfile } from './component/EditProfile';
+import Timeline from './component/charts/Timeline';
 
 const Stack = createNativeStackNavigator();
 
@@ -147,7 +148,7 @@ const App = () => (
             <Stack.Screen name='Charts' component={Charts} />
             <Stack.Screen name='DataInputs' component={DataInputs} />
             <Stack.Screen name='BottomButton' component={BottomButton} />
-
+            <Stack.Screen name= 'Timeline' component={Timeline}/>
             <Stack.Screen name='Inputs' component={Inputs} />
 
 
