@@ -76,7 +76,7 @@ export const Landing = ({ navigation }) => {
     }
 
     const handleLogout = () => {
-        Alert.alert('Signing Out', 'Are your sure you want to sign out to this account?', [
+        Alert.alert('Signing Out', 'Are you sure you want to sign out to this account?', [
             {
                 text: 'Cancel',
                 onPress: () => console.log('Cancel Pressed'),

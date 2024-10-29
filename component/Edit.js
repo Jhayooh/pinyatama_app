@@ -78,14 +78,14 @@ const Edit = ({ route, navigation }) => {
                             </ScrollView>
                         )}
                     </Tab.Screen>
-                    <Tab.Screen
+                    {/* <Tab.Screen
                         name="Activities"
                         component={Activities}
                         options={{ tabBarLabel: 'Activities' }}
                         initialParams={{
                             farm: farm,
                         }}
-                    />
+                    /> */}
                     {/* <Tab.Screen
                         name="Report"
                         component={Report}

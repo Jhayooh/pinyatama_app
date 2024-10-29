@@ -162,11 +162,16 @@ const Activities = ({ route }) => {
   }
 
   const handleRepPer = (input) => {
-    // Only allow numbers and limit the value to 100
     const numericInput = input.replace(/[^0-9]/g, ''); // Remove non-numeric characters
     if (numericInput <= 100) {
       setReportPer(numericInput);
     }
+    if (value === '0') {
+      Alert.alert('Invalid Input', 'Percentage cannot be 0.');
+    } else {
+      setReportPer(value);
+    }
+
   };
 
   function getPinePrice(pine, pineObject) {
@@ -441,6 +446,30 @@ const Activities = ({ route }) => {
   };
 
 
+  const handleConfirmation = () => {
+    if (!reportTitle || !reportDesc || reportPer === '0' || reportPer === '' || !bilang) {
+      Alert.alert(
+        'Input Needed',
+        'Please fill out missing fields before submitting.'
+      );
+      return;
+    }
+    Alert.alert('Report', 'Are you sure you want to submit this report?',
+      [
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+        {
+          text: 'Yes',
+          onPress: () => handleSave("r")
+        },
+      ]
+    )
+    console.log('reeepooorrtt', handleConfirmation)
+  }
+
   return (
     <View style={styles.container}>
       <View style={{ display: 'flex', gap: 2, flexDirection: 'row', justifyContent: 'space-between', }}>
@@ -486,7 +515,10 @@ const Activities = ({ route }) => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>Add Activity</Text>
-            <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Fertilizer:</Text>
+            <View style={{display:'flex', flexDirection:'row'}}>
+                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Fertilizer:</Text>
+                <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
+              </View>
             <Dropdown
               data={ferti}
               labelField="label"
@@ -505,7 +537,10 @@ const Activities = ({ route }) => {
             {
               fertilizer.toLocaleLowerCase() === "flower inducer (ethrel)" &&
               <View style={styles.quantyContainer}>
-                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Plant Number:</Text>
+                <View style={{display:'flex', flexDirection:'row'}}>
+                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Number of Plants:</Text>
+                <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
+              </View>
                 <TextInput
                   placeholder="Bilang ng tanim"
                   keyboardType="numeric"
@@ -515,7 +550,10 @@ const Activities = ({ route }) => {
                 />
               </View>
             }
-            <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Quantity:</Text>
+            <View style={{display:'flex', flexDirection:'row'}}>
+                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Quantity:</Text>
+                <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
+              </View>
             <View style={styles.quantyContainer}>
               <TextInput
                 placeholder="0.0"
@@ -532,7 +570,6 @@ const Activities = ({ route }) => {
                   }));
                 }
                 }
-
               />
 
               <View style={styles.suffixContainer}>
@@ -540,7 +577,10 @@ const Activities = ({ route }) => {
               </View>
             </View>
             <View>
-              <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Date of Activity:</Text>
+            <View style={{display:'flex', flexDirection:'row'}}>
+                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Date:</Text>
+                <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
+              </View>
               <View style={{ ...styles.quantyContainer, display: 'flex', flexDirection: 'row', marginBottom: 10, }}>
                 <TextInput
                   value={date.toLocaleDateString()}
@@ -596,14 +636,20 @@ const Activities = ({ route }) => {
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>REPORT</Text>
             <View style={styles.quantyContainer}>
-              <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Title:</Text>
+              <View style={{display:'flex', flexDirection:'row'}}>
+                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Title:</Text>
+                <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
+              </View>
               <TextInput
                 // label='Title'
                 // placeholder='Title'
                 onChangeText={(e) => setReportTitle(e)}
                 style={{ ...styles.input, borderColor: bilangError ? 'red' : '#ccc' }}
               />
-              <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Description:</Text>
+                <View style={{display:'flex', flexDirection:'row'}}>
+                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Description:</Text>
+                <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
+              </View>
               <TextInput
                 editable
                 multiline
@@ -613,7 +659,10 @@ const Activities = ({ route }) => {
                 onChangeText={(e) => setReportDesc(e)}
                 style={{ ...styles.input, borderColor: bilangError ? 'red' : '#ccc' }}
               />
-              <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Percentage of Damage:</Text>
+                <View style={{display:'flex', flexDirection:'row'}}>
+                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Percentage of Damage:</Text>
+                <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
+              </View>
               <View style={styles.quantyContainer}>
                 <TextInput
                   placeholder="0"
@@ -626,7 +675,10 @@ const Activities = ({ route }) => {
                   <Text style={styles.suffix}>%</Text>
                 </View>
               </View>
-              <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Date of Report:</Text>
+              <View style={{display:'flex', flexDirection:'row'}}>
+                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Date of Report:</Text>
+                <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
+              </View>
               <View style={{ ...styles.quantyContainer, display: 'flex', flexDirection: 'row', marginBottom: 10, }}>
                 <TextInput
                   value={date.toLocaleDateString()}
@@ -662,7 +714,7 @@ const Activities = ({ route }) => {
               {
                 components && roi &&
                 <TouchableOpacity
-                  onPress={() => handleSave("r")}
+                  onPress={handleConfirmation}
                   style={[styles.ReportButton, saving && { backgroundColor: 'gray' }]}
                   disabled={saving}
                 >
@@ -670,26 +722,21 @@ const Activities = ({ route }) => {
                 </TouchableOpacity>
               }
             </View>
-            <View style={{
+            <TouchableOpacity style={{
               display: 'flex',
-              paddingVertical: 8,
-              paddingHorizontal: 10,
-              flexDirection: "row",
-              justifyContent: "center",
-
+              flexDirection: 'row',
+              alignItems: 'center',
+              padding: 10,
+              borderRadius: 30,
+              borderColor: '#fff',
+              borderWidth: 1,
+              backgroundColor: 'orange',
+              marginTop: 30
             }}>
-              <TouchableOpacity style={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                padding: 10,
-                borderRadius: 30,
-              }}>
-                <Image source={require('../assets/check.png')} style={{ marginLeft: 1 }} />
-                <Text style={styles.cmplt}>Mark as Complete</Text>
-              </TouchableOpacity>
+              <Image source={require('../assets/check.png')} style={{ marginLeft: 1, alignItems: 'center', textAlign: 'center' }} />
+              <Text style={styles.cmplt}>Mark as Complete Farm</Text>
+            </TouchableOpacity>
 
-            </View>
           </View>
         </View>
 
@@ -826,13 +873,12 @@ const styles = StyleSheet.create({
   {
     display: 'flex',
     color: '#fff',
-
-    // borderWidth: 1,
-    //borderColor: '#fff',
+    // fontFamily: 'lucida grande',
     borderRadius: 30,
     width: '100%',
     fontSize: 20,
-    textAlign: 'center'
+    textAlign: 'center',
+    paddingHorizontal: 10
   },
 });
 

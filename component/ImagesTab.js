@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, Modal, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image, Modal, TouchableOpacity, ScrollView } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 
 // db
@@ -128,28 +128,33 @@ const ImagesTab = ({ route }) => {
 
   return (
     <>
-      <View>
-        <View style={styles.screen}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <TouchableOpacity style={styles.button} onPress={() => setShowAddImage(true)}>
-              <Text style={{ color: '#fff', fontSize: 15 }}>Add Image</Text>
-            </TouchableOpacity>
-            {/* <TouchableOpacity style={styles.button} onPress={handleDeleteSelected}>
-              <Text style={{ color: '#fff', fontSize: 15 }}>Delete Image</Text>
-            </TouchableOpacity> */}
-          </View>
-          <View style={styles.container}>
-            {images.map((image, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.imageContainer}
-                onPress={() => handleSelectImage(image.ref)}
-              >
-                <Image source={{ uri: image.src }} style={{ width: '100%', height: '100%' }} />
+        <View style={{ flex: 1, padding: 10 }}>
+          <View style={styles.screen}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <TouchableOpacity style={styles.button} onPress={() => setShowAddImage(true)}>
+                <Text style={{ color: '#fff', fontSize: 15 }}>Add Image</Text>
               </TouchableOpacity>
-            ))}
+              <TouchableOpacity style={{ ...styles.button, backgroundColor: 'red' }}>
+                <Text style={{ color: '#fff', fontSize: 15 }}>Delete Image</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.container}>
+              {images.map((image, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.imageContainer}
+                  onPress={() => handleSelectImage(image.ref)}
+                >
+                  <Image source={{ uri: image.src }} style={{ width: '100%', height: '100%' }} />
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
         </View>
+      <View>
+        <TouchableOpacity style={styles.saveButton}>
+          <Text style={styles.save}>Save</Text>
+        </TouchableOpacity>
       </View>
       <Modal animationType='fade' visible={showAddImage} transparent={true}>
         <View style={styles.addImage}>
@@ -175,9 +180,22 @@ const ImagesTab = ({ route }) => {
 
 const styles = StyleSheet.create({
   screen: {
-    backgroundColor: '#fff',
-    padding: 5,
-    height: '100%',
+    paddingHorizontal: 10,
+    paddingBottom: 14,
+    borderRadius: 12,
+    marginTop: 16,
+    backgroundColor: '#FFF',
+    marginHorizontal: 5,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.20,
+    shadowRadius: 1.41,
+    elevation: 2,
+    marginBottom: 10,
+    height: '95%'
   },
   container: {
     flex: 1,
@@ -225,6 +243,29 @@ const styles = StyleSheet.create({
     elevation: 5,
     margin: 10,
   },
+  saveButton: {
+    backgroundColor: '#52be80',
+    borderRadius: 8,
+    padding: 12,
+    alignSelf: 'flex-end',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    margin: 10,
+    paddingHorizontal: 50,
+    marginHorizontal: 16,
+    marginTop: 10
+  },
+  save: {
+    color: '#fff',
+    fontSize: 20,
+  }
+
 });
 
 export default ImagesTab;

@@ -19,6 +19,7 @@ import { Button } from 'native-base';
 import YieldPredictor from './component/YieldPredictor'
 import { EditProfile } from './component/EditProfile';
 import Timeline from './component/charts/Timeline';
+import Activities from './component/Activities';
 
 const Stack = createNativeStackNavigator();
 
@@ -48,7 +49,7 @@ const App = () => (
                 name='Edit'
                 component={Edit}
                 options={{
-                    title: 'Edit',
+                    title: 'Edit Inputs',
                     headerTintColor: '#E8E7E7',
                     headerBackTitleVisible: false,
                     headerStyle: {
@@ -145,10 +146,23 @@ const App = () => (
                 }}
             />
 
+            <Stack.Screen
+                name='Activities'
+                component={Activities}
+                options={{
+                    title: 'Add Activities',
+                    headerTintColor: '#E8E7E7',
+                    headerBackTitleVisible: false,
+                    headerStyle: {
+                        backgroundColor: '#4DAF50',
+                    }
+                }}
+            />
+
             <Stack.Screen name='Charts' component={Charts} />
             <Stack.Screen name='DataInputs' component={DataInputs} />
             <Stack.Screen name='BottomButton' component={BottomButton} />
-            <Stack.Screen name= 'Timeline' component={Timeline}/>
+            <Stack.Screen name='Timeline' component={Timeline} />
             <Stack.Screen name='Inputs' component={Inputs} />
 
 
