@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Alert, Image } from 'react-native';
 import StepIndicator from 'react-native-step-indicator';
 import { Dropdown } from 'react-native-element-dropdown';
 import moment from 'moment';
 import { addDoc, collection, query, orderBy, onSnapshot, Timestamp, updateDoc, doc } from 'firebase/firestore'; // added onSnapshot
 import { db } from '../firebase/Config';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import { LinearGradient } from 'expo-linear-gradient';
+
 
 const ferti = [
   { label: "Ammophos (16-20-0)", value: "Ammophos (16-20-0)" },
@@ -54,6 +57,7 @@ const Activities = ({ route }) => {
   const [bilang, setBilang] = useState(0)
   const [qntyPrice, setQntyPrice] = useState(0)
 
+
   const [laborMaterial, setLaborMaterial] = useState(null)
   const [actualComponents, setActualComponents] = useState(null)
 
@@ -64,6 +68,9 @@ const Activities = ({ route }) => {
   const [reportPer, setReportPer] = useState(0)
 
   const [bilangError, setBilangError] = useState(false)
+
+  const [startPicker, setStartPicker] = useState(false);
+  const [date, setDate] = useState(new Date())
 
   const [alert, setAlert] = useState({ visible: false, message: '', severity: '' });
 
@@ -213,7 +220,7 @@ const Activities = ({ route }) => {
   const handleSave = async (act) => {
     setSaving(true);
     try {
-      const currDate = new Date();
+      const currDate = date;
       if (act === "r") {
         await addDoc(activityColl,
           {
@@ -415,6 +422,23 @@ const Activities = ({ route }) => {
     labelSize: 13,
     currentStepLabelColor: '#fe7013',
   };
+  const renderStepIndicator = ({ position, stepStatus }) => {
+    if (position === 0 && stepStatus === 'finished') {
+      return <Image source={require('../assets/pineapple.png')} width={10} />;
+    }
+
+    // Default indicator for other steps
+    return (
+      <View
+        style={{
+          width: 20,
+          height: 20,
+          borderRadius: 10,
+          //backgroundColor: stepStatus === 'current' ? '#fe7013' : '#aaaaaa',
+        }}
+      />
+    );
+  };
 
 
   return (
@@ -427,6 +451,7 @@ const Activities = ({ route }) => {
           <Text style={styles.addButtonText}>Add Report</Text>
         </TouchableOpacity>
       </View>
+
       {dynamicSteps.length > 0 ? (
         <View style={styles.stepContainer}>
           <View style={{ flex: 1 }}>
@@ -436,6 +461,7 @@ const Activities = ({ route }) => {
               stepCount={dynamicSteps.length}
               labels={dynamicSteps.map(step => step.text)}
               direction="vertical"
+              renderStepIndicator={renderStepIndicator}
             />
           </View>
           <View style={styles.dateColumn}>
@@ -498,19 +524,52 @@ const Activities = ({ route }) => {
                 value={qntyPrice.toString()}
                 onChangeText={(e) => {
                   const parsedValue = parseFloat(e) || 0;
+<<<<<<< Updated upstream
                   setQntyPrice(parsedValue)
+=======
+                  console.log("theeee whatt???", parsedValue)
+>>>>>>> Stashed changes
                   setComps(prev => ({
                     ...prev,
                     qntyPrice: parsedValue
                   }));
                 }
                 }
+
               />
+
               <View style={styles.suffixContainer}>
                 <Text style={styles.suffix}>kg</Text>
               </View>
             </View>
+<<<<<<< Updated upstream
             <View>
+=======
+            <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Date of Activity:</Text>
+            <View style={{ ...styles.quantyContainer, display: 'flex', flexDirection: 'row', marginBottom: 10, }}>
+              <TextInput
+                value={date.toLocaleDateString()}
+                editable={false}
+                style={{ ...styles.input, width: '80%', borderBottomRightRadius: 0, borderTopRightRadius: 0 }}
+              />
+              <TouchableOpacity onPress={() => setStartPicker(true)}
+                style={{ ...styles.input, width: '20%', borderBottomLeftRadius: 0, borderTopLeftRadius: 0, paddingHorizontal: 22, paddingVertical: 0, justifyContent: 'center' }}
+              >
+                <Image source={require('../assets/calender.png')} />
+              </TouchableOpacity>
+
+              <DateTimePickerModal
+                isVisible={startPicker}
+                mode="date"
+                maximumDate={new Date()}
+                onConfirm={(date) => {
+                  setDate(date);
+                  setStartPicker(false);
+                }}
+                onCancel={() => setStartPicker(false)}
+                style={{ marginBottom: 10 }}
+              />
+>>>>>>> Stashed changes
 
             </View>
             <View style={{ display: 'flex', flexDirection: 'row', alignContent: 'center', gap: 2, width: '100%' }}>
@@ -572,7 +631,35 @@ const Activities = ({ route }) => {
                   <Text style={styles.suffix}>%</Text>
                 </View>
               </View>
+              <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Date of Report:</Text>
+              <View style={{ ...styles.quantyContainer, display: 'flex', flexDirection: 'row', marginBottom: 10, }}>
+                <TextInput
+                  value={date.toLocaleDateString()}
+                  editable={false}
+                  style={{ ...styles.input, width: '80%', borderBottomRightRadius: 0, borderTopRightRadius: 0 }}
+                />
+                <TouchableOpacity onPress={() => setStartPicker(true)}
+                  style={{ ...styles.input, width: '20%', borderBottomLeftRadius: 0, borderTopLeftRadius: 0, paddingHorizontal: 22, paddingVertical: 0, justifyContent: 'center' }}
+                >
+                  <Image source={require('../assets/calender.png')} style={{}} />
+                </TouchableOpacity>
+
+                <DateTimePickerModal
+                  isVisible={startPicker}
+                  mode="date"
+                  maximumDate={new Date()}
+                  onConfirm={(date) => {
+                    setDate(date);
+                    setStartPicker(false);
+                  }}
+                  onCancel={() => setStartPicker(false)}
+                  style={{ marginBottom: 10 }}
+                />
+
+              </View>
+
             </View>
+
             <View style={{ display: 'flex', flexDirection: 'row', alignContent: 'center', gap: 2, width: '100%' }}>
               <TouchableOpacity onPress={handleModalClose} style={styles.cancelButton2}>
                 <Text style={styles.cancelButtonText}>Cancel</Text>
@@ -587,6 +674,32 @@ const Activities = ({ route }) => {
                   <Text style={styles.saveButtonText}>{saving ? 'Saving...' : 'Report'}</Text>
                 </TouchableOpacity>
               }
+            </View>
+            <View style={{
+              display: 'flex', 
+              paddingVertical: 8,
+              paddingHorizontal: 10,
+              flexDirection: "row",
+              justifyContent: "center",
+
+            }}>
+              <LinearGradient>
+                colors={['#93d6b0', '#3b5998', '#192f6a']}
+                <TouchableOpacity style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  padding: 10,
+                  borderRadius: 30,
+                  linear
+
+
+                }}>
+                  <Image source={require('../assets/check.png')} style={{ marginLeft: 1 }} />
+                  <Text style={styles.cmplt}>Mark as Complete</Text>
+                </TouchableOpacity>
+              </LinearGradient>
+
             </View>
           </View>
         </View>
@@ -701,6 +814,36 @@ const styles = StyleSheet.create({
   },
   suffix: {
     fontSize: 16,
+  },
+  button: {
+    // backgroundColor: '#4DAF50',
+    alignItems: 'center',
+    // padding: 12,
+    borderRadius: 5,
+  },
+  textInputFocus: {
+    flex: 1,
+    height: 46,
+    opacity: 1.0,
+    borderColor: '#ccc',
+    borderWidth: 1.6,
+    borderRadius: 5,
+    paddingHorizontal: 18,
+    // color: '#3C3C3B',
+    fontSize: 16,
+
+  },
+  cmplt:
+  {
+    display: 'flex',
+    color: '#fff',
+
+    // borderWidth: 1,
+    //borderColor: '#fff',
+    borderRadius: 30,
+    width: '100%',
+    fontSize: 20,
+    textAlign: 'center'
   },
 });
 

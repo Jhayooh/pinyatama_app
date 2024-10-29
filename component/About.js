@@ -25,7 +25,7 @@ const About = () => {
                             <Text style={styles.innerText}>
                                 ay isang makabagong digital na solusyon
                                 na dinisenyo upang tugunan ang problema ng over at under supply ng
-                                pinya sa bayan ng Daet, Camarines Norte. Layunin ng app na ito na makatulong
+                                pinya sa probinsya ng  Camarines Norte. Layunin ng app na ito na makatulong
                                 sa mga lokal na magsasaka ng pinya sa pamamagitan ng pagbibigay ng detalyadong
                                 impormasyon na makatutulong sa mas mahusay na pamamahala ng kanilang sakahan.
                                 Sa loob ng app, makikita ang iskedyul ng pagtatanim at pag-ani ng bawat sakahan,
