@@ -524,11 +524,8 @@ const Activities = ({ route }) => {
                 value={qntyPrice.toString()}
                 onChangeText={(e) => {
                   const parsedValue = parseFloat(e) || 0;
-<<<<<<< Updated upstream
                   setQntyPrice(parsedValue)
-=======
                   console.log("theeee whatt???", parsedValue)
->>>>>>> Stashed changes
                   setComps(prev => ({
                     ...prev,
                     qntyPrice: parsedValue
@@ -542,50 +539,48 @@ const Activities = ({ route }) => {
                 <Text style={styles.suffix}>kg</Text>
               </View>
             </View>
-<<<<<<< Updated upstream
             <View>
-=======
-            <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Date of Activity:</Text>
-            <View style={{ ...styles.quantyContainer, display: 'flex', flexDirection: 'row', marginBottom: 10, }}>
-              <TextInput
-                value={date.toLocaleDateString()}
-                editable={false}
-                style={{ ...styles.input, width: '80%', borderBottomRightRadius: 0, borderTopRightRadius: 0 }}
-              />
-              <TouchableOpacity onPress={() => setStartPicker(true)}
-                style={{ ...styles.input, width: '20%', borderBottomLeftRadius: 0, borderTopLeftRadius: 0, paddingHorizontal: 22, paddingVertical: 0, justifyContent: 'center' }}
-              >
-                <Image source={require('../assets/calender.png')} />
-              </TouchableOpacity>
-
-              <DateTimePickerModal
-                isVisible={startPicker}
-                mode="date"
-                maximumDate={new Date()}
-                onConfirm={(date) => {
-                  setDate(date);
-                  setStartPicker(false);
-                }}
-                onCancel={() => setStartPicker(false)}
-                style={{ marginBottom: 10 }}
-              />
->>>>>>> Stashed changes
-
-            </View>
-            <View style={{ display: 'flex', flexDirection: 'row', alignContent: 'center', gap: 2, width: '100%' }}>
-              <TouchableOpacity onPress={handleModalClose} style={styles.cancelButton}>
-                <Text style={styles.cancelButtonText}>Cancel</Text>
-              </TouchableOpacity>
-              {
-                components && roi &&
-                <TouchableOpacity
-                  onPress={() => handleSave("a")}
-                  style={[styles.saveButton, saving || bilangError && { backgroundColor: 'gray' }]}
-                  disabled={saving || bilangError}
+              <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Date of Activity:</Text>
+              <View style={{ ...styles.quantyContainer, display: 'flex', flexDirection: 'row', marginBottom: 10, }}>
+                <TextInput
+                  value={date.toLocaleDateString()}
+                  editable={false}
+                  style={{ ...styles.input, width: '80%', borderBottomRightRadius: 0, borderTopRightRadius: 0 }}
+                />
+                <TouchableOpacity onPress={() => setStartPicker(true)}
+                  style={{ ...styles.input, width: '20%', borderBottomLeftRadius: 0, borderTopLeftRadius: 0, paddingHorizontal: 22, paddingVertical: 0, justifyContent: 'center' }}
                 >
-                  <Text style={styles.saveButtonText}>{saving ? 'Saving...' : 'Save'}</Text>
+                  <Image source={require('../assets/calender.png')} />
                 </TouchableOpacity>
-              }
+
+                <DateTimePickerModal
+                  isVisible={startPicker}
+                  mode="date"
+                  maximumDate={new Date()}
+                  onConfirm={(date) => {
+                    setDate(date);
+                    setStartPicker(false);
+                  }}
+                  onCancel={() => setStartPicker(false)}
+                  style={{ marginBottom: 10 }}
+                />
+
+              </View>
+              <View style={{ display: 'flex', flexDirection: 'row', alignContent: 'center', gap: 2, width: '100%' }}>
+                <TouchableOpacity onPress={handleModalClose} style={styles.cancelButton}>
+                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                </TouchableOpacity>
+                {
+                  components && roi &&
+                  <TouchableOpacity
+                    onPress={() => handleSave("a")}
+                    style={[styles.saveButton, saving || bilangError && { backgroundColor: 'gray' }]}
+                    disabled={saving || bilangError}
+                  >
+                    <Text style={styles.saveButtonText}>{saving ? 'Saving...' : 'Save'}</Text>
+                  </TouchableOpacity>
+                }
+              </View>
             </View>
           </View>
         </View>
@@ -676,29 +671,23 @@ const Activities = ({ route }) => {
               }
             </View>
             <View style={{
-              display: 'flex', 
+              display: 'flex',
               paddingVertical: 8,
               paddingHorizontal: 10,
               flexDirection: "row",
               justifyContent: "center",
 
             }}>
-              <LinearGradient>
-                colors={['#93d6b0', '#3b5998', '#192f6a']}
-                <TouchableOpacity style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  padding: 10,
-                  borderRadius: 30,
-                  linear
-
-
-                }}>
-                  <Image source={require('../assets/check.png')} style={{ marginLeft: 1 }} />
-                  <Text style={styles.cmplt}>Mark as Complete</Text>
-                </TouchableOpacity>
-              </LinearGradient>
+              <TouchableOpacity style={{
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                padding: 10,
+                borderRadius: 30,
+              }}>
+                <Image source={require('../assets/check.png')} style={{ marginLeft: 1 }} />
+                <Text style={styles.cmplt}>Mark as Complete</Text>
+              </TouchableOpacity>
 
             </View>
           </View>
