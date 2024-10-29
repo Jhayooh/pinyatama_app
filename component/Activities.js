@@ -52,6 +52,7 @@ const Activities = ({ route }) => {
   const [saving, setSaving] = useState(false);
   const [events, setEvents] = useState(null)
   const [bilang, setBilang] = useState(0)
+  const [qntyPrice, setQntyPrice] = useState(0)
 
   const [laborMaterial, setLaborMaterial] = useState(null)
   const [actualComponents, setActualComponents] = useState(null)
@@ -103,6 +104,7 @@ const Activities = ({ route }) => {
       setBilangError(false)
     }
     setBilang(e)
+    setQntyPrice(getMult((e / 30000), comps.defQnty))
     setComps(prev => ({
       ...prev,
       qntyPrice: getMult((e / 30000), prev.defQnty)
@@ -112,6 +114,7 @@ const Activities = ({ route }) => {
   const handleModalClose = () => {
     setFertilizer('')
     setComps({ qntyPrice: 0, foreignId: '' })
+    setQntyPrice(0)
     setBilang(0)
     setIsAdd(false);
     setReport(false);
@@ -167,8 +170,6 @@ const Activities = ({ route }) => {
   useEffect(() => {
     async function calculateAndSaveData() {
       if (!actualComponents) return;
-
-      console.log("actualComponent", actualComponents);
       const actualRoi = roi.find(r => r.type === 'a');
 
       // LABOR MATERIAL
@@ -181,8 +182,6 @@ const Activities = ({ route }) => {
       const totalFertilizer = actualComponents
         .filter(item => item.parent.toLowerCase() === "fertilizer")
         .reduce((sum, item) => sum + item.totalPrice, 0);
-
-      console.log("arjay macalinao", totalFertilizer);
 
       // ROI
       const grossReturn = actualRoi.grossReturn * getPinePrice('good size', localPine) + actualRoi.butterBall * getPinePrice('butterball', localPine);
@@ -229,10 +228,10 @@ const Activities = ({ route }) => {
       } else {
         const theLabel = ferti.find(obj => obj.value === fertilizer);
         const qnty = comps.qntyPrice;
+        let newHarvest = null
         if (theLabel.label.toLowerCase() === "flower inducer (ethrel)" && events) {
           const vege_event = events.find(p => p.className === 'vegetative');
           const date_diff = currDate - vege_event.end_time.toDate();
-
           if (farm.plantNumber - farm.ethrel === 0) {
             setSaving(false);
             handleModalClose();
@@ -291,13 +290,12 @@ const Activities = ({ route }) => {
                   createdAt: currDate,
                 });
                 await updateDoc(fruEvent, { id: fruEvent.id });
+                newHarvest = e.end_time
                 break;
               default:
                 break;
             }
           }
-          // Update farm with ethrel count
-          console.log("the billaaannggg", bilang)
           await updateDoc(doc(db, `farms/${farm.id}`), {
             isEthrel: currDate,
             ethrel: farm.ethrel + parseInt(bilang),
@@ -308,21 +306,34 @@ const Activities = ({ route }) => {
               createdAt: currDate,
               label: theLabel.label,
               compId: fertilizer,
-              qnty: qnty,
+              qnty: qntyPrice,
               desc: ''
             }
           );
 
-          const pComp = components.find(c => c.name === theLabel.label)
+          const pComp = parts.find(c => c.name === theLabel.label)
+          const newQnty = getMult(farm.area, pComp.defQnty)
           const actComp = {
             ...pComp,
-            qntyPrice: comps.qntyPrice,
-            totalPrice: comps.qntyPrice * pComp.price,
+            qntyPrice: newQnty,
+            totalPrice: getMult(newQnty, pComp.price),
+            foreignId: pComp.id,
             type: "a"
           }
           setActualComponents([...components.filter(comp => comp.type !== 'p'), actComp]);
           const newCompAct = await addDoc(componentsColl, actComp)
           await updateDoc(newCompAct, { id: newCompAct.id })
+
+          if (e.length > 3 && newHarvest > new Date(farm.harvest_date.toDate())) {
+            await updateDoc(doc(db, `farms/${farm.id}`), {
+              harvest_date: newHarvest,
+            });
+          } else if (e.length <= 3) {
+            await updateDoc(doc(db, `farms/${farm.id}`), {
+              harvest_date: newHarvest,
+            });
+          }
+
           setSaving(false);
           setAlert({
             visible: true,
@@ -339,18 +350,21 @@ const Activities = ({ route }) => {
               createdAt: currDate,
               label: theLabel.label,
               compId: fertilizer,
-              qnty: qnty,
+              qnty: qntyPrice,
               desc: ''
             }
           );
 
-          const pComp = components.find(c => c.name === theLabel.label)
+          const pComp = parts.find(p => p.name === theLabel.label)
+          const newQnty = getMult(farm.area, pComp.defQnty)
           const actComp = {
             ...pComp,
-            qntyPrice: comps.qntyPrice,
-            totalPrice: comps.qntyPrice * pComp.price,
+            qntyPrice: newQnty,
+            totalPrice: getMult(newQnty, pComp.price),
+            foreignId: pComp.id,
             type: "a"
           }
+
           setActualComponents([...components.filter(comp => comp.type !== 'p'), actComp]);
           const newCompAct = await addDoc(componentsColl, actComp)
           await updateDoc(newCompAct, { id: newCompAct.id })
@@ -455,16 +469,17 @@ const Activities = ({ route }) => {
               value={fertilizer}
               style={styles.input}
               onChange={item => {
-                const obj = components?.find(obj => obj.name === item.value)
+                const obj = parts?.find(obj => obj.name === item.value)
                 setFertilizer(item.value)
                 setComps(obj)
+                setQntyPrice(getMult(farm.area, obj.defQnty))
                 setBilang((parseInt(farm.plantNumber) - parseInt(farm.ethrel)).toString())
               }}
             />
             {
               fertilizer.toLocaleLowerCase() === "flower inducer (ethrel)" &&
               <View style={styles.quantyContainer}>
-                 <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Plant Number:</Text>
+                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Plant Number:</Text>
                 <TextInput
                   placeholder="Bilang ng tanim"
                   keyboardType="numeric"
@@ -480,10 +495,10 @@ const Activities = ({ route }) => {
                 placeholder="0.0"
                 keyboardType="numeric"
                 style={styles.input}
-                value={comps.qntyPrice.toString()}
+                value={qntyPrice.toString()}
                 onChangeText={(e) => {
-                  const parsedValue = parseFloat(e) || 0;  // Handle NaN when input is empty or invalid
-                  console.log("theeee whatt???", parsedValue)
+                  const parsedValue = parseFloat(e) || 0;
+                  setQntyPrice(parsedValue)
                   setComps(prev => ({
                     ...prev,
                     qntyPrice: parsedValue
@@ -494,6 +509,9 @@ const Activities = ({ route }) => {
               <View style={styles.suffixContainer}>
                 <Text style={styles.suffix}>kg</Text>
               </View>
+            </View>
+            <View>
+
             </View>
             <View style={{ display: 'flex', flexDirection: 'row', alignContent: 'center', gap: 2, width: '100%' }}>
               <TouchableOpacity onPress={handleModalClose} style={styles.cancelButton}>
