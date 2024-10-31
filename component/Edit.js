@@ -24,20 +24,6 @@ const Edit = ({ route, navigation }) => {
     const quertyPine = collection(db, 'pineapple');
     const [qPine, lPine, ePine] = useCollectionData(quertyPine)
 
-    // React.useEffect(() => {
-    //     navigation.setOptions({
-    //         headerRight: () => (
-    //             <TouchableOpacity
-    //                 title='Save'>
-    //                 <View style={{ display: 'flex', justifyContent: 'space-between', flexDirection: 'row', gap: 1 }}>
-    //                     {/* <Image source={require('../assets/edit.png')} style={{ width: 20, height: 20 }} /> */}
-    //                     <Text style={{ color: 'white', fontSize: 20 }}>Save</Text>
-    //                 </View>
-    //             </TouchableOpacity>
-    //         )
-    //     })
-    // })
-
     return (
         <>
             {
@@ -73,24 +59,17 @@ const Edit = ({ route, navigation }) => {
                         options={{ tabBarLabel: 'Cost and Return' }}
                     >
                         {() => (
-                            <ScrollView>
-                                {qPine && <TableBuilder components={comp} area={farm.area} setRoiDetails={setRoiDetails} pineapple={qPine} setComponents={setComp} soil={farm.soil} />}
-                            </ScrollView>
+                            <View style={{padding:10, backgroundColor:'#fff'}}>
+                                <ScrollView style={{ height: '90%' }}>
+                                    {qPine && <TableBuilder components={comp} area={farm.area} setRoiDetails={setRoiDetails} pineapple={qPine} setComponents={setComp} soil={farm.soil} />}
+                                </ScrollView>
+                                <TouchableOpacity style={styles.saveButton}>
+                                    <Text style={styles.save}>Save</Text>
+                                </TouchableOpacity>
+                            </View>
                         )}
                     </Tab.Screen>
-                    {/* <Tab.Screen
-                        name="Activities"
-                        component={Activities}
-                        options={{ tabBarLabel: 'Activities' }}
-                        initialParams={{
-                            farm: farm,
-                        }}
-                    /> */}
-                    {/* <Tab.Screen
-                        name="Report"
-                        component={Report}
-                        options={{ tabBarLabel: 'Report' }}
-                    /> */}
+
                 </Tab.Navigator>
             }
         </>
@@ -98,3 +77,27 @@ const Edit = ({ route, navigation }) => {
 }
 
 export default Edit;
+
+const styles = StyleSheet.create({
+    saveButton: {
+        backgroundColor: '#52be80',
+        borderRadius: 8,
+        padding: 12,
+        alignSelf: 'flex-end',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+        margin: 10,
+        paddingHorizontal: 50,
+        marginHorizontal: 16,
+    },
+    save: {
+        color: '#fff',
+        fontSize: 20,
+    }
+})

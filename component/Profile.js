@@ -51,17 +51,17 @@ export default function Profile({ route, navigation }) {
                             <View style={{ flex: 1, flexDirection: 'column', marginRight: 5, marginBottom: 20 }}>
                                 <Text style={styles.supText}>Barangay</Text>
                                 <TextInput
-                                    editable
+                                    editable={false}
                                     placeholder={farm.brgy}
-                                    style={{ ...styles.textInput, width: '100%', borderColor: 'green' }}
+                                    style={{ ...styles.textInput, width: '100%'}}
                                 />
                             </View>
                             <View style={{ flex: 1, flexDirection: 'column', marginLeft: 5, marginBottom: 20 }}>
                                 <Text style={styles.supText}>Municipality</Text>
                                 <TextInput
-                                    editable
+                                    editable={false}
                                     placeholder={farm.mun}
-                                    style={{ ...styles.textInput, width: '100%', borderColor: 'green' }}
+                                    style={{ ...styles.textInput, width: '100%' }}
                                 />
                             </View>
                         </View>
@@ -69,17 +69,17 @@ export default function Profile({ route, navigation }) {
                             <View style={{ flex: 1, flexDirection: 'column', marginRight: 5, marginBottom: 20 }}>
                                 <Text style={styles.supText}>Bilang ng Tanim</Text>
                                 <TextInput
-                                    editable
+                                    editable={false}
                                     placeholder={farm.plantNumber}
-                                    style={{ ...styles.textInput, width: '100%', borderColor: 'green' }}
+                                    style={{ ...styles.textInput, width: '100%'}}
                                 />
                             </View>
                             <View style={{ flex: 1, flexDirection: 'column', marginLeft: 5, marginBottom: 20 }}>
                                 <Text style={styles.supText}>Land Area</Text>
                                 <TextInput
-                                    editable
+                                    editable={false}
                                     placeholder={farm.area}
-                                    style={{ ...styles.textInput, width: '100%', borderColor: 'green' }}
+                                    style={{ ...styles.textInput, width: '100%'}}
                                 />
                             </View>
                         </View>
@@ -87,17 +87,17 @@ export default function Profile({ route, navigation }) {
                             <View style={{ flex: 1, flexDirection: 'column', marginRight: 5, marginBottom: 20 }}>
                                 <Text style={styles.supText}>Klase ng Lupa</Text>
                                 <TextInput
-                                    editable
+                                    editable={false}
                                     placeholder={farm.soil}
-                                    style={{ ...styles.textInput, borderColor: 'green' }}
+                                    style={{ ...styles.textInput}}
                                 />
                             </View>
                             <View style={{ flex: 1, flexDirection: 'column', marginLeft: 5, marginBottom: 20 }}>
                                 <Text style={styles.supText}>NPK</Text>
                                 <TextInput
-                                    editable
+                                    editable={false}
                                     placeholder={farm.npk}
-                                    style={{ ...styles.textInput, width: '100%', borderColor: 'green' }}
+                                    style={{ ...styles.textInput, width: '100%' }}
                                 />
                             </View>
 

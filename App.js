@@ -20,6 +20,8 @@ import YieldPredictor from './component/YieldPredictor'
 import { EditProfile } from './component/EditProfile';
 import Timeline from './component/charts/Timeline';
 import Activities from './component/Activities';
+import ImagesTab from './component/ImagesTab';
+import Profile from './component/Profile';
 
 const Stack = createNativeStackNavigator();
 
@@ -158,6 +160,30 @@ const App = () => (
                     }
                 }}
             />
+            <Stack.Screen
+                name='Images'
+                component={ImagesTab}
+                options={{
+                    title: 'Add Farm Images',
+                    headerTintColor: '#E8E7E7',
+                    headerBackTitleVisible: false,
+                    headerStyle: {
+                        backgroundColor: '#4DAF50',
+                    }
+                }}
+            />      
+            <Stack.Screen
+            name='Profile'
+            component={Profile}
+            options={{
+                title: 'Edit Farm Details',
+                headerTintColor: '#E8E7E7',
+                headerBackTitleVisible: false,
+                headerStyle: {
+                    backgroundColor: '#4DAF50',
+                }
+            }}
+        />
 
             <Stack.Screen name='Charts' component={Charts} />
             <Stack.Screen name='DataInputs' component={DataInputs} />

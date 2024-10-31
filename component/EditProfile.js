@@ -11,18 +11,18 @@ import {
     Alert
 } from "react-native";
 import * as ImagePicker from 'expo-image-picker';
-import { updateDoc, doc, deleteDoc, getDoc} from 'firebase/firestore';
-import { db } from "../firebase/Config";
+import { updateDoc, doc, deleteDoc, getDoc } from 'firebase/firestore';
+import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage'
+import { db, storage } from "../firebase/Config";
 
 //icon
 import edit from '../assets/edit-text.png';
-import { Button } from "native-base";
 
 export const EditProfile = ({ navigation, route }) => {
     const { logUser } = route.params;
     logUser && console.log("loguserrrrrr", logUser);
     const [showAddImage, setShowAddImage] = useState(false);
-    
+
     //user details
     const [photoURL, setphotoURL] = useState(null);
     const [displayName, setDisplayName] = useState('');
@@ -33,10 +33,15 @@ export const EditProfile = ({ navigation, route }) => {
     const [password, setPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [userId, setUserId] = useState('')
+
+    const [currentUser, setCurrentUser] = useState({});
 
     useEffect(() => {
         if (!logUser) return;
         const lu = logUser;
+        setCurrentUser(lu)
+        setUserId(lu.id)
         setphotoURL(lu.photoURL || null);
         setDisplayName(lu.displayName);
         setFirstname(lu.firstname);
@@ -61,47 +66,84 @@ export const EditProfile = ({ navigation, route }) => {
         return true;
     };
 
+    const uploadImages = async (docRef) => {
+        try {
+            const response = await fetch(photoURL);
+            const blob = await response.blob();
+
+            const storageRef = ref(storage, `ProfileImages/${docRef.id}`);
+            const uploadTask = uploadBytesResumable(storageRef, blob);
+            console.log("the uploadTask", uploadTask);            
+
+            uploadTask.on('state_changed',
+                (snapshot) => {
+                    // Handle progress
+                },
+                (error) => {
+                    console.error("Error uploading image: ", error);
+                },
+                () => {
+                    // Upload completed successfully, get download URL
+                    getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
+                        console.log("new profile", uploadTask);
+                        
+                        await updateDoc(docRef, {
+                            uid: docRef.id,
+                            photoURL: downloadURL
+                        })
+                    }).then(
+                    ).catch((error) => {
+                        console.error("Error getting download URL: ", error);
+                    });
+                }
+            );
+        } catch (error) {
+            console.error("Error uploading image: ", error);
+        }
+    };
+
     const saveProfile = async () => {
+        if (
+            photoURL === currentUser.photoURL &&
+            displayName === currentUser.displayName &&
+            firstname === currentUser.firstname &&
+            lastname === currentUser.lastname &&
+            phoneNumber === currentUser.phoneNumber &&
+            email === currentUser.email
+        ) {
+            Alert.alert('Error', 'Walang pagbabago sa iyong impormasyon')
+            return
+        }
         if (!logUser || !logUser.id) {
             Alert.alert('Error', 'User not found or document ID is missing.');
             console.log('ussseeerrr', logUser.id)
             return;
         }
-    
+
         try {
-            const userDocRef = doc(db, 'users', logUser.id);
-    
-            // Check if document exists before attempting update
-            const docSnapshot = await getDoc(userDocRef);
-            if (!docSnapshot.exists()) {
-                Alert.alert('Error', 'No user profile found to update.');
-                return;
-            }
-    
-            // Prepare the updated profile data
+            const userDocRef = doc(db, 'users', logUser.uid);
             const updates = {
-                photoURL: photoURL,
                 displayName: displayName,
                 firstname: firstname,
                 lastname: lastname,
                 phoneNumber: phoneNumber,
                 email: email
             };
-    
             if (newPassword && validatePasswords()) {
                 updates.password = newPassword;
             }
-    
-            // Proceed with the update
             await updateDoc(userDocRef, updates);
-            Alert.alert('Success', 'Profile updated successfully!');
-            navigation.goBack();
+            await uploadImages(userDocRef)
+            Alert.alert('Success', 'Profile updated successfully!', [
+                { text: 'OK', onPress: () => navigation.goBack() }
+            ]);
+
         } catch (e) {
             console.log('Error while updating profile:', e);
             Alert.alert('Error', 'Failed to update profile.');
         }
     };
-    
+
 
     const deleteAccount = async () => {
         try {
@@ -124,6 +166,7 @@ export const EditProfile = ({ navigation, route }) => {
 
             if (!result.canceled) {
                 setphotoURL(result.assets[0].uri);
+                setShowAddImage(!showAddImage)
             }
         } catch (e) {
             console.log(e);
@@ -140,6 +183,7 @@ export const EditProfile = ({ navigation, route }) => {
 
             if (!result.canceled) {
                 setphotoURL(result.assets[0].uri);
+                setShowAddImage(!showAddImage)
             }
         } catch (e) {
             console.log(e);

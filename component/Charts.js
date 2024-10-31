@@ -23,28 +23,21 @@ import dayjs from 'dayjs'
 
 
 
-const Charts = ({ farms }) => {
-    const farm = farms[0]
-    console.log('this is the farms from chart', farm);
-
-
+const Charts = ({ farm }) => {
     const componentColl = collection(db, `farms/${farm.id}/components`)
     const [compData, compLoading, compError] = useCollectionData(componentColl)
-
-    const roiColl = collection(db, `farms/${farm.id}/roi`)
-    const [roiData, roiLoading, roiError] = useCollectionData(roiColl)
 
     const pineappleColl = collection(db, 'pineapple')
     const [pineData, pineLoading, pineError] = useCollectionData(pineappleColl)
 
     const eventsColl = collection(db, `farms/${farm.id}/events`)
-    const [eventsData] = useCollectionData(eventsColl)
+    const [eventsData, eventsLoading] = useCollectionData(eventsColl)
 
 
-    const [partTotal, setPartTotal] = useState([])
-    const [pineTotal, setPineTotal] = useState([])
-    const [netReturn, setNetReturn] = useState([])
-    const [newRoi, setNewRoi] = useState({})
+    const [partTotal, setPartTotal] = useState(null)
+    const [pineTotal, setPineTotal] = useState(null)
+    const [netReturn, setNetReturn] = useState(null)
+    const [newRoi, setNewRoi] = useState(null)
 
     function getPinePrice(pine, pineObject) {
         const newPine = pineObject.filter(thePine => thePine.name.toLowerCase() === pine.toLowerCase())[0]
@@ -57,19 +50,23 @@ const Charts = ({ farms }) => {
     }
 
     useEffect(() => {
-        if (!roiData || !pineData) return
+        if (!pineData && !farm) return
+        const roiWithS = farm.roi
+        console.log("roiWithS", roiWithS);
+        
+        const roi = roiWithS.length > 1 ? roiWithS.find(item => item.type === 'a') : roiWithS.find(item => item.type === 'p');
 
         setNewRoi([
             {
                 name: 'ROI',
-                sum: roiData[0].netReturn,
+                sum: roi.netReturn,
                 color: '#F7BF0B',
                 legendFontColor: "#7F7F7F",
                 legendFontSize: 16
             },
             {
                 name: 'Gastos',
-                sum: roiData[0].materialTotal + roiData[0].laborTotal,
+                sum: roi.materialTotal + roi.laborTotal,
                 color: '#40A040',
                 legendFontColor: "#7F7F7F",
                 legendFontSize: 16
@@ -78,21 +75,21 @@ const Charts = ({ farms }) => {
         setPartTotal([
             {
                 name: 'Material',
-                sum: roiData[0].materialTotal - roiData[0].fertilizerTotal,
+                sum: roi.materialTotal - roi.fertilizerTotal,
                 color: '#F7BF0B',
                 legendFontColor: "#7F7F7F",
                 legendFontSize: 16
             },
             {
                 name: 'Labor',
-                sum: roiData[0].laborTotal,
+                sum: roi.laborTotal,
                 color: '#40A040',
                 legendFontColor: "#7F7F7F",
                 legendFontSize: 16
             },
             {
                 name: 'Fertilizer',
-                sum: roiData[0].fertilizerTotal,
+                sum: roi.fertilizerTotal,
                 color: '#E74C3C',
                 legendFontColor: "#7F7F7F",
                 legendFontSize: 16
@@ -101,14 +98,14 @@ const Charts = ({ farms }) => {
         setPineTotal([
             {
                 name: 'Good size',
-                sum: roiData[0].grossReturn * getPinePrice('good size', pineData),
+                sum: roi.grossReturn,
                 color: '#F7BF0B',
                 legendFontColor: "#7F7F7F",
                 legendFontSize: 16
             },
             {
                 name: 'Butterball',
-                sum: roiData[0].butterBall * getPinePrice('butterball', pineData),
+                sum: roi.butterBall,
                 color: '#40A040',
                 legendFontColor: "#7F7F7F",
                 legendFontSize: 16
@@ -117,13 +114,13 @@ const Charts = ({ farms }) => {
         setNetReturn([
             {
                 name: 'Net Return',
-                sum: roiData[0].netReturn,
+                sum: roi.netReturn,
                 color: '#FF5733',
                 legendFontColor: "#7F7F7F",
                 legendFontSize: 16
             }
         ])
-    }, [roiData, pineData]);
+    }, [pineData, farm]);
 
     //all about calendaR
 
@@ -197,110 +194,114 @@ const Charts = ({ farms }) => {
 
                         </View>
                         {
-                            eventsData && (
-                                <Calendar
-                                    date={date}
-                                    events={eventsData.map(f => ({
-                                        start: f.start_time?.toDate() || new Date(),
-                                        end: f.end_time?.toDate() || new Date(),
-                                        title: f.title || 'No Title',
-                                        id: f.id
-                                    }))
-                                    }
-                                    height={500}
-                                    mode={mode}
-                                    hourRowHeight={40}
-                                    timeslots={2}
-                                    eventCellStyle={(event) => ({
-                                        backgroundColor: event.title === 'Vegetative' ? '#68c690' :
-                                            event.title === 'Flowering' ? '#FFDC2E' :
-                                                event.title === 'Fruiting' ? '#FF8D21' : 'grey',
-                                        borderRadius: 10,
-                                        padding: 5,
-                                        fontSize: 12,
-                                    })}
-                                />
-                            )
+                            eventsLoading
+                                ? <View style={{ padding: 32, margin: 12 }}>
+                                    <ActivityIndicator size={'large'} color={'#F6A30B'} />
+                                </View>
+                                : (
+                                    <Calendar
+                                        date={date}
+                                        events={eventsData.map(f => ({
+                                            start: f.start_time?.toDate() || new Date(),
+                                            end: f.end_time?.toDate() || new Date(),
+                                            title: f.title || 'No Title',
+                                            id: f.id
+                                        }))
+                                        }
+                                        height={500}
+                                        mode={mode}
+                                        hourRowHeight={40}
+                                        timeslots={2}
+                                        eventCellStyle={(event) => ({
+                                            backgroundColor: event.title === 'Vegetative' ? '#68c690' :
+                                                event.title === 'Flowering' ? '#FFDC2E' :
+                                                    event.title === 'Fruiting' ? '#FF8D21' : 'grey',
+                                            borderRadius: 10,
+                                            padding: 5,
+                                            fontSize: 12,
+                                        })}
+                                    />
+                                )
                         }
                     </View>
                     {/* ROI */}
-                    {
-                        roiLoading && !newRoi || Object.keys(newRoi).length === 0
-                            ?
-                            <ActivityIndicator />
-                            :
-                            <View style={{
-                                padding: 4,
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                borderRadius: 5,
-                                backgroundColor: '#fff',
-                                shadowColor: 'green',
-                                shadowOffset: {
-                                    width: 0,
-                                    height: 2,
-                                },
-                                shadowOpacity: 0.25,
-                                shadowRadius: 3.84,
-                                elevation: 5
-                            }}>
-                                <Text style={{ fontSize: 20, marginVertical: 12, fontWeight: '600', color: 'green' }}>ROI</Text>
-                                <DoughnutAndPie data={newRoi} col={'sum'} title="Expected QP Production" />
-                            </View>
-                    }
+                    <View style={{
+                        padding: 4,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: 5,
+                        backgroundColor: '#fff',
+                        shadowColor: 'green',
+                        shadowOffset: {
+                            width: 0,
+                            height: 2,
+                        },
+                        shadowOpacity: 0.25,
+                        shadowRadius: 3.84,
+                        elevation: 5
+                    }}>
+                        <Text style={{ fontSize: 20, marginVertical: 12, fontWeight: '600', color: 'green' }}>ROI</Text>
+                        {
+                            !newRoi
+                                ? <View style={{ padding: 32, margin: 12 }}>
+                                    <ActivityIndicator size={'large'} color={'#F6A30B'} />
+                                </View>
+                                : <DoughnutAndPie data={newRoi} col={'sum'} title="Expected QP Production" />
+                        }
+                    </View>
                     {/* Gastos sa Pinya */}
-                    {
-                        roiLoading && partTotal.length > 0
-                            ?
-                            <ActivityIndicator />
-                            :
-                            <View style={{
-                                padding: 4,
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                backgroundColor: '#fff',
-                                shadowColor: 'green',
-                                shadowOffset: {
-                                    width: 0,
-                                    height: 2,
-                                },
-                                shadowOpacity: 0.25,
-                                shadowRadius: 3.84,
-                                elevation: 5,
-                                flex: 1,
-                                borderRadius: 5,
+                    <View style={{
+                        padding: 4,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: '#fff',
+                        shadowColor: 'green',
+                        shadowOffset: {
+                            width: 0,
+                            height: 2,
+                        },
+                        shadowOpacity: 0.25,
+                        shadowRadius: 3.84,
+                        elevation: 5,
+                        flex: 1,
+                        borderRadius: 5,
 
-                            }}>
-                                <Text style={{ fontSize: 20, marginVertical: 12, fontWeight: '600', color: 'green' }}>Gastos sa Pinya</Text>
-                                <DoughnutAndPie data={partTotal} col={"sum"} title="Gastos sa Pinya" />
-                            </View>
-                    }
+                    }}>
+                        <Text style={{ fontSize: 20, marginVertical: 12, fontWeight: '600', color: 'green' }}>Gastos sa Pinya</Text>
+                        {
+                            !newRoi && !partTotal
+                                ? <View style={{ padding: 32, margin: 12 }}>
+                                    <ActivityIndicator size={'large'} color={'#F6A30B'} />
+                                </View>
+                                : <DoughnutAndPie data={partTotal} col={"sum"} title="Gastos sa Pinya" />
+                        }
+                    </View>
                     {/* Gross Return */}
-                    {
-                        roiLoading && pineTotal.length > 0
-                            ?
-                            <ActivityIndicator />
-                            :
-                            <View style={{
-                                padding: 4,
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                backgroundColor: '#fff',
-                                shadowColor: 'green',
-                                shadowOffset: {
-                                    width: 0,
-                                    height: 2,
-                                },
-                                shadowOpacity: 0.25,
-                                shadowRadius: 3.84,
-                                elevation: 5,
-                                flex: 1,
-                                borderRadius: 5,
-                            }}>
-                                <Text style={{ fontSize: 20, marginVertical: 12, fontWeight: '600', color: 'green' }}>Gross Return</Text>
-                                <DoughnutAndPie data={pineTotal} col={"sum"} title="Gross Return" />
-                            </View>
-                    }
+                    <View style={{
+                        padding: 4,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: '#fff',
+                        shadowColor: 'green',
+                        shadowOffset: {
+                            width: 0,
+                            height: 2,
+                        },
+                        shadowOpacity: 0.25,
+                        shadowRadius: 3.84,
+                        elevation: 5,
+                        flex: 1,
+                        borderRadius: 5,
+                    }}>
+                        <Text style={{ fontSize: 20, marginVertical: 12, fontWeight: '600', color: 'green' }}>Gross Return</Text>
+                        {
+                            !newRoi && !pineTotal
+                                ? <View style={{ padding: 32, margin: 12 }}>
+                                    <ActivityIndicator size={'large'} color={'#F6A30B'} />
+                                </View>
+                                : <DoughnutAndPie data={pineTotal} col={"sum"} title="Gross Return" />
+                        }
+                    </View>
                 </View>
             </ScrollView>
         </>

@@ -1,47 +1,33 @@
 import React, { useState } from 'react';
-import { SafeAreaView, StyleSheet, Text, TouchableOpacity, ScrollView, View, Image } from 'react-native';
+import { SafeAreaView, StyleSheet, Text, TouchableOpacity, ScrollView, View, Image, Modal } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import Charts from './Charts';
-import { Dropdown } from 'react-native-element-dropdown';
+import { useNavigation } from '@react-navigation/native';
+
 
 //db
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
 import { collection, doc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase/Config';
-import { Button } from 'native-base';
 
 const Tab = createMaterialTopTabNavigator();
 
-const moreOptions = [
-  {
-    label: 'Farm Profile', value: 'Profile'
-  },
-  {
-    label: 'Gallery', value: 'Gallery'
-  },
-  {
-    label: 'Cost and Return Analysis', value: 'CRA'
-  },
-  {
-    label: 'Activities', value: 'Activities'
-  },
-  {
-    label: 'Report', value: 'Report'
-  }
-]
-
-const ProductionInput = ({ route, navigation }) => {
-  const [edit, setEdit] = useState(false)
+const ProductionInput = ({ route}) => {
   const [user] = useAuthState(auth)
-
-  const { farms = [] } = route.params
-  const farm = farms[0]
-  const [roiDetails, setRoiDetails] = useState({})
-  const [options, setOptions] = useState()
+  const { farm = [] } = route.params
 
   const componentsColl = collection(db, `farms/${farm.id}/components`)
   const [compData, compLoading, compError] = useCollectionData(componentsColl)
+
+  const [visible, setVisible] = React.useState(false);
+  const navigation = useNavigation();
+
+  const handleNavigate = (screen, params = {}) => {
+    setVisible(false);  // Close the modal when navigating
+    navigation.navigate(screen, params);
+  };
+
 
   React.useEffect(() => {
     if (!user || !compData) {
@@ -50,27 +36,11 @@ const ProductionInput = ({ route, navigation }) => {
     navigation.setOptions({
       headerRight: () => (
         <View style={{ display: 'flex', flexDirection: 'row', gap: 1 }}>
-          <TouchableOpacity
-            onPress={() => navigation.navigate('Activities', { farm: farm })}
-            style={{
-              backgroundColor: 'orange',
-              padding: 10,
-              borderRadius: 10,
-              shadowColor: '#000',
-              shadowOffset: {
-                width: 0,
-                height: 2,
-              },
-              shadowOpacity: 0.25,
-              shadowRadius: 3.84,
-              elevation: 5,
-            }}
-          >
-            <Text style={{ color: '#fff', fontFamily: 'serif', fontWeight: 'bold' }}>Add Activities</Text>
+      
+          <TouchableOpacity onPress={() => setVisible(true)} style={styles.menuButton}>
+          <Image source={require('../assets/hamburger.png')}/>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate('Edit', { farm: farm, compData: compData })}>
-            <Image source={require('../assets/more.png')} style={{ width: 20, height: 20, marginTop: 10 }} />
-          </TouchableOpacity>
+         
         </View>
       ),
     });
@@ -78,13 +48,37 @@ const ProductionInput = ({ route, navigation }) => {
 
   return (
     <>
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} onPress={() => setVisible(false)}>
         <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', gap: 3, marginLeft: 15 }}>
           <Text style={styles.name}>{farm.title}</Text>
         </View>
         <Text style={styles.location}>{`${farm.mun}, ${farm.brgy}`}</Text>
-        <Charts farms={farms} />
+        <Charts farm={farm} />
       </SafeAreaView>
+
+      <Modal
+        transparent={true}
+        visible={visible}
+        // animationType="slide"
+        onRequestClose={() => setVisible(false)}
+      > 
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <TouchableOpacity onPress={() => setVisible(false)} style={styles.closeButton}>
+              <Text style={styles.closeButtonText}>X</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleNavigate('Profile', {farm: farm})} style={styles.menuItem}>
+              <Text style={styles.menuItemText}>Edit Farm Details</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleNavigate ('Images', { farm: farm })}style={styles.menuItem}>
+              <Text style={styles.menuItemText}>Add Farm Images</Text>
+            </TouchableOpacity>
+            <TouchableOpacity   onPress={() => handleNavigate ('Activities', { farm: farm })} style={styles.menuItem}>
+              <Text style={styles.menuItemText}>Add Activities</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </>
   );
 };
@@ -111,6 +105,35 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 10,
     marginLeft: 20
+  },
+  modalOverlay: {
+    marginTop:55,
+    flex: 1,
+    justifyContent: 'flex-start',
+    alignItems: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+  },
+  modalContent: {
+    // width: '80%',
+    
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 10,
+    // alignItems: 'center',
+  },
+  menuItem: {
+    padding: 10,
+    width: '100%',
+    // alignItems: 'flex-start',
+  },
+  menuItemText: {
+    fontSize: 18,
+  },
+  closeButtonText: {
+    color: 'red',
+    fontSize: 20,
+    alignSelf:'flex-end',
+    marginRight:5
   },
 });
 
