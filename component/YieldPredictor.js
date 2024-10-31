@@ -151,17 +151,19 @@ const YieldPredictor = ({ route, navigation }) => {
                     padding: 10,
                     marginTop: 18
                 }}>
-                    {series2.length === 0 ?
+                    {/* {labels2.length === 0 ?
                         (
-                            <Text style={{ display: 'flex', textAlign: 'center' }}> No Data to Display </Text>
-                        ) :
+                            <>
+                                <Text style={{ display: 'flex', textAlign: 'center' }}> No Data to Display </Text>
+                            </>
+                        ) : */}
 
                         <Pie
                             labels={labels2}
                             data={series2}
                             title={currentUser.mun}
                         />
-                    }
+                    {/* } */}
 
                 </View>
                 <View style={{

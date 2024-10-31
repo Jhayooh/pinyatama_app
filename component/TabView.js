@@ -28,7 +28,7 @@ const Card = ({ imageSource, title, description, startDate, endDate, onPress }) 
 
 const TabView = ({ route, navigation, farms, imageUrls }) => {
   const handleCardPress = (farm) => {
-    navigation.navigate("ProductionInput", { farms: [farm] });
+    navigation.navigate("ProductionInput", { farm: farm });
   };
 
   function dateFormatter(date) {

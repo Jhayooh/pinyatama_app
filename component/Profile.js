@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, ScrollView, TextInput, Text } from 'react-native';
+import { View, StyleSheet, ScrollView, TextInput, Text, TouchableOpacity } from 'react-native';
 
 export default function Profile({ route, navigation }) {
     const { farm } = route.params
@@ -26,7 +26,7 @@ export default function Profile({ route, navigation }) {
                             <TextInput
                                 editable
                                 placeholder={farm.title}
-                                style={{...styles.textInput, borderColor:'green'}}
+                                style={{ ...styles.textInput, borderColor: 'green' }}
                             />
                         </View>
                         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -35,7 +35,7 @@ export default function Profile({ route, navigation }) {
                                 <TextInput
                                     editable
                                     placeholder={farm.farmerName}
-                                    style={{...styles.textInput, borderColor:'green'}}
+                                    style={{ ...styles.textInput, borderColor: 'green' }}
                                 />
                             </View>
                             <View style={{ flex: 1, flexDirection: 'column', marginLeft: 5, marginBottom: 20 }}>
@@ -43,7 +43,7 @@ export default function Profile({ route, navigation }) {
                                 <TextInput
                                     editable
                                     placeholder={farm.sex}
-                                    style={{ ...styles.textInput, width: '100%', borderColor:'green' }}
+                                    style={{ ...styles.textInput, width: '100%', borderColor: 'green' }}
                                 />
                             </View>
                         </View>
@@ -51,35 +51,35 @@ export default function Profile({ route, navigation }) {
                             <View style={{ flex: 1, flexDirection: 'column', marginRight: 5, marginBottom: 20 }}>
                                 <Text style={styles.supText}>Barangay</Text>
                                 <TextInput
-                                    editable
+                                    editable={false}
                                     placeholder={farm.brgy}
-                                    style={{ ...styles.textInput, width: '100%', borderColor:'green' }}
+                                    style={{ ...styles.textInput, width: '100%'}}
                                 />
                             </View>
                             <View style={{ flex: 1, flexDirection: 'column', marginLeft: 5, marginBottom: 20 }}>
                                 <Text style={styles.supText}>Municipality</Text>
                                 <TextInput
-                                    editable
+                                    editable={false}
                                     placeholder={farm.mun}
-                                    style={{ ...styles.textInput, width: '100%', borderColor:'green' }}
+                                    style={{ ...styles.textInput, width: '100%' }}
                                 />
                             </View>
                         </View>
                         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                            <View style={{ flex: 1, flexDirection: 'column', marginRight: 5, marginBottom: 20  }}>
+                            <View style={{ flex: 1, flexDirection: 'column', marginRight: 5, marginBottom: 20 }}>
                                 <Text style={styles.supText}>Bilang ng Tanim</Text>
                                 <TextInput
-                                    editable
+                                    editable={false}
                                     placeholder={farm.plantNumber}
-                                    style={{ ...styles.textInput, width: '100%' , borderColor:'green'}}
+                                    style={{ ...styles.textInput, width: '100%'}}
                                 />
                             </View>
-                            <View style={{ flex: 1, flexDirection: 'column', marginLeft: 5, marginBottom: 20  }}>
+                            <View style={{ flex: 1, flexDirection: 'column', marginLeft: 5, marginBottom: 20 }}>
                                 <Text style={styles.supText}>Land Area</Text>
                                 <TextInput
-                                    editable
+                                    editable={false}
                                     placeholder={farm.area}
-                                    style={{ ...styles.textInput, width: '100%', borderColor:'green' }}
+                                    style={{ ...styles.textInput, width: '100%'}}
                                 />
                             </View>
                         </View>
@@ -87,24 +87,29 @@ export default function Profile({ route, navigation }) {
                             <View style={{ flex: 1, flexDirection: 'column', marginRight: 5, marginBottom: 20 }}>
                                 <Text style={styles.supText}>Klase ng Lupa</Text>
                                 <TextInput
-                                    editable
+                                    editable={false}
                                     placeholder={farm.soil}
-                                    style={{ ...styles.textInput, borderColor:'green' }}
+                                    style={{ ...styles.textInput}}
                                 />
                             </View>
                             <View style={{ flex: 1, flexDirection: 'column', marginLeft: 5, marginBottom: 20 }}>
                                 <Text style={styles.supText}>NPK</Text>
                                 <TextInput
-                                    editable
+                                    editable={false}
                                     placeholder={farm.npk}
-                                    style={{ ...styles.textInput, width: '100%', borderColor:'green' }}
+                                    style={{ ...styles.textInput, width: '100%' }}
                                 />
                             </View>
-                          
+
                         </View>
                     </View>
-                </View>
 
+                </View>
+                <View>
+                    <TouchableOpacity style={styles.saveButton}>
+                        <Text style={styles.save}>Save</Text>
+                    </TouchableOpacity>
+                </View>
             </ScrollView>
         </View>
     )
@@ -117,9 +122,9 @@ const styles = StyleSheet.create({
     },
     section: {
         // backgroundColor: 'red',
+        paddingHorizontal: 15,
         paddingTop: 30,
         paddingBottom: 14,
-        paddingHorizontal: 15,
         borderRadius: 12,
         marginTop: 16,
         backgroundColor: '#FFF',
@@ -163,4 +168,26 @@ const styles = StyleSheet.create({
         shadowRadius: 2.22,
         elevation: 3,
     },
+    saveButton: {
+        backgroundColor: '#52be80',
+        borderRadius: 8,
+        padding: 12,
+        alignSelf: 'flex-end',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+        margin: 10,
+        paddingHorizontal:50,
+        marginHorizontal:16,
+    },
+    save: {
+        color: '#fff',
+        fontSize: 20,
+    }
+
 })
