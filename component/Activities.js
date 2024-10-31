@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Alert, Image } from 'react-native';
 import StepIndicator from 'react-native-step-indicator';
 import { Dropdown } from 'react-native-element-dropdown';
 import moment from 'moment';
 import { addDoc, collection, query, orderBy, onSnapshot, Timestamp, updateDoc, doc } from 'firebase/firestore'; // added onSnapshot
 import { db } from '../firebase/Config';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import { LinearGradient } from 'expo-linear-gradient';
+
 
 const ferti = [
   { label: "Ammophos (16-20-0)", value: "Ammophos (16-20-0)" },
@@ -54,6 +57,7 @@ const Activities = ({ route }) => {
   const [bilang, setBilang] = useState(0)
   const [qntyPrice, setQntyPrice] = useState(0)
 
+
   const [laborMaterial, setLaborMaterial] = useState(null)
   const [actualComponents, setActualComponents] = useState(null)
 
@@ -64,6 +68,9 @@ const Activities = ({ route }) => {
   const [reportPer, setReportPer] = useState(0)
 
   const [bilangError, setBilangError] = useState(false)
+
+  const [startPicker, setStartPicker] = useState(false);
+  const [date, setDate] = useState(new Date())
 
   const [alert, setAlert] = useState({ visible: false, message: '', severity: '' });
 
@@ -155,11 +162,16 @@ const Activities = ({ route }) => {
   }
 
   const handleRepPer = (input) => {
-    // Only allow numbers and limit the value to 100
     const numericInput = input.replace(/[^0-9]/g, ''); // Remove non-numeric characters
     if (numericInput <= 100) {
       setReportPer(numericInput);
     }
+    if (value === '0') {
+      Alert.alert('Invalid Input', 'Percentage cannot be 0.');
+    } else {
+      setReportPer(value);
+    }
+
   };
 
   function getPinePrice(pine, pineObject) {
@@ -213,7 +225,7 @@ const Activities = ({ route }) => {
   const handleSave = async (act) => {
     setSaving(true);
     try {
-      const currDate = new Date();
+      const currDate = date;
       if (act === "r") {
         await addDoc(activityColl,
           {
@@ -415,7 +427,48 @@ const Activities = ({ route }) => {
     labelSize: 13,
     currentStepLabelColor: '#fe7013',
   };
+  const renderStepIndicator = ({ position, stepStatus }) => {
+    if (position === 0 && stepStatus === 'finished') {
+      return <Image source={require('../assets/pineapple.png')} width={10} />;
+    }
 
+    // Default indicator for other steps
+    return (
+      <View
+        style={{
+          width: 20,
+          height: 20,
+          borderRadius: 10,
+          //backgroundColor: stepStatus === 'current' ? '#fe7013' : '#aaaaaa',
+        }}
+      />
+    );
+  };
+
+
+  const handleConfirmation = () => {
+    if (!reportTitle || !reportDesc || reportPer === '0' || reportPer === '' || !bilang) {
+      Alert.alert(
+        'Input Needed',
+        'Please fill out missing fields before submitting.'
+      );
+      return;
+    }
+    Alert.alert('Report', 'Are you sure you want to submit this report?',
+      [
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+        {
+          text: 'Yes',
+          onPress: () => handleSave("r")
+        },
+      ]
+    )
+    console.log('reeepooorrtt', handleConfirmation)
+  }
 
   return (
     <View style={styles.container}>
@@ -427,6 +480,7 @@ const Activities = ({ route }) => {
           <Text style={styles.addButtonText}>Add Report</Text>
         </TouchableOpacity>
       </View>
+
       {dynamicSteps.length > 0 ? (
         <View style={styles.stepContainer}>
           <View style={{ flex: 1 }}>
@@ -436,6 +490,7 @@ const Activities = ({ route }) => {
               stepCount={dynamicSteps.length}
               labels={dynamicSteps.map(step => step.text)}
               direction="vertical"
+              renderStepIndicator={renderStepIndicator}
             />
           </View>
           <View style={styles.dateColumn}>
@@ -460,7 +515,10 @@ const Activities = ({ route }) => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>Add Activity</Text>
-            <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Fertilizer:</Text>
+            <View style={{display:'flex', flexDirection:'row'}}>
+                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Fertilizer:</Text>
+                <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
+              </View>
             <Dropdown
               data={ferti}
               labelField="label"
@@ -479,7 +537,10 @@ const Activities = ({ route }) => {
             {
               fertilizer.toLocaleLowerCase() === "flower inducer (ethrel)" &&
               <View style={styles.quantyContainer}>
-                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Plant Number:</Text>
+                <View style={{display:'flex', flexDirection:'row'}}>
+                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Number of Plants:</Text>
+                <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
+              </View>
                 <TextInput
                   placeholder="Bilang ng tanim"
                   keyboardType="numeric"
@@ -489,7 +550,10 @@ const Activities = ({ route }) => {
                 />
               </View>
             }
-            <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Quantity:</Text>
+            <View style={{display:'flex', flexDirection:'row'}}>
+                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Quantity:</Text>
+                <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
+              </View>
             <View style={styles.quantyContainer}>
               <TextInput
                 placeholder="0.0"
@@ -499,6 +563,7 @@ const Activities = ({ route }) => {
                 onChangeText={(e) => {
                   const parsedValue = parseFloat(e) || 0;
                   setQntyPrice(parsedValue)
+                  console.log("theeee whatt???", parsedValue)
                   setComps(prev => ({
                     ...prev,
                     qntyPrice: parsedValue
@@ -506,27 +571,56 @@ const Activities = ({ route }) => {
                 }
                 }
               />
+
               <View style={styles.suffixContainer}>
                 <Text style={styles.suffix}>kg</Text>
               </View>
             </View>
             <View>
-
-            </View>
-            <View style={{ display: 'flex', flexDirection: 'row', alignContent: 'center', gap: 2, width: '100%' }}>
-              <TouchableOpacity onPress={handleModalClose} style={styles.cancelButton}>
-                <Text style={styles.cancelButtonText}>Cancel</Text>
-              </TouchableOpacity>
-              {
-                components && roi &&
-                <TouchableOpacity
-                  onPress={() => handleSave("a")}
-                  style={[styles.saveButton, saving || bilangError && { backgroundColor: 'gray' }]}
-                  disabled={saving || bilangError}
+            <View style={{display:'flex', flexDirection:'row'}}>
+                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Date:</Text>
+                <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
+              </View>
+              <View style={{ ...styles.quantyContainer, display: 'flex', flexDirection: 'row', marginBottom: 10, }}>
+                <TextInput
+                  value={date.toLocaleDateString()}
+                  editable={false}
+                  style={{ ...styles.input, width: '80%', borderBottomRightRadius: 0, borderTopRightRadius: 0 }}
+                />
+                <TouchableOpacity onPress={() => setStartPicker(true)}
+                  style={{ ...styles.input, width: '20%', borderBottomLeftRadius: 0, borderTopLeftRadius: 0, paddingHorizontal: 22, paddingVertical: 0, justifyContent: 'center' }}
                 >
-                  <Text style={styles.saveButtonText}>{saving ? 'Saving...' : 'Save'}</Text>
+                  <Image source={require('../assets/calender.png')} />
                 </TouchableOpacity>
-              }
+
+                <DateTimePickerModal
+                  isVisible={startPicker}
+                  mode="date"
+                  maximumDate={new Date()}
+                  onConfirm={(date) => {
+                    setDate(date);
+                    setStartPicker(false);
+                  }}
+                  onCancel={() => setStartPicker(false)}
+                  style={{ marginBottom: 10 }}
+                />
+
+              </View>
+              <View style={{ display: 'flex', flexDirection: 'row', alignContent: 'center', gap: 2, width: '100%' }}>
+                <TouchableOpacity onPress={handleModalClose} style={styles.cancelButton}>
+                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                </TouchableOpacity>
+                {
+                  components && roi &&
+                  <TouchableOpacity
+                    onPress={() => handleSave("a")}
+                    style={[styles.saveButton, saving || bilangError && { backgroundColor: 'gray' }]}
+                    disabled={saving || bilangError}
+                  >
+                    <Text style={styles.saveButtonText}>{saving ? 'Saving...' : 'Save'}</Text>
+                  </TouchableOpacity>
+                }
+              </View>
             </View>
           </View>
         </View>
@@ -542,14 +636,20 @@ const Activities = ({ route }) => {
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>REPORT</Text>
             <View style={styles.quantyContainer}>
-              <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Title:</Text>
+              <View style={{display:'flex', flexDirection:'row'}}>
+                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Title:</Text>
+                <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
+              </View>
               <TextInput
                 // label='Title'
                 // placeholder='Title'
                 onChangeText={(e) => setReportTitle(e)}
                 style={{ ...styles.input, borderColor: bilangError ? 'red' : '#ccc' }}
               />
-              <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Description:</Text>
+                <View style={{display:'flex', flexDirection:'row'}}>
+                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Description:</Text>
+                <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
+              </View>
               <TextInput
                 editable
                 multiline
@@ -559,7 +659,10 @@ const Activities = ({ route }) => {
                 onChangeText={(e) => setReportDesc(e)}
                 style={{ ...styles.input, borderColor: bilangError ? 'red' : '#ccc' }}
               />
-              <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Percentage of Damage:</Text>
+                <View style={{display:'flex', flexDirection:'row'}}>
+                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Percentage of Damage:</Text>
+                <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
+              </View>
               <View style={styles.quantyContainer}>
                 <TextInput
                   placeholder="0"
@@ -572,7 +675,38 @@ const Activities = ({ route }) => {
                   <Text style={styles.suffix}>%</Text>
                 </View>
               </View>
+              <View style={{display:'flex', flexDirection:'row'}}>
+                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Date of Report:</Text>
+                <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
+              </View>
+              <View style={{ ...styles.quantyContainer, display: 'flex', flexDirection: 'row', marginBottom: 10, }}>
+                <TextInput
+                  value={date.toLocaleDateString()}
+                  editable={false}
+                  style={{ ...styles.input, width: '80%', borderBottomRightRadius: 0, borderTopRightRadius: 0 }}
+                />
+                <TouchableOpacity onPress={() => setStartPicker(true)}
+                  style={{ ...styles.input, width: '20%', borderBottomLeftRadius: 0, borderTopLeftRadius: 0, paddingHorizontal: 22, paddingVertical: 0, justifyContent: 'center' }}
+                >
+                  <Image source={require('../assets/calender.png')} style={{}} />
+                </TouchableOpacity>
+
+                <DateTimePickerModal
+                  isVisible={startPicker}
+                  mode="date"
+                  maximumDate={new Date()}
+                  onConfirm={(date) => {
+                    setDate(date);
+                    setStartPicker(false);
+                  }}
+                  onCancel={() => setStartPicker(false)}
+                  style={{ marginBottom: 10 }}
+                />
+
+              </View>
+
             </View>
+
             <View style={{ display: 'flex', flexDirection: 'row', alignContent: 'center', gap: 2, width: '100%' }}>
               <TouchableOpacity onPress={handleModalClose} style={styles.cancelButton2}>
                 <Text style={styles.cancelButtonText}>Cancel</Text>
@@ -580,7 +714,7 @@ const Activities = ({ route }) => {
               {
                 components && roi &&
                 <TouchableOpacity
-                  onPress={() => handleSave("r")}
+                  onPress={handleConfirmation}
                   style={[styles.ReportButton, saving && { backgroundColor: 'gray' }]}
                   disabled={saving}
                 >
@@ -588,6 +722,21 @@ const Activities = ({ route }) => {
                 </TouchableOpacity>
               }
             </View>
+            <TouchableOpacity style={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              padding: 10,
+              borderRadius: 30,
+              borderColor: '#fff',
+              borderWidth: 1,
+              backgroundColor: 'orange',
+              marginTop: 30
+            }}>
+              <Image source={require('../assets/check.png')} style={{ marginLeft: 1, alignItems: 'center', textAlign: 'center' }} />
+              <Text style={styles.cmplt}>Mark as Complete Farm</Text>
+            </TouchableOpacity>
+
           </View>
         </View>
 
@@ -701,6 +850,35 @@ const styles = StyleSheet.create({
   },
   suffix: {
     fontSize: 16,
+  },
+  button: {
+    // backgroundColor: '#4DAF50',
+    alignItems: 'center',
+    // padding: 12,
+    borderRadius: 5,
+  },
+  textInputFocus: {
+    flex: 1,
+    height: 46,
+    opacity: 1.0,
+    borderColor: '#ccc',
+    borderWidth: 1.6,
+    borderRadius: 5,
+    paddingHorizontal: 18,
+    // color: '#3C3C3B',
+    fontSize: 16,
+
+  },
+  cmplt:
+  {
+    display: 'flex',
+    color: '#fff',
+    // fontFamily: 'lucida grande',
+    borderRadius: 30,
+    width: '100%',
+    fontSize: 20,
+    textAlign: 'center',
+    paddingHorizontal: 10
   },
 });
 

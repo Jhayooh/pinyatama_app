@@ -30,7 +30,7 @@ export default function Gallery({ route, }) {
       const downloadUrl = await getDownloadURL(result.items[0])
       return downloadUrl
     } catch (error) {
-      // console.error('Error fetching images: ', error);
+      console.error('Error fetching images: ', error);
       <ActivityIndicator />
     }
   }
@@ -112,17 +112,12 @@ export default function Gallery({ route, }) {
                 <TabView
                   {...props}
                   farms={filteredFarms.filter(
-                    obj =>
-                      obj.cropStage.toLowerCase() === 'vegetative' ||
-                      obj.cropStage.toLowerCase() === 'flowering' ||
-                      obj.cropStage.toLowerCase() === 'fruiting'
+                    obj => obj.cropStage.toLowerCase() !== 'complete'
                   )}
                   imageUrls={imageUrls}
                 />
               )}
-
             />
-
             <Tab.Screen
               name="Vegetative"
               // component={TabView}

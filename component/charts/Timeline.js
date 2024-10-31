@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
         marginTop: 20,
     },
     more: {
-        fontFamily: 'seric',
+        fontFamily: 'serif',
         fontSize: 20,
         backgroundColor: 'orange',
         color: '#fff',

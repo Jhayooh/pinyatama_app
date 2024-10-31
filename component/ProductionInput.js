@@ -1,81 +1,84 @@
 import React, { useState } from 'react';
-import { SafeAreaView, StyleSheet, Text, TouchableOpacity,ScrollView, View, Image } from 'react-native';
+import { SafeAreaView, StyleSheet, Text, TouchableOpacity, ScrollView, View, Image, Modal } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import Charts from './Charts';
-import { Dropdown } from 'react-native-element-dropdown';
+import { useNavigation } from '@react-navigation/native';
+
 
 //db
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
 import { collection, doc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase/Config';
-import { Button } from 'native-base';
 
 const Tab = createMaterialTopTabNavigator();
 
-const moreOptions=[
-  {
-    label: 'Farm Profile', value:'Profile'
-  },
-  {
-    label:'Gallery', value:'Gallery'
-  },
-  {
-    label:'Cost and Return Analysis', value:'CRA'
-  },
-  {
-    label:'Activities', value:'Activities'
-  },
-  {
-    label:'Report', value:'Report'
-  }
-]
-
-const ProductionInput = ({ route, navigation }) => {
-  const [edit, setEdit] = useState(false)
+const ProductionInput = ({ route}) => {
   const [user] = useAuthState(auth)
+  const { farm = [] } = route.params
 
-  const { farms = [] } = route.params
-  const farm = farms[0]
-  const [roiDetails, setRoiDetails] = useState({})
-  const [options, setOptions] =useState()
-  
   const componentsColl = collection(db, `farms/${farm.id}/components`)
   const [compData, compLoading, compError] = useCollectionData(componentsColl)
 
+  const [visible, setVisible] = React.useState(false);
+  const navigation = useNavigation();
+
+  const handleNavigate = (screen, params = {}) => {
+    setVisible(false);  // Close the modal when navigating
+    navigation.navigate(screen, params);
+  };
+
+
   React.useEffect(() => {
-    if (!user || !compData){
-      return
+    if (!user || !compData) {
+      return;
     }
     navigation.setOptions({
       headerRight: () => (
-        <TouchableOpacity
-          onPress={() => navigation.navigate('Edit', {farm: farm, compData: compData})}
-        >
-          <View style={{display:'flex', justifyContent:'space-between', flexDirection:'row',gap:1}}>
-          <Image source={require('../assets/more.png')} style={{width:20, height:20,}}/>
-          </View>
+        <View style={{ display: 'flex', flexDirection: 'row', gap: 1 }}>
+      
+          <TouchableOpacity onPress={() => setVisible(true)} style={styles.menuButton}>
+          <Image source={require('../assets/hamburger.png')}/>
+          </TouchableOpacity>
          
-        </TouchableOpacity>     
-        // <Dropdown
-        // data={moreOptions}
-        // labelField='label'
-        // valueField='value'
-        // value={options}/>
-          
+        </View>
       ),
     });
-  }, [navigation, compData]);
+  }, [navigation, compData, user]);
 
   return (
     <>
-    <SafeAreaView style={styles.container}>
-    <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', gap: 3 , marginLeft:15}}>
-      <Text style={styles.name}>{farm.title}</Text>
-    </View>
-      <Text style={styles.location}>{`${farm.mun}, ${farm.brgy}`}</Text>
-        <Charts farms={farms} />
-    </SafeAreaView>
+      <SafeAreaView style={styles.container} onPress={() => setVisible(false)}>
+        <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', gap: 3, marginLeft: 15 }}>
+          <Text style={styles.name}>{farm.title}</Text>
+        </View>
+        <Text style={styles.location}>{`${farm.mun}, ${farm.brgy}`}</Text>
+        <Charts farm={farm} />
+      </SafeAreaView>
+
+      <Modal
+        transparent={true}
+        visible={visible}
+        // animationType="slide"
+        onRequestClose={() => setVisible(false)}
+      > 
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <TouchableOpacity onPress={() => setVisible(false)} style={styles.closeButton}>
+              <Text style={styles.closeButtonText}>X</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleNavigate('Profile', {farm: farm})} style={styles.menuItem}>
+              <Text style={styles.menuItemText}>Edit Farm Details</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleNavigate ('Images', { farm: farm })}style={styles.menuItem}>
+              <Text style={styles.menuItemText}>Add Farm Images</Text>
+            </TouchableOpacity>
+            <TouchableOpacity   onPress={() => handleNavigate ('Activities', { farm: farm })} style={styles.menuItem}>
+              <Text style={styles.menuItemText}>Add Activities</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </>
   );
 };
@@ -83,7 +86,7 @@ const ProductionInput = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    
+
   },
   header: {
     flexDirection: 'row',
@@ -101,202 +104,37 @@ const styles = StyleSheet.create({
     color: 'black',
     fontWeight: 'bold',
     marginBottom: 10,
-    marginLeft:20
+    marginLeft: 20
+  },
+  modalOverlay: {
+    marginTop:55,
+    flex: 1,
+    justifyContent: 'flex-start',
+    alignItems: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+  },
+  modalContent: {
+    // width: '80%',
+    
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 10,
+    // alignItems: 'center',
+  },
+  menuItem: {
+    padding: 10,
+    width: '100%',
+    // alignItems: 'flex-start',
+  },
+  menuItemText: {
+    fontSize: 18,
+  },
+  closeButtonText: {
+    color: 'red',
+    fontSize: 20,
+    alignSelf:'flex-end',
+    marginRight:5
   },
 });
 
 export default ProductionInput;
-
-
-
-// import React, { useState } from 'react';
-// import { useAuthState } from 'react-firebase-hooks/auth';
-// import { useCollectionData } from 'react-firebase-hooks/firestore';
-// import {
-//   ActivityIndicator,
-//   ImageBackground,
-//   Modal,
-//   SafeAreaView,
-//   ScrollView,
-//   StyleSheet,
-//   Text,
-//   TextInput,
-//   TouchableOpacity,
-//   View,
-//   Image
-// } from "react-native";
-// import { auth, db } from '../firebase/Config';
-// import { BottomButton } from './BottomButton';
-// import Charts from './Charts';
-// import { TableBuilder } from './TableBuilder';
-
-// const ProductionInput = ({ route, navigation }) => {
-//   const [user] = useAuthState(auth)
-//   const { farms = [] } = route.params
-//   const farm = farms[0]
-//   const [edit, setEdit] = useState(false)
-//   const [roiDetails, setRoiDetails] = useState({})
-
-//   const componentsColl = collection(db, `farms/${farm.id}/components`)
-//   const [compData, compLoading, compError] = useCollectionData(componentsColl)
-
-//   const addDocumentWithId = async () => {
-//     setIsShow(false)
-//     onChangeText('')
-//     try {
-//       const documentRef = doc(collParticular, text);
-//       await setDoc(documentRef, { name: text, totalInputs: 0 });
-//     } catch (error) {
-//       console.error('Error adding document:', error);
-//     }
-//   };
-
-//   return (
-//     <>
-//       <SafeAreaView style={styles.container}>
-//         <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', gap: 3 , marginLeft:15}}>
-//           <Text style={styles.name}>{farm.title}</Text>
-//           <TouchableOpacity style={{ height: 32, alignItems: 'center', justifyContent: 'center', paddingTop: 20 }} onPress={() => {
-//             setEdit(!edit)
-//           }}>
-//             <Image source={require('../assets/edit.png')} style={{ width: 20, height: 20 }} />
-//           </TouchableOpacity>
-//         </View>
-//         <Text style={styles.loc}>{`${farm.mun}, ${farm.brgy}`}</Text>
-
-
-//         {edit
-//           ?
-//           <>
-//             < ScrollView style={styles.scrollView}>       
-//               {
-//                 compLoading
-//                   ?
-//                   <ActivityIndicator size='small' color='#3bcd6b' style={{ padding: 64, backgroundColor: '#fff' }} />
-//                   :
-//                   <TableBuilder
-//                     components={compData}
-//                     area={farm.area}
-//                     setRoiDetails={setRoiDetails}
-//                   />
-//               }
-//             </ScrollView>
-//           </>
-//           :
-//           <Charts farms={farms} />
-//         }
-//       </SafeAreaView >
-
-
-//     </>
-//   )
-// }
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-    
-//   },
-//   image: {
-//     flex: 1,
-//     padding: 12,
-//     backgroundColor: '#22b14c',
-//     padding: 20
-
-//   },
-//   name: {
-//     fontSize: 32,
-//     paddingTop: 20,
-//     color: 'green',
-//     fontWeight: '700',
-//     marginLeft: 5
-//   },
-//   loc: {
-//     fontSize: 16,
-//     color: 'black',
-//     fontWeight: '700',
-//     marginTop: 6,
-//     marginLeft: 25
-//   },
-//   label: {
-//     alignItems: 'center',
-//     marginTop: 18,
-//     fontSize: 12,
-//     justifyContent: 'center',
-//     fontWeight: 'bold',
-//     fontFamily: 'serif',
-//     color: '#4DAF50',
-    
-
-//   },
-//   scrollView: {
-//     marginTop: 12,
-//     flex: 1,
-//   },
-//   texts: {
-//     color: '#fff',
-//     fontSize: 14,
-//     fontWeight: '800',
-//   },
-//   tableHead: {
-//     flexDirection: 'row',
-//     borderBottomWidth: 1,
-//     borderColor: '#ddd',
-//     padding: 6,
-//     backgroundColor: '#3bcd6b',
-//     alignSelf: 'stretch',
-//     marginBottom: '16'
-//   },
-//   tableHeadLabel2: {
-//     flex: 2,
-//     alignSelf: 'stretch'
-//   },
-//   tableHeadLabel3: {
-//     flex: 3,
-//     alignSelf: 'stretch'
-//   },
-//   tableData: {
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//     borderBottomWidth: 1,
-//     borderColor: '#ddd',
-//     padding: 6,
-//     backgroundColor: '#fff',
-//     flex: 1,
-//     alignSelf: 'stretch',
-//     flexDirection: 'row'
-//   },
-
-//   modalContainer: {
-//     flex: 1,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-//   },
-//   modalContent: {
-//     backgroundColor: 'white',
-//     width: 280,
-//     padding: 20,
-//     borderRadius: 10,
-//     elevation: 5, 
-//   },
-//   modalTitle: {
-//     fontSize: 18,
-//     fontWeight: 'bold',
-//     marginBottom: 10,
-//   },
-//   modalLabel: {
-//     fontSize: 12,
-//     fontWeight: 'bold',
-//     marginBottom: 9,
-//   },
-//   input: {
-//     height: 40,
-//     borderColor: 'gray',
-//     borderWidth: 1,
-//     marginBottom: 10,
-//     paddingHorizontal: 10,
-//   },
-// })
-
-// export default ProductionInput

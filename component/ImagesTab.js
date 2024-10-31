@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, Modal, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image, Modal, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { Dimensions } from 'react-native';
 
 // db
 import { storage } from '../firebase/Config';
 import { deleteObject, getDownloadURL, listAll, ref, uploadBytesResumable } from 'firebase/storage';
+import { ActivityIndicator } from 'react-native-paper';
 
+const screenWidth = Dimensions.get('window').width;
 const ImagesTab = ({ route }) => {
   const { farm } = route.params;
   const [images, setImages] = useState([]);
+  const [newImages, setNewImages] = useState([])
   const [showAddImage, setShowAddImage] = useState(false);
   const [selectedImages, setSelectedImages] = useState([]);
 
@@ -21,6 +25,9 @@ const ImagesTab = ({ route }) => {
 
         const imagePromises = result.items.map(async (itemRef) => {
           const downloadURL = await getDownloadURL(itemRef);
+          console.log("dlURL:", downloadURL);
+          console.log("itemRef:", itemRef);
+
           return {
             src: downloadURL,
             ref: itemRef,
@@ -38,23 +45,27 @@ const ImagesTab = ({ route }) => {
   // Adding image
   const addImage = (image, height, width) => {
     setImages((images) => [...images, { src: image, height, width }]);
+    setNewImages((images) => [...images, { src: image, height, width }]);
   };
-
+  
   const openGallery = async () => {
     try {
       let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsMultipleSelection: true,
         quality: 0.6,
       });
-
+  
       if (!result.canceled) {
-        addImage(result.assets[0].uri, result.assets[0].height, result.assets[0].width);
+        result.assets.forEach((asset) => {
+          addImage(asset.uri, asset.height, asset.width);
+        });
       }
     } catch (e) {
       console.log(e);
     }
   };
-
+  
   const openCamera = async () => {
     try {
       await ImagePicker.requestCameraPermissionsAsync();
@@ -62,7 +73,7 @@ const ImagesTab = ({ route }) => {
         cameraType: ImagePicker.CameraType.back,
         quality: 0.6,
       });
-
+  
       if (!result.canceled) {
         addImage(result.assets[0].uri, result.assets[0].height, result.assets[0].width);
       }
@@ -70,86 +81,104 @@ const ImagesTab = ({ route }) => {
       console.log(e);
     }
   };
-
-  const uploadImages = async (uri, fileType, newFarm) => {
-    try {
-      const response = await fetch(uri);
-      const blob = await response.blob();
-      const filename = uri.substring(uri.lastIndexOf('/') + 1);
-
-      const storageRef = ref(storage, `FarmImages/${newFarm}/${filename}`);
-      const uploadTask = uploadBytesResumable(storageRef, blob);
-
-      uploadTask.on(
-        'state_changed',
-        (snapshot) => {
-          // Handle progress
-        },
-        (error) => {
-          console.error('Error uploading image: ', error);
-        },
-        () => {
-          getDownloadURL(uploadTask.snapshot.ref)
-            .then((downloadURL) => {
-              // Handle download URL
-            })
-            .catch((error) => {
+  
+  const uploadImages = (uri, newFarm) => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const response = await fetch(uri);
+        const blob = await response.blob();
+        const filename = uri.substring(uri.lastIndexOf('/') + 1);
+  
+        const storageRef = ref(storage, `FarmImages/${newFarm}/${filename}`);
+        const uploadTask = uploadBytesResumable(storageRef, blob);
+  
+        uploadTask.on(
+          'state_changed',
+          (snapshot) => {
+          },
+          (error) => {
+            console.error('Error uploading image: ', error);
+            reject(error);
+          },
+          async () => {
+            try {
+              const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+              resolve(downloadURL); 
+            } catch (error) {
               console.error('Error getting download URL: ', error);
-            });
-        }
-      );
-    } catch (error) {
-      console.error('Error uploading image: ', error);
-    }
-  };
-
-  const SaveImage = async () => {
-    try {
-      for (const img of images) {
-        await uploadImages(img.url, 'Image', farm.id);
-      }
-    } catch (e) {
-      console.log('Saving Error: ', e);
-    }
-  };
-
-  // Selecting and deleting image
-  const handleSelectImage = (imageRef) => {
-    setSelectedImages((prevSelected) => {
-      if (prevSelected.includes(imageRef)) {
-        return prevSelected.filter((ref) => ref !== imageRef);
-      } else {
-        return [...prevSelected, imageRef];
+              reject(error);
+            }
+          }
+        );
+      } catch (error) {
+        console.error('Error uploading image: ', error);
+        reject(error);
       }
     });
   };
+  
+  const handleSave = async () => {
+    try {
+      const uploadPromises = newImages.map((img) => uploadImages(img.src, farm.id));
+      Alert.alert('Success', 'All images uploaded successfully');
+    } catch (e) {
+      console.log('Saving Error: ', e);
+      Alert.alert('Error', 'Some images failed to upload');
+    }
+  };
+  
 
+  const handleSelectImage = (imageRef) => {
+    setSelectedImages((prevSelected) =>
+      prevSelected.includes(imageRef)
+        ? prevSelected.filter((ref) => ref !== imageRef)
+        : [...prevSelected, imageRef]
+    );
+  };
 
+  const handleDeleteSelected = async () => {
+    try {
+      const deletePromises = selectedImages.map((imageRef) => deleteObject(imageRef));
+      await Promise.all(deletePromises);
+      setImages((prevImages) => prevImages.filter((image) => !selectedImages.includes(image.ref)));
+      setSelectedImages([]);
+      Alert.alert('Success', 'Selected images have been deleted');
+    } catch (error) {
+      console.error('Error deleting images: ', error);
+    }
+  };
 
   return (
     <>
-      <View>
+      <View style={{ flex: 1, padding: 10 }}>
         <View style={styles.screen}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
             <TouchableOpacity style={styles.button} onPress={() => setShowAddImage(true)}>
-              <Text style={{ color: '#fff', fontSize: 15 }}>Add Image</Text>
+              <Text style={{ color: '#fff', fontSize: 15, textAlign: 'center', }}>Add Image</Text>
             </TouchableOpacity>
-            {/* <TouchableOpacity style={styles.button} onPress={handleDeleteSelected}>
-              <Text style={{ color: '#fff', fontSize: 15 }}>Delete Image</Text>
+            {/* <TouchableOpacity style={{ ...styles.button, backgroundColor: 'red' }} onPress={() => handleDeleteSelected}>
+              <Text style={{ color: '#fff', fontSize: 15, textAlign: 'center', }}>Delete Image</Text>
             </TouchableOpacity> */}
           </View>
-          <View style={styles.container}>
-            {images.map((image, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.imageContainer}
-                onPress={() => handleSelectImage(image.ref)}
-              >
-                <Image source={{ uri: image.src }} style={{ width: '100%', height: '100%' }} />
-              </TouchableOpacity>
-            ))}
-          </View>
+          <ScrollView>
+            <View style={styles.container}>
+              {images.map((image, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.imageContainer}
+                  onPress={() => handleSelectImage(image.ref)}
+                >
+                  <Image source={{ uri: image.src }} style={{ width: '100%', height: '100%' }} />
+                </TouchableOpacity>
+              ))}
+            </View>
+          </ScrollView>
         </View>
+      </View>
+      <View>
+        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+          <Text style={styles.save}>Save</Text>
+        </TouchableOpacity>
       </View>
       <Modal animationType='fade' visible={showAddImage} transparent={true}>
         <View style={styles.addImage}>
@@ -175,23 +204,33 @@ const ImagesTab = ({ route }) => {
 
 const styles = StyleSheet.create({
   screen: {
-    backgroundColor: '#fff',
-    padding: 5,
-    height: '100%',
+    paddingHorizontal: 5,
+    paddingBottom: 14,
+    borderRadius: 12,
+    marginTop: 10,
+    backgroundColor: '#FFF',
+    marginHorizontal: 5,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.20,
+    shadowRadius: 1.41,
+    elevation: 2,
+    marginBottom: 10,
+    height: '100%'
   },
   container: {
     flex: 1,
     flexDirection: 'row',
     flexWrap: 'wrap',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    padding: 10,
     width: '100%',
   },
   imageContainer: {
-    margin: 2,
-    width: '32.3%',
-    height: '22%',
+    margin: 1,
+    width: (screenWidth - 50) / 3,
+    height: (screenWidth - 50) / 3,
     overflow: 'hidden',
   },
   addImage: {
@@ -210,11 +249,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   button: {
+    flex: 1,
     backgroundColor: 'orange',
     borderRadius: 8,
     padding: 12,
-    justifyContent: 'flex-end',
-    alignItems: 'flex-end',
+
+    alignSelf: 'flex-end',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -225,6 +265,28 @@ const styles = StyleSheet.create({
     elevation: 5,
     margin: 10,
   },
+  saveButton: {
+    backgroundColor: '#52be80',
+    borderRadius: 8,
+    padding: 12,
+    alignSelf: 'flex-end',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    margin: 10,
+    paddingHorizontal: 50,
+    marginHorizontal: 16,
+  },
+  save: {
+    color: '#fff',
+    fontSize: 20,
+  }
+
 });
 
 export default ImagesTab;

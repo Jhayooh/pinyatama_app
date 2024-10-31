@@ -214,7 +214,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
           </View>
 
           <View style={{ ...styles.tableHead, marginTop: 12 }}>
-            <Text styles={{ fontWeight: 'bold' }}>Apply during the 1st month</Text>
+            <Text styles={{ fontWeight: 'bold', color:'red' }}>Apply during the 1st month</Text>
           </View>
           {
             comps?.map((comp) => {
@@ -230,7 +230,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
             })
           }
           <View style={{ ...styles.tableHead, marginTop: 12 }}>
-            <Text styles={{ fontWeight: 'bold' }}>Apply during the 4th month</Text>
+            <Text styles={{ fontWeight: 'bold', color:'red'  }}>Apply during the 4th month</Text>
           </View>
           {
             comps?.map((comp) => {
@@ -246,7 +246,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
             })
           }
           <View style={{ ...styles.tableHead, marginTop: 12 }}>
-            <Text styles={{ fontWeight: 'bold' }}>Apply during the 7th month</Text>
+            <Text styles={{ fontWeight: 'bold', color:'red'  }}>Apply during the 7th month</Text>
           </View>
           {
             comps?.map((comp) => {
