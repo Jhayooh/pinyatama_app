@@ -1,7 +1,7 @@
 import { address } from 'addresspinas';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
-import { GeoPoint, Timestamp, collection, doc, setDoc, updateDoc, addDoc, FieldValue, query, where } from 'firebase/firestore';
+import { GeoPoint, Timestamp, collection, doc, setDoc, updateDoc, addDoc, writeBatch, query, where } from 'firebase/firestore';
 import React, { useEffect, useState, useRef } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
@@ -920,7 +920,6 @@ export const Calculator = ({ navigation }) => {
   const [show, setShow] = useState(false);
 
   const handleMapPress = (e) => {
-    console.log("the eeeeeeeeeeee:", e)
     setUserLocation(e.nativeEvent.coordinate);
   };
 
@@ -995,141 +994,119 @@ export const Calculator = ({ navigation }) => {
     navigation.goBack()
   }
 
-  // important function (saving)
   const saveInputs = async () => {
     try {
-      const newAccount = await addDoc(farmerColl, {
+      const batch = writeBatch(db);
+      const currDate = new Date();
+  
+      // Add newAccount and get its ID
+      const newAccountRef = await addDoc(farmerColl, {
         firstname,
         lastname,
         sex,
         farmName,
-      })
-      await updateDoc(newAccount, { id: newAccount.id })
-      await setDoc(doc(dataColl, fieldId), {
+
+      });
+      const newAccountId = newAccountRef.id;
+      batch.update(newAccountRef, { id: newAccountId });
+  
+      // Set data in dataColl
+      const dataDocRef = doc(dataColl, fieldId);
+      batch.set(dataDocRef, {
         fieldId,
         farmName,
-        farmerId: newAccount.id,
+        farmerId: newAccountId,
         mun: municipality,
-        brgy: brgyCode
-      })
-
-      const newFarm = await addDoc(farmsColl, {
+        brgy: brgyCode,
+      });
+  
+      // Add farm with calculated dates
+      const start_date = new Date(Date.parse(startDate));
+      const floweringDate = new Date(start_date);
+      floweringDate.setMonth(start_date.getMonth() + 12);
+      const fruitingDate = new Date(floweringDate);
+      fruitingDate.setMonth(floweringDate.getMonth() + 1);
+      const harvestDate = new Date(fruitingDate);
+      harvestDate.setMonth(fruitingDate.getMonth() + 5);
+  
+      const newFarmRef = await addDoc(farmsColl, {
         area: area.toFixed(2),
         brgy: brgyCode,
-        cropStage: cropStage,
-        start_date: startDate,
-        harvest_date: endDate,
+        cropStage,
+        start_date,
+        harvest_date: harvestDate,
         geopoint: userLocation,
         mun: municipality,
         title: farmName,
         plantNumber: base,
         brgyUID: user.uid,
-        farmerName: firstname + ' ' + lastname,
-        sex: sex,
-        fieldId: fieldId,
-        farmerId: newAccount.id,
-        npk: npk,
-        soil: soil,
+        farmerName: `${firstname} ${lastname}`,
+        sex,
+        fieldId,
+        farmerId: newAccountId,
+        npk,
+        soil,
         ethrel: 0,
         isEthrel: null,
-        data: fertilizer.data
-      })
-
-      const weatherCol = collection(db, `farms/${newFarm.id}/weather`);
-      const farmComp = collection(db, `farms/${newFarm.id}/components`);
-      const farmCompActual = collection
-      const eventsRef = collection(db, `farms/${newFarm.id}/events`);
-      const roiRef = collection(db, `farms/${newFarm.id}/roi`);
-
-      const newWeather = await addDoc(weatherCol, weather.current)
-      await updateDoc(newWeather, { id: newWeather.id })
-
-      components.forEach(async (component) => {
-        try {
-          const newComp = await addDoc(farmComp, {
-            ...component
-          })
-          await updateDoc(newComp, { id: newComp.id })
-        } catch (e) {
-          console.log("error sa components:", e);
-        }
-      })
-
-      const newRoi = await addDoc(roiRef, {
-        ...roiDetails,
-        type: 'p'
-      })
-      await updateDoc(newRoi, { id: newRoi.id })
-
-      const actualRoi = await addDoc(roiRef, {
-        ...roiDetails,
-        type: 'a'
-      })
-      await updateDoc(actualRoi, { id: actualRoi.id })
-
-      const currDate = new Date()
-
-      const vegetativeDate = new Date(Date.parse(startDate));
-
-      const floweringDate = new Date(vegetativeDate);
-      floweringDate.setMonth(vegetativeDate.getMonth() + 12);
-
-      const fruitingDate = new Date(floweringDate);
-      fruitingDate.setMonth(floweringDate.getMonth() + 1);
-
-      const harvestDate = new Date(fruitingDate);
-      harvestDate.setMonth(fruitingDate.getMonth() + 5);
-      await updateDoc(newFarm, {
-        id: newFarm.id,
-        harvest_date: harvestDate
-      })
-
-      const eRef_vegetative = await addDoc(eventsRef, {
-        group: newFarm.id,
-        title: "Vegetative",
-        className: "vegetative",
-        start_time: Timestamp.fromDate(vegetativeDate),
-        end_time: Timestamp.fromDate(floweringDate),
-        createdAt: currDate,
+        data: fertilizer.data,
+        roi: [
+          { ...roiDetails, type: 'p' },
+          { ...roiDetails, type: 'a' },
+        ],
+        weather: weather.current
       });
-      await updateDoc(eRef_vegetative, { id: eRef_vegetative.id })
-
-      const eRef_flowering = await addDoc(eventsRef, {
-        group: newFarm.id,
-        title: "Flowering",
-        className: "flowering",
-        start_time: Timestamp.fromDate(floweringDate),
-        end_time: Timestamp.fromDate(fruitingDate),
-        createdAt: currDate,
-      })
-      await updateDoc(eRef_flowering, { id: eRef_flowering.id })
-
-      const eRef_fruiting = await addDoc(eventsRef, {
-        group: newFarm.id,
-        title: "Fruiting",
-        className: "fruiting",
-        start_time: Timestamp.fromDate(fruitingDate),
-        end_time: Timestamp.fromDate(harvestDate),
-        createdAt: currDate,
-      })
-      await updateDoc(eRef_fruiting, { id: eRef_fruiting.id })
-
+      const newFarmId = newFarmRef.id;
+  
+      batch.update(newFarmRef, { id: newFarmId });
+  
+      // Add events for Vegetative, Flowering, and Fruiting stages
+      const eventsRef = collection(db, `farms/${newFarmId}/events`);
+      const stages = [
+        { title: 'Vegetative', start: start_date, end: floweringDate, className: 'vegetative' },
+        { title: 'Flowering', start: floweringDate, end: fruitingDate, className: 'flowering' },
+        { title: 'Fruiting', start: fruitingDate, end: harvestDate, className: 'fruiting' },
+      ];
+      stages.forEach(async ({ title, start, end, className }) => {
+        const eventRef = await addDoc(eventsRef, {
+          group: newFarmId,
+          title,
+          className,
+          start_time: Timestamp.fromDate(start),
+          end_time: Timestamp.fromDate(end),
+          createdAt: currDate,
+        });
+        batch.update(eventRef, { id: eventRef.id });
+      });
+  
+      // Add each component to farmComp collection
+      const farmComp = collection(db, `farms/${newFarmId}/components`);
+      await Promise.all(
+        components.map(async (component) => {
+          const newComp = await addDoc(farmComp, component);
+          batch.update(newComp, { id: newComp.id });
+        })
+      );
+  
+      // Commit the batch
+      await batch.commit();
+  
+      // Upload images
+      await Promise.all(images.map((img) => uploadImages(img.url, 'Image', newFarmId)));
+  
       Alert.alert(`Saved Successfully`, `${farmName} is saved.`, [
         {
-          text: 'Ok', onPress: () => {
-            setSaving(false)
-            goBack()
-          }
+          text: 'Ok',
+          onPress: () => {
+            setSaving(false);
+            goBack();
+          },
         },
-      ])
-
-      for (const img of images) {
-        const upImg = await uploadImages(img.url, "Image", newFarm.id);
-      }
+      ]);
     } catch (e) {
-      console.log("Saving Error: ", e);
+      console.log('Saving Error: ', e);
     }
-  }
+  };
+  
 
   const BottomButton = () => {
     const checkMissing = () => {
@@ -1384,11 +1361,14 @@ export const Calculator = ({ navigation }) => {
   const fieldIdChange = (e) => {
     setFieldId(e.fieldId)
     const f = farmerData?.find(fd => fd.id === e.farmerId)
+    console.log("e", e);
+    console.log("f", f);
+    
     if (f) {
-      setFarmName(f['farmName'])
-      setFirstname(f['firstname'])
-      setLastname(f['lastname'])
-      setSex(f['sex'])
+      setFarmName(f.farmName)
+      setFirstname(f.firstname)
+      setLastname(f.lastname)
+      setSex(f.sex)
     }
     setMunicipality(e.mun)
     setBrgyCode(e.brgy)
