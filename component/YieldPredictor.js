@@ -8,14 +8,6 @@ import { ActivityIndicator } from 'react-native-paper';
 import Timeline from './charts/Timeline';
 
 const YieldPredictor = ({ route, navigation }) => {
-    const [productionData, setProductionData] = useState([]);
-    const [totalProduction, setTotalProduction] = useState(0);
-    const [pieChartData, setPieChartData] = useState([]);
-    const [combinedData2, setCombinedData2] = useState([]);
-    const [roiData, setRoiData] = useState([]);
-
-    const [currentUser, setCurrentUser] = useState('')
-
     const userAuth = auth.currentUser
 
     const farmsColl = collection(db, 'farms');
@@ -24,114 +16,87 @@ const YieldPredictor = ({ route, navigation }) => {
     const userColl = collection(db, '/users');
     const [usersData, usersLoading, usersError] = useCollectionData(userColl);
 
-    useEffect(() => {
-        const fetchRoiData = async () => {
-            if (!farmsData || farmsData.length === 0) return;
+    // {
+    //     name: "Seoul",
+    //     population: 21500000,
+    //     color: "rgba(131, 167, 234, 1)",
+    //     legendFontColor: "#7F7F7F",
+    //     legendFontSize: 15
+    //   },
+    // {
+    //     name: "Toronto",
+    //     population: 2800000,
+    //     color: "#F00",
+    //     legendFontColor: "#7F7F7F",
+    //     legendFontSize: 15
+    //   },
 
-            let roiDataArray = [];
-            for (const farm of farmsData) {
-                if (!farm.id) {
-                    console.error(`Farm is missing an id: ${JSON.stringify(farm)}`);
-                    continue;
-                }
+    const getPieData = (activeFarms, key, colorFunc) => {
+        return activeFarms.reduce((acc, farm) => {
+            const keyExist = acc.find(item => item.name === farm[key]);
+            const plantNumber = parseInt(farm.plantNumber);
 
-                try {
-                    const roiColl = collection(db, `farms/${farm.id}/roi`);
-                    const roiSnapshot = await getDocs(roiColl);
-                    roiSnapshot.forEach(doc => {
-                        roiDataArray.push({
-                            farmId: farm.id,
-                            ...doc.data(),
-                        });
-                    });
-                } catch (error) {
-                    console.error(`Error fetching ROI data for farm ${farm.id}:`, error);
-                }
+            if (keyExist) {
+                keyExist.population += plantNumber;
+            } else {
+                acc.push({
+                    name: farm[key],
+                    population: plantNumber,
+                    color: colorFunc(farm[key]),
+                    legendFontColor: "#7F7F7F",
+                    legendFontSize: 15
+                });
             }
-
-            setRoiData(roiDataArray);
-        };
-
-        fetchRoiData();
-    }, [farmsData]);
-
-    useEffect(() => {
-        if (!farmsData || farmsData.length === 0 || roiData.length === 0 || !usersData || usersData.length === 0) return;
-        const user = usersData.find(u => u.id === userAuth.uid)
-        setCurrentUser(user)
-        console.log("the userrrr", user);
-
-        const filteredFarms = farmsData.filter(farm => farm.mun === user.mun);
-
-        const groupedByBrgy = filteredFarms.reduce((acc, farm) => {
-            const brgy = farm.brgy || 'Unknown Barangay';
-            if (!acc[brgy]) acc[brgy] = [];
-
-            const farmRoiData = roiData.find(data => data.farmId === farm.id);
-            const grossReturn = farmRoiData?.grossReturn || 0;
-
-            acc[brgy].push(grossReturn);
             return acc;
-        },
-            {});
+        }, []);
+    };
+    const colorList = [
+        '#FF6700',
+        '#FFB000',
+        '#FFE600',
+        '#7FDD05',
+        '#00A585',
+        '#22BCF2',
+        '#1256CC',
+        '#803AD0',
+        '#B568F2',
+        '#CC2782',
+        '#FF71BF',
+        '#7EE8C7'
+    ];
 
+    // Array to track used colors
+    const usedColors = [];
 
+    // Function to get a random color from the predefined list
+    const getRandomColor = () => {
+        if (usedColors.length >= colorList.length) {
+            throw new Error("All colors have been used.");
+        }
 
-        const groupedByMun = farmsData.reduce((acc, farm) => {
-            const mun = farm.mun || 'Unknown Municipality';
-            if (!acc[mun]) acc[mun] = [];
+        let randomIndex;
+        do {
+            randomIndex = Math.floor(Math.random() * colorList.length);
+        } while (usedColors.includes(colorList[randomIndex]));
 
-            const farmRoiData = roiData.find(data => data.farmId === farm.id);
-            const grossReturn = farmRoiData?.grossReturn || 0;
+        // Mark this color as used
+        usedColors.push(colorList[randomIndex]);
+        return colorList[randomIndex];
+    };
 
-            acc[mun].push(grossReturn);
-            return acc;
-        }, {});
+    const munColor = (mun) => {
+        const colors = {
 
-        const combinedData = Object.keys(groupedByBrgy).map(brgy => ({
-            brgy,
-            data: groupedByBrgy[brgy].reduce((sum, value) => sum + value, 0),
-        }));
+        }
+        return colors[mun] || getRandomColor()
+    }
 
+    const brgyColor = (brgy) => {
+        const colors = {
 
-        const combinedData1 = Object.keys(groupedByMun).map(mun => ({
-            mun,
-            data: groupedByMun[mun].reduce((sum, value) => sum + value, 0),
-        }));
-
-        const pieChartData = combinedData.map(item => ({
-            label: item.brgy,
-            value: item.data,
-        }));
-
-        const totalProduction = combinedData1.reduce((sum, item) => sum + item.data, 0);
-        const combinedData2 = combinedData1.map(item => ({
-            label: item.mun,
-            value: item.data,
-        }));
-
-        setProductionData(combinedData2);
-        setTotalProduction(totalProduction);
-        setPieChartData(pieChartData);
-        setCombinedData2(combinedData2);
-    }, [farmsData, roiData, usersData]);
-
-    // if (farmsLoading || usersLoading || roiData.length === 0) {
-    //     return (
-    //         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-    //             <ActivityIndicator />
-    //         </View>
-    //     );
-    // }
-
-    // if (farmsError || usersError) {
-    //     return <View><Text>Error loading data...</Text></View>;
-    // }
-
-    const series1 = combinedData2.map(item => item.value);
-    const labels1 = combinedData2.map(item => item.label);
-    const series2 = pieChartData.map(item => item.value);
-    const labels2 = pieChartData.map(item => item.label);
+        }
+        return colors[brgy] || getRandomColor()
+    }
 
     return (
         <ScrollView>
@@ -142,7 +107,11 @@ const YieldPredictor = ({ route, navigation }) => {
                     elevation: 5,
                     padding: 10,
                 }}>
-                    <Pie labels={labels1} data={series1} title="Camarines Norte" />
+                    {
+                        farmsLoading
+                            ? <ActivityIndicator />
+                            : <Pie series={getPieData(farmsData.filter(f => f.cropStage !== 'complete'), 'mun', munColor)} title={"Municipality"} />
+                    }
                 </View>
                 <View style={{
                     backgroundColor: '#fff',
@@ -151,19 +120,19 @@ const YieldPredictor = ({ route, navigation }) => {
                     padding: 10,
                     marginTop: 18
                 }}>
-                    {/* {labels2.length === 0 ?
-                        (
-                            <>
-                                <Text style={{ display: 'flex', textAlign: 'center' }}> No Data to Display </Text>
-                            </>
-                        ) : */}
+                    {
+                        farmsLoading && usersLoading
+                            ? <ActivityIndicator />
+                            : <Pie
+                                series={getPieData(
+                                    farmsData.filter(f => f.cropStage !== 'complete' && f.mun === usersData?.find(u => u.id === userAuth.uid)?.mun),
+                                    'brgy',
+                                    brgyColor
+                                )}
+                                title={"Barangays"}
+                            />
 
-                        <Pie
-                            labels={labels2}
-                            data={series2}
-                            title={currentUser.mun}
-                        />
-                    {/* } */}
+                    }
 
                 </View>
                 <View style={{

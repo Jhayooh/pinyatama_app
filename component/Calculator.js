@@ -933,6 +933,8 @@ export const Calculator = ({ navigation }) => {
       let result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         quality: .6,
+        allowsEditing: true,
+        aspect: [3, 2]
       });
 
       if (!result.canceled) {
@@ -948,7 +950,9 @@ export const Calculator = ({ navigation }) => {
       await ImagePicker.requestCameraPermissionsAsync();
       let result = await ImagePicker.launchCameraAsync({
         cameraType: ImagePicker.CameraType.back,
-        quality: .6
+        quality: .6,
+        allowsEditing: true,
+        aspect: [3, 2]
       })
 
       if (!result.canceled) {
@@ -998,7 +1002,7 @@ export const Calculator = ({ navigation }) => {
     try {
       const batch = writeBatch(db);
       const currDate = new Date();
-  
+
       // Add newAccount and get its ID
       const newAccountRef = await addDoc(farmerColl, {
         firstname,
@@ -1009,7 +1013,7 @@ export const Calculator = ({ navigation }) => {
       });
       const newAccountId = newAccountRef.id;
       batch.update(newAccountRef, { id: newAccountId });
-  
+
       // Set data in dataColl
       const dataDocRef = doc(dataColl, fieldId);
       batch.set(dataDocRef, {
@@ -1019,7 +1023,7 @@ export const Calculator = ({ navigation }) => {
         mun: municipality,
         brgy: brgyCode,
       });
-  
+
       // Add farm with calculated dates
       const start_date = new Date(Date.parse(startDate));
       const floweringDate = new Date(start_date);
@@ -1028,7 +1032,7 @@ export const Calculator = ({ navigation }) => {
       fruitingDate.setMonth(floweringDate.getMonth() + 1);
       const harvestDate = new Date(fruitingDate);
       harvestDate.setMonth(fruitingDate.getMonth() + 5);
-  
+
       const newFarmRef = await addDoc(farmsColl, {
         area: area.toFixed(2),
         brgy: brgyCode,
@@ -1056,9 +1060,9 @@ export const Calculator = ({ navigation }) => {
         weather: weather.current
       });
       const newFarmId = newFarmRef.id;
-  
+
       batch.update(newFarmRef, { id: newFarmId });
-  
+
       // Add events for Vegetative, Flowering, and Fruiting stages
       const eventsRef = collection(db, `farms/${newFarmId}/events`);
       const stages = [
@@ -1077,7 +1081,7 @@ export const Calculator = ({ navigation }) => {
         });
         batch.update(eventRef, { id: eventRef.id });
       });
-  
+
       // Add each component to farmComp collection
       const farmComp = collection(db, `farms/${newFarmId}/components`);
       await Promise.all(
@@ -1086,13 +1090,13 @@ export const Calculator = ({ navigation }) => {
           batch.update(newComp, { id: newComp.id });
         })
       );
-  
+
       // Commit the batch
       await batch.commit();
-  
+
       // Upload images
       await Promise.all(images.map((img) => uploadImages(img.url, 'Image', newFarmId)));
-  
+
       Alert.alert(`Saved Successfully`, `${farmName} is saved.`, [
         {
           text: 'Ok',
@@ -1106,7 +1110,7 @@ export const Calculator = ({ navigation }) => {
       console.log('Saving Error: ', e);
     }
   };
-  
+
 
   const BottomButton = () => {
     const checkMissing = () => {
@@ -1363,7 +1367,7 @@ export const Calculator = ({ navigation }) => {
     const f = farmerData?.find(fd => fd.id === e.farmerId)
     console.log("e", e);
     console.log("f", f);
-    
+
     if (f) {
       setFarmName(f.farmName)
       setFirstname(f.firstname)
@@ -1373,7 +1377,6 @@ export const Calculator = ({ navigation }) => {
     setMunicipality(e.mun)
     setBrgyCode(e.brgy)
     setFieldidFocus(false)
-    console.log("eeeeeeeeeee:", e)
     // setUserLocation(f['Geopoint'])
 
     // Index: 0
