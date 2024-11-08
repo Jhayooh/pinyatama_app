@@ -1,5 +1,5 @@
 import { addDoc, collection, doc, getDoc, updateDoc, query } from 'firebase/firestore';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect} from 'react';
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import {
   ActivityIndicator,
@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { db } from '../firebase/Config';
 import { AddDataRow } from './AddDataRow';
+import { Table, Row, Rows } from 'react-native-table-component';
 
 export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setComponents, fertilizers, soil, bbType }) => {
   const [comps, setComps] = useState(components)
@@ -119,6 +120,61 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
     return Math.round((nambir / 100) * pirsint)
   }
 
+  // const formatter = (num) => {
+  //   return num.toLocaleString('en-PH', {
+  //     style: 'currency',
+  //     currency: 'PHP',
+  //     minimumFractionDigits: 0
+  //   })
+  // }
+
+  const tableHead = ['Particulars', 'Quantity', 'Unit', 'Price/Unit', 'Total Price'];
+
+  const TableData = ({ component, editable }) => {
+    const [name, setName] = useState(component.name);
+    const [qntyPrice, setQntyPrice] = useState(component.qntyPrice);
+    const [unit, setUnit] = useState(component.unit);
+    const [price, setPrice] = useState(component.price);
+    const [totalPrice, setTotalPrice] = useState(component.totalPrice);
+  
+    const handleEnter = () => {
+      setTotalPrice(qntyPrice * price);
+    };
+  
+    const handleEdit = (value) => {
+      const v = parseFloat(value) || 0;
+      setQntyPrice(v);
+      setTotalPrice(v * price);
+    };
+    const tableData = [
+      [
+        name,
+        <TextInput
+          editable={editable}
+          keyboardType="numeric"
+          maxLength={3}
+          onChangeText={handleEdit}
+          onSubmitEditing={handleEnter}
+          placeholder={qntyPrice.toString()}
+          value={qntyPrice.toString()}
+          style={editable ? { ...styles.textInput, borderWidth: 1 } : styles.textInput}
+        />,
+        unit,
+        formatter(price),
+        formatter(totalPrice)
+      ]
+    ];
+  
+    return (
+      <View style={styles.tableContainer}>
+        <Table borderStyle={{ borderWidth: 1, borderColor: '#c8e1ff' }}>
+          {/* <Row data={tableHead} style={styles.head} textStyle={styles.text} /> */}
+          <Rows data={tableData} textStyle={styles.text} />
+        </Table>
+      </View>
+    );
+  };
+  
   const formatter = (num) => {
     return num.toLocaleString('en-PH', {
       style: 'currency',
@@ -126,58 +182,59 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
       minimumFractionDigits: 0
     })
   }
+  
+  //   const [name, setName] = useState(component.name)
+  //   const [qntyPrice, setQntyPrice] = useState(component.qntyPrice)
+  //   const [unit, setUnit] = useState(component.unit)
+  //   const [price, setPrice] = useState(component.price)
+  //   const [totalPrice, setTotalPrice] = useState(component.totalPrice)
 
-  const TableData = ({ component, editable }) => {
-    const [name, setName] = useState(component.name)
-    const [qntyPrice, setQntyPrice] = useState(component.qntyPrice)
-    const [unit, setUnit] = useState(component.unit)
-    const [price, setPrice] = useState(component.price)
-    const [totalPrice, setTotalPrice] = useState(component.totalPrice)
+  //   const handleEnter = () => {
+  //     setComps((prev) =>
+  //       prev.map((c) =>
+  //         c.id === component.id && c.label === component.label ? { ...c, qntyPrice: qntyPrice, totalPrice: qntyPrice * price } : c
+  //       ))
+  //   }
 
-    const handleEnter = () => {
-      setComps((prev) =>
-        prev.map((c) =>
-          c.id === component.id && c.label === component.label ? { ...c, qntyPrice: qntyPrice, totalPrice: qntyPrice * price } : c
-        ))
-    }
+  //   const handleEdit = (e) => {
+  //     const v = e || 0
+  //     setQntyPrice(v)
+  //     setTotalPrice(v * price)
+  //   }
 
-    const handleEdit = (e) => {
-      const v = e || 0
-      setQntyPrice(v)
-      setTotalPrice(v * price)
-    }
+  //   return (
+  //     <View style={styles.tableData}>
+  //       <View style={{ ...styles.tableHeadLabel3, alignItems: 'flex-start' }}>
+  //         <Text>{name}</Text>
+  //       </View>
+  //       <View style={{ ...styles.tableHeadLabel3, alignItems: 'center' }}>
+  //         <TextInput
+  //           editable={editable}
+  //           keyboardType='numeric'
+  //           maxLength={3}
+  //           onChangeText={handleEdit}
+  //           onSubmitEditing={handleEnter}
+  //           placeholder={component ? qntyPrice.toString() : ""}
+  //           value={qntyPrice}
+  //           style={editable ? { ...styles.textInput, borderColor: 'orange', borderWidth: 1 } : styles.textInput}
+  //         />
+  //         {/* <Text>{qnty.toLocaleString()}</Text> */}
+  //       </View>
+  //       <View style={{ ...styles.tableHeadLabel2, alignItems: 'center' }}>
+  //         <Text>{unit}</Text>
+  //       </View>
+  //       <View style={{ ...styles.tableHeadLabel3, alignItems: 'flex-end' }}>
+  //         <Text>{formatter(price)}</Text>
+  //       </View>
+  //       <View style={{ ...styles.tableHeadLabel3, alignItems: 'flex-end' }}>
+  //         {/* {setTotal(total + totalPrice)} */}
+  //         <Text>{formatter(totalPrice)}</Text>
+  //       </View>
+  //     </View>
+  //   )
+  // }
 
-    return (
-      <View style={styles.tableData}>
-        <View style={{ ...styles.tableHeadLabel3, alignItems: 'flex-start' }}>
-          <Text>{name}</Text>
-        </View>
-        <View style={{ ...styles.tableHeadLabel3, alignItems: 'center' }}>
-          <TextInput
-            editable={editable}
-            keyboardType='numeric'
-            maxLength={3}
-            onChangeText={handleEdit}
-            onSubmitEditing={handleEnter}
-            placeholder={component ? qntyPrice.toString() : ""}
-            value={qntyPrice}
-            style={editable ? { ...styles.textInput, borderColor: 'orange', borderWidth: 1 } : styles.textInput}
-          />
-          {/* <Text>{qnty.toLocaleString()}</Text> */}
-        </View>
-        <View style={{ ...styles.tableHeadLabel2, alignItems: 'center' }}>
-          <Text>{unit}</Text>
-        </View>
-        <View style={{ ...styles.tableHeadLabel3, alignItems: 'flex-end' }}>
-          <Text>{formatter(price)}</Text>
-        </View>
-        <View style={{ ...styles.tableHeadLabel3, alignItems: 'flex-end' }}>
-          {/* {setTotal(total + totalPrice)} */}
-          <Text>{formatter(totalPrice)}</Text>
-        </View>
-      </View>
-    )
-  }
+
 
   return (
     <>
@@ -186,15 +243,14 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
           <Text style={{ width: '100%', padding: 8, alignItems: 'center', textAlign: 'center', color: '#FFF' }}>
             COST AND RETURN ANALYSIS {typeof area === 'number' ? area.toFixed(2) : area} HA PINEAPPLE PRODUCTION
           </Text>
-
         </View>
         <View style={{ flex: 1, marginTop: 6, marginHorizontal: 12 }}>
           {/* Header */}
           <View style={{ ...styles.tableHead, borderBottomWidth: 2, borderColor: '#000', }}>
             <View style={{ ...styles.tableHeadLabel3, alignItems: 'center' }}>
-              <Text style={{ fontSize: 12, fontWeight: '600' }}>PARTICULARS</Text>
+                <Row data={tableHead} style={styles.head} textStyle={styles.text} />
             </View>
-            <View style={{ ...styles.tableHeadLabel3, alignItems: 'center' }}>
+            {/* <View style={{ ...styles.tableHeadLabel3, alignItems: 'center' }}>
               <Text style={{ fontSize: 12 }}>QNTY</Text>
             </View>
             <View style={{ ...styles.tableHeadLabel2, alignItems: 'center' }}>
@@ -205,7 +261,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
             </View>
             <View style={{ ...styles.tableHeadLabel3, alignItems: 'flex-end' }}>
               <Text style={{ fontSize: 12 }}>TOTAL PRICE</Text>
-            </View>
+            </View> */}
           </View>
 
           {/* Body */}
@@ -284,7 +340,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
                   <TableData
                     key={comp.id}
                     component={comp}
-                    editable={false}
+                    editable={true}
                   />
                 )
               }
@@ -310,7 +366,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
                   <TableData
                     key={comp.id}
                     component={comp}
-                    editable={false}
+                    editable={true}
                   />
                 )
               }
@@ -395,7 +451,7 @@ const styles = StyleSheet.create({
   },
   textInput: {
     flex: 1,
-    height: 42,
+    height: 10,
     opacity: 1.0,
     borderColor: '#E8E7E7',
     borderWidth: 1,

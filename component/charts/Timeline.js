@@ -27,7 +27,7 @@ const Timeline = ({ navigation }) => {
 
     const filteredEvents = farms
         ? farms
-            .filter(f => f.brgyUID === user?.uid)
+            .filter(f => f.brgyUID === user?.uid && f.cropStage !== 'complete' && !f.isEthrel)
             .map(f => ({
                 start: f.start_date?.toDate() || new Date(),
                 end: f.harvest_date?.toDate() || new Date(),

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SafeAreaView, StyleSheet, Text, TouchableOpacity, ScrollView, View, Image, Modal } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import Charts from './Charts';
@@ -13,9 +13,11 @@ import { auth, db } from '../firebase/Config';
 
 const Tab = createMaterialTopTabNavigator();
 
-const ProductionInput = ({ route}) => {
+const ProductionInput = ({ route }) => {
   const [user] = useAuthState(auth)
   const { farm = [] } = route.params
+
+  console.log('faaarrmmm', farm.cropStage)
 
   const componentsColl = collection(db, `farms/${farm.id}/components`)
   const [compData, compLoading, compError] = useCollectionData(componentsColl)
@@ -27,20 +29,29 @@ const ProductionInput = ({ route}) => {
     setVisible(false);  // Close the modal when navigating
     navigation.navigate(screen, params);
   };
+  const [cmplt, setCmplt] = useState(false)
 
+  const handleCmplt = () => {
+    if (farm.cropStage === 'complete') {
+      setCmplt(true)
+    }
+  };
+  useEffect(() => {
+    handleCmplt();
+  }, [farm.cropStage]);
 
-  React.useEffect(() => {
-    if (!user || !compData) {
+  useEffect(() => {
+    if (!user || !compData || cmplt) {
       return;
     }
     navigation.setOptions({
       headerRight: () => (
         <View style={{ display: 'flex', flexDirection: 'row', gap: 1 }}>
-      
+
           <TouchableOpacity onPress={() => setVisible(true)} style={styles.menuButton}>
-          <Image source={require('../assets/hamburger.png')}/>
+            <Image source={require('../assets/dots.png')} />
           </TouchableOpacity>
-         
+
         </View>
       ),
     });
@@ -61,19 +72,19 @@ const ProductionInput = ({ route}) => {
         visible={visible}
         // animationType="slide"
         onRequestClose={() => setVisible(false)}
-      > 
+      >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <TouchableOpacity onPress={() => setVisible(false)} style={styles.closeButton}>
               <Text style={styles.closeButtonText}>X</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => handleNavigate('Profile', {farm: farm})} style={styles.menuItem}>
+            <TouchableOpacity onPress={() => handleNavigate('Profile', { farm: farm })} style={styles.menuItem}>
               <Text style={styles.menuItemText}>Edit Farm Details</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => handleNavigate ('Images', { farm: farm })}style={styles.menuItem}>
+            <TouchableOpacity onPress={() => handleNavigate('Images', { farm: farm })} style={styles.menuItem}>
               <Text style={styles.menuItemText}>Add Farm Images</Text>
             </TouchableOpacity>
-            <TouchableOpacity   onPress={() => handleNavigate ('Activities', { farm: farm })} style={styles.menuItem}>
+            <TouchableOpacity onPress={() => handleNavigate('Activities', { farm: farm })} style={styles.menuItem}>
               <Text style={styles.menuItemText}>Add Activities</Text>
             </TouchableOpacity>
           </View>
@@ -107,7 +118,7 @@ const styles = StyleSheet.create({
     marginLeft: 20
   },
   modalOverlay: {
-    marginTop:55,
+    marginTop: 55,
     flex: 1,
     justifyContent: 'flex-start',
     alignItems: 'flex-end',
@@ -115,7 +126,7 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     // width: '80%',
-    
+
     backgroundColor: '#fff',
     borderRadius: 10,
     padding: 10,
@@ -132,8 +143,8 @@ const styles = StyleSheet.create({
   closeButtonText: {
     color: 'red',
     fontSize: 20,
-    alignSelf:'flex-end',
-    marginRight:5
+    alignSelf: 'flex-end',
+    marginRight: 5
   },
 });
 

@@ -3,12 +3,12 @@ import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Alert, Imag
 import StepIndicator from 'react-native-step-indicator';
 import { Dropdown } from 'react-native-element-dropdown';
 import moment from 'moment';
-import { addDoc, collection, query, orderBy, onSnapshot, Timestamp, updateDoc, doc } from 'firebase/firestore'; // added onSnapshot
+import { addDoc, collection, query, orderBy, onSnapshot, Timestamp, updateDoc, doc, arrayUnion } from 'firebase/firestore'; // added onSnapshot
 import { db } from '../firebase/Config';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { LinearGradient } from 'expo-linear-gradient';
-
+import CheckBox from 'expo-checkbox'
 
 const ferti = [
   { label: "Ammophos (16-20-0)", value: "Ammophos (16-20-0)" },
@@ -162,17 +162,21 @@ const Activities = ({ route }) => {
   }
 
   const handleRepPer = (input) => {
-    const numericInput = input.replace(/[^0-9]/g, ''); // Remove non-numeric characters
-    if (numericInput <= 100) {
-      setReportPer(numericInput);
-    }
-    if (value === '0') {
-      Alert.alert('Invalid Input', 'Percentage cannot be 0.');
-    } else {
-      setReportPer(value);
+    // Remove non-numeric characters
+    let numericInput = input.replace(/[^0-9]/g, '');
+
+    // Limit the input to a maximum of 100
+    if (numericInput > 100) {
+      numericInput = '100';
     }
 
+    setReportPer(numericInput);
+
+    if (numericInput === '0') {
+      Alert.alert('Invalid Input', 'Percentage cannot be 0.');
+    }
   };
+
 
   function getPinePrice(pine, pineObject) {
     const newPine = pineObject.filter(thePine => thePine.name.toLowerCase() === pine.toLowerCase())[0]
@@ -182,7 +186,7 @@ const Activities = ({ route }) => {
   useEffect(() => {
     async function calculateAndSaveData() {
       if (!actualComponents) return;
-      const actualRoi = roi.find(r => r.type === 'a');
+      const actualRoi = farm.roi.find(r => r.type === 'a');
 
       // LABOR MATERIAL
       const totalLabor = actualComponents
@@ -201,18 +205,25 @@ const Activities = ({ route }) => {
       const netReturnValue = grossReturn - costTotal;
       const roiValue = (netReturnValue / grossReturn) * 100;
 
-      const eventId = roi?.find(event => event.type === 'a')?.id || null;
-      if (eventId) {
-        await updateDoc(doc(db, `farms/${farm.id}/roi/${actualRoi.id}`), {
-          ...actualRoi,
-          roi: roiValue,
-          costTotal: costTotal,
-          laborTotal: totalLabor,
-          materialTotal: totalMaterial,
-          fertilizerTotal: totalFertilizer,
-          netReturn: netReturnValue
-        });
-      }
+      const newRoi = farm.roi.map(fr => {
+        if (fr.type === 'a') {
+          return {
+            ...fr,
+            roi: roiValue,
+            costTotal: costTotal,
+            laborTotal: totalLabor,
+            materialTotal: totalMaterial,
+            fertilizerTotal: totalFertilizer,
+            netReturn: netReturnValue
+          }
+        }
+        return fr
+      })
+      console.log("new Roi: ", newRoi);
+      
+      await updateDoc(doc(farmColl, farm.id), {
+        roi: newRoi
+      })
     }
 
     // Call the async function
@@ -220,13 +231,81 @@ const Activities = ({ route }) => {
 
   }, [actualComponents]);
 
-
+  const getPercentage = (pirsint, nambir) => {
+    return Math.round((nambir / 100) * pirsint)
+  }
 
   const handleSave = async (act) => {
     setSaving(true);
     try {
       const currDate = date;
       if (act === "r") {
+
+        const date = new Date()
+        const farmDocRef = doc(farmColl, `${farm.id}`)
+        if (mark) {
+          await updateDoc(farmDocRef, {
+            crop: true,
+            cropStage: 'complete',
+            harvest_date: Timestamp.fromDate(date)
+          });
+        }
+
+        const farmRoi = farm.roi.find(r => r.type === 'a')
+        const totalPlant = farmRoi.butterBall + farmRoi.grossReturn
+        const remainingPlant = getPercentage(100 - reportPer, totalPlant)
+
+        let newGoodSize = getPercentage(90, remainingPlant)
+        let newButterBall = getPercentage(10, remainingPlant)
+
+        switch (farm.soil.toLowerCase()) {
+          case 'clay':
+            newGoodSize = getPercentage(85, newGoodSize)
+            newButterBall = getPercentage(85, newButterBall)
+            break;
+          case 'sandy':
+            newGoodSize = getPercentage(70, newGoodSize)
+            newButterBall = getPercentage(70, newButterBall)
+            break;
+          default:
+            break;
+        }
+
+        const grossReturn = (newGoodSize * getPinePrice('good size', localPine)) + (newButterBall * getPinePrice('butterball', localPine));
+        const costTotal = (farmRoi.materialTotal - farmRoi.fertilizerTotal) + farmRoi.laborTotal + farmRoi.fertilizerTotal;
+        const netReturnValue = grossReturn - costTotal;
+        const roiValue = (netReturnValue / grossReturn) * 100;
+
+        const newRoi = farm.roi.map(fr => {
+          if (fr.type === 'a') {
+            return {
+              ...fr,
+              butterBall: newButterBall,
+              costTotal: costTotal,
+              grossReturn: grossReturn,
+              netReturn: netReturnValue,
+              roi: roiValue,
+            }
+          }
+          return fr
+        })
+
+        console.log("new roi", {
+          totalPlant,
+          remainingPlant,
+          newGoodSize,
+          newButterBall,
+          grossReturn,
+          costTotal,
+          netReturnValue,
+          roiValue
+        });
+        
+
+        await updateDoc(farmDocRef, {
+          roi: newRoi
+        })
+
         await addDoc(activityColl,
           {
             type: act,
@@ -237,6 +316,8 @@ const Activities = ({ route }) => {
             qnty: reportPer,
           }
         )
+
+
       } else {
         const theLabel = ferti.find(obj => obj.value === fertilizer);
         const qnty = comps.qntyPrice;
@@ -432,7 +513,6 @@ const Activities = ({ route }) => {
       return <Image source={require('../assets/pineapple.png')} width={10} />;
     }
 
-    // Default indicator for other steps
     return (
       <View
         style={{
@@ -445,38 +525,93 @@ const Activities = ({ route }) => {
     );
   };
 
+  const [mark, setMark] = useState(false)
+
+  useEffect(() => {
+    if (!handleMark()) {
+      setMark(false);
+    }
+  }, [reportPer]);
+
+  const handleMark = () => {
+    return reportPer >= 70 && reportPer <= 100;
+  };
+
+  const handleComplete = async () => {
+    try {
+      if (!farm) {
+        console.log('No farm data found');
+        return;
+      }
+
+      const farmDocRef = doc(farmColl, `${farm.id}`)
+
+      await updateDoc(farmDocRef, {
+        cropStage: 'complete',
+        crop: true
+      });
+
+
+
+      console.log('Crop stage updated to complete');
+    } catch (error) {
+      console.error('Error updating crop stage:', error);
+    }
+  };
 
   const handleConfirmation = () => {
-    if (!reportTitle || !reportDesc || reportPer === '0' || reportPer === '' || !bilang) {
+    if (!reportTitle || !reportDesc || reportPer === '0' || reportPer === '') {
       Alert.alert(
         'Input Needed',
         'Please fill out missing fields before submitting.'
       );
       return;
     }
-    Alert.alert('Report', 'Are you sure you want to submit this report?',
-      [
-        {
-          text: 'Cancel',
-          onPress: () => console.log('Cancel Pressed'),
-          style: 'cancel',
-        },
-        {
-          text: 'Yes',
-          onPress: () => handleSave("r")
-        },
-      ]
-    )
-    console.log('reeepooorrtt', handleConfirmation)
+
+    if (mark) {
+      Alert.alert(
+        'Mark as Complete',
+        'This will remove the Farm from the list of active Farms.',
+        [
+          {
+            text: 'Cancel',
+            onPress: () => console.log('Cancel Pressed'),
+            style: 'cancel',
+          },
+          {
+            text: 'Ok',
+            onPress: () => {
+              handleSave("r");
+              return;
+            },
+          },
+        ]
+      );
+    } else {
+      Alert.alert('Report', 'Are you sure you want to submit this report?',
+        [
+          {
+            text: 'Cancel',
+            onPress: () => console.log('Cancel Pressed'),
+            style: 'cancel',
+          },
+          {
+            text: 'Yes',
+            onPress: () => handleSave("r")
+          },
+        ]
+      )
+    }
+
   }
 
   return (
     <View style={styles.container}>
       <View style={{ display: 'flex', gap: 2, flexDirection: 'row', justifyContent: 'space-between', }}>
-        <TouchableOpacity onPress={() => setIsAdd(true)} style={{ ...styles.addButton, flex: 1 }}>
+        <TouchableOpacity disabled={farm.crop} onPress={() => setIsAdd(true)} style={{ ...styles.addButton, flex: 1 }}>
           <Text style={styles.addButtonText}>Add Activities</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => setReport(true)} style={{ ...styles.addButton, backgroundColor: 'red', flex: 1 }}>
+        <TouchableOpacity disabled={farm.crop} onPress={() => setReport(true)} style={{ ...styles.addButton, backgroundColor: 'red', flex: 1 }}>
           <Text style={styles.addButtonText}>Add Report</Text>
         </TouchableOpacity>
       </View>
@@ -515,10 +650,10 @@ const Activities = ({ route }) => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>Add Activity</Text>
-            <View style={{display:'flex', flexDirection:'row'}}>
-                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Fertilizer:</Text>
-                <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
-              </View>
+            <View style={{ display: 'flex', flexDirection: 'row' }}>
+              <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Fertilizer:</Text>
+              <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
+            </View>
             <Dropdown
               data={ferti}
               labelField="label"
@@ -537,10 +672,10 @@ const Activities = ({ route }) => {
             {
               fertilizer.toLocaleLowerCase() === "flower inducer (ethrel)" &&
               <View style={styles.quantyContainer}>
-                <View style={{display:'flex', flexDirection:'row'}}>
-                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Number of Plants:</Text>
-                <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
-              </View>
+                <View style={{ display: 'flex', flexDirection: 'row' }}>
+                  <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Number of Plants:</Text>
+                  <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
+                </View>
                 <TextInput
                   placeholder="Bilang ng tanim"
                   keyboardType="numeric"
@@ -550,10 +685,10 @@ const Activities = ({ route }) => {
                 />
               </View>
             }
-            <View style={{display:'flex', flexDirection:'row'}}>
-                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Quantity:</Text>
-                <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
-              </View>
+            <View style={{ display: 'flex', flexDirection: 'row' }}>
+              <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Quantity:</Text>
+              <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
+            </View>
             <View style={styles.quantyContainer}>
               <TextInput
                 placeholder="0.0"
@@ -577,7 +712,7 @@ const Activities = ({ route }) => {
               </View>
             </View>
             <View>
-            <View style={{display:'flex', flexDirection:'row'}}>
+              <View style={{ display: 'flex', flexDirection: 'row' }}>
                 <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Date:</Text>
                 <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
               </View>
@@ -636,7 +771,7 @@ const Activities = ({ route }) => {
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>REPORT</Text>
             <View style={styles.quantyContainer}>
-              <View style={{display:'flex', flexDirection:'row'}}>
+              <View style={{ display: 'flex', flexDirection: 'row' }}>
                 <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Title:</Text>
                 <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
               </View>
@@ -646,7 +781,7 @@ const Activities = ({ route }) => {
                 onChangeText={(e) => setReportTitle(e)}
                 style={{ ...styles.input, borderColor: bilangError ? 'red' : '#ccc' }}
               />
-                <View style={{display:'flex', flexDirection:'row'}}>
+              <View style={{ display: 'flex', flexDirection: 'row' }}>
                 <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Description:</Text>
                 <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
               </View>
@@ -659,7 +794,7 @@ const Activities = ({ route }) => {
                 onChangeText={(e) => setReportDesc(e)}
                 style={{ ...styles.input, borderColor: bilangError ? 'red' : '#ccc' }}
               />
-                <View style={{display:'flex', flexDirection:'row'}}>
+              <View style={{ display: 'flex', flexDirection: 'row' }}>
                 <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Percentage of Damage:</Text>
                 <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
               </View>
@@ -675,7 +810,7 @@ const Activities = ({ route }) => {
                   <Text style={styles.suffix}>%</Text>
                 </View>
               </View>
-              <View style={{display:'flex', flexDirection:'row'}}>
+              <View style={{ display: 'flex', flexDirection: 'row' }}>
                 <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Date of Report:</Text>
                 <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
               </View>
@@ -722,26 +857,36 @@ const Activities = ({ route }) => {
                 </TouchableOpacity>
               }
             </View>
-            <TouchableOpacity style={{
+
+            <View style={{
               display: 'flex',
-              flexDirection: 'row',
               alignItems: 'center',
-              padding: 10,
-              borderRadius: 30,
-              borderColor: '#fff',
-              borderWidth: 1,
-              backgroundColor: 'orange',
-              marginTop: 30
+              justifyContent: 'center',
+              marginTop: 20,
             }}>
-              <Image source={require('../assets/check.png')} style={{ marginLeft: 1, alignItems: 'center', textAlign: 'center' }} />
-              <Text style={styles.cmplt}>Mark as Complete Farm</Text>
-            </TouchableOpacity>
+              <View style={{
+                display: 'flex',
+                flexDirection: 'row',
+                marginBottom: 10,
+              }}>
+                <CheckBox
+                  disabled={!handleMark()}
+                  value={mark}
+                  onValueChange={setMark}
+                  color={mark ? '#f6a30b' : undefined}
+                  style={{ margin: 8 }}
+                />
+                <TouchableOpacity onPress={() => setMark(!mark)} disabled={!handleMark()}>
+                  <Text style={{ fontSize: 15, color: 'black', marginTop: 10, fontFamily: 'serif' }}>Mark as Complete Farm?</Text>
+                </TouchableOpacity>
+              </View>
+
+            </View>
 
           </View>
         </View>
 
       </Modal>
-      {/* <Alert {...alert}/> */}
     </View>
   );
 };
