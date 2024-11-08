@@ -46,7 +46,7 @@ const soilType = [
 
 const npkType = [
   {
-    label: 'HHS',
+    label: 'HHS (High, High, Sufficient)',
     value: 'HHS',
     data: {
       oranicFert: 4,
@@ -70,7 +70,7 @@ const npkType = [
           K: 15,
         },
         list: {
-          '17-0-17': 1.0, //water soluble solution
+          '17-0-17': 1.0, 
           '46-0-0': 0.5,
           '0-0-60': 0,
         }
@@ -78,7 +78,7 @@ const npkType = [
     }
   },
   {
-    label: 'HMS',
+    label: 'HMS (High, Medium, Sufficient)',
     value: 'HMS',
     data: {
       oranicFert: 4,
@@ -110,7 +110,7 @@ const npkType = [
     }
   },
   {
-    label: 'HLS',
+    label: 'HLS (High, Low, Sufficient)',
     value: 'HLS',
     data: {
       oranicFert: 4,
@@ -142,7 +142,7 @@ const npkType = [
     }
   },
   {
-    label: 'HHD',
+    label: 'HHD (High, High, Deficient)',
     value: 'HHD',
     data: {
       oranicFert: 4,
@@ -174,7 +174,7 @@ const npkType = [
     }
   },
   {
-    label: 'HMD',
+    label: 'HMD (High, Medium, Deficient)',
     value: 'HMD',
     data: {
       oranicFert: 4,
@@ -206,7 +206,7 @@ const npkType = [
     }
   },
   {
-    label: 'HLD',
+    label: 'HLD (High, Low, Deficient)',
     value: 'HLD',
     data: {
       oranicFert: 4,
@@ -238,7 +238,7 @@ const npkType = [
     }
   },
   {
-    label: 'MHS',
+    label: 'MHS (Medium, High, Suficient)',
     value: 'MHS',
     data: {
       oranicFert: 6,
@@ -270,7 +270,7 @@ const npkType = [
     }
   },
   {
-    label: 'MMS',
+    label: 'MMS (Medium, Medium, Suficient)',
     value: 'MMS',
     data: {
       oranicFert: 6,
@@ -302,7 +302,7 @@ const npkType = [
     }
   },
   {
-    label: 'MLS',
+    label: 'MLS (Medium, Low, Suficient)',
     value: 'MLS',
     data: {
       oranicFert: 6,
@@ -334,7 +334,7 @@ const npkType = [
     }
   },
   {
-    label: 'MHD',
+    label: 'MHD (Medium, High, Deficient)',
     value: 'MHD',
     data: {
       oranicFert: 6,
@@ -366,7 +366,7 @@ const npkType = [
     }
   },
   {
-    label: 'MMD',
+    label: 'MMD (Medium, Medium, Deficient)',
     value: 'MMD',
     data: {
       oranicFert: 6,
@@ -398,7 +398,7 @@ const npkType = [
     }
   },
   {
-    label: 'MLD',
+    label: 'MLD (Medium, Low, Deficient)',
     value: 'MLD',
     data: {
       oranicFert: 6,
@@ -430,7 +430,7 @@ const npkType = [
     }
   },
   {
-    label: 'LHS',
+    label: 'LHS (Low, High, Suficient)',
     value: 'LHS',
     data: {
       oranicFert: 8,
@@ -462,7 +462,7 @@ const npkType = [
     }
   },
   {
-    label: 'LMS',
+    label: 'LMS (Low, Medium, Suficient)',
     value: 'LMS',
     data: {
       oranicFert: 8,
@@ -494,7 +494,7 @@ const npkType = [
     }
   },
   {
-    label: 'LLS',
+    label: 'LLS (Low, Low, Suficient)',
     value: 'LLS',
     data: {
       oranicFert: 8,
@@ -526,7 +526,7 @@ const npkType = [
     }
   },
   {
-    label: 'LHD',
+    label: 'LHD (Low, High, Deficient)',
     value: 'LHD',
     data: {
       oranicFert: 8,
@@ -559,7 +559,7 @@ const npkType = [
   },
 
   {
-    label: 'LMD',
+    label: 'LMD (Low, Medium, Deficient)',
     value: 'LMD',
     data: {
       oranicFert: 8,
@@ -591,7 +591,7 @@ const npkType = [
     }
   }, //150 60 225
   {
-    label: 'LLD',
+    label: 'LLD (Low, Low, Deficient)',
     value: 'LLD',
     data: {
       oranicFert: 8,
@@ -1421,6 +1421,7 @@ export const Calculator = ({ navigation }) => {
     return lng > 0 ? lng - 360 : lng; // Adjusting for positive longitudes
   }
 
+  
   return (
     <>
       <View style={styles.screen}>

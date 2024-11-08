@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, ScrollView, Text, LogBox } from 'react-native';
-import Pie from './Pie';  // Assume this is a custom Pie chart component
+import Pie from './Pie';
 import { collection, getDocs } from 'firebase/firestore';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
 import { db, auth } from '../firebase/Config';
@@ -16,53 +16,65 @@ const YieldPredictor = ({ route, navigation }) => {
     const userColl = collection(db, '/users');
     const [usersData, usersLoading, usersError] = useCollectionData(userColl);
 
-    // {
-    //     name: "Seoul",
-    //     population: 21500000,
-    //     color: "rgba(131, 167, 234, 1)",
-    //     legendFontColor: "#7F7F7F",
-    //     legendFontSize: 15
-    //   },
-    // {
-    //     name: "Toronto",
-    //     population: 2800000,
-    //     color: "#F00",
-    //     legendFontColor: "#7F7F7F",
-    //     legendFontSize: 15
-    //   },
+    const getPercentage = (pirsint, nambir) => {
+        return Math.round((nambir / 100) * pirsint)
+    }
+    const format = (num) => {
+        return num.toLocaleString('en-US'
+        )
+    }
 
     const getPieData = (activeFarms, key, colorFunc) => {
+        const totalProduction = activeFarms.reduce((acc, farm) => {
+            return parseInt(acc) + parseInt(farm.plantNumber);
+        }, 0);
+        console.log('total production:', totalProduction);
+
+        const munTotalProduction = activeFarms.reduce((acc, farm) => {
+            const keyValue = farm[key];
+
+            if (keyValue) {
+                // Check if the key already exists in acc
+                if (acc[keyValue]) {
+                    acc[keyValue] += parseInt(farm.plantNumber); // Add to the existing value
+                } else {
+                    acc[keyValue] = parseInt(farm.plantNumber); // Initialize the key with the value
+                }
+            }
+
+            return acc;
+        }, {});
+
+        console.log("munTotal", munTotalProduction);
+
         return activeFarms.reduce((acc, farm) => {
             const keyExist = acc.find(item => item.name === farm[key]);
             const plantNumber = parseInt(farm.plantNumber);
 
             if (keyExist) {
-                keyExist.population += plantNumber;
+                keyExist.value += plantNumber;
             } else {
                 acc.push({
                     name: farm[key],
-                    population: plantNumber,
+                    value: plantNumber,
+                    text: `${Math.round((munTotalProduction[farm[key]] / totalProduction) * 100)}% (${format(munTotalProduction[farm[key]])})`,
                     color: colorFunc(farm[key]),
-                    legendFontColor: "#7F7F7F",
-                    legendFontSize: 15
                 });
             }
             return acc;
         }, []);
     };
     const colorList = [
-        '#FF6700',
-        '#FFB000',
-        '#FFE600',
-        '#7FDD05',
-        '#00A585',
-        '#22BCF2',
-        '#1256CC',
-        '#803AD0',
-        '#B568F2',
-        '#CC2782',
-        '#FF71BF',
-        '#7EE8C7'
+        '#FFB3BA', '#FFDFBA', '#FFFFBA', '#BAFFC9', '#BAE1FF',
+        '#D4A5A5', '#FFD3B6', '#C9C9FF', '#E2F0CB', '#FFBEAA',
+        '#FF9AA2', '#FFB7B2', '#FFDAC1', '#E0BBE4', '#D4A5A5',
+        '#A0E7E5', '#B4F8C8', '#FFAEBC', '#AFCBFF', '#FFCECE',
+        '#FFBCBC', '#FFD8D8', '#E1F7D5', '#FFFFD1', '#B2F7EF',
+        '#FFC8A2', '#D3E4CD', '#F5E0B7', '#D2D7DF', '#FAD9C1',
+        '#F3D1F4', '#E1E5EA', '#FFFCB6', '#BAED91', '#AED1E6',
+        '#FFC6C6', '#FDFD96', '#B3B3FF', '#C4A3BF', '#C8E4EC',
+        '#FFE5B4', '#FFCBF2', '#FFEEF2', '#D4E157', '#C6FFDD',
+        '#F8BBD0', '#D3C1E5', '#C3FBD8', '#FAD1A5', '#CDE7B0'
     ];
 
     // Array to track used colors
@@ -105,20 +117,22 @@ const YieldPredictor = ({ route, navigation }) => {
                     backgroundColor: '#fff',
                     borderRadius: 12,
                     elevation: 5,
-                    padding: 10,
+                    paddingTop:10,
+                    paddingBottom:10
                 }}>
                     {
                         farmsLoading
                             ? <ActivityIndicator />
-                            : <Pie series={getPieData(farmsData.filter(f => f.cropStage !== 'complete'), 'mun', munColor)} title={"Municipality"} />
+                            : <Pie series={getPieData(farmsData.filter(f => f.cropStage !== 'complete'), 'mun', munColor)} title={"Camarines Norte QP Plantation (pcs)"} />
                     }
                 </View>
                 <View style={{
                     backgroundColor: '#fff',
                     borderRadius: 12,
                     elevation: 5,
-                    padding: 10,
-                    marginTop: 18
+                    marginTop: 18,
+                    paddingTop:10,
+                    paddingBottom:10
                 }}>
                     {
                         farmsLoading && usersLoading
@@ -129,7 +143,7 @@ const YieldPredictor = ({ route, navigation }) => {
                                     'brgy',
                                     brgyColor
                                 )}
-                                title={"Barangays"}
+                                title={`${usersData?.find(u => u.id === userAuth.uid)?.mun || 'Unknown'} Plantation QP (pcs)`}
                             />
 
                     }
