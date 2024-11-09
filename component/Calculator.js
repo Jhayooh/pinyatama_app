@@ -1055,7 +1055,7 @@ export const Calculator = ({ navigation }) => {
         data: fertilizer.data,
         roi: [
           { ...roiDetails, type: 'p' },
-          { ...roiDetails, type: 'a' },
+          { ...roiDetails, fertilizerTotal: 0, type: 'a' },
         ],
         weather: weather.current
       });
@@ -1561,7 +1561,10 @@ export const Calculator = ({ navigation }) => {
                         valueField='value'
                         placeholder='Select soil type'
                         value={soil}
-                        onChange={item => { setSoil(item.value) }}
+                        onChange={item => {
+                          setSoil(item.value);
+                          console.log("the soil", item)
+                        }}
                         style={{ ...styles.textInput, borderBottomRightRadius: 0, borderTopRightRadius: 0 }}
                       />
                     </View>

@@ -1,5 +1,5 @@
 import { addDoc, collection, doc, getDoc, updateDoc, query } from 'firebase/firestore';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect} from 'react';
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import {
   ActivityIndicator,
@@ -41,31 +41,33 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
     let laborSum = 0;
     let fertilizerSum = 0;
 
+    const loam = 90;
+    const sandy = 85;
+    const clay = 80;
+
     comps.forEach((component) => {
       if (component.particular.toLowerCase() === 'material') {
         if (component.name.toLowerCase() === 'planting materials') {
           const qntyPrice = parseInt(component.qntyPrice)
-          let gr = getPercentage(90, qntyPrice)
-          let bb = getPercentage(10, qntyPrice)
           switch (soil.toLowerCase()) {
             case 'loam':
-              setGrossReturn(getPercentage(100, gr));
-              setBatterBall(getPercentage(100, bb));
+              setGrossReturn(getPercentage(loam, qntyPrice));
+              setBatterBall(getPercentage(100-loam, qntyPrice));
               break
 
             case 'clay':
-              setGrossReturn(getPercentage(85, gr));
-              setBatterBall(getPercentage(85, bb));
+              setGrossReturn(getPercentage(clay, qntyPrice));
+              setBatterBall(getPercentage(100-clay, qntyPrice));
               break
 
             case 'sandy':
-              setGrossReturn(getPercentage(70, gr));
-              setBatterBall(getPercentage(70, bb));
+              setGrossReturn(getPercentage(sandy, qntyPrice));
+              setBatterBall(getPercentage(100-sandy, qntyPrice));
               break
 
             default:
-              setGrossReturn(gr)
-              setBatterBall(bb)
+              setGrossReturn(90, qntyPrice)
+              setBatterBall(10, qntyPrice)
               break;
           }
 
@@ -80,7 +82,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
       }
     });
 
-    setMaterialTotal(materialSum);
+    setMaterialTotal(materialSum - fertilizerSum);
     setLaborTotal(laborSum);
     setFertlizerTotal(fertilizerSum);
     setCostTotal(materialSum + laborSum);
