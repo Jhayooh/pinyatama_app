@@ -295,14 +295,18 @@ const Activities = ({ route }) => {
               ...fr,
               butterBall: newButterBall,
               costTotal: costTotal,
-              grossReturn: grossReturn,
+              grossReturn: newGoodSize,
               netReturn: netReturnValue,
+              damage: farm.damage||0 + parseInt(farmRoi.netReturn-netReturnValue),
               roi: roiValue,
             }
           }
           return fr
         })
-
+        console.log("damage", farm.damage);
+        console.log("new roi", newRoi);
+        
+        
         await updateDoc(farmDocRef, {
           roi: newRoi,
           remainingPlant: remainingPlant,

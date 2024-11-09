@@ -37,6 +37,8 @@ export const DoughnutAndPie = ({ data, col }) => {
                     coloredData.length === 0
                         ? <ActivityIndicator />
                         : <PieChart
+                            strokeColor="white"
+                            strokeWidth={3}
                             data={coloredData}
                             showText
                             textColor='black'
@@ -74,7 +76,7 @@ export const DoughnutAndPie = ({ data, col }) => {
                                     marginRight: 10,
                                 }}
                             />
-                            <Text style={{ fontSize: 16, color: 'black' , textAlign:'left'}}>
+                            <Text style={{ fontSize: 16, color: 'black', textAlign: 'left' }}>
                                 {item.name}
                             </Text>
                         </View>
