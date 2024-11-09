@@ -57,7 +57,6 @@ const Activities = ({ route }) => {
   const [bilang, setBilang] = useState(0)
   const [qntyPrice, setQntyPrice] = useState(0)
 
-
   const [laborMaterial, setLaborMaterial] = useState(null)
   const [actualComponents, setActualComponents] = useState(null)
 
@@ -93,16 +92,6 @@ const Activities = ({ route }) => {
     const num = numOne * numTwo
     return Math.round(num * 100) / 100
   }
-
-  const handleChange = (text) => {
-    // Allow numbers and at most one decimal point
-    const decimalRegex = /^[0-9]*\.?[0-9]*$/;
-
-    // Validate input and update value if it matches the decimal format
-    if (decimalRegex.test(text)) {
-      setQuantity(parseFloat(text));
-    }
-  };
 
   const handleBilang = (e) => {
     if (isNaN(e) || e > (parseInt(farm.plantNumber) - parseInt(farm.ethrel)) || e <= 0) {
@@ -186,14 +175,14 @@ const Activities = ({ route }) => {
   useEffect(() => {
     async function calculateAndSaveData() {
       if (!actualComponents) return;
-      const actualRoi = farm.roi.find(r => r.type === 'a');
+      const actualRoi = farm.roi.find(fr => fr.type === 'a')
 
       // LABOR MATERIAL
       const totalLabor = actualComponents
         .filter(item => item.particular.toLowerCase() === 'labor')
         .reduce((sum, item) => sum + item.totalPrice, 0);
       const totalMaterial = actualComponents
-        .filter(item => item.particular.toLowerCase() === 'material')
+        .filter(item => item.particular.toLowerCase() === 'material' && item.parent.toLowerCase() !== 'fertilizer')
         .reduce((sum, item) => sum + item.totalPrice, 0);
       const totalFertilizer = actualComponents
         .filter(item => item.parent.toLowerCase() === "fertilizer")
@@ -201,10 +190,17 @@ const Activities = ({ route }) => {
 
       // ROI
       const grossReturn = actualRoi.grossReturn * getPinePrice('good size', localPine) + actualRoi.butterBall * getPinePrice('butterball', localPine);
-      const costTotal = (totalMaterial - totalFertilizer) + totalLabor + totalFertilizer;
+      const costTotal = totalMaterial + totalLabor + totalFertilizer;
       const netReturnValue = grossReturn - costTotal;
       const roiValue = (netReturnValue / grossReturn) * 100;
 
+      console.log("actual comp", actualComponents)
+
+      console.log("costTotal:", costTotal);
+      console.log("f:", totalFertilizer);
+      console.log("l:", totalLabor);
+      console.log("m:", totalMaterial);
+      
       const newRoi = farm.roi.map(fr => {
         if (fr.type === 'a') {
           return {
@@ -219,8 +215,6 @@ const Activities = ({ route }) => {
         }
         return fr
       })
-      console.log("new Roi: ", newRoi);
-      
       await updateDoc(doc(farmColl, farm.id), {
         roi: newRoi
       })
@@ -235,6 +229,16 @@ const Activities = ({ route }) => {
     return Math.round((nambir / 100) * pirsint)
   }
 
+  const getDifference = (pirsint, nambir) => {
+    const amount = (pirsint / 100) * nambir
+    return nambir - amount
+  }
+
+  const getRoi = (netReturn, grossReturn) => {
+    const roi = (netReturn / grossReturn) * 100
+    return roi
+  }
+
   const handleSave = async (act) => {
     setSaving(true);
     try {
@@ -243,36 +247,45 @@ const Activities = ({ route }) => {
 
         const date = new Date()
         const farmDocRef = doc(farmColl, `${farm.id}`)
+        const farmRoi = farm.roi.find(r => r.type === 'a')
+        const totalPlant = farm.remainingPlant || farm.plantNumber
+        const remainingPlant = getDifference(reportPer, totalPlant)
+
+        const loam = 90;
+        const sandy = 85;
+        const clay = 80
+
         if (mark) {
           await updateDoc(farmDocRef, {
             crop: true,
             cropStage: 'complete',
-            harvest_date: Timestamp.fromDate(date)
+            harvest_date: Timestamp.fromDate(date),
+            remainingPlant: 0
           });
         }
-
-        const farmRoi = farm.roi.find(r => r.type === 'a')
-        const totalPlant = farmRoi.butterBall + farmRoi.grossReturn
-        const remainingPlant = getPercentage(100 - reportPer, totalPlant)
 
         let newGoodSize = getPercentage(90, remainingPlant)
         let newButterBall = getPercentage(10, remainingPlant)
 
         switch (farm.soil.toLowerCase()) {
+          case 'loam':
+            newGoodSize = getPercentage(loam, remainingPlant)
+            newButterBall = getPercentage(100 - loam, remainingPlant)
+            break;
           case 'clay':
-            newGoodSize = getPercentage(85, newGoodSize)
-            newButterBall = getPercentage(85, newButterBall)
+            newGoodSize = getPercentage(clay, remainingPlant)
+            newButterBall = getPercentage(100 - clay, remainingPlant)
             break;
           case 'sandy':
-            newGoodSize = getPercentage(70, newGoodSize)
-            newButterBall = getPercentage(70, newButterBall)
+            newGoodSize = getPercentage(sandy, remainingPlant)
+            newButterBall = getPercentage(100 - sandy, remainingPlant)
             break;
           default:
             break;
         }
 
         const grossReturn = (newGoodSize * getPinePrice('good size', localPine)) + (newButterBall * getPinePrice('butterball', localPine));
-        const costTotal = (farmRoi.materialTotal - farmRoi.fertilizerTotal) + farmRoi.laborTotal + farmRoi.fertilizerTotal;
+        const costTotal = farmRoi.materialTotal + farmRoi.laborTotal + farmRoi.fertilizerTotal;
         const netReturnValue = grossReturn - costTotal;
         const roiValue = (netReturnValue / grossReturn) * 100;
 
@@ -290,20 +303,10 @@ const Activities = ({ route }) => {
           return fr
         })
 
-        console.log("new roi", {
-          totalPlant,
-          remainingPlant,
-          newGoodSize,
-          newButterBall,
-          grossReturn,
-          costTotal,
-          netReturnValue,
-          roiValue
-        });
-        
-
         await updateDoc(farmDocRef, {
-          roi: newRoi
+          roi: newRoi,
+          remainingPlant: remainingPlant,
+          damage: (farm.damage || 0) + reportPer
         })
 
         await addDoc(activityColl,
@@ -317,10 +320,8 @@ const Activities = ({ route }) => {
           }
         )
 
-
       } else {
         const theLabel = ferti.find(obj => obj.value === fertilizer);
-        const qnty = comps.qntyPrice;
         let newHarvest = null
         if (theLabel.label.toLowerCase() === "flower inducer (ethrel)" && events) {
           const vege_event = events.find(p => p.className === 'vegetative');
@@ -328,25 +329,11 @@ const Activities = ({ route }) => {
           if (farm.plantNumber - farm.ethrel === 0) {
             setSaving(false);
             handleModalClose();
-            setAlert({
-              visible: true,
-              message: "Hindi ka na puwedeng magdagdag ng Ethrel",
-              severity: "warning",
-              vertical: 'top',
-              horizontal: 'center',
-            });
             return;
           }
           if (!ethrelValid(currDate, vege_event.start_time.toDate())) {
             setSaving(false);
             handleModalClose();
-            setAlert({
-              visible: true,
-              message: "Hindi ka puwedeng maglagay ng Ethrel",
-              severity: "warning",
-              vertical: 'top',
-              horizontal: 'center',
-            });
             return;
           }
           for (const e of events) {
@@ -428,13 +415,6 @@ const Activities = ({ route }) => {
           }
 
           setSaving(false);
-          setAlert({
-            visible: true,
-            message: `Ikaw ay naglagay ng ethrel ngayong ${moment(currDate).format('MMM DD, YYYY')}`,
-            severity: "success",
-            vertical: 'bottom',
-            horizontal: 'left',
-          });
           handleModalClose();
         } else {
           await addDoc(activityColl,
@@ -452,37 +432,25 @@ const Activities = ({ route }) => {
           const newQnty = getMult(farm.area, pComp.defQnty)
           const actComp = {
             ...pComp,
-            qntyPrice: newQnty,
-            totalPrice: getMult(newQnty, pComp.price),
+            qntyPrice: qntyPrice,
+            totalPrice: getMult(qntyPrice, pComp.price),
             foreignId: pComp.id,
             type: "a"
           }
+
+          console.log("pComp", pComp);
+          console.log("actComp", actComp)
 
           setActualComponents([...components.filter(comp => comp.type !== 'p'), actComp]);
           const newCompAct = await addDoc(componentsColl, actComp)
           await updateDoc(newCompAct, { id: newCompAct.id })
         }
       }
-
       setSaving(false);
-      setAlert({
-        visible: true,
-        message: `Ikaw ay nakapaglagay ng fertilizer ngayong ${moment(currDate).format('MMM DD, YYYY')}`,
-        severity: "success",
-        vertical: 'bottom',
-        horizontal: 'center',
-      });
       handleModalClose();
     } catch (error) {
       console.error('error updating document', error);
       setSaving(false);
-      setAlert({
-        visible: true,
-        message: "May error sa pag-update ng dokumento",
-        severity: "error",
-        vertical: 'top',
-        horizontal: 'center',
-      });
     }
   };
   const customStyles = {
@@ -535,28 +503,6 @@ const Activities = ({ route }) => {
 
   const handleMark = () => {
     return reportPer >= 70 && reportPer <= 100;
-  };
-
-  const handleComplete = async () => {
-    try {
-      if (!farm) {
-        console.log('No farm data found');
-        return;
-      }
-
-      const farmDocRef = doc(farmColl, `${farm.id}`)
-
-      await updateDoc(farmDocRef, {
-        cropStage: 'complete',
-        crop: true
-      });
-
-
-
-      console.log('Crop stage updated to complete');
-    } catch (error) {
-      console.error('Error updating crop stage:', error);
-    }
   };
 
   const handleConfirmation = () => {
@@ -698,7 +644,6 @@ const Activities = ({ route }) => {
                 onChangeText={(e) => {
                   const parsedValue = parseFloat(e) || 0;
                   setQntyPrice(parsedValue)
-                  console.log("theeee whatt???", parsedValue)
                   setComps(prev => ({
                     ...prev,
                     qntyPrice: parsedValue

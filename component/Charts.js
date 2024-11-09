@@ -56,6 +56,7 @@ const Charts = ({ farm }) => {
     useEffect(() => {
         if (!pineData && !farm) return
         const roiWithS = farm.roi
+        
 
         const roi = roiWithS.length > 1 ? roiWithS.find(item => item.type === 'a') : roiWithS.find(item => item.type === 'p');
 

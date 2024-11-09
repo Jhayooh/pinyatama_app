@@ -17,8 +17,6 @@ const ProductionInput = ({ route }) => {
   const [user] = useAuthState(auth)
   const { farm = [] } = route.params
 
-  console.log('faaarrmmm', farm.cropStage)
-
   const componentsColl = collection(db, `farms/${farm.id}/components`)
   const [compData, compLoading, compError] = useCollectionData(componentsColl)
 
