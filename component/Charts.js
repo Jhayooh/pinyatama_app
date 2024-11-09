@@ -48,76 +48,64 @@ const Charts = ({ farm }) => {
         console.log("pirsint", (n1 / n2) * 100);
         return (n1 / n2) * 100
     }
+    const format = (num) => {
+        return num.toLocaleString('en-US'
+        )
+      }
 
     useEffect(() => {
         if (!pineData && !farm) return
         const roiWithS = farm.roi
-        console.log("roiWithS", roiWithS);
-        
+
         const roi = roiWithS.length > 1 ? roiWithS.find(item => item.type === 'a') : roiWithS.find(item => item.type === 'p');
 
         setNewRoi([
             {
-                name: 'ROI',
-                sum: roi.netReturn,
-                color: '#F7BF0B',
-                legendFontColor: "#7F7F7F",
-                legendFontSize: 16
+              name: 'ROI',
+              value: roi.netReturn,
+              text: `${Math.round(getPercentage(roi.netReturn, (roi.materialTotal + roi.laborTotal + roi.netReturn + roi.fertilizerTotal)))}%(${format(roi.netReturn)})`,
             },
             {
-                name: 'Gastos',
-                sum: roi.materialTotal + roi.laborTotal,
-                color: '#40A040',
-                legendFontColor: "#7F7F7F",
-                legendFontSize: 16
+              name: 'Gastos',
+              value: roi.materialTotal + roi.laborTotal + roi.fertilizerTotal,
+              text: `${Math.round(getPercentage(roi.materialTotal + roi.laborTotal + roi.fertilizerTotal, (roi.materialTotal + roi.laborTotal + roi.netReturn + roi.fertilizerTotal)))}%(${format(roi.materialTotal + roi.laborTotal + roi.fertilizerTotal)})`,
             }
-        ])
+          ])
         setPartTotal([
             {
                 name: 'Material',
-                sum: roi.materialTotal - roi.fertilizerTotal,
-                color: '#F7BF0B',
-                legendFontColor: "#7F7F7F",
-                legendFontSize: 16
+                value: roi.materialTotal,
+                text: `${Math.round(getPercentage(roi.materialTotal, (roi.materialTotal + roi.laborTotal + roi.fertilizerTotal)))}%(${format(roi.materialTotal)})`,
             },
             {
                 name: 'Labor',
-                sum: roi.laborTotal,
-                color: '#40A040',
-                legendFontColor: "#7F7F7F",
-                legendFontSize: 16
+                value: roi.laborTotal,
+                text: `${Math.round(getPercentage( roi.laborTotal, (roi.materialTotal + roi.laborTotal + roi.fertilizerTotal)))}%(${format(roi.laborTotal)})`,
+                
             },
             {
                 name: 'Fertilizer',
-                sum: roi.fertilizerTotal,
-                color: '#E74C3C',
-                legendFontColor: "#7F7F7F",
-                legendFontSize: 16
+                value: roi.fertilizerTotal,
+                text: `${Math.round(getPercentage(roi.fertilizerTotal, (roi.materialTotal + roi.laborTotal + roi.fertilizerTotal)))}%(${format(roi.fertilizerTotal)})`,
             }
         ])
         setPineTotal([
             {
                 name: 'Good size',
-                sum: roi.grossReturn,
-                color: '#F7BF0B',
-                legendFontColor: "#7F7F7F",
-                legendFontSize: 16
+                value: roi.grossReturn,
+                text: `${Math.round(getPercentage(roi.grossReturn, (roi.grossReturn + roi.butterBall )))}%(${format(roi.netReturn)})`,
             },
             {
                 name: 'Butterball',
-                sum: roi.butterBall,
-                color: '#40A040',
-                legendFontColor: "#7F7F7F",
-                legendFontSize: 16
+                value: roi.butterBall,
+                text: `${Math.round(getPercentage( roi.butterBall, (roi.grossReturn + roi.butterBall )))}%(${format(roi.butterBall)})`,
             }
         ])
         setNetReturn([
             {
                 name: 'Net Return',
-                sum: roi.netReturn,
-                color: '#FF5733',
-                legendFontColor: "#7F7F7F",
-                legendFontSize: 16
+                value: roi.netReturn,
+                text: `${Math.round(getPercentage(roi.netReturn, (roi.materialTotal + roi.laborTotal + roi.netReturn)))} % `,
             }
         ])
     }, [pineData, farm]);
@@ -137,20 +125,6 @@ const Charts = ({ farm }) => {
     };
     const _onNextDate = () => setDate(dayjs(date).add(1, 'month').toDate());
 
-    // const filteredEvents = farms
-    //     ? farms
-    //         .filter(f => f.brgyUID === user?.uid)
-    //         .map(f => ({
-    //             start: f.start_date?.toDate() || new Date(),
-    //             end: f.harvest_date?.toDate() || new Date(),
-    //             title: f.title || 'No Title',
-    //             stage: f.cropStage || 'vegetative',
-    //             id:f.id
-    //         }))
-    //     : [];
-
-
-    const color = ["rgb(0, 255, 0)", "rgb(0, 0, 255)", "rgb(255, 0, 0)"]
     return (
         <>
             <ScrollView style={{
@@ -240,7 +214,7 @@ const Charts = ({ farm }) => {
                         shadowRadius: 3.84,
                         elevation: 5
                     }}>
-                        <Text style={{ fontSize: 20, marginVertical: 12, fontWeight: '600', color: 'green' }}>ROI</Text>
+                        <Text style={{ fontSize: 20, marginVertical: 12, fontWeight: '600', color: 'green' }}>ROI (₱)</Text>
                         {
                             !newRoi
                                 ? <View style={{ padding: 32, margin: 12 }}>
@@ -267,7 +241,7 @@ const Charts = ({ farm }) => {
                         borderRadius: 5,
 
                     }}>
-                        <Text style={{ fontSize: 20, marginVertical: 12, fontWeight: '600', color: 'green' }}>Gastos sa Pinya</Text>
+                        <Text style={{ fontSize: 20, marginVertical: 12, fontWeight: '600', color: 'green' }}>Gastos sa Pinya(₱)</Text>
                         {
                             !newRoi && !partTotal
                                 ? <View style={{ padding: 32, margin: 12 }}>
@@ -293,7 +267,7 @@ const Charts = ({ farm }) => {
                         flex: 1,
                         borderRadius: 5,
                     }}>
-                        <Text style={{ fontSize: 20, marginVertical: 12, fontWeight: '600', color: 'green' }}>Gross Return</Text>
+                        <Text style={{ fontSize: 20, marginVertical: 12, fontWeight: '600', color: 'green' }}>Gross Return (pcs)</Text>
                         {
                             !newRoi && !pineTotal
                                 ? <View style={{ padding: 32, margin: 12 }}>
