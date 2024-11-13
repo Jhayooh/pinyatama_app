@@ -64,42 +64,42 @@ const Charts = ({ farm }) => {
             {
               name: 'ROI',
               value: roi.netReturn,
-              text: `${Math.round(getPercentage(roi.netReturn, (roi.materialTotal + roi.laborTotal + roi.netReturn + roi.fertilizerTotal)))}%(${format(roi.netReturn)})`,
+              text: `${Math.round(getPercentage(roi.netReturn, (roi.materialTotal + roi.laborTotal + roi.netReturn + roi.fertilizerTotal)))}%(${format(Math.round(roi.netReturn))})`,
             },
             {
               name: 'Gastos',
               value: roi.materialTotal + roi.laborTotal + roi.fertilizerTotal,
-              text: `${Math.round(getPercentage(roi.materialTotal + roi.laborTotal + roi.fertilizerTotal, (roi.materialTotal + roi.laborTotal + roi.netReturn + roi.fertilizerTotal)))}%(${format(roi.materialTotal + roi.laborTotal + roi.fertilizerTotal)})`,
+              text: `${Math.round(getPercentage(roi.materialTotal + roi.laborTotal + roi.fertilizerTotal, (roi.materialTotal + roi.laborTotal + roi.netReturn + roi.fertilizerTotal)))}%(${format(Math.round(roi.materialTotal + roi.laborTotal + roi.fertilizerTotal))})`,
             }
           ])
         setPartTotal([
             {
                 name: 'Material',
                 value: roi.materialTotal,
-                text: `${Math.round(getPercentage(roi.materialTotal, (roi.materialTotal + roi.laborTotal + roi.fertilizerTotal)))}%(${format(roi.materialTotal)})`,
+                text: `${Math.round(getPercentage(roi.materialTotal, (roi.materialTotal + roi.laborTotal + roi.fertilizerTotal)))}%(${format(Math.round(roi.materialTotal))})`,
             },
             {
                 name: 'Labor',
                 value: roi.laborTotal,
-                text: `${Math.round(getPercentage( roi.laborTotal, (roi.materialTotal + roi.laborTotal + roi.fertilizerTotal)))}%(${format(roi.laborTotal)})`,
+                text: `${Math.round(getPercentage( roi.laborTotal, (roi.materialTotal + roi.laborTotal + roi.fertilizerTotal)))}%(${format(Math.round(roi.laborTotal))})`,
                 
             },
             {
                 name: 'Fertilizer',
                 value: roi.fertilizerTotal,
-                text: `${Math.round(getPercentage(roi.fertilizerTotal, (roi.materialTotal + roi.laborTotal + roi.fertilizerTotal)))}%(${format(roi.fertilizerTotal)})`,
+                text: `${Math.round(getPercentage(roi.fertilizerTotal, (roi.materialTotal + roi.laborTotal + roi.fertilizerTotal)))}%(${format(Math.round(roi.fertilizerTotal))})`,
             }
         ])
         setPineTotal([
             {
                 name: 'Good size',
                 value: roi.grossReturn,
-                text: `${Math.round(getPercentage(roi.grossReturn, (roi.grossReturn + roi.butterBall )))}%(${format(roi.netReturn)})`,
+                text: `${Math.round(getPercentage(roi.grossReturn, (roi.grossReturn + roi.butterBall )))}%(${format(Math.round(roi.netReturn))})`,
             },
             {
                 name: 'Butterball',
                 value: roi.butterBall,
-                text: `${Math.round(getPercentage( roi.butterBall, (roi.grossReturn + roi.butterBall )))}%(${format(roi.butterBall)})`,
+                text: `${Math.round(getPercentage( roi.butterBall, (roi.grossReturn + roi.butterBall )))}%(${format(Math.round(roi.butterBall))})`,
             }
         ])
         setNetReturn([

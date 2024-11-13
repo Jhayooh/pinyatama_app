@@ -1055,7 +1055,7 @@ export const Calculator = ({ navigation }) => {
         data: fertilizer.data,
         roi: [
           { ...roiDetails, type: 'p' },
-          { ...roiDetails, fertilizerTotal: 0, type: 'a' },
+          { ...roiDetails, type: 'a' },
         ],
         weather: weather.current
       });
