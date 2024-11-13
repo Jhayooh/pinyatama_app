@@ -194,13 +194,6 @@ const Activities = ({ route }) => {
       const netReturnValue = grossReturn - costTotal;
       const roiValue = (netReturnValue / grossReturn) * 100;
 
-      console.log("actual comp", actualComponents)
-
-      console.log("costTotal:", costTotal);
-      console.log("f:", totalFertilizer);
-      console.log("l:", totalLabor);
-      console.log("m:", totalMaterial);
-      
       const newRoi = farm.roi.map(fr => {
         if (fr.type === 'a') {
           return {
@@ -248,14 +241,14 @@ const Activities = ({ route }) => {
         const date = new Date()
         const farmDocRef = doc(farmColl, `${farm.id}`)
         const farmRoi = farm.roi.find(r => r.type === 'a')
-        const totalPlant = farm.remainingPlant || farm.plantNumber
-        const remainingPlant = getDifference(reportPer, totalPlant)
+        const plant = farm.remainingPlant || farm.plantNumber;
+        const remainingPlant = plant - ((reportPer/100)*farm.plantNumber);
 
         const loam = 90;
         const sandy = 85;
         const clay = 80
 
-        if (mark) {
+        if (mark || remainingPlant === 0) {
           await updateDoc(farmDocRef, {
             crop: true,
             cropStage: 'complete',
@@ -310,7 +303,7 @@ const Activities = ({ route }) => {
         await updateDoc(farmDocRef, {
           roi: newRoi,
           remainingPlant: remainingPlant,
-          damage: (farm.damage || 0) + reportPer
+          damage: (farm.damage || 0) + parseInt(reportPer)
         })
 
         await addDoc(activityColl,
@@ -323,7 +316,6 @@ const Activities = ({ route }) => {
             qnty: reportPer,
           }
         )
-
       } else {
         const theLabel = ferti.find(obj => obj.value === fertilizer);
         let newHarvest = null
@@ -441,9 +433,6 @@ const Activities = ({ route }) => {
             foreignId: pComp.id,
             type: "a"
           }
-
-          console.log("pComp", pComp);
-          console.log("actComp", actComp)
 
           setActualComponents([...components.filter(comp => comp.type !== 'p'), actComp]);
           const newCompAct = await addDoc(componentsColl, actComp)
