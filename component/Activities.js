@@ -165,7 +165,7 @@ const Activities = ({ route }) => {
       return
     }
 
-    const damage = 100-farm.damage
+    const damage = 100 - (farm.damage || 0)
 
     numericInput = Math.min(numericInput, damage, 100);
 
@@ -330,6 +330,8 @@ const Activities = ({ route }) => {
             qnty: reportPer,
           }
         )
+
+        setReportPer('')
       } else {
         const theLabel = ferti.find(obj => obj.value === fertilizer);
         let newHarvest = null
@@ -752,7 +754,7 @@ const Activities = ({ route }) => {
               </View>
               <View style={styles.quantyContainer}>
                 <TextInput
-                  placeholder={(100 - farm.damage).toString() + '% remaining plant'}
+                  placeholder={(100 - (farm.damage || 0)).toString() + '% remaining plants'}
                   keyboardType="numeric"
                   style={styles.input}
                   value={reportPer}
@@ -768,7 +770,11 @@ const Activities = ({ route }) => {
               </View>
               <View style={{ ...styles.quantyContainer, display: 'flex', flexDirection: 'row', marginBottom: 10, }}>
                 <TextInput
-                  value={date ? date.toLocaleDateString() : ''}
+                  value={date ? date.toLocaleDateString() : `${new Intl.DateTimeFormat('en-US', {
+                    month: 'short',
+                    day: '2-digit',
+                    year: 'numeric'
+                  }).format(new Date())}`}
                   editable={false}
                   style={{ ...styles.input, width: '80%', borderBottomRightRadius: 0, borderTopRightRadius: 0 }}
                 />
