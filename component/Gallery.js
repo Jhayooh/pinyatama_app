@@ -95,19 +95,13 @@ export default function Gallery({ route, }) {
             initialRouteName="Lahat"
             tabBarOptions={{
               activeTintColor: 'green',
-              labelStyle: { fontSize: 11 },
+              labelStyle: { fontSize: 10 },
               style: { backgroundColor: 'white' },
               fontWeight: 'bold',
             }}
           >
             <Tab.Screen
               name="Lahat"
-              // component={TabView}
-              // options={{ tabBarLabel: 'Lahat' }}
-              // setParams={{
-              //   farms: filteredFarms,
-              //   imageUrls: imageUrls,
-              // }}
               children={props => (
                 <TabView
                   {...props}
@@ -120,56 +114,25 @@ export default function Gallery({ route, }) {
             />
             <Tab.Screen
               name="Vegetative"
-              // component={TabView}
-              // options={{ tabBarLabel: 'Vegetative' }}
-              // initialParams={{
-              //   farms: filteredFarms.filter(obj =>
-              //     obj.cropStage.toLowerCase() === 'vegetative'
-              //   ),
-              //   imageUrls: imageUrls
-              // }}
               children={props => (
                 <TabView {...props} farms={filteredFarms.filter(obj => obj.cropStage.toLowerCase() === 'vegetative')} imageUrls={imageUrls} />
               )}
             />
             <Tab.Screen
               name="Flowering"
-              // component={TabView}
-              // options={{ tabBarLabel: 'Flowering' }}
-              // initialParams={{
-              //   farms: filteredFarms.filter(obj =>
-              //     obj.cropStage.toLowerCase() === 'flowering'
-              //   ),
-              //   imageUrls: imageUrls
-              // }}
               children={props => (
                 <TabView {...props} farms={filteredFarms.filter(obj => obj.cropStage.toLowerCase() === 'flowering')} imageUrls={imageUrls} />
               )}
             />
             <Tab.Screen
               name="Fruiting"
-              // component={TabView}
-              // options={{ tabBarLabel: 'Fruiting' }}
-              // initialParams={{
-              //   farms: filteredFarms.filter(obj =>
-              //     obj.cropStage.toLowerCase() === 'fruiting'
-              //   ),
-              //   imageUrls: imageUrls
-              // }}
+             
               children={props => (
                 <TabView {...props} farms={filteredFarms.filter(obj => obj.cropStage.toLowerCase() === 'fruiting')} imageUrls={imageUrls} />
               )}
             />
             <Tab.Screen
               name="Complete"
-              // component={TabView}
-              // options={{ tabBarLabel: 'Archive' }}
-              // initialParams={{
-              //   farms: filteredFarms.filter(obj =>
-              //     obj.cropStage.toLowerCase() === 'complete'
-              //   ),
-              //   imageUrls: imageUrls
-              // }}
               children={props => (
                 <TabView {...props} farms={filteredFarms.filter(obj => obj.cropStage.toLowerCase() === 'complete')} imageUrls={imageUrls} />
               )}

@@ -1,5 +1,5 @@
 import { addDoc, collection, doc, getDoc, updateDoc, query } from 'firebase/firestore';
-import React, { useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import {
   ActivityIndicator,
@@ -27,7 +27,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
   const [trial, setTrial] = useState({})
 
   function getPinePrice(pine) {
-    const newPine = pineapple.filter(thePine => thePine.name.toLowerCase() === pine.toLowerCase())[0]
+    const newPine = pineapple.find(thePine => thePine.name.toLowerCase() === pine.toLowerCase())
     return parseInt(newPine.price.toFixed())
   }
 
@@ -52,17 +52,17 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
           switch (soil.toLowerCase()) {
             case 'loam':
               setGrossReturn(getPercentage(loam, qntyPrice));
-              setBatterBall(getPercentage(100-loam, qntyPrice));
+              setBatterBall(getPercentage(100 - loam, qntyPrice));
               break
 
             case 'clay':
               setGrossReturn(getPercentage(clay, qntyPrice));
-              setBatterBall(getPercentage(100-clay, qntyPrice));
+              setBatterBall(getPercentage(100 - clay, qntyPrice));
               break
 
             case 'sandy':
               setGrossReturn(getPercentage(sandy, qntyPrice));
-              setBatterBall(getPercentage(100-sandy, qntyPrice));
+              setBatterBall(getPercentage(100 - sandy, qntyPrice));
               break
 
             default:
@@ -92,7 +92,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
     const pineapplePrice = getPinePrice('good size')
     const butterballPrice = getPinePrice('butterball')
     const grossReturnAndBatter = (grossReturn * pineapplePrice) + (butterBall * butterballPrice)
-    const netReturnValue = grossReturnAndBatter - costTotal;
+    const netReturnValue = grossReturnAndBatter - costTotal;    
     const roiValue = (netReturnValue / grossReturnAndBatter) * 100;
     setPinePrice(pineapplePrice)
     setButterPrice(butterballPrice)
@@ -150,7 +150,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
     };
     const tableData = [
       [
-        <Text style={{ fontSize: 12, fontWeight:600}}>{name}</Text>,
+        <Text style={{ fontSize: 12, fontWeight: 600 }}>{name}</Text>,
         <TextInput
           editable={editable}
           keyboardType="numeric"
@@ -159,7 +159,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
           onSubmitEditing={handleEnter}
           placeholder={formatter(qntyPrice).toString()}
           value={formatter(qntyPrice).toString()}
-          style={editable ? styles.textInputEditable: styles.textInput}
+          style={editable ? styles.textInputEditable : styles.textInput}
         />,
         unit,
         formatter(price),
@@ -169,7 +169,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
 
     return (
       <View style={styles.tableHeadLabel3}>
-        <Table borderStyle={{ borderWidth: 1, borderColor: 'transparent' }}>
+        <Table borderStyle={{ borderWidth: .5, borderColor: 'grey', opacity: 0.1 }}>
           {/* <Row data={tableHead} style={styles.head} textStyle={styles.text} /> */}
           <Rows data={tableData} textStyle={{ textAlign: 'right', padding: 3 }} />
         </Table>
@@ -400,9 +400,9 @@ const styles = StyleSheet.create({
   textInputEditable: {
     flex: 1,
     width: '100%',
-    color: 'black', 
+    color: 'black',
     opacity: 1.0,
-    backgroundColor: '#FFF', 
+    backgroundColor: '#FFF',
     elevation: 5,
     shadowColor: '#000',
     shadowOffset: { width: 0, },
@@ -420,7 +420,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 10,
     opacity: .9,
-    
+
     paddingHorizontal: 12,
     color: 'black',
     fontSize: 14,
