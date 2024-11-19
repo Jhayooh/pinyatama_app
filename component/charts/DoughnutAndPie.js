@@ -4,32 +4,18 @@ import { Dimensions, View, Text, ActivityIndicator } from 'react-native';
 
 // List of possible colors
 const colorList = [
-    '#FFB3BA', '#FFDFBA', '#FFFFBA', '#BAFFC9', '#BAE1FF',
-    '#D4A5A5', '#FFD3B6', '#C9C9FF', '#E2F0CB', '#FFBEAA',
-    '#FF9AA2', '#FFB7B2', '#FFDAC1', '#E0BBE4', '#D4A5A5',
-    '#A0E7E5', '#B4F8C8', '#FFAEBC', '#AFCBFF', '#FFCECE',
-    '#FFBCBC', '#FFD8D8', '#E1F7D5', '#FFFFD1', '#B2F7EF',
-    '#FFC8A2', '#D3E4CD', '#F5E0B7', '#D2D7DF', '#FAD9C1',
-    '#F3D1F4', '#E1E5EA', '#FFFCB6', '#BAED91', '#AED1E6',
-    '#FFC6C6', '#FDFD96', '#B3B3FF', '#C4A3BF', '#C8E4EC',
-    '#FFE5B4', '#FFCBF2', '#FFEEF2', '#D4E157', '#C6FFDD',
-    '#F8BBD0', '#D3C1E5', '#C3FBD8', '#FAD1A5', '#CDE7B0'
+    "#F7BF0B", //yilo
+    "#40A040", //grin
+    "#E74C3C", //rid
 ];
 
 export const DoughnutAndPie = ({ data, col }) => {
     const screenWidth = Dimensions.get('window').width;
 
-    // Function to assign random colors from the colorList to each item
-    const getRandomColor = () => {
-        return colorList[Math.floor(Math.random() * colorList.length)];
-    };
-
-    // Add random colors to each data item
-    const coloredData = data.map(item => ({
+    const coloredData = data.map((item, index) => ({
         ...item,
-        color: getRandomColor()
+        color: colorList[index % colorList.length]
     }));
-
     return (
         <>
             <View style={{ alignItems: 'center', justifyContent: 'center', minHeight: 80 }}>
@@ -76,7 +62,7 @@ export const DoughnutAndPie = ({ data, col }) => {
                                     marginRight: 10,
                                 }}
                             />
-                            <Text style={{ fontSize: 16, color: 'black', textAlign: 'left' }}>
+                            <Text style={{ fontSize: 16, color: 'black', textAlign: 'flex-start' }}>
                                 {item.name}
                             </Text>
                         </View>

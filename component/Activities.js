@@ -69,7 +69,7 @@ const Activities = ({ route }) => {
   const [bilangError, setBilangError] = useState(false)
 
   const [startPicker, setStartPicker] = useState(false);
-  const [date, setDate] = useState(new Date())
+  const [date, setDate] = useState(null)
 
   const [alert, setAlert] = useState({ visible: false, message: '', severity: '' });
 
@@ -154,16 +154,23 @@ const Activities = ({ route }) => {
     // Remove non-numeric characters
     let numericInput = input.replace(/[^0-9]/g, '');
 
-    // Limit the input to a maximum of 100
-    if (numericInput > 100) {
-      numericInput = '100';
-    }
-
-    setReportPer(numericInput);
-
     if (numericInput === '0') {
       Alert.alert('Invalid Input', 'Percentage cannot be 0.');
+      setReportPer('');
+      return;
     }
+
+    if (!numericInput) {
+      setReportPer('')
+      return
+    }
+
+    const damage = 100 - (farm.damage || 0)
+
+    numericInput = Math.min(numericInput, damage, 100);
+
+
+    setReportPer(numericInput.toString());
   };
 
 
@@ -232,21 +239,46 @@ const Activities = ({ route }) => {
     return roi
   }
 
+  const getNewGross = (npk, plant) => {
+    let newGoodSize = getPercentage(90, plant)
+    let newButterBall = getPercentage(10, plant)
+
+    const loam = 90;
+    const sandy = 85;
+    const clay = 80
+
+    switch (npk) {
+      case 'loam':
+        newGoodSize = getPercentage(loam, plant)
+        newButterBall = getPercentage(100 - loam, plant)
+        break;
+      case 'clay':
+        newGoodSize = getPercentage(clay, plant)
+        newButterBall = getPercentage(100 - clay, plant)
+        break;
+      case 'sandy':
+        newGoodSize = getPercentage(sandy, plant)
+        newButterBall = getPercentage(100 - sandy, plant)
+        break;
+      default:
+        break;
+    }
+
+    return [newGoodSize, newButterBall]
+  }
+
   const handleSave = async (act) => {
     setSaving(true);
     try {
-      const currDate = date;
+      const currDate = date || new Date();
       if (act === "r") {
 
         const date = new Date()
         const farmDocRef = doc(farmColl, `${farm.id}`)
         const farmRoi = farm.roi.find(r => r.type === 'a')
         const plant = farm.remainingPlant || farm.plantNumber;
-        const remainingPlant = plant - ((reportPer/100)*farm.plantNumber);
-
-        const loam = 90;
-        const sandy = 85;
-        const clay = 80
+        const theDamage = ((reportPer / 100) * farm.plantNumber)
+        const remainingPlant = plant - theDamage;
 
         if (mark || remainingPlant === 0) {
           await updateDoc(farmDocRef, {
@@ -257,30 +289,14 @@ const Activities = ({ route }) => {
           });
         }
 
-        let newGoodSize = getPercentage(90, remainingPlant)
-        let newButterBall = getPercentage(10, remainingPlant)
-
-        switch (farm.soil.toLowerCase()) {
-          case 'loam':
-            newGoodSize = getPercentage(loam, remainingPlant)
-            newButterBall = getPercentage(100 - loam, remainingPlant)
-            break;
-          case 'clay':
-            newGoodSize = getPercentage(clay, remainingPlant)
-            newButterBall = getPercentage(100 - clay, remainingPlant)
-            break;
-          case 'sandy':
-            newGoodSize = getPercentage(sandy, remainingPlant)
-            newButterBall = getPercentage(100 - sandy, remainingPlant)
-            break;
-          default:
-            break;
-        }
+        const [newGoodSize, newButterBall] = getNewGross(farm.soil.toLowerCase(), remainingPlant)
 
         const grossReturn = (newGoodSize * getPinePrice('good size', localPine)) + (newButterBall * getPinePrice('butterball', localPine));
         const costTotal = farmRoi.materialTotal + farmRoi.laborTotal + farmRoi.fertilizerTotal;
         const netReturnValue = grossReturn - costTotal;
         const roiValue = (netReturnValue / grossReturn) * 100;
+
+        const [ggDamage, bbDamage] = getNewGross(farm.soil.toLowerCase(), theDamage)
 
         const newRoi = farm.roi.map(fr => {
           if (fr.type === 'a') {
@@ -290,16 +306,14 @@ const Activities = ({ route }) => {
               costTotal: costTotal,
               grossReturn: newGoodSize,
               netReturn: netReturnValue,
-              damage: farm.damage||0 + parseInt(farmRoi.netReturn-netReturnValue),
+              damageCost: farm.damageCost || 0 + ((ggDamage * getPinePrice('good size', localPine)) + (bbDamage * getPinePrice('butterball', localPine))),
               roi: roiValue,
             }
           }
           return fr
         })
-        console.log("damage", farm.damage);
-        console.log("new roi", newRoi);
-        
-        
+
+
         await updateDoc(farmDocRef, {
           roi: newRoi,
           remainingPlant: remainingPlant,
@@ -316,6 +330,8 @@ const Activities = ({ route }) => {
             qnty: reportPer,
           }
         )
+
+        setReportPer('')
       } else {
         const theLabel = ferti.find(obj => obj.value === fertilizer);
         let newHarvest = null
@@ -656,7 +672,7 @@ const Activities = ({ route }) => {
               </View>
               <View style={{ ...styles.quantyContainer, display: 'flex', flexDirection: 'row', marginBottom: 10, }}>
                 <TextInput
-                  value={date.toLocaleDateString()}
+                  value={date ? date.toLocaleDateString() : ''}
                   editable={false}
                   style={{ ...styles.input, width: '80%', borderBottomRightRadius: 0, borderTopRightRadius: 0 }}
                 />
@@ -738,7 +754,7 @@ const Activities = ({ route }) => {
               </View>
               <View style={styles.quantyContainer}>
                 <TextInput
-                  placeholder="0"
+                  placeholder={(100 - (farm.damage || 0)).toString() + '% remaining plants'}
                   keyboardType="numeric"
                   style={styles.input}
                   value={reportPer}
@@ -754,7 +770,11 @@ const Activities = ({ route }) => {
               </View>
               <View style={{ ...styles.quantyContainer, display: 'flex', flexDirection: 'row', marginBottom: 10, }}>
                 <TextInput
-                  value={date.toLocaleDateString()}
+                  value={date ? date.toLocaleDateString() : `${new Intl.DateTimeFormat('en-US', {
+                    month: 'short',
+                    day: '2-digit',
+                    year: 'numeric'
+                  }).format(new Date())}`}
                   editable={false}
                   style={{ ...styles.input, width: '80%', borderBottomRightRadius: 0, borderTopRightRadius: 0 }}
                 />
