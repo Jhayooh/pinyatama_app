@@ -15,8 +15,8 @@ export default function Gallery({ route, }) {
   const { farms = [], user } = route.params
   const [loading, setLoading] = useState(true);
 
-
-  const [filteredFarms, setFilteredFarms] = useState(farms)
+  const [filteredFarms, setFilteredFarms] = useState(farms.filter(farm => farm.brgyUID === user.id ))
+  console.log('loguseer', user)
 
   const handleSearch = (text) => {
     setSearch(text);
@@ -106,7 +106,7 @@ export default function Gallery({ route, }) {
                 <TabView
                   {...props}
                   farms={filteredFarms.filter(
-                    obj => obj.cropStage.toLowerCase() !== 'complete'
+                    obj => obj.cropStage.toLowerCase() !== 'complete' && obj.remarks !== 'failed'
                   )}
                   imageUrls={imageUrls}
                 />
@@ -115,26 +115,31 @@ export default function Gallery({ route, }) {
             <Tab.Screen
               name="Vegetative"
               children={props => (
-                <TabView {...props} farms={filteredFarms.filter(obj => obj.cropStage.toLowerCase() === 'vegetative')} imageUrls={imageUrls} />
+                <TabView {...props} farms={filteredFarms.filter(obj => obj.cropStage.toLowerCase() === 'vegetative' && obj.remarks !== 'failed')} imageUrls={imageUrls} />
               )}
             />
             <Tab.Screen
               name="Flowering"
               children={props => (
-                <TabView {...props} farms={filteredFarms.filter(obj => obj.cropStage.toLowerCase() === 'flowering')} imageUrls={imageUrls} />
+                <TabView {...props} farms={filteredFarms.filter(obj => obj.cropStage.toLowerCase() === 'flowering' && obj.remarks !== 'failed')} imageUrls={imageUrls} />
               )}
             />
             <Tab.Screen
               name="Fruiting"
-             
               children={props => (
-                <TabView {...props} farms={filteredFarms.filter(obj => obj.cropStage.toLowerCase() === 'fruiting')} imageUrls={imageUrls} />
+                <TabView {...props} farms={filteredFarms.filter(obj => obj.cropStage.toLowerCase() === 'fruiting' && obj.remarks !== 'failed')} imageUrls={imageUrls} />
               )}
             />
             <Tab.Screen
               name="Complete"
               children={props => (
                 <TabView {...props} farms={filteredFarms.filter(obj => obj.cropStage.toLowerCase() === 'complete')} imageUrls={imageUrls} />
+              )}
+            />
+             <Tab.Screen
+              name="Failed"
+              children={props => (
+                <TabView {...props} farms={filteredFarms.filter(obj => obj.remarks === 'failed')} imageUrls={imageUrls} />
               )}
             />
           </Tab.Navigator>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Alert, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Alert, Image, ScrollView, } from 'react-native';
 import StepIndicator from 'react-native-step-indicator';
+import { MultiSelect } from 'react-native-element-dropdown';
 import { Dropdown } from 'react-native-element-dropdown';
 import moment from 'moment';
 import { addDoc, collection, query, orderBy, onSnapshot, Timestamp, updateDoc, doc, arrayUnion } from 'firebase/firestore'; // added onSnapshot
@@ -9,6 +10,7 @@ import { useCollectionData } from 'react-firebase-hooks/firestore';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import CheckBox from 'expo-checkbox'
+import { EvilIcons, AntDesign, Entypo } from '@expo/vector-icons';
 
 const ferti = [
   { label: "Ammophos (16-20-0)", value: "Ammophos (16-20-0)" },
@@ -18,6 +20,31 @@ const ferti = [
   { label: "Complete (14-14-14)", value: "Complete (14-14-14)" },
   { label: "Water Soluble Calcium Nitrate (17-0-17)", value: "Water Soluble Calcium Nitrate (17-0-17)" },
   { label: "Flower Inducer (ethrel)", value: "Flower Inducer (ethrel)" },
+];
+
+const title = [
+  { label: 'Crop Monoculture', value: 'Crop Monoculture' },
+  { label: 'Diseases', value: 'Diseases' },
+  { label: 'Drought', value: 'Drought' },
+  { label: 'Excessive Rainfall', value: 'Excessive Rainfall' },
+  { label: 'Extreme Temperatures', value: 'Extreme Temperatures' },
+  { label: 'Floods', value: 'Floods' },
+  { label: 'Hailstorms', value: 'Hailstorms' },
+  { label: 'High Input Costs', value: 'High Input Costs' },
+  { label: 'High Salinity', value: 'High Salinity' },
+  { label: 'Improper Harvesting', value: 'Improper Harvesting' },
+  { label: 'Improper Irrigation', value: 'Improper Irrigation' },
+  { label: 'Incorrect Planting Time', value: 'Incorrect Planting Time' },
+  { label: 'Labor Shortages', value: 'Labor Shortages' },
+  { label: 'Market Limitations', value: 'Market Limitations' },
+  { label: 'Pests', value: 'Pests' },
+  { label: 'Poor Fertilization', value: 'Poor Fertilization' },
+  { label: 'Poor Seed Quality', value: 'Poor Seed Quality' },
+  { label: 'Soil Erosion', value: 'Soil Erosion' },
+  { label: 'Strong Winds', value: 'Strong Winds' },
+  { label: 'Typhoon', value: 'Typhoon' },
+  { label: 'Unpredictable Weather Patterns', value: 'Unpredictable Weather Patterns' },
+  { label: 'Weeds', value: 'Weeds' },
 ];
 
 
@@ -64,10 +91,8 @@ const Activities = ({ route }) => {
 
   const [reportTitle, setReportTitle] = useState('')
   const [reportDesc, setReportDesc] = useState('')
-  const [reportPer, setReportPer] = useState(0)
-
+  const [reportPer, setReportPer] = useState(0);
   const [bilangError, setBilangError] = useState(false)
-
   const [startPicker, setStartPicker] = useState(false);
   const [date, setDate] = useState(null)
 
@@ -114,6 +139,7 @@ const Activities = ({ route }) => {
     setBilang(0)
     setIsAdd(false);
     setReport(false);
+    setDate(new Date())
   };
 
 
@@ -280,13 +306,17 @@ const Activities = ({ route }) => {
         const theDamage = ((reportPer / 100) * farm.plantNumber)
         const remainingPlant = plant - theDamage;
 
+        let failed = false
+
         if (mark || remainingPlant === 0) {
+          failed = true
           await updateDoc(farmDocRef, {
             crop: true,
-            cropStage: 'complete',
             harvest_date: Timestamp.fromDate(date),
-            remainingPlant: 0
+            remainingPlant: 0,
+            remarks: 'failed'
           });
+
         }
 
         const [newGoodSize, newButterBall] = getNewGross(farm.soil.toLowerCase(), remainingPlant)
@@ -328,6 +358,7 @@ const Activities = ({ route }) => {
             compId: '',
             desc: reportDesc,
             qnty: reportPer,
+            remarks: failed
           }
         )
 
@@ -336,6 +367,7 @@ const Activities = ({ route }) => {
         const theLabel = ferti.find(obj => obj.value === fertilizer);
         let newHarvest = null
         if (theLabel.label.toLowerCase() === "flower inducer (ethrel)" && events) {
+          const batches = farm.batches || []
           const vege_event = events.find(p => p.className === 'vegetative');
           const date_diff = currDate - vege_event.end_time.toDate();
           if (farm.plantNumber - farm.ethrel === 0) {
@@ -352,11 +384,12 @@ const Activities = ({ route }) => {
             switch (e.className.toLowerCase()) {
               case 'vegetative':
                 e.end_time = Timestamp.fromDate(currDate);
-                e.title = `${e.title} - ${farm.plantNumber} (${plantPercent(farm.plantNumber, farm.plantNumber)}%)`;
+                e.title = `Batch ${batches.length + 1} [${bilang}pcs (${plantPercent(bilang, farm.plantNumber)}%)] - ${e.title}`;
                 const vegeEvent = await addDoc(collection(db, `farms/${farm.id}/events`), {
                   ...e,
                   className: e.className + 'Actual',
-                  createdAt: currDate,
+                  createdAt: new Date(),
+                  index: batches.length + 1,
                 });
                 await updateDoc(vegeEvent, { id: vegeEvent.id });
                 break;
@@ -366,7 +399,8 @@ const Activities = ({ route }) => {
                 const flowEvent = await addDoc(collection(db, `farms/${farm.id}/events`), {
                   ...e,
                   className: e.className + 'Actual',
-                  createdAt: currDate,
+                  createdAt: new Date(),
+                  index: batches.length + 1,
                 });
                 await updateDoc(flowEvent, { id: flowEvent.id });
                 break;
@@ -379,10 +413,16 @@ const Activities = ({ route }) => {
                 const fruEvent = await addDoc(collection(db, `farms/${farm.id}/events`), {
                   ...e,
                   className: e.className + 'Actual',
-                  createdAt: currDate,
+                  createdAt: new Date(),
+                  index: batches.length + 1,
                 });
                 await updateDoc(fruEvent, { id: fruEvent.id });
                 newHarvest = e.end_time
+                batches.push({
+                  index: batches.length + 1,
+                  harvestDate: e.end_time,
+                  plantSize: parseInt(bilang)
+                })
                 break;
               default:
                 break;
@@ -391,6 +431,7 @@ const Activities = ({ route }) => {
           await updateDoc(doc(db, `farms/${farm.id}`), {
             isEthrel: currDate,
             ethrel: farm.ethrel + parseInt(bilang),
+            batches
           });
           await addDoc(activityColl,
             {
@@ -559,7 +600,33 @@ const Activities = ({ route }) => {
     }
 
   }
-
+  const renderItem = (item) => (
+    <View
+      style={{
+        padding: 17,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+      }}
+    >
+      <Text
+        style={{
+          flex: 1,
+          fontSize: 16,
+        }}
+      >
+        {item.label}
+      </Text>
+      {reportTitle.includes(item.value) && (
+        <EvilIcons
+          style={{ margin: 5 }}
+          color="black"
+          name="check"
+          size={20}
+        />
+      )}
+    </View>
+  );
   return (
     <View style={styles.container}>
       <View style={{ display: 'flex', gap: 2, flexDirection: 'row', justifyContent: 'space-between', }}>
@@ -570,30 +637,29 @@ const Activities = ({ route }) => {
           <Text style={styles.addButtonText}>Add Report</Text>
         </TouchableOpacity>
       </View>
-
-      {dynamicSteps.length > 0 ? (
-        <View style={styles.stepContainer}>
-          <View style={{ flex: 1 }}>
-            <StepIndicator
-              customStyles={customStyles}
-              currentPosition={currentStep}
-              stepCount={dynamicSteps.length}
-              labels={dynamicSteps.map(step => step.text)}
-              direction="vertical"
-              renderStepIndicator={renderStepIndicator}
-            />
+        {dynamicSteps.length > 0 ? (
+          <View style={styles.stepContainer}>
+            <View style={{ flex: 1 }}>
+              <StepIndicator
+                customStyles={customStyles}
+                currentPosition={currentStep}
+                stepCount={dynamicSteps.length}
+                labels={dynamicSteps.map(step => step.text)}
+                direction="vertical"
+                renderStepIndicator={renderStepIndicator}
+              />
+            </View>
+            <View style={styles.dateColumn}>
+              {dynamicSteps.map((step, index) => (
+                <Text key={index} style={styles.dateText}>
+                  {moment(step.date).format('MMM DD, YYYY')}
+                </Text>
+              ))}
+            </View>
           </View>
-          <View style={styles.dateColumn}>
-            {dynamicSteps.map((step, index) => (
-              <Text key={index} style={styles.dateText}>
-                {moment(step.date).format('MMM DD, YYYY')}
-              </Text>
-            ))}
-          </View>
-        </View>
-      ) : (
-        <Text style={styles.noActivitiesText}>No activities yet</Text>
-      )}
+        ) : (
+          <Text style={styles.noActivitiesText}>No activities yet</Text>
+        )}
 
       {/* Modal for adding activity */}
       <Modal
@@ -729,12 +795,50 @@ const Activities = ({ route }) => {
                 <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Title:</Text>
                 <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
               </View>
-              <TextInput
+              <MultiSelect
+                style={{
+                  height: 50,
+                  backgroundColor: 'transparent',
+                  borderBottomColor: 'gray',
+                  borderBottomWidth: 0.5,
+                }}
+                placeholderStyle={{ fontSize: 16, }}
+                selectedTextStyle={{ fontSize: 14, }}
+                inputSearchStyle={{
+                  height: 40,
+                  fontSize: 16,
+                }}
+                iconStyle={{
+                  width: 20,
+                  height: 20,
+                }}
+                search
+                data={title}
+                labelField="label"
+                valueField="value"
+                placeholder="Select Report Title"
+                searchPlaceholder="Search..."
+                value={reportTitle}
+                onChange={item => {
+                  setReportTitle(item);
+                }}
+                renderLeftIcon={() => (
+                  <AntDesign
+                    style={{ marginRight: 5, }}
+                    color="black"
+                    name="Safety"
+                    size={20}
+                  />
+                )}
+                selectedStyle={{ borderRadius: 12, }}
+                renderItem={renderItem}
+              />
+              {/* <TextInput
                 // label='Title'
                 // placeholder='Title'
                 onChangeText={(e) => setReportTitle(e)}
                 style={{ ...styles.input, borderColor: bilangError ? 'red' : '#ccc' }}
-              />
+              /> */}
               <View style={{ display: 'flex', flexDirection: 'row' }}>
                 <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Description:</Text>
                 <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
@@ -779,9 +883,9 @@ const Activities = ({ route }) => {
                   style={{ ...styles.input, width: '80%', borderBottomRightRadius: 0, borderTopRightRadius: 0 }}
                 />
                 <TouchableOpacity onPress={() => setStartPicker(true)}
-                  style={{ ...styles.input, width: '20%', borderBottomLeftRadius: 0, borderTopLeftRadius: 0, paddingHorizontal: 22, paddingVertical: 0, justifyContent: 'center' }}
+                  style={{ ...styles.input, width: '20%', borderBottomLeftRadius: 0, borderTopLeftRadius: 0, paddingHorizontal: 10, paddingVertical: 0, justifyContent: 'center' }}
                 >
-                  <Image source={require('../assets/calender.png')} style={{}} />
+                  <Entypo name="calendar" size={24} color="black" />
                 </TouchableOpacity>
 
                 <DateTimePickerModal

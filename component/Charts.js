@@ -45,7 +45,7 @@ const Charts = ({ farm }) => {
     }
 
     const getPercentage = (n1, n2) => {
-        console.log("pirsint", (n1 / n2) * 100);
+        // console.log("pirsint", (n1 / n2) * 100);
         return (n1 / n2) * 100
     }
     const format = (num) => {

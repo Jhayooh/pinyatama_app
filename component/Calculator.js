@@ -1042,6 +1042,7 @@ export const Calculator = ({ navigation }) => {
         geopoint: userLocation,
         mun: municipality,
         title: farmName,
+        remarks:'On going',
         plantNumber: base,
         brgyUID: user.uid,
         farmerName: `${firstname} ${lastname}`,
@@ -1365,8 +1366,6 @@ export const Calculator = ({ navigation }) => {
   const fieldIdChange = (e) => {
     setFieldId(e.fieldId)
     const f = farmerData?.find(fd => fd.id === e.farmerId)
-    console.log("e", e);
-    console.log("f", f);
 
     if (f) {
       setFarmName(f.farmName)
@@ -1534,7 +1533,7 @@ export const Calculator = ({ navigation }) => {
                 <View style={{ ...styles.section, marginHorizontal: table ? 0 : 14, paddingHorizontal: 8 }}>
                   <Text style={styles.header}>CALCULATE</Text>
                   <View style={styles.subsection}>
-                    <Text style={styles.supText}>NPK</Text>
+                    <Text style={styles.supText}>Nitrogen (N), Phosphorus (P), and Potassium (K)</Text>
                     <View style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
                       <Dropdown
                         data={npkType}
