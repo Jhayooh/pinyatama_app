@@ -916,13 +916,6 @@ export const Calculator = ({ navigation }) => {
 
   }, [userLocation]);
 
-  const [mode, setMode] = useState('date');
-  const [show, setShow] = useState(false);
-
-  const handleMapPress = (e) => {
-    setUserLocation(e.nativeEvent.coordinate);
-  };
-
   const addImage = (image, height, width) => {
     setImages(images => [...images, { url: image, height: height, width: width }])
   }
@@ -1542,9 +1535,8 @@ export const Calculator = ({ navigation }) => {
                         placeholder='Select NPK'
                         value={npk}
                         onChange={item => {
+                          setTable(false)
                           setFertilizer(item)
-                          console.log("the npk item:", item);
-
                           setNpk(item.value)
                         }}
                         style={{ ...styles.textInput, borderBottomRightRadius: 0, borderTopRightRadius: 0 }}
@@ -1561,8 +1553,8 @@ export const Calculator = ({ navigation }) => {
                         placeholder='Select soil type'
                         value={soil}
                         onChange={item => {
+                          setTable(false)
                           setSoil(item.value);
-                          console.log("the soil", item)
                         }}
                         style={{ ...styles.textInput, borderBottomRightRadius: 0, borderTopRightRadius: 0 }}
                       />

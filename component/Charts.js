@@ -55,10 +55,8 @@ const Charts = ({ farm }) => {
 
     useEffect(() => {
         if (!pineData && !farm) return
-        const roiWithS = farm.roi
         
-
-        const roi = roiWithS.length > 1 ? roiWithS.find(item => item.type === 'a') : roiWithS.find(item => item.type === 'p');
+        const roi = farm.roi.find(actRoi => actRoi.type === 'a')
 
         setNewRoi([
             {
@@ -94,7 +92,7 @@ const Charts = ({ farm }) => {
             {
                 name: 'Good size',
                 value: roi.grossReturn,
-                text: `${Math.round(getPercentage(roi.grossReturn, (roi.grossReturn + roi.butterBall )))}%(${format(Math.round(roi.netReturn))})`,
+                text: `${Math.round(getPercentage(roi.grossReturn, (roi.grossReturn + roi.butterBall )))}%(${format(Math.round(roi.grossReturn))})`,
             },
             {
                 name: 'Butterball',
@@ -106,7 +104,7 @@ const Charts = ({ farm }) => {
             {
                 name: 'Net Return',
                 value: roi.netReturn,
-                text: `${Math.round(getPercentage(roi.netReturn, (roi.materialTotal + roi.laborTotal + roi.netReturn)))} % `,
+                text: `${Math.round(getPercentage(roi.netReturn, (roi.materialTotal + roi.laborTotal + roi.fertilizerTotal)))} % `,
             }
         ])
     }, [pineData, farm]);

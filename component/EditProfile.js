@@ -14,6 +14,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { updateDoc, doc, deleteDoc, getDoc } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage'
 import { db, storage } from "../firebase/Config";
+import { deleteUser } from "firebase/auth";
 
 //icon
 import edit from '../assets/edit-text.png';
@@ -73,7 +74,7 @@ export const EditProfile = ({ navigation, route }) => {
 
             const storageRef = ref(storage, `ProfileImages/${docRef.id}`);
             const uploadTask = uploadBytesResumable(storageRef, blob);
-            console.log("the uploadTask", uploadTask);            
+            console.log("the uploadTask", uploadTask);
 
             uploadTask.on('state_changed',
                 (snapshot) => {
@@ -86,7 +87,7 @@ export const EditProfile = ({ navigation, route }) => {
                     // Upload completed successfully, get download URL
                     getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
                         console.log("new profile", uploadTask);
-                        
+
                         await updateDoc(docRef, {
                             uid: docRef.id,
                             photoURL: downloadURL
@@ -147,16 +148,24 @@ export const EditProfile = ({ navigation, route }) => {
 
     const deleteAccount = async () => {
         try {
+            // Delete user from Firestore collection
             const userDocRef = doc(db, 'users', logUser.id);
             await deleteDoc(userDocRef);
-            Alert.alert('Success', 'Account deleted successfully!');
-            navigation.navigate('Login');
+
+            // Delete user from Firebase Authentication
+            const user = auth.currentUser; // Assumes the user is logged in
+            if (user) {
+                await deleteUser(user);
+                Alert.alert('Success', 'Account deleted successfully!');
+                navigation.navigate('Login');
+            } else {
+                Alert.alert('Error', 'No authenticated user found.');
+            }
         } catch (e) {
             console.log(e);
-            Alert.alert('Error', 'Failed to delete account.');
+            Alert.alert('Error', 'Failed to delete account. Please try again.');
         }
     };
-
     const openGallery = async () => {
         try {
             let result = await ImagePicker.launchImageLibraryAsync({
