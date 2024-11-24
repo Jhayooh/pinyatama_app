@@ -88,7 +88,6 @@ const Activities = ({ route }) => {
   const [actualComponents, setActualComponents] = useState(null)
 
   const [comps, setComps] = useState({ qntyPrice: 0, foreignId: '' })
-
   const [reportTitle, setReportTitle] = useState('')
   const [reportDesc, setReportDesc] = useState('')
   const [reportPer, setReportPer] = useState(0);
@@ -119,7 +118,11 @@ const Activities = ({ route }) => {
   }
 
   const handleBilang = (e) => {
-    if (isNaN(e) || e > (parseInt(farm.plantNumber) - parseInt(farm.ethrel)) || e <= 0) {
+    if (
+      isNaN(e)
+      || e > (parseInt(farm.plantNumber) - parseInt(farm.ethrel))
+      || e <= 0
+    ) {
       setBilangError(true)
     } else {
       setBilangError(false)
@@ -154,7 +157,7 @@ const Activities = ({ route }) => {
 
       if (!snapshot.empty) {
         const fetchedSteps = snapshot.docs.map((doc) => ({
-          text: `${doc.data().qnty}${doc.data().type === 'a' ? 'kg' : '%'}, ${doc.data().label}`,
+          text: `${doc.data().qnty}${doc.data().type === 'a' ? '': '%'}, ${doc.data().label}`,
           date: doc.data().createdAt.toDate(),
         }));
 
@@ -637,29 +640,29 @@ const Activities = ({ route }) => {
           <Text style={styles.addButtonText}>Add Report</Text>
         </TouchableOpacity>
       </View>
-        {dynamicSteps.length > 0 ? (
-          <View style={styles.stepContainer}>
-            <View style={{ flex: 1 }}>
-              <StepIndicator
-                customStyles={customStyles}
-                currentPosition={currentStep}
-                stepCount={dynamicSteps.length}
-                labels={dynamicSteps.map(step => step.text)}
-                direction="vertical"
-                renderStepIndicator={renderStepIndicator}
-              />
-            </View>
-            <View style={styles.dateColumn}>
-              {dynamicSteps.map((step, index) => (
-                <Text key={index} style={styles.dateText}>
-                  {moment(step.date).format('MMM DD, YYYY')}
-                </Text>
-              ))}
-            </View>
+      {dynamicSteps.length > 0 ? (
+        <View style={styles.stepContainer}>
+          <View style={{ flex: 1 }}>
+            <StepIndicator
+              customStyles={customStyles}
+              currentPosition={currentStep}
+              stepCount={dynamicSteps.length}
+              labels={dynamicSteps.map(step => step.text)}
+              direction="vertical"
+              renderStepIndicator={renderStepIndicator}
+            />
           </View>
-        ) : (
-          <Text style={styles.noActivitiesText}>No activities yet</Text>
-        )}
+          <View style={styles.dateColumn}>
+            {dynamicSteps.map((step, index) => (
+              <Text key={index} style={styles.dateText}>
+                {moment(step.date).format('MMM DD, YYYY')}
+              </Text>
+            ))}
+          </View>
+        </View>
+      ) : (
+        <Text style={styles.noActivitiesText}>No activities yet</Text>
+      )}
 
       {/* Modal for adding activity */}
       <Modal
@@ -713,22 +716,29 @@ const Activities = ({ route }) => {
             <View style={styles.quantyContainer}>
               <TextInput
                 placeholder="0.0"
-                keyboardType="numeric"
+                keyboardType="decimal-pad"
                 style={styles.input}
                 value={qntyPrice.toString()}
-                onChangeText={(e) => {
-                  const parsedValue = parseFloat(e) || 0;
-                  setQntyPrice(parsedValue)
+                onChangeText={(value) => {
+                  if (value === "") {
+                    value = "0"
+                  }
+                  if (value.startsWith(".")) {
+                    value = "0" + value;
+                  }
+                  if (/^\d*\.?\d*$/.test(value)) {
+                    setQntyPrice(value);
+                  }
                   setComps(prev => ({
                     ...prev,
-                    qntyPrice: parsedValue
+                    qntyPrice: parseFloat(value)
                   }));
                 }
                 }
               />
 
               <View style={styles.suffixContainer}>
-                <Text style={styles.suffix}>kg</Text>
+                <Text style={styles.suffix}>{comps.unit || ""}</Text>
               </View>
             </View>
             <View>
@@ -769,8 +779,8 @@ const Activities = ({ route }) => {
                   components && roi &&
                   <TouchableOpacity
                     onPress={() => handleSave("a")}
-                    style={[styles.saveButton, saving || bilangError && { backgroundColor: 'gray' }]}
-                    disabled={saving || bilangError}
+                    style={[styles.saveButton, (saving || bilangError || !comps.id) && { backgroundColor: 'gray' }]}
+                    disabled={saving || bilangError || !comps.id}
                   >
                     <Text style={styles.saveButtonText}>{saving ? 'Saving...' : 'Save'}</Text>
                   </TouchableOpacity>

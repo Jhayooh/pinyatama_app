@@ -92,7 +92,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
     const pineapplePrice = getPinePrice('good size')
     const butterballPrice = getPinePrice('butterball')
     const grossReturnAndBatter = (grossReturn * pineapplePrice) + (butterBall * butterballPrice)
-    const netReturnValue = grossReturnAndBatter - costTotal;    
+    const netReturnValue = grossReturnAndBatter - costTotal;
     const roiValue = (netReturnValue / grossReturnAndBatter) * 100;
     setPinePrice(pineapplePrice)
     setButterPrice(butterballPrice)
@@ -141,19 +141,51 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
 
     const handleEnter = () => {
       setTotalPrice(qntyPrice * price);
+      const newComp = {
+        ...component,
+        name,
+        qntyPrice: qntyPrice,
+        unit,
+        price,
+        totalPrice: qntyPrice * price
+      }
+      setComps((prevComps) =>
+        prevComps.map((comp) => {
+          if (component.parent.toLowerCase() === 'fertilizer' && comp.foreignId === component.foreignId && comp.label === component.label) {
+            console.log("comp", newComp);
+
+            return newComp;
+          }
+          if (comp.id === component.id) {
+            console.log("comp", newComp);
+            return newComp;
+          }
+          return comp;
+        })
+      );
+
+      console.log("the editing:", component);
+      console.log("the edited:", newComp);
     };
 
     const handleEdit = (value) => {
-      const v = parseFloat(value) || 0;
-      setQntyPrice(v);
-      setTotalPrice(v * price);
+      if (value === "") {
+        value = "0"
+      }
+      if (value.startsWith(".")) {
+        value = "0" + value;
+      }
+      if (/^\d*\.?\d*$/.test(value)) {
+        setQntyPrice(value);
+      }
+      setTotalPrice('Press Enter');
     };
     const tableData = [
       [
         <Text style={{ fontSize: 12, fontWeight: 600 }}>{name}</Text>,
         <TextInput
           editable={editable}
-          keyboardType="numeric"
+          keyboardType="decimal-pad"
           // maxLength={3}
           onChangeText={handleEdit}
           onSubmitEditing={handleEnter}
@@ -197,23 +229,11 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
               <Row data={tableHead} style={{ justifyContent: 'center' }}
                 textStyle={{ textAlign: 'center', fontWeight: 'bold' }} />
             </View>
-            {/* <View style={{ ...styles.tableHeadLabel3, alignItems: 'center' }}>
-              <Text style={{ fontSize: 12 }}>QNTY</Text>
-            </View>
-            <View style={{ ...styles.tableHeadLabel2, alignItems: 'center' }}>
-              <Text style={{ fontSize: 12 }}>UNIT</Text>
-            </View>
-            <View style={{ ...styles.tableHeadLabel3, alignItems: 'center' }}>
-              <Text style={{ fontSize: 12 }}>PRICE/UNIT</Text>
-            </View>
-            <View style={{ ...styles.tableHeadLabel3, alignItems: 'flex-end' }}>
-              <Text style={{ fontSize: 12 }}>TOTAL PRICE</Text>
-            </View> */}
           </View>
 
           {/* Body */}
           <View style={{ ...styles.tableHead }}>
-            <Text style={{ fontWeight: 'bold', fontSize: 20, color: 'red' }}>Materials Inputs:</Text>
+            <Text style={{ fontWeight: 'bold', fontSize: 20, color: 'red' }}>Fertilizers</Text>
           </View>
 
           <View style={{ ...styles.tableHead, marginTop: 12 }}>
@@ -224,8 +244,8 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
               if (comp.parent.toLowerCase() === 'fertilizer' && comp.label === 1) {
                 return (
                   <TableData
-                    key={comp.id}
-                    component={comp}
+                    key={comp.id + comp.label}
+                    component={{ ...comp, id: comp.id + comp.label }}
                     editable={true}
                   />
                 )
@@ -240,8 +260,8 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
               if (comp.parent.toLowerCase() === 'fertilizer' && comp.label === 4) {
                 return (
                   <TableData
-                    key={comp.id}
-                    component={comp}
+                    key={comp.id + comp.label}
+                    component={{ ...comp, id: comp.id + comp.label }}
                     editable={true}
                   />
                 )
@@ -256,8 +276,8 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
               if (comp.parent.toLowerCase() === 'fertilizer' && comp.label === 7) {
                 return (
                   <TableData
-                    key={comp.id}
-                    component={comp}
+                    key={comp.id + comp.label}
+                    component={{ ...comp, id: comp.id + comp.label }}
                     editable={true}
                   />
                 )
@@ -272,14 +292,28 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
               if (comp.parent.toLowerCase() === 'fertilizer' && comp.label === 10) {
                 return (
                   <TableData
-                    key={comp.id}
-                    component={comp}
+                    key={comp.id + comp.label}
+                    component={{ ...comp, id: comp.id + comp.label }}
                     editable={true}
                   />
                 )
               }
             })
           }
+          <View style={{ ...styles.tableHead, borderTopWidth: 2, borderBottomWidth: 2, marginBottom: 12 }}>
+            <View style={{ flex: 3 }}>
+              <Text style={{ fontWeight: 'bold', fontSize: 20, color: 'red' }}>Total Fertilizer Input: </Text>
+            </View>
+            <View style={{ flex: 2, alignItems: 'flex-end' }}>
+              <Text style={{ fontWeight: 'bold', fontSize: 18, color: 'red' }}>
+                {currencyformatter(fertilizerTotal)}
+              </Text>
+            </View>
+          </View>
+          <View style={{ ...styles.tableHead }}>
+            <Text style={{ fontWeight: 'bold', fontSize: 20, color: 'red' }}>Materials:</Text>
+          </View>
+
           {
             comps?.map((comp) => {
               if (comp.particular.toLowerCase() === 'material' && comp.parent.toLowerCase() !== 'fertilizer') {
@@ -304,7 +338,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
             </View>
           </View>
           <View style={{ ...styles.tableHead }}>
-            <Text style={{ fontWeight: 'bold', fontSize: 18, color: 'red' }}>Labor Inputs:</Text>
+            <Text style={{ fontWeight: 'bold', fontSize: 18, color: 'red' }}>Labor:</Text>
           </View>
           {
             comps?.map((comp) => {

@@ -5,6 +5,7 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { Avatar } from "native-base";
 import { Divider } from 'react-native-paper';
+import { Ionicons } from '@expo/vector-icons';
 import {
     Button,
     Dimensions,
@@ -21,6 +22,8 @@ import {
     TextInput,
     FlatList,
     DrawerLayoutAndroid,
+    TouchableWithoutFeedback,
+    ActivityIndicator,
 } from 'react-native';
 import { auth, db } from '../firebase/Config';
 
@@ -52,6 +55,7 @@ export const Landing = ({ navigation }) => {
 
     const drawer = useRef(null);
     const [drawerPosition, setdrawerPosition] = useState('left')
+
 
     const logUser = user && users?.find(item => item.id === user.uid)
 
@@ -90,6 +94,15 @@ export const Landing = ({ navigation }) => {
     const LoginModal = () => {
         const [email, setEmail] = useState('')
         const [password, setPassword] = useState('')
+        const [emailError, setEmailError] = useState(false)
+        const [saving, setSaving] = useState(false)
+        const [modalUser, setModalUser] = useState(null)
+        const [welcome, setWelcome] = useState(false)
+        const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
+        const togglePasswordVisibility = () => {
+            setIsPasswordVisible(!isPasswordVisible);
+        };
 
         const handleSignUp = () => {
             createUserWithEmailAndPassword(auth, email, password)
@@ -99,55 +112,172 @@ export const Landing = ({ navigation }) => {
                 .catch(error => alert(error.message))
         }
 
+        const handleEmail = (email) => {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            if (emailRegex.test(email)) {
+                setEmailError(false);
+            } else {
+                setEmailError(true);
+            }
+
+            setEmail(email.toLowerCase());
+        };
+
+
         const handleLogin = () => {
+            setSaving(true);
             signInWithEmailAndPassword(auth, email, password)
-                .then(userCredentials => {
-                    console.log('Logged in with:', userCredentials.user.email);
+                .then(async userCredentials => {
+                    const u = users.find(u => u.id === userCredentials.user.uid);
+
+                    if (u) {
+                        if (u.status === "blocked") {
+                            Alert.alert('Account Blocked', 'Your account has been blocked. Please contact support.');
+                            await auth.signOut();
+                            setSaving(false);
+                            return;
+                        }
+                        if (u.status === "pending") {
+                            Alert.alert('Pending Account', 'Your account is pending. Please wait for approval');
+                            await auth.signOut();
+                            setSaving(false);
+                            return;
+                        }
+                        console.log("user", u);
+                        setModalUser(u);
+                        setSaving(false);
+                    } else {
+                        Alert.alert('User Not Found', 'No user data found. Please contact support.');
+                        setSaving(false);
+                    }
                 })
-                .catch(error => Alert.alert('Invalid Account', 'User not found, please contact the administration.'))
-        }
+                .catch(error => {
+                    switch (error.code) {
+                        case 'auth/invalid-email':
+                            Alert.alert('Invalid Email', 'Please enter a valid email address.');
+                            break;
+                        case 'auth/user-disabled':
+                            Alert.alert('Account Disabled', 'This account has been disabled. Contact support.');
+                            break;
+                        case 'auth/user-not-found':
+                            Alert.alert('User Not Found', 'No account found with this email.');
+                            break;
+                        case 'auth/wrong-password':
+                            Alert.alert('Invalid Password', 'The password you entered is incorrect.');
+                            break;
+                        case 'auth/too-many-requests':
+                            Alert.alert('Too Many Attempts', 'Try again later or reset your password.');
+                            break;
+                        case 'auth/network-request-failed':
+                            Alert.alert('Network Error', 'Please check your internet connection.');
+                            break;
+                        case 'auth/invalid-credential':
+                            Alert.alert('Invalid credentials provided', 'Check email/password and try again.');
+                            break;
+                        default:
+                            Alert.alert('Login Error', 'An unexpected error occurred. Please try again.');
+                    }
+                    setEmailError(true);
+                    setSaving(false);
+                });
+        };
+
+
         return (
             <Modal animationType='fade' transparent={true} visible={showLogin} onBackdropPress={() => (setShowLogin(false))} onRequestClose={() => (setShowLogin(false))}>
                 <TouchableOpacity
                     style={loginStyle.container}
                     activeOpacity={1}
-                    onPressOut={() => { setShowLogin(false) }}>
-                    <View style={loginStyle.formContainer}>
-                        <View style={loginStyle.card}>
-                            <Text style={loginStyle.title}>MALIGAYANG PAGDATING</Text>
-                            <Text style={loginStyle.subtitle}>Mag Login sa iyong account</Text>
-                            <View style={loginStyle.inputContainer}>
-                                <TextInput
-                                    style={loginStyle.input}
-                                    value={email}
-                                    onChangeText={text => setEmail(text)}
-                                    placeholder="Email"
-                                    placeholderTextColor="#999"
-                                />
-                            </View>
-                            <View style={loginStyle.inputContainer}>
-                                <TextInput
-                                    style={loginStyle.input}
-                                    value={password}
-                                    onChangeText={text => setPassword(text)}
-                                    placeholder="Password"
-                                    placeholderTextColor="#999"
-                                    secureTextEntry
-                                />
-                            </View>
-                            <TouchableOpacity style={loginStyle.button} onPress={handleLogin} >
-                                <Text style={loginStyle.buttonText}>Sign In</Text>
-                            </TouchableOpacity>
+                    onPressOut={() => {
+                        setShowLogin(false)
+                        setModalUser(null)
+                    }}>
+                    <TouchableWithoutFeedback >
+                        <View style={loginStyle.formContainer}>
+                            <View style={loginStyle.card}>
+                                {
+                                    saving
+                                        ? <>
+                                            <Text style={loginStyle.title}>Signing in ...</Text>
+                                            <View style={{ padding: 24 }}>
+                                                <ActivityIndicator size="large" color="green" />
+                                            </View>
+                                        </>
+                                        :
+                                        <>
+                                            <Text style={loginStyle.title}>MALIGAYANG PAGDATING</Text>
+                                            {
+                                                modalUser
+                                                    ? <>
+                                                        <Image
+                                                            source={{ uri: modalUser.photoURL }}
+                                                            style={{ ...styles.btnImage, borderRadius: 50 }}
+                                                        />
+                                                        <Text>
+                                                            {modalUser.displayName}
+                                                        </Text>
+                                                        <Text>
+                                                            {modalUser.brgy + ", " + modalUser.mun}
+                                                        </Text>
 
-                            <TouchableOpacity style={loginStyle.createAccountButton}>
-                                <Text style={loginStyle.createAccountButtonText} onPress={() => {
-                                    setShowLogin(false)
-                                    navigation.navigate('Register', { users: users })
-                                }}>
-                                    Create Account?</Text>
-                            </TouchableOpacity>
+                                                        <TouchableOpacity disabled={emailError} style={{ ...loginStyle.button }} onPress={() => setShowLogin(false)} >
+                                                            <Text style={loginStyle.buttonText}>Close</Text>
+                                                        </TouchableOpacity>
+                                                    </>
+                                                    : <>
+                                                        <Text style={loginStyle.subtitle}>Mag Login sa iyong account</Text>
+                                                        <View style={loginStyle.inputContainer}>
+                                                            <Text>Email:</Text>
+                                                            <TextInput
+                                                                style={{ ...loginStyle.input, borderColor: emailError ? 'red' : '#ddd' }}
+                                                                value={email}
+                                                                onChangeText={handleEmail}
+                                                                 placeholder="Enter your Email"
+                                                                placeholderTextColor="#999"
+                                                                autoCapitalize="none"
+                                                            />
+                                                        </View>
+                                                        <View style={loginStyle.inputContainer}>
+                                                            <Text>Password:</Text>
+                                                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                                                <TextInput
+                                                                    style={[loginStyle.input, { flex: 1 }]} // Adjust input width to accommodate the icon
+                                                                    value={password}
+                                                                    onChangeText={text => setPassword(text)}
+                                                                    placeholder="Enter your password"
+                                                                    placeholderTextColor="#999"
+                                                                    autoCapitalize="none"
+                                                                    secureTextEntry={!isPasswordVisible} // Control visibility
+                                                                />
+                                                                <TouchableOpacity onPress={togglePasswordVisibility} style={{ marginLeft: 10 }}>
+                                                                    <Ionicons
+                                                                        name={isPasswordVisible ? 'eye-outline' : 'eye-off-outline'  }
+                                                                        size={24}
+                                                                        color="#999"
+                                                                    />
+                                                                </TouchableOpacity>
+                                                            </View>
+                                                        </View>
+
+                                                        <TouchableOpacity disabled={emailError} style={{ ...loginStyle.button, backgroundColor: emailError ? '#A1A1A1' : 'green' }} onPress={handleLogin} >
+                                                            <Text style={loginStyle.buttonText}>Sign In</Text>
+                                                        </TouchableOpacity>
+
+                                                        <TouchableOpacity style={loginStyle.createAccountButton}>
+                                                            <Text style={loginStyle.createAccountButtonText} onPress={() => {
+                                                                setShowLogin(false)
+                                                                navigation.navigate('Register', { users: users })
+                                                            }}>
+                                                                Create Account?</Text>
+                                                        </TouchableOpacity>
+                                                    </>
+                                            }
+                                        </>
+                                }
+                            </View>
                         </View>
-                    </View>
+                    </TouchableWithoutFeedback>
                 </TouchableOpacity>
             </Modal>
         )
@@ -188,7 +318,7 @@ export const Landing = ({ navigation }) => {
                             </Text>
                         </View>
                         <Divider />
-                        <View style={styles.drawerLogoutContainer}>
+                        <View style={styles.drawerLogoutContainer} >
                             <Image source={require('../assets/logout.png')} style={styles.drawerBtnText} />
                             <Text
                                 onPress={handleLogout}
@@ -278,8 +408,7 @@ export const Landing = ({ navigation }) => {
                                         ?
                                         <TouchableHighlight
                                             style={styles.btnbtn}
-                                            onPress={() => { console.log("the draweeeer", drawer); drawer.current?.openDrawer() }}
-                                            //onPress={handleLogout}
+                                        //onPress={handleLogout}
                                         >
                                             <View style={styles.btnbtnChild2}>
                                                 {
@@ -294,7 +423,7 @@ export const Landing = ({ navigation }) => {
                                                             style={styles.btnImage}
                                                         />
                                                     )}
-                                                <Text style={{ ...styles.buttonText, color: '#fff' }}>Log out</Text> 
+                                                <Text style={{ ...styles.buttonText, color: '#fff' }}>Log out</Text>
                                             </View>
                                         </TouchableHighlight>
                                         :
@@ -511,7 +640,7 @@ const loginStyle = StyleSheet.create({
     formContainer: {
         justifyContent: 'center',
         alignItems: 'center',
-
+        // backgroundColor: 'red',
         padding: 10
     },
     title: {
@@ -525,12 +654,12 @@ const loginStyle = StyleSheet.create({
     subtitle: {
         color: 'black',
         textAlign: 'center',
-        marginBottom: 10,
+        marginBottom: 32,
     },
     card: {
         width: '80%',
         backgroundColor: '#fff',
-        borderRadius: 4,
+        borderRadius: 12,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
@@ -539,7 +668,7 @@ const loginStyle = StyleSheet.create({
         marginBottom: 20,
     },
     inputContainer: {
-        marginBottom: 20,
+        marginBottom: 20
     },
     label: {
         fontSize: 16,
