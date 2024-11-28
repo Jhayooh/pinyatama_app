@@ -2043,8 +2043,9 @@ export const Calculator = ({ navigation }) => {
       </Modal>
       <Modal animationType='fade' visible={saving} transparent={true}>
         <View style={styles.addImage}>
-          <View style={{ ...styles.modalContainer, paddingHorizontal: 42 }}>
-            <ActivityIndicator size='large' />
+          <View style={{ ...styles.modalContainer, paddingHorizontal: 28, display: 'flex', paddingVertical: 18 }}>
+            <ActivityIndicator size='large' style={{paddingRight: 0, marginRight: 0}} />
+            <Text>Saving...</Text>
           </View>
         </View>
       </Modal>
