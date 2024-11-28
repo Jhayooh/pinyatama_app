@@ -40,8 +40,6 @@ import { db } from '../firebase/Config';
 
 export default function Register({ navigation, route }) {
     const { users } = route.params
-    console.log("users", users);
-
     const [munCode, setMunCode] = useState(null)
     const [imageUri, setImageUri] = useState(null)
 
@@ -364,23 +362,25 @@ export default function Register({ navigation, route }) {
                     onPress: () => {
                         setSaving(true);
                         handleRegister()
-                            .then(() => {
+                            .then(()=>{
+                                let cnt = 3;
                                 Alert.alert(
-                                    'Successfully Created an Account',
-                                    'Mangyaring maghintay bago tuluyang magamit ang iyong account',
+                                    'Successfully Created an Account.',
+                                    `Mangyaring maghintay bago tuluyang magamit ang iyong account`,
                                     [
                                         {
-                                            text: 'Ok',
-                                            style: 'cancel'
+                                            text: 'OK',
+                                            style: 'cancel',
                                         }
                                     ]
                                 )
-                            });
+                            })
                     },
                 },
             ]
         );
-    }
+    };
+
 
     return (
         <>
@@ -459,9 +459,12 @@ export default function Register({ navigation, route }) {
                                             <TextInput
                                                 editable
                                                 onChangeText={(num) => {
-                                                    setPhoneNumber(num)
+                                                    const cleaned = num.replace(/[^0-9]/g, '');
+                                                    console.log("cleaned", cleaned);
+                                                    
+                                                    setPhoneNumber(cleaned)
                                                 }}
-                                                maxLength={40}
+                                                maxLength={11}
                                                 placeholder='Enter Mobile Number'
                                                 keyboardType='numeric'
                                                 value={phoneNumber}
