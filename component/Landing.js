@@ -198,12 +198,10 @@ export const Landing = ({ navigation }) => {
                             <View style={loginStyle.card}>
                                 {
                                     saving
-                                        ? <>
+                                        ? <View style={loginStyle.subCard}>
+                                            <ActivityIndicator size="large" color="green" />
                                             <Text style={loginStyle.title}>Signing in ...</Text>
-                                            <View style={{ padding: 24 }}>
-                                                <ActivityIndicator size="large" color="green" />
-                                            </View>
-                                        </>
+                                        </View>
                                         :
                                         <>
                                             <Text style={loginStyle.title}>MALIGAYANG PAGDATING</Text>
@@ -233,7 +231,7 @@ export const Landing = ({ navigation }) => {
                                                                 style={{ ...loginStyle.input, borderColor: emailError ? 'red' : '#ddd' }}
                                                                 value={email}
                                                                 onChangeText={handleEmail}
-                                                                 placeholder="Enter your Email"
+                                                                placeholder="Enter your Email"
                                                                 placeholderTextColor="#999"
                                                                 autoCapitalize="none"
                                                             />
@@ -252,7 +250,7 @@ export const Landing = ({ navigation }) => {
                                                                 />
                                                                 <TouchableOpacity onPress={togglePasswordVisibility} style={{ marginLeft: 10 }}>
                                                                     <Ionicons
-                                                                        name={isPasswordVisible ? 'eye-outline' : 'eye-off-outline'  }
+                                                                        name={isPasswordVisible ? 'eye-outline' : 'eye-off-outline'}
                                                                         size={24}
                                                                         color="#999"
                                                                     />
@@ -265,11 +263,13 @@ export const Landing = ({ navigation }) => {
                                                         </TouchableOpacity>
 
                                                         <TouchableOpacity style={loginStyle.createAccountButton}>
-                                                            <Text style={loginStyle.createAccountButtonText} onPress={() => {
-                                                                setShowLogin(false)
-                                                                navigation.navigate('Register', { users: users })
-                                                            }}>
-                                                                Create Account?</Text>
+                                                            {
+                                                                users && <Text style={loginStyle.createAccountButtonText} onPress={() => {
+                                                                    setShowLogin(false)
+                                                                    navigation.navigate('Register', { users: users })
+                                                                }}>
+                                                                    Create Account?</Text>
+                                                            }
                                                         </TouchableOpacity>
                                                     </>
                                             }
@@ -666,6 +666,13 @@ const loginStyle = StyleSheet.create({
         shadowRadius: 2,
         padding: 20,
         marginBottom: 20,
+    },
+    subCard: {
+        display: 'flex',
+        flexDirection: 'row',
+        padding: 8 ,
+        alignItems: 'center',
+        justifyContent: 'space-around'
     },
     inputContainer: {
         marginBottom: 20

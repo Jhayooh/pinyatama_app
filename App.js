@@ -126,7 +126,7 @@ const App = () => (
                 name='Register'
                 component={Register}
                 options={{
-                    title: 'Register',
+                    title: 'Create an Account',
                     headerTintColor: '#E8E7E7',
                     headerBackTitleVisible: false,
                     headerStyle: {

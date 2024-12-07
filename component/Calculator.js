@@ -70,7 +70,7 @@ const npkType = [
           K: 15,
         },
         list: {
-          '17-0-17': 1.0, 
+          '17-0-17': 1.0,
           '46-0-0': 0.5,
           '0-0-60': 0,
         }
@@ -1017,7 +1017,6 @@ export const Calculator = ({ navigation }) => {
         brgy: brgyCode,
       });
 
-      // Add farm with calculated dates
       const start_date = new Date(Date.parse(startDate));
       const floweringDate = new Date(start_date);
       floweringDate.setMonth(start_date.getMonth() + 12);
@@ -1025,6 +1024,8 @@ export const Calculator = ({ navigation }) => {
       fruitingDate.setMonth(floweringDate.getMonth() + 1);
       const harvestDate = new Date(fruitingDate);
       harvestDate.setMonth(fruitingDate.getMonth() + 5);
+      const endDate = new Date(harvestDate)
+      endDate.setDate(harvestDate.getDate() + 15)
 
       const newFarmRef = await addDoc(farmsColl, {
         area: area.toFixed(2),
@@ -1035,7 +1036,7 @@ export const Calculator = ({ navigation }) => {
         geopoint: userLocation,
         mun: municipality,
         title: farmName,
-        remarks:'On going',
+        remarks: 'On going',
         plantNumber: base,
         brgyUID: user.uid,
         farmerName: `${firstname} ${lastname}`,
@@ -1057,12 +1058,12 @@ export const Calculator = ({ navigation }) => {
 
       batch.update(newFarmRef, { id: newFarmId });
 
-      // Add events for Vegetative, Flowering, and Fruiting stages
       const eventsRef = collection(db, `farms/${newFarmId}/events`);
       const stages = [
         { title: 'Vegetative', start: start_date, end: floweringDate, className: 'vegetative' },
         { title: 'Flowering', start: floweringDate, end: fruitingDate, className: 'flowering' },
         { title: 'Fruiting', start: fruitingDate, end: harvestDate, className: 'fruiting' },
+        { title: 'Harvesting', start: harvestDate, end: endDate, className: 'harvesting' },
       ];
       stages.forEach(async ({ title, start, end, className }) => {
         const eventRef = await addDoc(eventsRef, {
@@ -1101,7 +1102,11 @@ export const Calculator = ({ navigation }) => {
         },
       ]);
     } catch (e) {
-      console.log('Saving Error: ', e);
+      console.error('Error in saveInputs:', e.message, e.stack);
+      console.log('start_date:', start_date);
+      console.log('floweringDate:', floweringDate);
+      console.log('fruitingDate:', fruitingDate);
+      console.log('harvestDate:', harvestDate);
     }
   };
 
@@ -1413,7 +1418,7 @@ export const Calculator = ({ navigation }) => {
     return lng > 0 ? lng - 360 : lng; // Adjusting for positive longitudes
   }
 
-  
+
   return (
     <>
       <View style={styles.screen}>
@@ -2043,8 +2048,9 @@ export const Calculator = ({ navigation }) => {
       </Modal>
       <Modal animationType='fade' visible={saving} transparent={true}>
         <View style={styles.addImage}>
-          <View style={{ ...styles.modalContainer, paddingHorizontal: 42 }}>
-            <ActivityIndicator size='large' />
+          <View style={{ ...styles.modalContainer, paddingHorizontal: 28, display: 'flex', paddingVertical: 18 }}>
+            <ActivityIndicator size='large' style={{ paddingRight: 0, marginRight: 0 }} />
+            <Text>Saving...</Text>
           </View>
         </View>
       </Modal>

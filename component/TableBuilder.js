@@ -377,7 +377,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
             component={{
               name: 'Good Size',
               qntyPrice: grossReturn,
-              unit: 'pc/s',
+              unit: 'pcs',
               price: pinePrice,
               totalPrice: grossReturn * pinePrice
             }}
@@ -387,7 +387,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
             component={{
               name: 'Butterball',
               qntyPrice: butterBall,
-              unit: 'pc/s',
+              unit: 'pcs',
               price: butterPrice,
               totalPrice: butterBall * butterPrice
             }}
