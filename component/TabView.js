@@ -12,7 +12,14 @@ import {
 
 const windowWidth = Dimensions.get('window').width;
 
-const Card = ({ imageSource, title, description, startDate, endDate, onPress }) => {
+const Card = ({ imageSource, title, description, startDate, endDate, onPress, remarks}) => {
+  const remarksColor = remarks
+  ? remarks === 'failed'
+    ? 'red'
+    : remarks === 'On going'
+      ? 'orange'
+      : 'green'
+  : 'green';
   return (
     <TouchableOpacity onPress={onPress} style={styles.card}>
       <Image source={imageSource} style={styles.cardImage} />
@@ -21,6 +28,7 @@ const Card = ({ imageSource, title, description, startDate, endDate, onPress }) 
         <Text style={styles.cardDescription}>{description}</Text>
         <Text style={styles.cardDate}>Date of Planting: {startDate}</Text>
         <Text style={styles.cardDate}>Date of Expected Harvest: {endDate}</Text>
+        <Text style={[styles.cardRemarks, { color: remarksColor }]}>{remarks}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -34,7 +42,7 @@ const TabView = ({ route, navigation, farms, imageUrls }) => {
   function dateFormatter(date) {
     const d = new Date(date.toMillis());
     return d.toLocaleDateString();
-  }  
+  }
 
   return (
     <>
@@ -52,6 +60,7 @@ const TabView = ({ route, navigation, farms, imageUrls }) => {
                 description={`${farm.brgy}, ${farm.mun}`}
                 startDate={dateFormatter(farm.start_date)}
                 endDate={dateFormatter(farm.harvest_date)}
+                remarks={farm.remarks}
                 imageSource={imageUrls[farm.id] ? { uri: imageUrls[farm.id] } : require('../assets/p.jpg')}
                 onPress={() => handleCardPress(farm)}
               />
@@ -113,6 +122,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 18,
     marginBottom: 10,
+  },
+  cardRemarks: {
+    fontSize: 16,
+    lineHeight: 18,
+    textTransform:'uppercase',
+    marginTop:5
   },
   cardDate: {
     fontSize: 12,

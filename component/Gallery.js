@@ -30,7 +30,7 @@ export default function Gallery({ route, }) {
       const downloadUrl = await getDownloadURL(result.items[0])
       return downloadUrl
     } catch (error) {
-      console.error('Error fetching images: ', error);
+      console.error('Error fetching images');
       <ActivityIndicator />
     }
   }
@@ -133,15 +133,15 @@ export default function Gallery({ route, }) {
             <Tab.Screen
               name="Complete"
               children={props => (
-                <TabView {...props} farms={filteredFarms.filter(obj => obj.cropStage.toLowerCase() === 'complete')} imageUrls={imageUrls} />
+                <TabView {...props} farms={filteredFarms.filter(obj => obj.cropStage.toLowerCase() === 'complete' || obj.remarks === 'failed')} imageUrls={imageUrls} />
               )}
             />
-             <Tab.Screen
+             {/* <Tab.Screen
               name="Failed"
               children={props => (
                 <TabView {...props} farms={filteredFarms.filter(obj => obj.remarks === 'failed')} imageUrls={imageUrls} />
               )}
-            />
+            /> */}
           </Tab.Navigator>
         )
       }

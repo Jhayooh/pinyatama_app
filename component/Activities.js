@@ -95,6 +95,8 @@ const Activities = ({ route }) => {
   const [startPicker, setStartPicker] = useState(false);
   const [date, setDate] = useState(null)
 
+  const [application, setApplication] = useState([])
+
   const [alert, setAlert] = useState({ visible: false, message: '', severity: '' });
 
   useEffect(() => {
@@ -143,6 +145,7 @@ const Activities = ({ route }) => {
     setIsAdd(false);
     setReport(false);
     setDate(new Date())
+    setApplication([])
   };
 
 
@@ -157,7 +160,7 @@ const Activities = ({ route }) => {
 
       if (!snapshot.empty) {
         const fetchedSteps = snapshot.docs.map((doc) => ({
-          text: `${doc.data().qnty}${doc.data().type === 'a' ? '': '%'}, ${doc.data().label}`,
+          text: `${doc.data().qnty}${doc.data().type === 'a' ? '' : '%'}, ${doc.data().label}`,
           date: doc.data().createdAt.toDate(),
         }));
 
@@ -361,7 +364,8 @@ const Activities = ({ route }) => {
             compId: '',
             desc: reportDesc,
             qnty: reportPer,
-            remarks: failed
+            remarks: failed,
+            unit: 'pcs'
           }
         )
 
@@ -370,101 +374,153 @@ const Activities = ({ route }) => {
         const theLabel = ferti.find(obj => obj.value === fertilizer);
         let newHarvest = null
         if (theLabel.label.toLowerCase() === "flower inducer (ethrel)" && events) {
-          const batches = farm.batches || []
+          const batches = farm.batches || [];
           const vege_event = events.find(p => p.className === 'vegetative');
+
+          if (!vege_event) {
+            console.warn("No vegetative event found.");
+            setSaving(false);
+            handleModalClose();
+            return;
+          }
+
           const date_diff = currDate - vege_event.end_time.toDate();
+
           if (farm.plantNumber - farm.ethrel === 0) {
             setSaving(false);
             handleModalClose();
             return;
           }
+
           if (!ethrelValid(currDate, vege_event.start_time.toDate())) {
             setSaving(false);
             handleModalClose();
             return;
           }
-          for (const e of events) {
-            switch (e.className.toLowerCase()) {
-              case 'vegetative':
+
+          const eventStages = ["vegetative", "flowering", "fruiting", "harvesting"];
+
+          const addAndSetDoc = async (eventData) => {
+            const docRef = await addDoc(collection(db, `farms/${farm.id}/events`), eventData);
+            await updateDoc(docRef, { id: docRef.id });
+            return docRef;
+          };
+
+          let newHarvest;
+
+          for (let stage of eventStages) {
+            const e = events.find(event => event.className.toLowerCase() === stage);
+            if (!e) continue;
+
+            const batchIndex = batches.length + 1;
+
+            switch (stage) {
+              case "vegetative":
                 e.end_time = Timestamp.fromDate(currDate);
-                e.title = `Batch ${batches.length + 1} [${bilang}pcs (${plantPercent(bilang, farm.plantNumber)}%)] - ${e.title}`;
-                const vegeEvent = await addDoc(collection(db, `farms/${farm.id}/events`), {
+                e.title = `Batch ${batchIndex} [${bilang}pcs (${plantPercent(bilang, farm.plantNumber)}%)] - ${e.title}`;
+                await addAndSetDoc({
                   ...e,
-                  className: e.className + 'Actual',
+                  className: e.className + "Actual",
                   createdAt: new Date(),
-                  index: batches.length + 1,
+                  index: batchIndex,
                 });
-                await updateDoc(vegeEvent, { id: vegeEvent.id });
                 break;
-              case 'flowering':
+
+              case "flowering":
                 e.start_time = Timestamp.fromDate(currDate);
                 e.end_time = Timestamp.fromMillis(e.end_time.toMillis() + date_diff);
-                const flowEvent = await addDoc(collection(db, `farms/${farm.id}/events`), {
+                await addAndSetDoc({
                   ...e,
-                  className: e.className + 'Actual',
+                  className: e.className + "Actual",
                   createdAt: new Date(),
-                  index: batches.length + 1,
+                  index: batchIndex,
                 });
-                await updateDoc(flowEvent, { id: flowEvent.id });
                 break;
-              case 'fruiting':
+
+              case "fruiting":
                 e.start_time = Timestamp.fromMillis(e.start_time.toMillis() + date_diff);
-                const et = new Date(e.start_time.toDate());
-                et.setMonth(et.getMonth() + 3);
-                et.setDate(et.getDate() + 15);
-                e.end_time = Timestamp.fromDate(et);
-                const fruEvent = await addDoc(collection(db, `farms/${farm.id}/events`), {
+                const fruitingEndDate = new Date(e.start_time.toDate());
+                fruitingEndDate.setMonth(fruitingEndDate.getMonth() + 3);
+                fruitingEndDate.setDate(fruitingEndDate.getDate() + 15);
+                e.end_time = Timestamp.fromDate(fruitingEndDate);
+
+                await addAndSetDoc({
                   ...e,
-                  className: e.className + 'Actual',
+                  className: e.className + "Actual",
                   createdAt: new Date(),
-                  index: batches.length + 1,
+                  index: batchIndex,
                 });
-                await updateDoc(fruEvent, { id: fruEvent.id });
-                newHarvest = e.end_time
+
+                newHarvest = e.end_time;
                 batches.push({
-                  index: batches.length + 1,
+                  index: batchIndex,
                   harvestDate: e.end_time,
-                  plantSize: parseInt(bilang)
-                })
+                  plantSize: parseInt(bilang),
+                });
                 break;
+
+              case "harvesting":
+                const fruitingEvent = batches[batches.length - 1];
+                if (!fruitingEvent || !fruitingEvent.harvestDate) {
+                  console.warn("Skipping harvesting: Missing previous harvestDate.");
+                  continue;
+                }
+
+                const harvestingStartDate = fruitingEvent.harvestDate.toDate();
+                e.start_time = Timestamp.fromDate(harvestingStartDate);
+                const harvestingDate = new Date(e.start_time.toDate());
+                harvestingDate.setDate(harvestingDate.getDate() + 15);
+                e.end_time = Timestamp.fromDate(harvestingDate);
+
+                await addAndSetDoc({
+                  ...e,
+                  className: e.className + "Actual",
+                  createdAt: new Date(),
+                  index: batchIndex,
+                });
+                break;
+
               default:
                 break;
             }
           }
+
           await updateDoc(doc(db, `farms/${farm.id}`), {
             isEthrel: currDate,
             ethrel: farm.ethrel + parseInt(bilang),
-            batches
+            batches,
           });
-          await addDoc(activityColl,
-            {
-              type: act,
-              createdAt: currDate,
-              label: theLabel.label,
-              compId: fertilizer,
-              qnty: qntyPrice,
-              desc: ''
-            }
-          );
 
-          const pComp = parts.find(c => c.name === theLabel.label)
-          const newQnty = getMult(farm.area, pComp.defQnty)
+          await addDoc(activityColl, {
+            type: act,
+            createdAt: currDate,
+            label: theLabel.label,
+            compId: fertilizer,
+            qnty: qntyPrice,
+            desc: `Ikaw ay naglagay ng ${qntyPrice} liter ng ${theLabel.label}`,
+            unit: 'liter',
+          });
+
+          const pComp = parts.find(c => c.name === theLabel.label);
+          const newQnty = getMult(farm.area, pComp.defQnty);
+
           const actComp = {
             ...pComp,
             qntyPrice: newQnty,
             totalPrice: getMult(newQnty, pComp.price),
             foreignId: pComp.id,
-            type: "a"
-          }
-          setActualComponents([...components.filter(comp => comp.type !== 'p'), actComp]);
-          const newCompAct = await addDoc(componentsColl, actComp)
-          await updateDoc(newCompAct, { id: newCompAct.id })
+            type: "a",
+          };
 
-          if (e.length > 3 && newHarvest > new Date(farm.harvest_date.toDate())) {
+          setActualComponents([...components.filter(comp => comp.type !== 'p'), actComp]);
+          const newCompAct = await addDoc(componentsColl, actComp);
+          await updateDoc(newCompAct, { id: newCompAct.id });
+
+          if (events.length > 3 && newHarvest > new Date(farm.harvest_date.toDate())) {
             await updateDoc(doc(db, `farms/${farm.id}`), {
               harvest_date: newHarvest,
             });
-          } else if (e.length <= 3) {
+          } else if (events.length <= 3) {
             await updateDoc(doc(db, `farms/${farm.id}`), {
               harvest_date: newHarvest,
             });
@@ -472,17 +528,8 @@ const Activities = ({ route }) => {
 
           setSaving(false);
           handleModalClose();
-        } else {
-          await addDoc(activityColl,
-            {
-              type: act,
-              createdAt: currDate,
-              label: theLabel.label,
-              compId: fertilizer,
-              qnty: qntyPrice,
-              desc: ''
-            }
-          );
+        }
+        else {
 
           const pComp = parts.find(p => p.name === theLabel.label)
           const newQnty = getMult(farm.area, pComp.defQnty)
@@ -493,6 +540,18 @@ const Activities = ({ route }) => {
             foreignId: pComp.id,
             type: "a"
           }
+
+          await addDoc(activityColl,
+            {
+              type: act,
+              createdAt: currDate,
+              label: theLabel.label,
+              compId: fertilizer,
+              qnty: qntyPrice,
+              desc: `Ikaw ay naglagay ng ${qntyPrice} ${pComp.unit} ng ${theLabel.label}`,
+              unit: pComp.unit,
+            }
+          );
 
           setActualComponents([...components.filter(comp => comp.type !== 'p'), actComp]);
           const newCompAct = await addDoc(componentsColl, actComp)
@@ -506,6 +565,13 @@ const Activities = ({ route }) => {
       setSaving(false);
     }
   };
+
+  function getOrdinal(number) {
+    const suffixes = ["th", "st", "nd", "rd"];
+    const value = number % 100;
+    return number + (suffixes[(value - 20) % 10] || suffixes[value] || suffixes[0]);
+  }
+
   const customStyles = {
     stepIndicatorSize: 10,
     currentStepIndicatorSize: 40,
@@ -687,8 +753,30 @@ const Activities = ({ route }) => {
               style={styles.input}
               onChange={item => {
                 const obj = parts?.find(obj => obj.name === item.value)
+                const apply = components?.filter(c => c.foreignId === obj.id && c.parent.toLowerCase() === 'fertilizer')
+
+                const monthApply = [1, 4, 7, 10];
+                const newArray = monthApply.map((month) => {
+                  const match = apply
+                    .find((a) => a.label === month);
+
+                  if (match) {
+                    return {
+                      qntyPrice: match.qntyPrice,
+                      unit: match.unit,
+                      label: match.label
+                    };
+                  } else {
+                    return {
+                      qntyPrice: 0,
+                      unit: obj?.unit,
+                      label: month
+                    };
+                  }
+                });
                 setFertilizer(item.value)
                 setComps(obj)
+                setApplication(obj.parent.toLowerCase() === 'fertilizer' ? newArray.sort((a, b) => a.label - b.label) : [])
                 setQntyPrice(getMult(farm.area, obj.defQnty))
                 setBilang((parseInt(farm.plantNumber) - parseInt(farm.ethrel)).toString())
               }}
@@ -717,9 +805,10 @@ const Activities = ({ route }) => {
               <TextInput
                 placeholder="0.0"
                 keyboardType="decimal-pad"
-                style={styles.input}
+                style={{ ...styles.input, marginBottom: 0 }}
                 value={qntyPrice.toString()}
                 onChangeText={(value) => {
+
                   if (value === "") {
                     value = "0"
                   }
@@ -740,6 +829,18 @@ const Activities = ({ route }) => {
               <View style={styles.suffixContainer}>
                 <Text style={styles.suffix}>{comps.unit || ""}</Text>
               </View>
+            </View>
+            <View style={{ marginBottom: 20 }}>
+              {
+                application.length > 0
+                && application.map(app => {
+                  return (
+                    <Text style={styles.subScript}>
+                      *Apply {app.qntyPrice.toFixed(2)} {app.unit} on {getOrdinal(app.label)} month
+                    </Text>
+                  )
+                })
+              }
             </View>
             <View>
               <View style={{ display: 'flex', flexDirection: 'row' }}>
@@ -1019,6 +1120,12 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 20,
     borderRadius: 5,
+  },
+  subScript: {
+    fontSize: 12,
+    fontWeight: '100',
+    fontStyle: 'italic',
+    marginLeft: 2
   },
   saveButton: {
     backgroundColor: 'green',
