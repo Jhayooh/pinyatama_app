@@ -126,7 +126,8 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
     return num.toLocaleString('en-PH', {
       style: 'currency',
       currency: 'PHP',
-      minimumFractionDigits: 0
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
     })
   }
 
@@ -152,20 +153,15 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
       setComps((prevComps) =>
         prevComps.map((comp) => {
           if (component.parent.toLowerCase() === 'fertilizer' && comp.foreignId === component.foreignId && comp.label === component.label) {
-            console.log("comp", newComp);
 
             return newComp;
           }
           if (comp.id === component.id) {
-            console.log("comp", newComp);
             return newComp;
           }
           return comp;
         })
       );
-
-      console.log("the editing:", component);
-      console.log("the edited:", newComp);
     };
 
     const handleEdit = (value) => {
@@ -210,9 +206,11 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
   };
 
   const formatter = (num) => {
-    return num.toLocaleString('en-US'
-    )
-  }
+    return num.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  };
 
   return (
     <>
