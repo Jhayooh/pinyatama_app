@@ -26,8 +26,8 @@ const Card = ({ imageSource, title, description, startDate, endDate, onPress, re
       <View style={styles.cardContent}>
         <Text style={styles.cardTitle}>{title}</Text>
         <Text style={styles.cardDescription}>{description}</Text>
-        <Text style={styles.cardDate}>Date of Planting: {startDate}</Text>
-        <Text style={styles.cardDate}>Date of Expected Harvest: {endDate}</Text>
+        <Text style={styles.cardDate}>Petsa ng Pagtanim: {startDate}</Text>
+        <Text style={styles.cardDate}>Petsa ng Inaasahang ani: {endDate}</Text>
         <Text style={[styles.cardRemarks, { color: remarksColor }]}>{remarks}</Text>
       </View>
     </TouchableOpacity>

@@ -89,13 +89,13 @@ const Timeline = ({ navigation }) => {
                     })}
                 />
             )}
-            <View style={styles.viewMoreButton}>
+            {/* <View style={styles.viewMoreButton}>
                 <TouchableOpacity
                 // onPress={() => navigation.navigate('Gallery')}
                 >
                     <Text style={styles.more}> View More</Text>
                 </TouchableOpacity>
-            </View>
+            </View> */}
         </>
     );
 };

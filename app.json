@@ -19,7 +19,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage":  "./assets/logo.png",
+        "foregroundImage": "./assets/logo.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.jhayooh.Pinyatama",
@@ -31,7 +31,7 @@
     },
     "extra": {
       "eas": {
-        "projectId": "2815b92d-bfb2-4fa4-bade-95fd0afafad5"
+        "projectId": "00a0140c-823e-4042-a0b3-645a5126facf"
       }
     },
     "runtimeVersion": "1.0.0",
