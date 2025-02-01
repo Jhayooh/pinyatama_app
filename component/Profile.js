@@ -49,7 +49,7 @@ export default function Profile({ route, navigation }) {
                         </View>
                         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                             <View style={{ flex: 1, flexDirection: 'column', marginRight: 5, marginBottom: 20 }}>
-                                <Text style={styles.supText}>Barangay</Text>
+                                <Text style={styles.supText}>Baranggay</Text>
                                 <TextInput
                                     editable={false}
                                     placeholder={farm.brgy}
@@ -57,7 +57,7 @@ export default function Profile({ route, navigation }) {
                                 />
                             </View>
                             <View style={{ flex: 1, flexDirection: 'column', marginLeft: 5, marginBottom: 20 }}>
-                                <Text style={styles.supText}>Municipality</Text>
+                                <Text style={styles.supText}>Munisipalidad</Text>
                                 <TextInput
                                     editable={false}
                                     placeholder={farm.mun}
@@ -75,7 +75,7 @@ export default function Profile({ route, navigation }) {
                                 />
                             </View>
                             <View style={{ flex: 1, flexDirection: 'column', marginLeft: 5, marginBottom: 20 }}>
-                                <Text style={styles.supText}>Land Area</Text>
+                                <Text style={styles.supText}>Lawak ng Lupa</Text>
                                 <TextInput
                                     editable={false}
                                     placeholder={farm.area}
@@ -93,7 +93,7 @@ export default function Profile({ route, navigation }) {
                                 />
                             </View>
                             <View style={{ flex: 1, flexDirection: 'column', marginLeft: 5, marginBottom: 20 }}>
-                                <Text style={styles.supText}>NPK</Text>
+                                <Text style={styles.supText}>Nitrogen (N), Phosphorus (P), and Potassium (K)</Text>
                                 <TextInput
                                     editable={false}
                                     placeholder={farm.npk}
@@ -107,7 +107,7 @@ export default function Profile({ route, navigation }) {
                 </View>
                 <View>
                     <TouchableOpacity style={styles.saveButton}>
-                        <Text style={styles.save}>Save</Text>
+                        <Text style={styles.save}>I-save</Text>
                     </TouchableOpacity>
                 </View>
             </ScrollView>
