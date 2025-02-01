@@ -58,7 +58,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
       }
     }
   }, [oneSevenData]);
-  
+
   useEffect(() => {
     if (fourTenData !== null) {
       const selectedFourTen = fourTen.find(item => item.value === fourTenData);
@@ -76,7 +76,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
       }
     }
   }, [fourTenData]);
-  
+
 
   useEffect(() => {
     let materialSum = 0;
@@ -322,7 +322,16 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
                 )
               })
           }
-
+          <View style={{ ...styles.tableHead, borderTopWidth: 2, borderBottomWidth: 2, marginBottom: 12 }}>
+            <View style={{ flex: 3 }}>
+              <Text style={{ fontWeight: 'bold', fontSize: 20, color: 'red' }}>Total: </Text>
+            </View>
+            <View style={{ flex: 2, alignItems: 'flex-end' }}>
+              <Text style={{ fontWeight: 'bold', fontSize: 18, color: 'red' }}>
+                Total ng 1st or 7th
+              </Text>
+            </View>
+          </View>
           <View style={{ ...styles.tableHead, marginTop: 12 }}>
             <Text style={{ fontWeight: 'bold', fontSize: 18 }}>Apply during the 4th and 10th month</Text>
           </View>
@@ -355,6 +364,17 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
                 )
               })
           }
+
+          <View style={{ ...styles.tableHead, borderTopWidth: 2, borderBottomWidth: 2, marginBottom: 12 }}>
+            <View style={{ flex: 3 }}>
+              <Text style={{ fontWeight: 'bold', fontSize: 20, color: 'red' }}>Total: </Text>
+            </View>
+            <View style={{ flex: 2, alignItems: 'flex-end' }}>
+              <Text style={{ fontWeight: 'bold', fontSize: 18, color: 'red' }}>
+                Total ng 4th and 10th
+              </Text>
+            </View>
+          </View>
 
           <View style={{ ...styles.tableHead, borderTopWidth: 2, borderBottomWidth: 2, marginBottom: 12 }}>
             <View style={{ flex: 3 }}>
@@ -427,6 +447,12 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
               <Text style={{ fontWeight: 'bold', fontSize: 20, color: 'red' }}>
                 {currencyformatter(costTotal)}
               </Text>
+            </View>
+          </View>
+          <View style={{ ...styles.tableHead, borderBottomWidth: 2, borderColor: '#000', marginTop: 10, }}>
+            <View style={{ ...styles.tableHeadLabel3, alignItems: 'center' }}>
+              <Row data={tableHead} style={{ justifyContent: 'center' }}
+                textStyle={{ textAlign: 'center', fontWeight: 'bold' }} />
             </View>
           </View>
           <TableData
