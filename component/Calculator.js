@@ -1114,7 +1114,7 @@ export const Calculator = ({ navigation }) => {
   const BottomButton = () => {
     const checkMissing = () => {
       if (!base) {
-        Alert.alert('This field is required!', 'Maglagay ng bilang ng tanim.', [
+        Alert.alert('Kinakailangang punan ang patlang na ito', 'Maglagay ng bilang ng tanim.', [
           {
             text: 'Ok',
             onPress: () => { focusNumplants.current.focus() },
@@ -1124,7 +1124,7 @@ export const Calculator = ({ navigation }) => {
         return
       }
       if (!table) {
-        Alert.alert('Walang laman haha', 'Kalkyuladuhin ang bilang ng tanim.', [
+        Alert.alert('Kinakailangang punan ang patlang na ito', 'Kalkyuladuhin ang bilang ng tanim.', [
           {
             text: 'Ok',
             onPress: () => { focusNumplants.current.focus() },
@@ -1134,7 +1134,7 @@ export const Calculator = ({ navigation }) => {
         return
       }
       if (!cropStage) {
-        Alert.alert('Walang laman haha', 'Maglagay ng stage ng tanim.', [
+        Alert.alert('Kinakailangang punan ang patlang na ito', 'Maglagay ng yugto ng tanim.', [
           {
             text: 'Ok',
             onPress: () => { focusNumplants.current.focus() },
@@ -1144,7 +1144,7 @@ export const Calculator = ({ navigation }) => {
         return
       }
       if (!firstname) {
-        Alert.alert('This field is required!', 'Maglagay ng pangalan ng magsasaka', [
+        Alert.alert('Kinakailangang punan ang patlang na ito', 'Maglagay ng pangalan ng magsasaka', [
           {
             text: 'Ok',
             onPress: () => { focusNumplants.current.focus() },
@@ -1529,7 +1529,7 @@ export const Calculator = ({ navigation }) => {
                   </View>
                 </View> */}
                 <View style={{ ...styles.section, marginHorizontal: table ? 0 : 14, paddingHorizontal: 8 }}>
-                  <Text style={styles.header}>CALCULATE</Text>
+                  <Text style={styles.header}>KALKULAHIN</Text>
                   <View style={styles.subsection}>
                     <Text style={styles.supText}>Nitrogen (N), Phosphorus (P), and Potassium (K)</Text>
                     <View style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
@@ -1537,7 +1537,7 @@ export const Calculator = ({ navigation }) => {
                         data={npkType}
                         labelField='label'
                         valueField='value'
-                        placeholder='Select NPK'
+                        placeholder='Pumili ng NPK'
                         value={npk}
                         onChange={item => {
                           setTable(false)
@@ -1549,13 +1549,13 @@ export const Calculator = ({ navigation }) => {
                     </View>
                   </View>
                   <View style={styles.subsection}>
-                    <Text style={styles.supText}>Soil Type</Text>
+                    <Text style={styles.supText}>Klase ng Lupa</Text>
                     <View style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
                       <Dropdown
                         data={soilType}
                         labelField='label'
                         valueField='value'
-                        placeholder='Select soil type'
+                        placeholder='Pumili ng klase ng lupa'
                         value={soil}
                         onChange={item => {
                           setTable(false)
@@ -1566,7 +1566,7 @@ export const Calculator = ({ navigation }) => {
                     </View>
                   </View>
                   <View style={styles.subsection}>
-                    <Text style={styles.supText}>Number of Plants</Text>
+                    <Text style={styles.supText}>Bilang ng Tanim</Text>
                     <View style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
                       <TextInput
                         editable
@@ -1576,7 +1576,7 @@ export const Calculator = ({ navigation }) => {
                           setTable(false)
                         }}
                         ref={focusNumplants}
-                        placeholder='Enter Number of Plants'
+                        placeholder='Maglagay ng bilang ng Tanim'
                         keyboardType='numeric'
                         value={base}
                         style={calculateFocus ? { ...styles.textInputFocus, borderBottomRightRadius: 0, borderTopRightRadius: 0 } : { ...styles.textInput, borderBottomRightRadius: 0, borderTopRightRadius: 0 }}
@@ -1593,7 +1593,7 @@ export const Calculator = ({ navigation }) => {
                             handleBase()
                           }
                           } style={{ ...styles.button, backgroundColor: '#F5C115', borderBottomLeftRadius: 0, borderTopLeftRadius: 0, paddingHorizontal: 22, paddingVertical: 0, justifyContent: 'center' }}>
-                            <Text> Calculate </Text>
+                            <Text> Kalkulahin </Text>
                           </TouchableOpacity>
 
                       }
@@ -1635,7 +1635,7 @@ export const Calculator = ({ navigation }) => {
                             onChangeText={(text) => {
                               setFieldId(text);
                               if (text.trim() === '') {
-                                setFieldIdError('This is a required field');
+                                setFieldIdError('Kinakailangang punan ang patlang na ito');
                               } else {
                                 setFieldIdError('');
                               }
@@ -1655,8 +1655,8 @@ export const Calculator = ({ navigation }) => {
                           labelField='fieldId'
                           valueField='fieldId'
                           onChange={fieldIdChange}
-                          placeholder={!fieldidFocus ? 'Select Farm Field ID' : fieldId}
-                          searchPlaceholder="Search..."
+                          placeholder={!fieldidFocus ? 'Pumili ng Field ID' : fieldId}
+                          searchPlaceholder="Maghanap..."
                           value={fieldId}
                           style={fieldidFocus ? styles.textInputFocus : styles.textInput}
                           onFocus={() => setFieldidFocus(true)}
@@ -1666,7 +1666,7 @@ export const Calculator = ({ navigation }) => {
                   </View>
                   <View style={styles.subsection}>
                     <View style={{ flexDirection: 'row', gap: 1 }}>
-                      <Text style={styles.supText}>Farm Name</Text>
+                      <Text style={styles.supText}>Pangalan ng Bukid</Text>
                       <Text style={{ color: 'red' }}>*</Text>
                     </View>
                     <TextInput
@@ -1675,12 +1675,12 @@ export const Calculator = ({ navigation }) => {
                       onChangeText={(text) => {
                         setFarmName(text);
                         if (text.trim() === '') {
-                          setFarmnameError('This is a required field');
+                          setFarmnameError('Kinakailangang punan ang patlang na ito');
                         } else {
                           setFarmnameError('');
                         }
                       }}
-                      placeholder='Enter Farm Name'
+                      placeholder='Maglagay ng Pangalan ng Bukid'
                       value={farmName}
                       style={farmnameFocus ? styles.textInputFocus : styles.textInput}
                       onFocus={() => setFarmnameFocus(true)}
@@ -1691,37 +1691,37 @@ export const Calculator = ({ navigation }) => {
                   </View>
                   <View style={styles.subsection}>
                     <View style={{ flexDirection: 'row', gap: 1 }}>
-                      <Text style={styles.supText}>Municipality</Text>
+                      <Text style={styles.supText}>Munisipalidad</Text>
                       <Text style={{ color: 'red' }}>*</Text>
                     </View>
                     <TextInput
                       editable={false}
                       maxLength={40}
-                      placeholder='Enter Farm Municipality'
+                      placeholder='Piliin ang Munisipalidad'
                       value={municipality}
                       style={styles.textInput}
                     />
                   </View>
                   <View style={styles.subsection}>
                     <View style={{ flexDirection: 'row', gap: 1 }}>
-                      <Text style={styles.supText}>Barangay</Text>
+                      <Text style={styles.supText}>Baranggay</Text>
                       <Text style={{ color: 'red' }}>*</Text>
                     </View>
                     <TextInput
                       maxLength={40}
                       disabled={false}
-                      placeholder='Enter Farm Barangay'
+                      placeholder='Piliin ang Baranggay'
                       value={brgyCode}
                       style={styles.textInput}
                     />
                   </View>
                   <View style={styles.subsection}>
                     <View style={{ flexDirection: 'row', gap: 1 }}>
-                      <Text style={styles.supText}>Location</Text>
+                      <Text style={styles.supText}>Lokasyon</Text>
                       <Text style={{ color: 'red' }}>*</Text>
                     </View>
                     <View >
-                      <Button color='green' onPress={() => setModalVisible(true)} title="Open Map" />
+                      <Button color='green' onPress={() => setModalVisible(true)} title="Buksan ang Mapa" />
                       <Modal
                         animationType="slide"
                         transparent={true}
@@ -1777,14 +1777,14 @@ export const Calculator = ({ navigation }) => {
                               style={{ backgroundColor: 'red', padding: 10, flex: 1, alignItems: 'center' }}
                               onPress={() => setModalVisible(false)}
                             >
-                              <Text style={{ color: 'white', fontFamily: 'serif', fontSize: 20 }}>Cancel</Text>
+                              <Text style={{ color: 'white', fontFamily: 'serif', fontSize: 20 }}>Kanselahin</Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity
                               style={{ backgroundColor: 'green', padding: 10, flex: 1, alignItems: 'center' }}
                               onPress={() => setModalVisible(false)}
                             >
-                              <Text style={{ color: 'white', fontFamily: 'serif', fontSize: 20 }}>OK</Text>
+                              <Text style={{ color: 'white', fontFamily: 'serif', fontSize: 20 }}>Ok</Text>
                             </TouchableOpacity>
                           </View>
 
@@ -1813,10 +1813,10 @@ export const Calculator = ({ navigation }) => {
 
                 {/* Farmer Detail */}
                 <View style={styles.section}>
-                  <Text style={styles.header}>FARMER INFORMATION</Text>
+                  <Text style={styles.header}>DETALYE NG MAGSASAKA</Text>
                   <View style={styles.subsection}>
                     <View style={{ flexDirection: 'row', gap: 1 }}>
-                      <Text style={styles.supText}>First Name</Text>
+                      <Text style={styles.supText}>Pangalan</Text>
                       <Text style={{ color: 'red' }}>*</Text>
                     </View>
                     <TextInput
@@ -1825,12 +1825,12 @@ export const Calculator = ({ navigation }) => {
                       onChangeText={(text) => {
                         setFirstname(text);
                         if (text.trim() === '') {
-                          setFirstnameError('This is a required field');
+                          setFirstnameError('Kinakailangang punan ang patlang na ito');
                         } else {
                           setFirstnameError('');
                         }
                       }}
-                      placeholder='Enter Firstname of Farmer'
+                      placeholder='Illagay ang Pangalan'
                       value={firstname}
                       style={firstnameFocus ? styles.textInputFocus : styles.textInput}
                       onFocus={() => setFirstnameFocus(true)}
@@ -1840,7 +1840,7 @@ export const Calculator = ({ navigation }) => {
                   </View>
                   <View style={styles.subsection}>
                     <View style={{ flexDirection: 'row', gap: 1 }}>
-                      <Text style={styles.supText}>Last Name</Text>
+                      <Text style={styles.supText}>Apelyido</Text>
                       <Text style={{ color: 'red' }}>*</Text>
                     </View>
                     <TextInput
@@ -1849,12 +1849,12 @@ export const Calculator = ({ navigation }) => {
                       onChangeText={(text) => {
                         setLastname(text);
                         if (text.trim() === '') {
-                          setLastnameError('This is a required field');
+                          setLastnameError('Kinakailangang punan ang patlang na ito');
                         } else {
                           setLastnameError('');
                         }
                       }}
-                      placeholder='Enter Lastname of Farmer'
+                      placeholder='Ilagay ang Apelyido'
                       value={lastname}
                       style={lastnameFocus ? styles.textInputFocus : styles.textInput}
                       onFocus={() => setLastnameFocus(true)}
@@ -1864,7 +1864,7 @@ export const Calculator = ({ navigation }) => {
                   </View>
                   <View style={styles.subsection}>
                     <View style={{ flexDirection: 'row', gap: 1 }}>
-                      <Text style={styles.supText}>Sex</Text>
+                      <Text style={styles.supText}>Kasarian</Text>
                       <Text style={{ color: 'red' }}>*</Text>
                     </View>
                     <View style={styles.switches}>
@@ -1876,7 +1876,7 @@ export const Calculator = ({ navigation }) => {
                           onPress={() => setSex('Male')}
                           color="#F5C115"
                         />
-                        <Text >Male</Text>
+                        <Text >Lalaki</Text>
                         {/* <Switch
                           trackColor={{ false: '#E8E7E7', true: '#FCF0C5' }}
                           thumbColor={sex === 'Male' ? '#F5C115' : '#f4f3f4'}
@@ -1893,7 +1893,7 @@ export const Calculator = ({ navigation }) => {
                           onPress={() => setSex('Female')}
                           color="#F5C115"
                         />
-                        <Text >Female</Text>
+                        <Text >Babae</Text>
                         {/* <Switch
                           trackColor={{ false: '#E8E7E7', true: '#FCF0C5' }}
                           thumbColor={sex === 'Female' ? '#F5C115' : '#f4f3f4'}
@@ -1908,16 +1908,16 @@ export const Calculator = ({ navigation }) => {
 
                 {/* farm details */}
                 <View style={styles.section}>
-                  <Text style={styles.header}>DATE OF PLANTING</Text>
+                  <Text style={styles.header}>PETSA NG PAGTANIM</Text>
                   <View style={styles.subsection}>
                     <View style={{ flexDirection: 'row', gap: 1 }}>
-                      <Text style={styles.supText}>Date of Planting</Text>
+                      <Text style={styles.supText}>Petsa ng Pagtanim</Text>
                       <Text style={{ color: 'red' }}>*</Text>
                     </View>
                     <View style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
                       <TextInput
                         value={startDate.toLocaleDateString()}
-                        placeholder="Date of Planting"
+                        placeholder="Petsa ng Pagtanim"
                         style={startdateFocus ? { ...styles.textInputFocus, borderBottomRightRadius: 0, borderTopRightRadius: 0 } : { ...styles.textInput, borderBottomRightRadius: 0, borderTopRightRadius: 0 }}
                         onFocus={() => setStartdateFocus(true)}
                         onBlur={() => setStartdateFocus(false)}

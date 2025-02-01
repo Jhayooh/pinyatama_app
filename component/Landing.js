@@ -363,7 +363,7 @@ export const Landing = ({ navigation }) => {
                                 }>
                                     <View style={styles.btnbtnChild}>
                                         <Image source={calcLogo} style={styles.btnImage} />
-                                        <Text style={styles.buttonText}>Kalkulador ng gastos</Text>
+                                        <Text style={styles.buttonText}>Pagkalkula ng Gastos at Kita</Text>
                                     </View>
                                 </TouchableHighlight>
                                 <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn} onPress={() =>
@@ -385,14 +385,14 @@ export const Landing = ({ navigation }) => {
                                 }}>
                                     <View style={styles.btnbtnChild}>
                                         <Image source={galleryLogo} style={styles.btnImage} />
-                                        <Text style={styles.buttonText}>Mga Bukid ng Pinya</Text>
+                                        <Text style={styles.buttonText}>Mga Sakahan</Text>
                                     </View>
                                 </TouchableHighlight>
                                 <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn} onPress={() =>
                                     navigation.navigate('Video')}>
                                     <View style={styles.btnbtnChild}>
                                         <Image source={videoLogo} style={styles.btnImage} />
-                                        <Text style={styles.buttonText}>Mga Bidyo</Text>
+                                        <Text style={styles.buttonText}>Bidyu</Text>
                                     </View>
                                 </TouchableHighlight>
                             </View>
@@ -423,14 +423,14 @@ export const Landing = ({ navigation }) => {
                                                             style={styles.btnImage}
                                                         />
                                                     )}
-                                                <Text style={{ ...styles.buttonText, color: '#fff' }}>Log out</Text>
+                                                <Text style={{ ...styles.buttonText, color: '#fff' }}>Mag-Log out</Text>
                                             </View>
                                         </TouchableHighlight>
                                         :
                                         <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn} onPress={() => setShowLogin(true)}>
                                             <View style={styles.btnbtnChild}>
                                                 <Image source={logonLogo} style={styles.btnImage} />
-                                                <Text style={styles.buttonText}>Log in</Text>
+                                                <Text style={styles.buttonText}>Mag-Log in</Text>
                                             </View>
                                         </TouchableHighlight>
 

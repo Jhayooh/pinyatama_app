@@ -77,13 +77,13 @@ const ProductionInput = ({ route }) => {
               <Text style={styles.closeButtonText}>X</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => handleNavigate('Profile', { farm: farm })} style={styles.menuItem}>
-              <Text style={styles.menuItemText}>Edit Farm Details</Text>
+              <Text style={styles.menuItemText}>Detalye ng Bukid</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => handleNavigate('Images', { farm: farm })} style={styles.menuItem}>
-              <Text style={styles.menuItemText}>Add Farm Images</Text>
+              <Text style={styles.menuItemText}>Mga Larawan ng Bukid</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => handleNavigate('Activities', { farm: farm })} style={styles.menuItem}>
-              <Text style={styles.menuItemText}>Add Activities</Text>
+              <Text style={styles.menuItemText}>Mga Aktibidad</Text>
             </TouchableOpacity>
           </View>
         </View>
