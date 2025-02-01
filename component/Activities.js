@@ -755,6 +755,9 @@ const Activities = ({ route }) => {
                 const obj = parts?.find(obj => obj.name === item.value)
                 const apply = components?.filter(c => c.foreignId === obj.id && c.parent.toLowerCase() === 'fertilizer')
 
+                console.log("the appllyyyyy", apply)
+                console.log("the compss", components)
+
                 const monthApply = [1, 4, 7, 10];
                 const newArray = monthApply.map((month) => {
                   const match = apply

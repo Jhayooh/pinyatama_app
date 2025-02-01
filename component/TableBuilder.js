@@ -1,4 +1,4 @@
-import { addDoc, collection, doc, getDoc, updateDoc, query } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc, updateDoc, query, LoadBundleTask } from 'firebase/firestore';
 import React, { useState, useEffect } from 'react';
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import {
@@ -11,9 +11,11 @@ import {
 import { db } from '../firebase/Config';
 import { AddDataRow } from './AddDataRow';
 import { Table, Row, Rows } from 'react-native-table-component';
+import { Dropdown } from 'react-native-element-dropdown';
 
-export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setComponents, fertilizers, soil, bbType }) => {
+export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setComponents, fertilizers, soil, bbType, oneSeven, fourTen }) => {
   const [comps, setComps] = useState(components)
+  const [cacheComps, setCacheComps] = useState(null)
   const [laborTotal, setLaborTotal] = useState(0)
   const [materialTotal, setMaterialTotal] = useState(0)
   const [fertilizerTotal, setFertlizerTotal] = useState(0)
@@ -26,6 +28,9 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
   const [butterPrice, setButterPrice] = useState(0)
   const [trial, setTrial] = useState({})
 
+  const [oneSevenData, setOneSevenData] = useState(0)
+  const [fourTenData, setFourTenData] = useState(0)
+
   function getPinePrice(pine) {
     const newPine = pineapple.find(thePine => thePine.name.toLowerCase() === pine.toLowerCase())
     return parseInt(newPine.price.toFixed())
@@ -37,6 +42,43 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
   }
 
   useEffect(() => {
+    if (oneSevenData !== null) {
+      const selectedOneSeven = oneSeven.find(item => item.value === oneSevenData);
+      if (selectedOneSeven) {
+        setComps(prevComps => {
+          const filteredComps = prevComps.filter(comp => ![1, 7].includes(comp.label));
+          return [
+            ...filteredComps,
+            ...selectedOneSeven.data.flatMap(item => [
+              { ...item, label: 1, type: 'p' },
+              { ...item, label: 7, type: 'p' }
+            ])
+          ];
+        });
+      }
+    }
+  }, [oneSevenData]);
+  
+  useEffect(() => {
+    if (fourTenData !== null) {
+      const selectedFourTen = fourTen.find(item => item.value === fourTenData);
+      if (selectedFourTen) {
+        setComps(prevComps => {
+          const filteredComps = prevComps.filter(comp => ![4, 10].includes(comp.label));
+          return [
+            ...filteredComps,
+            ...selectedFourTen.data.flatMap(item => [
+              { ...item, label: 4, type: 'p' },
+              { ...item, label: 10, type: 'p' }
+            ])
+          ];
+        });
+      }
+    }
+  }, [fourTenData]);
+  
+
+  useEffect(() => {
     let materialSum = 0;
     let laborSum = 0;
     let fertilizerSum = 0;
@@ -44,6 +86,20 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
     const loam = 90;
     const sandy = 85;
     const clay = 80;
+
+    // const oneAndSevenFerts = oneSeven.find(v => v.value === oneSevenData);
+    // const fourAndTenFerts = fourTen.find(v => v.value === fourTenData);
+
+    // const totalOneSevenPrice = oneAndSevenFerts.data.reduce((sum, comp) => {
+    //   return sum + comp.totalPrice;
+    // }, 0);
+
+    // const totalFourTenPrice = fourAndTenFerts.data.reduce((sum, comp) => {
+    //   return sum + comp.totalPrice;
+    // }, 0);
+
+    // fertilizerSum = totalOneSevenPrice + totalFourTenPrice
+
 
     comps.forEach((component) => {
       if (component.particular.toLowerCase() === 'material') {
@@ -72,13 +128,14 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
           }
 
         }
+
         if (component.parent.toLowerCase() === 'fertilizer') {
-          fertilizerSum += parseInt(component.totalPrice)
+          fertilizerSum += parseFloat(component.totalPrice)
         }
 
         materialSum += parseInt(component.totalPrice);
       } else if (component.particular.toLowerCase() === 'labor') {
-        laborSum += parseInt(component.totalPrice);
+        laborSum += parseFloat(component.totalPrice);
       }
     });
 
@@ -86,7 +143,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
     setLaborTotal(laborSum);
     setFertlizerTotal(fertilizerSum);
     setCostTotal(materialSum + laborSum);
-  }, [comps, pineapple]);
+  }, [comps, pineapple, fourTenData, oneSevenData]);
 
   useEffect(() => {
     const pineapplePrice = getPinePrice('good size')
@@ -189,9 +246,9 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
           value={formatter(qntyPrice).toString()}
           style={editable ? styles.textInputEditable : styles.textInput}
         />,
-        unit,
-        formatter(price),
-        formatter(totalPrice)
+        <Text style={{ fontSize: 12, fontWeight: 600 }}>{unit}</Text>,
+        <Text style={{ fontSize: 12, fontWeight: 600, textAlign: 'right' }}>{formatter(price)}</Text>,
+        <Text style={{ fontSize: 12, fontWeight: 600, textAlign: 'right' }}>{formatter(totalPrice)}</Text>,
       ]
     ];
 
@@ -235,69 +292,70 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
           </View>
 
           <View style={{ ...styles.tableHead, marginTop: 12 }}>
-            <Text style={{ fontWeight: 'bold', fontSize: 18 }}>Apply during the 1st month</Text>
+            <Text style={{ fontWeight: 'bold', fontSize: 18 }}>Apply during the 1st and 7th month</Text>
           </View>
+
+          <View style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
+            <Dropdown
+              data={oneSeven}
+              labelField='option'
+              valueField='value'
+              value={oneSevenData}
+              onChange={(item) => {
+                console.log("iteeeem oneSeven", item.data)
+                setOneSevenData(item.value);
+              }}
+              style={{ ...styles.textInput, borderBottomRightRadius: 0, borderTopRightRadius: 0 }}
+            />
+          </View>
+
           {
-            comps?.map((comp) => {
-              if (comp.parent.toLowerCase() === 'fertilizer' && comp.label === 1) {
+            oneSeven
+              .find(d => d.value === oneSevenData)
+              .data?.map((comp) => {
                 return (
                   <TableData
-                    key={comp.id + comp.label}
-                    component={{ ...comp, id: comp.id + comp.label }}
+                    key={comp.option}
+                    component={{ ...comp }}
                     editable={true}
                   />
                 )
-              }
-            })
+              })
           }
+
           <View style={{ ...styles.tableHead, marginTop: 12 }}>
-            <Text style={{ fontWeight: 'bold', fontSize: 18 }}>Apply during the 4th month</Text>
+            <Text style={{ fontWeight: 'bold', fontSize: 18 }}>Apply during the 4th and 10th month</Text>
           </View>
+
+          <View style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
+            <Dropdown
+              data={fourTen}
+              labelField='option'
+              valueField='value'
+              placeholder='Select fertilizers'
+              value={fourTenData}
+              onChange={(item) => {
+                console.log("iteeeem fourTen", item.data)
+                setFourTenData(item.value);
+              }}
+              style={{ ...styles.textInput, borderBottomRightRadius: 0, borderTopRightRadius: 0 }}
+            />
+          </View>
+
           {
-            comps?.map((comp) => {
-              if (comp.parent.toLowerCase() === 'fertilizer' && comp.label === 4) {
+            fourTen
+              .find(d => d.value === fourTenData)
+              .data?.map((comp) => {
                 return (
                   <TableData
-                    key={comp.id + comp.label}
-                    component={{ ...comp, id: comp.id + comp.label }}
+                    key={comp.option}
+                    component={{ ...comp }}
                     editable={true}
                   />
                 )
-              }
-            })
+              })
           }
-          <View style={{ ...styles.tableHead, marginTop: 12 }}>
-            <Text style={{ fontWeight: 'bold', fontSize: 18 }}>Apply during the 7th month</Text>
-          </View>
-          {
-            comps?.map((comp) => {
-              if (comp.parent.toLowerCase() === 'fertilizer' && comp.label === 7) {
-                return (
-                  <TableData
-                    key={comp.id + comp.label}
-                    component={{ ...comp, id: comp.id + comp.label }}
-                    editable={true}
-                  />
-                )
-              }
-            })
-          }
-          <View style={{ ...styles.tableHead, marginTop: 12 }}>
-            <Text style={{ fontWeight: 'bold', fontSize: 18 }}>Apply during the 10th month</Text>
-          </View>
-          {
-            comps?.map((comp) => {
-              if (comp.parent.toLowerCase() === 'fertilizer' && comp.label === 10) {
-                return (
-                  <TableData
-                    key={comp.id + comp.label}
-                    component={{ ...comp, id: comp.id + comp.label }}
-                    editable={true}
-                  />
-                )
-              }
-            })
-          }
+
           <View style={{ ...styles.tableHead, borderTopWidth: 2, borderBottomWidth: 2, marginBottom: 12 }}>
             <View style={{ flex: 3 }}>
               <Text style={{ fontWeight: 'bold', fontSize: 20, color: 'red' }}>Total Fertilizer Input: </Text>
@@ -558,5 +616,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 10,
     paddingHorizontal: 10,
+  },
+  textInput: {
+    flex: 1,
+    height: 46,
+    opacity: 1.0,
+    borderColor: '#E8E7E7',
+    borderWidth: 1,
+    backgroundColor: '#FBFBFB',
+    borderRadius: 8,
+    paddingHorizontal: 18,
+    color: '#3C3C3B',
+    fontSize: 16,
   },
 })

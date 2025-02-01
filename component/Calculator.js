@@ -46,583 +46,151 @@ const soilType = [
 
 const npkType = [
   {
-    label: 'HHS (High, High, Sufficient)',
-    value: 'HHS',
-    data: {
-      oranicFert: 4,
-      first: {
-        nutrients: {
-          N: 40,
-          P: 20,
-          K: 45
-        },
-        list: {
-          '14-14-14': 1.5,
-          '16-20-0': 0,
-          '46-0-0': 0.5,
-          '0-0-60': 0.5
-        }
-      },
-      second: {
-        nutrients: {
-          N: 40,
-          P: 0,
-          K: 15,
-        },
-        list: {
-          '17-0-17': 1.0,
-          '46-0-0': 0.5,
-          '0-0-60': 0,
-        }
-      }
-    }
+    label: "HHS (High, High, Sufficient)",
+    value: "HHS",
+    data: [
+      { N: 40, P: 20, K: 45 },
+      { N: 40, P: 0, K: 15 }
+    ]
   },
   {
-    label: 'HMS (High, Medium, Sufficient)',
-    value: 'HMS',
-    data: {
-      oranicFert: 4,
-      first: {
-        nutrients: {
-          N: 40,
-          P: 40,
-          K: 45
-        },
-        list: {
-          '14-14-14': 3,
-          '16-20-0': 0,
-          '46-0-0': 0,
-          '0-0-60': 0
-        }
-      },
-      second: {
-        nutrients: {
-          N: 40,
-          P: 0,
-          K: 15,
-        },
-        list: {
-          '17-0-17': 1.0, //water soluble solution
-          '46-0-0': 0.5,
-          '0-0-60': 0,
-        }
-      }
-    }
+    label: "HMS (High, Medium, Sufficient)",
+    value: "HMS",
+    data: [
+      { N: 40, P: 40, K: 45 },
+      { N: 40, P: 0, K: 15 }
+    ]
   },
   {
-    label: 'HLS (High, Low, Sufficient)',
-    value: 'HLS',
-    data: {
-      oranicFert: 4,
-      first: {
-        nutrients: {
-          N: 40,
-          P: 60,
-          K: 45
-        },
-        list: {
-          '14-14-14': 0,
-          '16-20-0': 3.0,
-          '46-0-0': 0,
-          '0-0-60': 0.75
-        }
-      },
-      second: {
-        nutrients: {
-          N: 40,
-          P: 0,
-          K: 15,
-        },
-        list: {
-          '17-0-17': 1.0, //water soluble solution
-          '46-0-0': 0.5,
-          '0-0-60': 0,
-        }
-      }
-    }
+    label: "HLS (High, Low, Sufficient)",
+    value: "HLS",
+    data: [
+      { N: 40, P: 60, K: 45 },
+      { N: 40, P: 0, K: 15 }
+    ]
   },
   {
-    label: 'HHD (High, High, Deficient)',
-    value: 'HHD',
-    data: {
-      oranicFert: 4,
-      first: {
-        nutrients: {
-          N: 40,
-          P: 20,
-          K: 225
-        },
-        list: {
-          '14-14-14': 1.5,
-          '16-20-0': 0,
-          '46-0-0': 0.5,
-          '0-0-60': 3.0
-        }
-      },
-      second: {
-        nutrients: {
-          N: 40,
-          P: 0,
-          K: 75,
-        },
-        list: {
-          '17-0-17': 2.5, //water soluble solution
-          '46-0-0': 0,
-          '0-0-60': 0.5,
-        }
-      }
-    }
+    label: "HHD (High, High, Deficient)",
+    value: "HHD",
+    data: [
+      { N: 40, P: 20, K: 225 },
+      { N: 40, P: 0, K: 75 }
+    ]
   },
   {
-    label: 'HMD (High, Medium, Deficient)',
-    value: 'HMD',
-    data: {
-      oranicFert: 4,
-      first: {
-        nutrients: {
-          N: 40,
-          P: 40,
-          K: 225
-        },
-        list: {
-          '14-14-14': 3.0,
-          '16-20-0': 0,
-          '46-0-0': 0,
-          '0-0-60': 3.0
-        }
-      },
-      second: {
-        nutrients: {
-          N: 40,
-          P: 0,
-          K: 75,
-        },
-        list: {
-          '17-0-17': 2.5, //water soluble solution
-          '46-0-0': 0,
-          '0-0-60': 0.5,
-        }
-      }
-    }
+    label: "HMD (High, Medium, Deficient)",
+    value: "HMD",
+    data: [
+      { N: 40, P: 40, K: 225 },
+      { N: 40, P: 0, K: 75 }
+    ]
   },
   {
-    label: 'HLD (High, Low, Deficient)',
-    value: 'HLD',
-    data: {
-      oranicFert: 4,
-      first: {
-        nutrients: {
-          N: 40,
-          P: 60,
-          K: 225
-        },
-        list: {
-          '14-14-14': 0,
-          '16-20-0': 3.0,
-          '46-0-0': 0,
-          '0-0-60': 4.0
-        }
-      },
-      second: {
-        nutrients: {
-          N: 40,
-          P: 0,
-          K: 75,
-        },
-        list: {
-          '17-0-17': 2.5, //water soluble solution
-          '46-0-0': 0,
-          '0-0-60': 0.5,
-        }
-      }
-    }
+    label: "HLD (High, Low, Deficient)",
+    value: "HLD",
+    data: [
+      { N: 40, P: 60, K: 225 },
+      { N: 40, P: 0, K: 75 }
+    ]
   },
   {
-    label: 'MHS (Medium, High, Suficient)',
-    value: 'MHS',
-    data: {
-      oranicFert: 6,
-      first: {
-        nutrients: {
-          N: 100,
-          P: 20,
-          K: 45
-        },
-        list: {
-          '14-14-14': 1.5,
-          '16-20-0': 0,
-          '46-0-0': 1.75,
-          '0-0-60': 0.5
-        }
-      },
-      second: {
-        nutrients: {
-          N: 100,
-          P: 0,
-          K: 15,
-        },
-        list: {
-          '17-0-17': 1.0, //water soluble solution
-          '46-0-0': 2.0,
-          '0-0-60': 0,
-        }
-      }
-    }
+    label: "MHS (Medium, High, Sufficient)",
+    value: "MHS",
+    data: [
+      { N: 100, P: 20, K: 45 },
+      { N: 100, P: 0, K: 15 }
+    ]
   },
   {
-    label: 'MMS (Medium, Medium, Suficient)',
-    value: 'MMS',
-    data: {
-      oranicFert: 6,
-      first: {
-        nutrients: {
-          N: 100,
-          P: 40,
-          K: 45
-        },
-        list: {
-          '14-14-14': 3.0,
-          '16-20-0': 0,
-          '46-0-0': 1.5,
-          '0-0-60': 0
-        }
-      },
-      second: {
-        nutrients: {
-          N: 100,
-          P: 0,
-          K: 15,
-        },
-        list: {
-          '17-0-17': 1.0, //water soluble solution
-          '46-0-0': 2.0,
-          '0-0-60': 0,
-        }
-      }
-    }
+    label: "MMS (Medium, Medium, Sufficient)",
+    value: "MMS",
+    data: [
+      { N: 100, P: 40, K: 45 },
+      { N: 100, P: 0, K: 15 }
+    ]
   },
   {
-    label: 'MLS (Medium, Low, Suficient)',
-    value: 'MLS',
-    data: {
-      oranicFert: 6,
-      first: {
-        nutrients: {
-          N: 100,
-          P: 60,
-          K: 45
-        },
-        list: {
-          '14-14-14': 3.0,
-          '16-20-0': 1.0,
-          '46-0-0': 1.0,
-          '0-0-60': 0
-        }
-      },
-      second: {
-        nutrients: {
-          N: 100,
-          P: 0,
-          K: 15,
-        },
-        list: {
-          '17-0-17': 1.0, //water soluble solution
-          '46-0-0': 2.0,
-          '0-0-60': 0,
-        }
-      }
-    }
+    label: "MLS (Medium, Low, Sufficient)",
+    value: "MLS",
+    data: [
+      { N: 100, P: 60, K: 45 },
+      { N: 100, P: 0, K: 15 }
+    ]
   },
   {
-    label: 'MHD (Medium, High, Deficient)',
-    value: 'MHD',
-    data: {
-      oranicFert: 6,
-      first: {
-        nutrients: {
-          N: 100,
-          P: 20,
-          K: 225
-        },
-        list: {
-          '14-14-14': 1.5,
-          '16-20-0': 0,
-          '46-0-0': 1.75,
-          '0-0-60': 3.0
-        }
-      },
-      second: {
-        nutrients: {
-          N: 100,
-          P: 0,
-          K: 75,
-        },
-        list: {
-          '17-0-17': 4.5, //water soluble solution
-          '46-0-0': 0.5,
-          '0-0-60': 0,
-        }
-      }
-    }
+    label: "MHD (Medium, High, Deficient)",
+    value: "MHD",
+    data: [
+      { N: 100, P: 20, K: 225 },
+      { N: 100, P: 0, K: 75 }
+    ]
   },
   {
-    label: 'MMD (Medium, Medium, Deficient)',
-    value: 'MMD',
-    data: {
-      oranicFert: 6,
-      first: {
-        nutrients: {
-          N: 100,
-          P: 40,
-          K: 225
-        },
-        list: {
-          '14-14-14': 3.0,
-          '16-20-0': 0,
-          '46-0-0': 1.0,
-          '0-0-60': 3.0
-        }
-      },
-      second: {
-        nutrients: {
-          N: 100,
-          P: 0,
-          K: 75,
-        },
-        list: {
-          '17-0-17': 4.5, //water soluble solution
-          '46-0-0': 0.5,
-          '0-0-60': 0,
-        }
-      }
-    }
+    label: "MMD (Medium, Medium, Deficient)",
+    value: "MMD",
+    data: [
+      { N: 100, P: 40, K: 225 },
+      { N: 100, P: 0, K: 75 }
+    ]
   },
   {
-    label: 'MLD (Medium, Low, Deficient)',
-    value: 'MLD',
-    data: {
-      oranicFert: 6,
-      first: {
-        nutrients: {
-          N: 100,
-          P: 60,
-          K: 225
-        },
-        list: {
-          '14-14-14': 4.0,
-          '16-20-0': 0,
-          '46-0-0': 1.0,
-          '0-0-60': 3.0
-        }
-      },
-      second: {
-        nutrients: {
-          N: 100,
-          P: 0,
-          K: 75,
-        },
-        list: {
-          '17-0-17': 4.5, //water soluble solution
-          '46-0-0': 0.5,
-          '0-0-60': 0,
-        }
-      }
-    }
+    label: "MLD (Medium, Low, Deficient)",
+    value: "MLD",
+    data: [
+      { N: 100, P: 60, K: 225 },
+      { N: 100, P: 0, K: 75 }
+    ]
   },
   {
-    label: 'LHS (Low, High, Suficient)',
-    value: 'LHS',
-    data: {
-      oranicFert: 8,
-      first: {
-        nutrients: {
-          N: 150,
-          P: 20,
-          K: 45
-        },
-        list: {
-          '14-14-14': 1.5,
-          '16-20-0': 0,
-          '46-0-0': 3.0,
-          '0-0-60': 0.7
-        }
-      },
-      second: {
-        nutrients: {
-          N: 150,
-          P: 0,
-          K: 15,
-        },
-        list: {
-          '17-0-17': 1.0, //water soluble solution
-          '46-0-0': 3.0,
-          '0-0-60': 0,
-        }
-      }
-    }
+    label: "LHS (Low, High, Sufficient)",
+    value: "LHS",
+    data: [
+      { N: 150, P: 20, K: 45 },
+      { N: 150, P: 0, K: 15 }
+    ]
   },
   {
-    label: 'LMS (Low, Medium, Suficient)',
-    value: 'LMS',
-    data: {
-      oranicFert: 8,
-      first: {
-        nutrients: {
-          N: 150,
-          P: 40,
-          K: 45
-        },
-        list: {
-          '14-14-14': 3.0,
-          '16-20-0': 0,
-          '46-0-0': 2.5,
-          '0-0-60': 0
-        }
-      },
-      second: {
-        nutrients: {
-          N: 150,
-          P: 0,
-          K: 15,
-        },
-        list: {
-          '17-0-17': 1.0, //water soluble solution
-          '46-0-0': 3.0,
-          '0-0-60': 0,
-        }
-      }
-    }
+    label: "LMS (Low, Medium, Sufficient)",
+    value: "LMS",
+    data: [
+      { N: 150, P: 40, K: 45 },
+      { N: 150, P: 0, K: 15 }
+    ]
   },
   {
-    label: 'LLS (Low, Low, Suficient)',
-    value: 'LLS',
-    data: {
-      oranicFert: 8,
-      first: {
-        nutrients: {
-          N: 150,
-          P: 60,
-          K: 45
-        },
-        list: {
-          '14-14-14': 3.0,
-          '16-20-0': 1.0,
-          '46-0-0': 2.0,
-          '0-0-60': 0
-        }
-      },
-      second: {
-        nutrients: {
-          N: 150,
-          P: 0,
-          K: 15,
-        },
-        list: {
-          '17-0-17': 1.0, //water soluble solution
-          '46-0-0': 3.0,
-          '0-0-60': 0,
-        }
-      }
-    }
+    label: "LLS (Low, Low, Sufficient)",
+    value: "LLS",
+    data: [
+      { N: 150, P: 60, K: 45 },
+      { N: 150, P: 0, K: 15 }
+    ]
   },
   {
-    label: 'LHD (Low, High, Deficient)',
-    value: 'LHD',
-    data: {
-      oranicFert: 8,
-      first: {
-        nutrients: {
-          N: 150,
-          P: 20,
-          K: 225
-        },
-        list: {
-          '14-14-14': 1.5,
-          '16-20-0': 0,
-          '46-0-0': 3.0,
-          '0-0-60': 3.5
-        }
-      },
-      second: {
-        nutrients: {
-          N: 150,
-          P: 0,
-          K: 75,
-        },
-        list: {
-          '17-0-17': 4.5, //water soluble solution
-          '46-0-0': 1.5,
-          '0-0-60': 0,
-        }
-      }
-    }
+    label: "LHD (Low, High, Deficient)",
+    value: "LHD",
+    data: [
+      { N: 150, P: 20, K: 225 },
+      { N: 150, P: 0, K: 75 }
+    ]
   },
+  {
+    label: "LMD (Low, Medium, Deficient)",
+    value: "LMD",
+    data: [
+      { N: 150, P: 40, K: 225 },
+      { N: 150, P: 0, K: 75 }
+    ]
+  },
+  {
+    label: "LLD (Low, Low, Deficient)",
+    value: "LLD",
+    data: [
+      { N: 150, P: 60, K: 225 },
+      { N: 150, P: 0, K: 75 }
+    ]
+  }
+];
 
-  {
-    label: 'LMD (Low, Medium, Deficient)',
-    value: 'LMD',
-    data: {
-      oranicFert: 8,
-      first: {
-        nutrients: {
-          N: 150,
-          P: 40,
-          K: 225
-        },
-        list: {
-          '14-14-14': 3.0,
-          '16-20-0': 0,
-          '46-0-0': 2.5,
-          '0-0-60': 3.0
-        }
-      },
-      second: {
-        nutrients: {
-          N: 150,
-          P: 0,
-          K: 75,
-        },
-        list: {
-          '17-0-17': 4.5, //water soluble solution
-          '46-0-0': 1.5,
-          '0-0-60': 0,
-        }
-      }
-    }
-  }, //150 60 225
-  {
-    label: 'LLD (Low, Low, Deficient)',
-    value: 'LLD',
-    data: {
-      oranicFert: 8,
-      first: {
-        nutrients: {
-          N: 150,
-          P: 60,
-          K: 225
-        },
-        list: {
-          '14-14-14': 4.0,
-          '16-20-0': 0,
-          '46-0-0': 2.0,
-          '0-0-60': 3.0
-        }
-      },
-      second: {
-        nutrients: {
-          N: 150,
-          P: 0,
-          K: 75,
-        },
-        list: {
-          '17-0-17': 4.5, //water soluble solution
-          '46-0-0': 1.5,
-          '0-0-60': 0,
-        }
-      }
-    }
-  }, //150 60 225
-]
 
 const buttType = [
   { label: 'Farmer Practice', value: 'Farmer Practice' },
@@ -680,7 +248,7 @@ export const Calculator = ({ navigation }) => {
   const [indUser, setIndUser] = useState({})
 
   // data natin
-  const [base, setBase] = useState('')
+  const [base, setBase] = useState(0)
   const [area, setArea] = useState(0)
   const [cropStage, setCropStage] = useState('vegetative')
   const [startDate, setStartDate] = useState(new Date());
@@ -701,8 +269,8 @@ export const Calculator = ({ navigation }) => {
   const [butterballType, setButterballType] = useState('')
 
   const [fertilizer, setFertilizer] = useState({})
-
-
+  const [oneSevenData, setOneSevenData] = useState(null);
+  const [fourTenData, setFourTenData] = useState(null)
   const [uniqueId, setUniqueId] = useState(0)
   // end ng data natin
 
@@ -799,7 +367,6 @@ export const Calculator = ({ navigation }) => {
     if (!users) return
     const io = GetIndObj(users, user.uid, 'id')
     setIndUser(io[0])
-    console.log("indUser", io[0])
   }, [users])
 
 
@@ -826,12 +393,9 @@ export const Calculator = ({ navigation }) => {
       newMun = indUser.mun
     }
 
-    console.log("muni", capitalize(newMun))
-
     fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${capitalize(newMun)},Camarines Norte,PH&appid=${WEATHER_KEY}`)
       .then(response => response.json())
       .then(json => {
-        console.log("locatioooonn:", json)
         setUserLocation(new GeoPoint(json[0].lat, json[0].lon))
       }).catch(e => {
         console.log("error fetching lat and lng", e)
@@ -839,55 +403,8 @@ export const Calculator = ({ navigation }) => {
 
   }, [isAddFarm])
 
-  // {
-  //   "base": "stations",
-  //   "clouds": {
-  //     "all": 84
-  //   },
-  //   "cod": 200,
-  //   "coord": {
-  //     "lat": 14.1066,
-  //     "lon": 122.8732
-  //   },
-  //   "dt": 1722450813,
-  //   "id": 1687428,
-  //   "main": {
-  //     "feels_like": 26.14,
-  //     "grnd_level": 1007,
-  //     "humidity": 91,
-  //     "pressure": 1010,
-  //     "sea_level": 1010,
-  //     "temp": 25.19,
-  //     "temp_max": 25.19,
-  //     "temp_min": 25.19
-  //   },
-  //   "name": "San Vicente",
-  //   "sys": {
-  //     "country": "PH",
-  //     "sunrise": 1722461546,
-  //     "sunset": 1722507427
-  //   },
-  //   "timezone": 28800,
-  //   "visibility": 10000,
-  //   "weather": [
-  //     {
-  //       "description": "broken clouds",
-  //       "icon": "04n",
-  //       "id": 803,
-  //       "main": "Clouds"
-  //     }
-  //   ],
-  //   "wind": {
-  //     "deg": 217,
-  //     "gust": 0.9,
-  //     "speed": 0.79
-  //   }
-  // }
-
-
   useEffect(() => {
     if (!userLocation) return
-    console.log(`the locationnnnn: ${userLocation.latitude}`);
 
     fetch(`http://api.openweathermap.org/data/2.5/weather?lat=${userLocation.latitude}&lon=${userLocation.longitude}&APPID=${WEATHER_KEY}&units=metric`)
       .then((res) => res.json())
@@ -961,11 +478,9 @@ export const Calculator = ({ navigation }) => {
       const response = await fetch(uri);
       const blob = await response.blob();
       const filename = uri.substring(uri.lastIndexOf('/') + 1);
-      console.log("number 2");
 
       const storageRef = ref(storage, `FarmImages/${newFarm}/${filename}`);
       const uploadTask = uploadBytesResumable(storageRef, blob);
-      console.log("number 3");
       uploadTask.on('state_changed',
         (snapshot) => {
           // Handle progress
@@ -1002,7 +517,6 @@ export const Calculator = ({ navigation }) => {
         lastname,
         sex,
         farmName,
-
       });
       const newAccountId = newAccountRef.id;
       batch.update(newAccountRef, { id: newAccountId });
@@ -1103,10 +617,6 @@ export const Calculator = ({ navigation }) => {
       ]);
     } catch (e) {
       console.error('Error in saveInputs:', e.message, e.stack);
-      console.log('start_date:', start_date);
-      console.log('floweringDate:', floweringDate);
-      console.log('fruitingDate:', fruitingDate);
-      console.log('harvestDate:', harvestDate);
     }
   };
 
@@ -1175,15 +685,6 @@ export const Calculator = ({ navigation }) => {
 
     return (
       <>
-        {/* <TouchableOpacity style={{
-          ...styles.button,
-          backgroundColor: '#FFF',
-          borderWidth: 1,
-          borderColor: '#4DAF50',
-          ...styles.buttonTwo
-        }} onPress={() => setIsNext(false)}>
-          <Text style={{ color: '#4DAF50', fontSize: 16 }}>Back</Text>
-        </TouchableOpacity> */}
         <TouchableOpacity style={{
           ...styles.button,
           ...styles.buttonTwo
@@ -1195,134 +696,240 @@ export const Calculator = ({ navigation }) => {
     )
   }
 
-  // useEffect(() => {
-  //   getLocationAsync();
-  // }, []);
-
-  // const getLocationAsync = async () => {
-  //   let { status } = await Location.requestForegroundPermissionsAsync();
-
-  //   if (status !== 'granted') {
-  //     Alert.alert('Permission to access location was denied');
-  //     return;
-  //   }
-
-  //   let location = await Location.getCurrentPositionAsync({});
-  //   const lat = location.coords.latitude
-  //   const long = location.coords.latitude
-  //   setUserLocation(new GeoPoint(lat, long));
-  //   setRegion({
-  //     latitude: location.coords.latitude,
-  //     longitude: location.coords.longitude,
-  //     latitudeDelta: 0.0922,
-  //     longitudeDelta: 0.0421,
-  //   });
-  // };
-
-  // const handleUpdateLocation = async () => {
-  //   let location = await Location.getCurrentPositionAsync({});
-  //   setUserLocation(location.coords);
-  //   setRegion({
-  //     latitude: location.coords.latitude,
-  //     longitude: location.coords.longitude,
-  //     latitudeDelta: 0.0922,
-  //     longitudeDelta: 0.0421,
-  //   });
-  // };
-
-  // const hideDatePicker = () => {
-  //   setDatePickerVisibility(false)
-  // }
-
-  // const showMode = (currentMode) => {
-  //   setShow(true);
-  //   setMode(currentMode);
-  // };
-
   const getMult = (numOne, numTwo) => {
     const num = numOne * numTwo
     return Math.round(num * 10) / 10
   }
 
+  // start of fertilizer optimizations
+  function getFunction(N, P, K, fertilizerOptions) {
+    const nonZeroNPK = [N, P, K].filter(v => v > 0);
+
+    const lowest = Math.min(...nonZeroNPK);
+    const field = (lowest === N) ? 'N' : (lowest === P) ? 'P' : 'K';
+
+    const needFert = fertilizerOptions.filter(fertilizer => fertilizer[field] !== 0);
+
+    return {
+      lowest,
+      field,
+      fertilizers:
+        needFert,
+    };
+  }
+
+  function getAmount(num) {
+    const bag = getMult(area, (num / 50) / 2);
+    return Math.round(bag * 100) / 100;
+  }
+
+  function formatNum(number) {
+    return Math.round(number * 100) / 100;
+  }
+
+  function getPrice(fertName) {
+    const fert = qParti.find(obj => obj.name.includes(fertName));
+    console.log("the fert issss", fert)
+    return fert ? { ...fert, foreignId: fert.id } : null
+  }
+
+  function getFertValue(N, P, K, fertilizerOptions) {
+    let options = [];
+    const { lowest, field, fertilizers } = getFunction(N, P, K, fertilizerOptions);
+
+    for (const f1 of fertilizers) {
+      let n1 = N;
+      let p1 = P;
+      let k1 = K;
+
+      const percent1 = f1[field] / 100;
+      const amount1 = (lowest / percent1);
+
+      n1 = n1 - (amount1 * (f1.N / 100));
+      p1 = p1 - (amount1 * (f1.P / 100));
+      k1 = k1 - (amount1 * (f1.K / 100));
+
+      const need1 = getFunction(n1, p1, k1, fertilizerOptions);
+      const lowest1 = need1.lowest;
+      const field1 = need1.field;
+      const fertilizers1 = need1.fertilizers.filter(f => f.name !== f1.name);
+
+      const amnt1 = Math.max(0, getAmount(amount1));
+      const fertObj1 = getPrice(f1.name)
+      if (fertObj1 === null) {
+        continue
+      }
+      const price1 = fertObj1.price
+      const totalPrice1 = price1 * amnt1;
+
+      if (n1 <= 0 && p1 <= 0 && k1 <= 0) {
+        const len = options.length;
+        options.push(
+          [{
+            ...fertObj1,
+            qntyPrice: amnt1,
+            price: formatNum(price1),
+            totalPrice: formatNum(totalPrice1),
+          }]);
+        continue;
+      }
+
+      for (const f2 of fertilizers1) {
+        let n2 = n1;
+        let p2 = p1;
+        let k2 = k1;
+
+        const percent2 = f2[field1] / 100;
+        const amount2 = lowest1 / percent2;
+
+        n2 = n2 - (amount2 * (f2.N / 100));
+        p2 = p2 - (amount2 * (f2.P / 100));
+        k2 = k2 - (amount2 * (f2.K / 100));
+
+        const need2 = getFunction(n2, p2, k2, fertilizerOptions);
+        const lowest2 = need2.lowest;
+        const field2 = need2.field;
+        const fertilizers2 = need2.fertilizers.filter(f => f.name !== f1.name && f.name !== f2.name);
+
+        const amnt2 = Math.max(0, getAmount(amount2));
+        const fertObj2 = getPrice(f2.name)
+        if (fertObj2 === null) {
+          continue
+        }
+        const price2 = fertObj2.price
+        const totalPrice2 = price2 * amnt2;
+
+        if (n2 <= 0 && p2 <= 0 && k2 <= 0) {
+          options.push(
+            [{
+              ...fertObj1,
+              qntyPrice: amnt1,
+              price: formatNum(price1),
+              totalPrice: formatNum(totalPrice1)
+            },
+            {
+              ...fertObj2,
+              qntyPrice: amnt2,
+              price: formatNum(price2),
+              totalPrice: formatNum(totalPrice2)
+            }]);
+          continue;
+        }
+        for (const f3 of fertilizers2) {
+          const len = options.length;
+          let n3 = n2;
+          let p3 = p2;
+          let k3 = k2;
+
+          const percent3 = f3[field2] / 100;
+          const amount3 = lowest2 / percent3;
+
+          n3 = n3 - (amount3 * (f3.N / 100));
+          p3 = p3 - (amount3 * (f3.P / 100));
+          k3 = k3 - (amount3 * (f3.K / 100));
+
+          const amnt3 = Math.max(0, getAmount(amount3));
+          const fertObj3 = getPrice(f3.name)
+          if (fertObj3 === null) {
+            continue
+          }
+          const price3 = fertObj3.price
+          const totalPrice3 = amnt3 * price3;
+
+          options.push(
+            [{
+              ...fertObj1,
+              qntyPrice: amnt1,
+              price: formatNum(price1),
+              totalPrice: formatNum(totalPrice1)
+            },
+            {
+              ...fertObj2,
+              qntyPrice: amnt2,
+              price: formatNum(price2),
+              totalPrice: formatNum(totalPrice2)
+            },
+            {
+              ...fertObj3,
+              qntyPrice: amnt3,
+              price: formatNum(price3),
+              totalPrice: formatNum(totalPrice3),
+            }])
+        }
+      }
+    }
+
+    const sortedOptions = options.sort((a, b) => {
+      const sumA = a.reduce((sum, fert) => sum + fert.totalPrice, 0);
+      const sumB = b.reduce((sum, fert) => sum + fert.totalPrice, 0);
+      return sumA - sumB;
+    }).slice(0, 5);
+
+    return sortedOptions;
+  }
+
+  function loopNPK(npks) {
+    const [npk1, npk2] = npks;
+
+    const fertilizersOne = [
+      { name: '16-20-0', N: 16, P: 20, K: 0 },
+      { name: '46-0-0', N: 46, P: 0, K: 0 },
+      { name: '0-0-60', N: 0, P: 0, K: 60 },
+      { name: '14-14-14', N: 14, P: 14, K: 14 },
+      { name: '21-0-0', N: 21, P: 0, K: 0 },
+      { name: '17-0-17', N: 17, P: 0, K: 17 },
+    ];
+
+    const oneAndSeven = getFertValue(npk1.N, npk1.P, npk1.K, fertilizersOne);
+    const fourAndTen = getFertValue(npk2.N, npk2.P, npk2.K, fertilizersOne);
+
+    const oneSeven = oneAndSeven.map((i, idx) => {
+      console.log(`oneSeven ${idx}: ${JSON.stringify(i, null, 2)}`)
+      return {
+        option: `Optimal Cost ${idx + 1}`,
+        value: idx,
+        data: i
+      }
+    })
+    const fourTen = fourAndTen.map((i, idx) => {
+      console.log(`fourTen ${idx}: ${JSON.stringify(i, null, 2)}`)
+      return {
+        option: `Optimal Cost ${idx + 1}`,
+        value: idx,
+        data: i
+      }
+    })
+
+
+    setOneSevenData(oneSeven);
+    setFourTenData(fourTen);
+  }
+
   const handleBase = () => {
     const baseValue = parseFloat(base);
+
     if (baseValue === 0) {
       return;
     }
 
-    const newComponents = qParti?.flatMap(item => {
-      if (item.parent.toLowerCase() === 'fertilizer') {
-        const fertilizers = npkType.find((npkItem) => npkItem.value === npk)
-        const firstList = fertilizers.data.first.list
-        const secondList = fertilizers.data.second.list
+    const fertilizers = npkType.find((npkItem) => npkItem.value === npk)
+    loopNPK(fertilizers.data)
 
-        // Update item based on firstList
-        let items = [];
-
-        Object.keys(firstList).forEach(list => {
-          if (item.name.includes(list)) {
-            const newQnty = getMult(area, firstList[list]);
-            items.push({
-              ...item,
-              qntyPrice: newQnty / 2,
-              totalPrice: getMult(newQnty / 2, item.price),
-              foreignId: item.id,
-              label: 1,
-              type: 'p'
-            });
-          }
-        });
-
-        Object.keys(firstList).forEach(list => {
-          if (item.name.includes(list)) {
-            const newQnty = getMult(area, firstList[list]);
-            items.push({
-              ...item,
-              qntyPrice: newQnty / 2,
-              totalPrice: getMult(newQnty / 2, item.price),
-              foreignId: item.id,
-              label: 7,
-              type: 'p'
-            });
-          }
-        });
-
-        // Update item based on secondList
-        Object.keys(secondList).forEach(list => {
-          if (item.name.includes(list)) {
-            const newQnty = getMult(area, secondList[list]);
-            items.push({
-              ...item,
-              qntyPrice: newQnty / 2,
-              totalPrice: getMult(newQnty / 2, item.price),
-              foreignId: item.id,
-              label: 4,
-              type: 'p'
-            });
-          }
-        });
-
-        Object.keys(secondList).forEach(list => {
-          if (item.name.includes(list)) {
-            const newQnty = getMult(area, secondList[list]);
-            items.push({
-              ...item,
-              qntyPrice: newQnty / 2,
-              totalPrice: getMult(newQnty / 2, item.price),
-              foreignId: item.id,
-              label: 10,
-              type: 'p'
-            });
-          }
-        });
-
-        return items
-
-      } else {
-        const newQnty = getMult(area, item.defQnty)
-        return [{ ...item, qntyPrice: newQnty, totalPrice: getMult(newQnty, item.price), price: parseInt(item.price), foreignId: item.id, type: item.id === '26nzrfWyeWAPHriACtP4' ? 'p' : 'b' }]
-      }
-    });
+    const newComponents = qParti
+      ?.flatMap(item => {
+        if (item.parent.toLowerCase() !== 'fertilizer') {
+          const newQnty = getMult(area, item.defQnty);
+          return [{
+            ...item,
+            qntyPrice: newQnty,
+            totalPrice: getMult(newQnty, item.price),
+            price: parseInt(item.price),
+            foreignId: item.id,
+            type: item.id === '26nzrfWyeWAPHriACtP4' ? 'p' : 'b'
+          }];
+        }
+      })
+      .filter(Boolean);
 
     setComponents(newComponents);
     setTable(true);
@@ -1598,7 +1205,7 @@ export const Calculator = ({ navigation }) => {
 
                       }
                     </View>
-                    {table && qPine && <TableBuilder
+                    {table && qPine && oneSevenData && fourTenData && <TableBuilder
                       components={components}
                       area={area}
                       setRoiDetails={setRoiDetails}
@@ -1607,6 +1214,8 @@ export const Calculator = ({ navigation }) => {
                       fertilizers={fertilizer}
                       soil={soil}
                       bbType={butterballType}
+                      oneSeven={oneSevenData}
+                      fourTen={fourTenData}
                     />}
                   </View>
 

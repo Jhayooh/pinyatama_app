@@ -338,14 +338,14 @@ export const Landing = ({ navigation }) => {
 
     return (
         <>
-            <DrawerLayoutAndroid
+            {/* <DrawerLayoutAndroid
                 //drawerBackgroundColor="rgba(0,0,0,0.6)"
                 ref={drawer}
                 drawerWidth={300}
                 drawerPosition={drawerPosition}
                 renderNavigationView={() => drawerView()}
                 drawerLockMode={drawerLockMode}
-            >
+            > */}
                 <View style={styles.bgOut}>
                     <View style={styles.logoBg} >
                         <Text style={styles.appTitle} >Queen Pineapple Farming</Text>
@@ -408,7 +408,7 @@ export const Landing = ({ navigation }) => {
                                         ?
                                         <TouchableHighlight
                                             style={styles.btnbtn}
-                                        //onPress={handleLogout}
+                                            onPress={handleLogout}
                                         >
                                             <View style={styles.btnbtnChild2}>
                                                 {
@@ -441,7 +441,7 @@ export const Landing = ({ navigation }) => {
                 </View>
                 <LoginModal />
                 {/* <RegistrationModal /> */}
-            </DrawerLayoutAndroid>
+            {/* </DrawerLayoutAndroid> */}
         </>
     );
 }
