@@ -30,7 +30,8 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
 
   const [oneSevenData, setOneSevenData] = useState(0)
   const [fourTenData, setFourTenData] = useState(0)
-
+  const [totalOneSeven, setTotalOneSeven] = useState(0)
+  const [totalFourTen, setTotalFourTen] = useState(0)
   function getPinePrice(pine) {
     const newPine = pineapple.find(thePine => thePine.name.toLowerCase() === pine.toLowerCase())
     return parseInt(newPine.price.toFixed())
@@ -45,6 +46,11 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
     if (oneSevenData !== null) {
       const selectedOneSeven = oneSeven.find(item => item.value === oneSevenData);
       if (selectedOneSeven) {
+        const totalPrice = selectedOneSeven.data.reduce((sum, item) => {
+          return sum + (item.totalPrice || 0) * 2;
+        }, 0);
+
+        setTotalOneSeven(totalPrice);
         setComps(prevComps => {
           const filteredComps = prevComps.filter(comp => ![1, 7].includes(comp.label));
           return [
@@ -63,6 +69,11 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
     if (fourTenData !== null) {
       const selectedFourTen = fourTen.find(item => item.value === fourTenData);
       if (selectedFourTen) {
+        const totalPrice = selectedFourTen.data.reduce((sum, item) => {
+          return sum + (item.totalPrice || 0) * 2;
+        }, 0);
+
+        setTotalFourTen(totalPrice);
         setComps(prevComps => {
           const filteredComps = prevComps.filter(comp => ![4, 10].includes(comp.label));
           return [
@@ -328,7 +339,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
             </View>
             <View style={{ flex: 2, alignItems: 'flex-end' }}>
               <Text style={{ fontWeight: 'bold', fontSize: 18, color: 'red' }}>
-                Total ng 1st or 7th
+                {currencyformatter(totalOneSeven)}
               </Text>
             </View>
           </View>
@@ -371,7 +382,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
             </View>
             <View style={{ flex: 2, alignItems: 'flex-end' }}>
               <Text style={{ fontWeight: 'bold', fontSize: 18, color: 'red' }}>
-                Total ng 4th and 10th
+                {currencyformatter(totalFourTen)}
               </Text>
             </View>
           </View>

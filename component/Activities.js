@@ -4,23 +4,24 @@ import StepIndicator from 'react-native-step-indicator';
 import { MultiSelect } from 'react-native-element-dropdown';
 import { Dropdown } from 'react-native-element-dropdown';
 import moment from 'moment';
-import { addDoc, collection, query, orderBy, onSnapshot, Timestamp, updateDoc, doc, arrayUnion } from 'firebase/firestore'; // added onSnapshot
+import { addDoc, collection, query, orderBy, onSnapshot, Timestamp, updateDoc, doc, writeBatch, arrayUnion } from 'firebase/firestore'; // added onSnapshot
 import { db } from '../firebase/Config';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import CheckBox from 'expo-checkbox'
 import { EvilIcons, AntDesign, Entypo } from '@expo/vector-icons';
+import dayjs from "dayjs";
 
-const ferti = [
-  { label: "Ammophos (16-20-0)", value: "Ammophos (16-20-0)" },
-  { label: "Muriate of Potash (0-0-60)", value: "Muriate of Potash (0-0-60)" },
-  { label: "Urea (Granular) (46-0-0)", value: "Urea (Granular) (46-0-0)" },
-  { label: "Ammosul (21-0-0)", value: "Ammosul (21-0-0)" },
-  { label: "Complete (14-14-14)", value: "Complete (14-14-14)" },
-  { label: "Water Soluble Calcium Nitrate (17-0-17)", value: "Water Soluble Calcium Nitrate (17-0-17)" },
-  { label: "Flower Inducer (ethrel)", value: "Flower Inducer (ethrel)" },
-];
+// const ferti = [
+//   { label: "Ammophos (16-20-0)", value: "Ammophos (16-20-0)" },
+//   { label: "Muriate of Potash (0-0-60)", value: "Muriate of Potash (0-0-60)" },
+//   { label: "Urea (Granular) (46-0-0)", value: "Urea (Granular) (46-0-0)" },
+//   { label: "Ammosul (21-0-0)", value: "Ammosul (21-0-0)" },
+//   { label: "Complete (14-14-14)", value: "Complete (14-14-14)" },
+//   { label: "Water Soluble Calcium Nitrate (17-0-17)", value: "Water Soluble Calcium Nitrate (17-0-17)" },
+//   { label: "Flower Inducer (ethrel)", value: "Flower Inducer (ethrel)" },
+// ];
 
 const title = [
   { label: 'Crop Monoculture', value: 'Crop Monoculture' },
@@ -50,6 +51,9 @@ const title = [
 
 const Activities = ({ route }) => {
   const [farm, setFarm] = useState(route.params.farm)
+  const currentMonthDiff = farm.start_date
+    ? dayjs().diff(dayjs(farm.start_date.toDate()), "month")
+    : 0;
 
   const componentsColl = collection(db, `farms/${farm.id}/components`)
   const [components] = useCollectionData(componentsColl)
@@ -72,6 +76,10 @@ const Activities = ({ route }) => {
   const eventsColl = collection(db, `farms/${farm.id}/events`)
   const eventsQuery = query(eventsColl, orderBy('createdAt'))
   const [e] = useCollectionData(eventsQuery)
+
+  const [ferti, setFerti] = useState(null)
+  const [dd_batches, setDd_batches] = useState(null)
+  const [batchValue, setBatchValue] = useState(null)
 
   const [dynamicSteps, setDynamicSteps] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
@@ -103,6 +111,41 @@ const Activities = ({ route }) => {
     if (!e) return
     setEvents(e)
   }, [e])
+
+  useEffect(() => {
+    if (farm.batches) {
+      const farmBatches = farm.batches.map(f => ({
+        label: `Batch ${f.index} (${f.plantSize} pcs)`,
+        value: f.index,
+        ...f
+      }));
+      setDd_batches(farmBatches);
+    }
+  }, [farm]);
+
+  useEffect(() => {
+    if (parts) {
+      const filteredFerti = parts
+        .filter((part) => part.parent.toLowerCase() === "fertilizer" && part.isAvailable)
+        .map((part) => ({
+          isAvailable: part.isAvailable,
+          label: part.name,
+          value: part.name
+        }));
+
+      // Find Ethrel separately
+      const ethrelPart = parts
+        .filter((part) => part.name.includes('ethrel'))
+        .map((part) => ({
+          isAvailable: part.isAvailable,
+          label: part.name,
+          value: part.name
+        }));
+
+      // Add Ethrel at the end
+      setFerti([...filteredFerti, ...ethrelPart]);
+    }
+  }, [parts]);
 
   useEffect(() => {
     if (farmData && farmData.length > 0) {
@@ -304,35 +347,47 @@ const Activities = ({ route }) => {
     try {
       const currDate = date || new Date();
       if (act === "r") {
+        const batch = writeBatch(db); // Initialize batch operation
+        const date = new Date();
+        const farmDocRef = doc(farmColl, farm.id);
+        const farmRoi = farm.roi.find(r => r.type === 'a');
 
-        const date = new Date()
-        const farmDocRef = doc(farmColl, `${farm.id}`)
-        const farmRoi = farm.roi.find(r => r.type === 'a')
+        let batchPer = reportPer;
+        let selectedBatch;
+
         const plant = farm.remainingPlant || farm.plantNumber;
-        const theDamage = ((reportPer / 100) * farm.plantNumber)
-        const remainingPlant = plant - theDamage;
+        let theDamage = ((reportPer / 100) * farm.plantNumber);
+        let remainingPlant = plant - theDamage;
 
-        let failed = false
+        if (farm.batches) {
+          selectedBatch = farm.batches.find(b=>b.index === batchValue)
+          
+          theDamage = ((reportPer/100)*selectedBatch.plantSize);
+          remainingPlant = plant - theDamage;
+          batchPer = (theDamage/farm.plantNumber)*100
+        }
+
+        let failed = false;
 
         if (mark || remainingPlant === 0) {
-          failed = true
-          await updateDoc(farmDocRef, {
+          failed = true;
+          batch.update(farmDocRef, {
             crop: true,
             harvest_date: Timestamp.fromDate(date),
             remainingPlant: 0,
-            remarks: 'failed'
+            remarks: 'failed',
           });
-
         }
 
-        const [newGoodSize, newButterBall] = getNewGross(farm.soil.toLowerCase(), remainingPlant)
-
-        const grossReturn = (newGoodSize * getPinePrice('good size', localPine)) + (newButterBall * getPinePrice('butterball', localPine));
+        // Calculate new gross and ROI values
+        const [newGoodSize, newButterBall] = getNewGross(farm.soil.toLowerCase(), remainingPlant);
+        const grossReturn = (newGoodSize * getPinePrice('good size', localPine)) +
+          (newButterBall * getPinePrice('butterball', localPine));
         const costTotal = farmRoi.materialTotal + farmRoi.laborTotal + farmRoi.fertilizerTotal;
         const netReturnValue = grossReturn - costTotal;
         const roiValue = (netReturnValue / grossReturn) * 100;
 
-        const [ggDamage, bbDamage] = getNewGross(farm.soil.toLowerCase(), theDamage)
+        const [ggDamage, bbDamage] = getNewGross(farm.soil.toLowerCase(), theDamage);
 
         const newRoi = farm.roi.map(fr => {
           if (fr.type === 'a') {
@@ -342,34 +397,39 @@ const Activities = ({ route }) => {
               costTotal: costTotal,
               grossReturn: newGoodSize,
               netReturn: netReturnValue,
-              damageCost: farm.damageCost || 0 + ((ggDamage * getPinePrice('good size', localPine)) + (bbDamage * getPinePrice('butterball', localPine))),
+              damageCost: (farm.damageCost || 0) +
+                ((ggDamage * getPinePrice('good size', localPine)) +
+                  (bbDamage * getPinePrice('butterball', localPine))),
               roi: roiValue,
-            }
+            };
           }
-          return fr
-        })
+          return fr;
+        });
 
-
-        await updateDoc(farmDocRef, {
+        // Add batch update for farm document
+        batch.update(farmDocRef, {
           roi: newRoi,
-          remainingPlant: remainingPlant,
-          damage: (farm.damage || 0) + parseInt(reportPer)
-        })
+          remainingPlant: failed ? 0 : remainingPlant,
+          damage: (farm.damage || 0) + parseInt(batchPer),
+        });
 
-        await addDoc(activityColl,
-          {
-            type: act,
-            createdAt: currDate,
-            label: reportTitle,
-            compId: '',
-            desc: reportDesc,
-            qnty: reportPer,
-            remarks: failed,
-            unit: '%'
-          }
-        )
+        // Add new activity document to Firestore
+        const activityRef = doc(activityColl);
+        batch.set(activityRef, {
+          type: act,
+          createdAt: currDate,
+          label: `${reportTitle} ${selectedBatch && selectedBatch.label}`,
+          compId: '',
+          desc: reportDesc,
+          qnty: reportPer,
+          remarks: failed,
+          unit: 'pcs',
+        });
 
-        setReportPer('')
+        // Commit the batched operations
+        await batch.commit();
+
+        setReportPer('');
       } else {
         const theLabel = ferti.find(obj => obj.value === fertilizer);
         let newHarvest = null
@@ -740,50 +800,52 @@ const Activities = ({ route }) => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>Maglagay ng Aktibidades</Text>
+            <Text>Month{currentMonthDiff > 1 && 's'} of Queenpineapple: {currentMonthDiff}</Text>
             <View style={{ display: 'flex', flexDirection: 'row' }}>
               <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Abono:</Text>
               <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
             </View>
-            <Dropdown
-              data={ferti}
-              labelField="label"
-              valueField="value"
-              placeholder="Pumili ng Abono"
-              value={fertilizer}
-              style={styles.input}
-              onChange={item => {
-                const obj = parts?.find(obj => obj.name === item.value)
-                const apply = components?.filter(c => c.foreignId === obj.id && c.parent.toLowerCase() === 'fertilizer')
+            {ferti &&
+              <Dropdown
+                data={ferti}
+                labelField="label"
+                valueField="value"
+                placeholder="Pumili ng Abono"
+                value={fertilizer}
+                style={styles.input}
+                onChange={item => {
+                  const monthApply = [1, 4, 7, 10];
+                  const obj = parts?.find(obj => obj.name === item.value)
+                  const apply = components?.filter(c => c.foreignId === obj.id && c.parent.toLowerCase() === 'fertilizer')
+                  const currentApp = Math.max(...monthApply.filter(num => num <= currentMonthDiff));
+                  const selectedComp = components.find(c => c.foreignId === obj.id && c.label === currentApp)
 
-                console.log("the appllyyyyy", apply)
-                console.log("the compss", components)
+                  const newArray = monthApply.map((month) => {
+                    const match = apply
+                      .find((a) => a.label === month);
 
-                const monthApply = [1, 4, 7, 10];
-                const newArray = monthApply.map((month) => {
-                  const match = apply
-                    .find((a) => a.label === month);
-
-                  if (match) {
-                    return {
-                      qntyPrice: match.qntyPrice,
-                      unit: match.unit,
-                      label: match.label
-                    };
-                  } else {
-                    return {
-                      qntyPrice: 0,
-                      unit: obj?.unit,
-                      label: month
-                    };
-                  }
-                });
-                setFertilizer(item.value)
-                setComps(obj)
-                setApplication(obj.parent.toLowerCase() === 'fertilizer' ? newArray.sort((a, b) => a.label - b.label) : [])
-                setQntyPrice(getMult(farm.area, obj.defQnty))
-                setBilang((parseInt(farm.plantNumber) - parseInt(farm.ethrel)).toString())
-              }}
-            />
+                    if (match) {
+                      return {
+                        qntyPrice: match.qntyPrice,
+                        unit: match.unit,
+                        label: match.label
+                      };
+                    } else {
+                      return {
+                        qntyPrice: 0,
+                        unit: obj?.unit,
+                        label: month
+                      };
+                    }
+                  });
+                  setFertilizer(item.value)
+                  setComps(obj)
+                  setApplication(obj.parent.toLowerCase() === 'fertilizer' ? newArray.sort((a, b) => a.label - b.label) : [])
+                  setQntyPrice(selectedComp ? selectedComp.qntyPrice : 0)
+                  setBilang((parseInt(farm.plantNumber) - parseInt(farm.ethrel)).toString())
+                }}
+              />
+            }
             {
               fertilizer.toLocaleLowerCase() === "flower inducer (ethrel)" &&
               <View style={styles.quantyContainer}>
@@ -966,6 +1028,26 @@ const Activities = ({ route }) => {
                 onChangeText={(e) => setReportDesc(e)}
                 style={{ ...styles.input, borderColor: bilangError ? 'red' : '#ccc' }}
               />
+              {farm.batches && dd_batches &&
+                < View style={styles.quantyContainer}>
+                  <View style={{ display: 'flex', flexDirection: 'row' }}>
+                    <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Batch:</Text>
+                    <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
+                  </View>
+                  <Dropdown
+                    data={dd_batches}
+                    labelField="label"
+                    valueField="value"
+                    placeholder="Select Batch"
+                    value={batchValue}
+                    style={styles.input}
+                    onChange={item => {
+                      setBatchValue(item.value)
+                    }}
+                  />
+                </View>
+
+              }
               <View style={{ display: 'flex', flexDirection: 'row' }}>
                 <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Porsyento ng Pinsala:</Text>
                 <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
@@ -1056,14 +1138,12 @@ const Activities = ({ route }) => {
                   <Text style={{ fontSize: 15, color: 'black', marginTop: 10, fontFamily: 'serif' }}>Mark as Complete Farm?</Text>
                 </TouchableOpacity>
               </View>
-
             </View>
-
           </View>
         </View>
 
-      </Modal>
-    </View>
+      </Modal >
+    </View >
   );
 };
 const styles = StyleSheet.create({
