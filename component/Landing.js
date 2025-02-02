@@ -381,7 +381,11 @@ export const Landing = ({ navigation }) => {
                             </View>
                             <View style={styles.btnRow}>
                                 <TouchableHighlight underlayColor={'#F5C115'} style={styles.btnbtn} onPress={() => {
+                                    user 
+                                    ?
                                     navigation.navigate('Gallery', { farms: farms, user: logUser })
+                                    :
+                                    setShowLogin(true)
                                 }}>
                                     <View style={styles.btnbtnChild}>
                                         <Image source={galleryLogo} style={styles.btnImage} />
