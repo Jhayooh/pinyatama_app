@@ -63,7 +63,7 @@ const App = () => (
                 name='ProductionInput'
                 component={ProductionInput}
                 options={{
-                    title: 'Production Input',
+                    title: 'Input ng Produksyon',
                     headerTintColor: '#E8E7E7',
                     headerBackTitleVisible: false,
                     headerStyle: {
@@ -76,7 +76,7 @@ const App = () => (
                 name='Gallery'
                 component={Gallery}
                 options={{
-                    title: 'Mga Bukid ng Pinya',
+                    title: 'Mga Sakahan',
                     headerTintColor: '#E8E7E7',
                     headerBackTitleVisible: false,
                     headerStyle: {
@@ -100,7 +100,7 @@ const App = () => (
                 name='Video'
                 component={Video}
                 options={{
-                    title: 'Mga Bidyo',
+                    title: 'Bidyu',
                     headerTintColor: '#E8E7E7',
                     headerBackTitleVisible: false,
                     headerStyle: {
@@ -126,7 +126,7 @@ const App = () => (
                 name='Register'
                 component={Register}
                 options={{
-                    title: 'Create an Account',
+                    title: 'Gumawa ng Account',
                     headerTintColor: '#E8E7E7',
                     headerBackTitleVisible: false,
                     headerStyle: {
@@ -152,7 +152,7 @@ const App = () => (
                 name='Activities'
                 component={Activities}
                 options={{
-                    title: 'Add Activities',
+                    title: 'Mga Aktibidades',
                     headerTintColor: '#E8E7E7',
                     headerBackTitleVisible: false,
                     headerStyle: {
@@ -164,7 +164,7 @@ const App = () => (
                 name='Images'
                 component={ImagesTab}
                 options={{
-                    title: 'Add Farm Images',
+                    title: 'Mga Larawan ng Sakahan',
                     headerTintColor: '#E8E7E7',
                     headerBackTitleVisible: false,
                     headerStyle: {
@@ -176,7 +176,7 @@ const App = () => (
             name='Profile'
             component={Profile}
             options={{
-                title: 'Edit Farm Details',
+                title: 'Detalye ng Sakahan',
                 headerTintColor: '#E8E7E7',
                 headerBackTitleVisible: false,
                 headerStyle: {

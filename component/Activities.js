@@ -365,7 +365,7 @@ const Activities = ({ route }) => {
             desc: reportDesc,
             qnty: reportPer,
             remarks: failed,
-            unit: 'pcs'
+            unit: '%'
           }
         )
 
@@ -700,10 +700,10 @@ const Activities = ({ route }) => {
     <View style={styles.container}>
       <View style={{ display: 'flex', gap: 2, flexDirection: 'row', justifyContent: 'space-between', }}>
         <TouchableOpacity disabled={farm.crop} onPress={() => setIsAdd(true)} style={{ ...styles.addButton, flex: 1 }}>
-          <Text style={styles.addButtonText}>Add Activities</Text>
+          <Text style={styles.addButtonText}>Maglagay ng Aktibidades</Text>
         </TouchableOpacity>
         <TouchableOpacity disabled={farm.crop} onPress={() => setReport(true)} style={{ ...styles.addButton, backgroundColor: 'red', flex: 1 }}>
-          <Text style={styles.addButtonText}>Add Report</Text>
+          <Text style={styles.addButtonText}>Add-report</Text>
         </TouchableOpacity>
       </View>
       {dynamicSteps.length > 0 ? (
@@ -727,7 +727,7 @@ const Activities = ({ route }) => {
           </View>
         </View>
       ) : (
-        <Text style={styles.noActivitiesText}>No activities yet</Text>
+        <Text style={styles.noActivitiesText}>Wala pang aktibidades</Text>
       )}
 
       {/* Modal for adding activity */}
@@ -739,16 +739,16 @@ const Activities = ({ route }) => {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Add Activity</Text>
+            <Text style={styles.modalTitle}>Maglagay ng Aktibidades</Text>
             <View style={{ display: 'flex', flexDirection: 'row' }}>
-              <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Fertilizer:</Text>
+              <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Abono:</Text>
               <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
             </View>
             <Dropdown
               data={ferti}
               labelField="label"
               valueField="value"
-              placeholder="Select Fertilizer"
+              placeholder="Pumili ng Abono"
               value={fertilizer}
               style={styles.input}
               onChange={item => {
@@ -788,7 +788,7 @@ const Activities = ({ route }) => {
               fertilizer.toLocaleLowerCase() === "flower inducer (ethrel)" &&
               <View style={styles.quantyContainer}>
                 <View style={{ display: 'flex', flexDirection: 'row' }}>
-                  <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Number of Plants:</Text>
+                  <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Bilang ng Tanim:</Text>
                   <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
                 </View>
                 <TextInput
@@ -801,7 +801,7 @@ const Activities = ({ route }) => {
               </View>
             }
             <View style={{ display: 'flex', flexDirection: 'row' }}>
-              <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Quantity:</Text>
+              <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Bilang:</Text>
               <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
             </View>
             <View style={styles.quantyContainer}>
@@ -847,7 +847,7 @@ const Activities = ({ route }) => {
             </View>
             <View>
               <View style={{ display: 'flex', flexDirection: 'row' }}>
-                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Date:</Text>
+                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Petsa:</Text>
                 <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
               </View>
               <View style={{ ...styles.quantyContainer, display: 'flex', flexDirection: 'row', marginBottom: 10, }}>
@@ -877,7 +877,7 @@ const Activities = ({ route }) => {
               </View>
               <View style={{ display: 'flex', flexDirection: 'row', alignContent: 'center', gap: 2, width: '100%' }}>
                 <TouchableOpacity onPress={handleModalClose} style={styles.cancelButton}>
-                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                  <Text style={styles.cancelButtonText}>Kanselahin</Text>
                 </TouchableOpacity>
                 {
                   components && roi &&
@@ -886,7 +886,7 @@ const Activities = ({ route }) => {
                     style={[styles.saveButton, (saving || bilangError || !comps.id) && { backgroundColor: 'gray' }]}
                     disabled={saving || bilangError || !comps.id}
                   >
-                    <Text style={styles.saveButtonText}>{saving ? 'Saving...' : 'Save'}</Text>
+                    <Text style={styles.saveButtonText}>{saving ? 'Isinusumite...' : 'Isumite'}</Text>
                   </TouchableOpacity>
                 }
               </View>
@@ -903,10 +903,10 @@ const Activities = ({ route }) => {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>REPORT</Text>
+            <Text style={styles.modalTitle}>Mag-report</Text>
             <View style={styles.quantyContainer}>
               <View style={{ display: 'flex', flexDirection: 'row' }}>
-                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Title:</Text>
+                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Uri ng report:</Text>
                 <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
               </View>
               <MultiSelect
@@ -930,8 +930,8 @@ const Activities = ({ route }) => {
                 data={title}
                 labelField="label"
                 valueField="value"
-                placeholder="Select Report Title"
-                searchPlaceholder="Search..."
+                placeholder="Pumili"
+                searchPlaceholder="Maghanap..."
                 value={reportTitle}
                 onChange={item => {
                   setReportTitle(item);
@@ -954,7 +954,7 @@ const Activities = ({ route }) => {
                 style={{ ...styles.input, borderColor: bilangError ? 'red' : '#ccc' }}
               /> */}
               <View style={{ display: 'flex', flexDirection: 'row' }}>
-                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Description:</Text>
+                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Deskripsyon:</Text>
                 <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
               </View>
               <TextInput
@@ -967,7 +967,7 @@ const Activities = ({ route }) => {
                 style={{ ...styles.input, borderColor: bilangError ? 'red' : '#ccc' }}
               />
               <View style={{ display: 'flex', flexDirection: 'row' }}>
-                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Percentage of Damage:</Text>
+                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Porsyento ng Pinsala:</Text>
                 <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
               </View>
               <View style={styles.quantyContainer}>
@@ -983,7 +983,7 @@ const Activities = ({ route }) => {
                 </View>
               </View>
               <View style={{ display: 'flex', flexDirection: 'row' }}>
-                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Date of Report:</Text>
+                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Petsa:</Text>
                 <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
               </View>
               <View style={{ ...styles.quantyContainer, display: 'flex', flexDirection: 'row', marginBottom: 10, }}>
@@ -1020,7 +1020,7 @@ const Activities = ({ route }) => {
 
             <View style={{ display: 'flex', flexDirection: 'row', alignContent: 'center', gap: 2, width: '100%' }}>
               <TouchableOpacity onPress={handleModalClose} style={styles.cancelButton2}>
-                <Text style={styles.cancelButtonText}>Cancel</Text>
+                <Text style={styles.cancelButtonText}>Kanselahin</Text>
               </TouchableOpacity>
               {
                 components && roi &&
@@ -1029,7 +1029,7 @@ const Activities = ({ route }) => {
                   style={[styles.ReportButton, saving && { backgroundColor: 'gray' }]}
                   disabled={saving}
                 >
-                  <Text style={styles.saveButtonText}>{saving ? 'Saving...' : 'Report'}</Text>
+                  <Text style={styles.saveButtonText}>{saving ? 'Isinusumite...' : 'Report'}</Text>
                 </TouchableOpacity>
               }
             </View>

@@ -154,7 +154,7 @@ const ImagesTab = ({ route }) => {
         <View style={styles.screen}>
           <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
             <TouchableOpacity style={styles.button} onPress={() => setShowAddImage(true)}>
-              <Text style={{ color: '#fff', fontSize: 15, textAlign: 'center', }}>Add Image</Text>
+              <Text style={{ color: '#fff', fontSize: 15, textAlign: 'center', }}>Magdagdag ng Larawan</Text>
             </TouchableOpacity>
             {/* <TouchableOpacity style={{ ...styles.button, backgroundColor: 'red' }} onPress={() => handleDeleteSelected}>
               <Text style={{ color: '#fff', fontSize: 15, textAlign: 'center', }}>Delete Image</Text>
@@ -177,7 +177,7 @@ const ImagesTab = ({ route }) => {
       </View>
       <View>
         <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Text style={styles.save}>Save</Text>
+          <Text style={styles.save}>I-save</Text>
         </TouchableOpacity>
       </View>
       <Modal animationType='fade' visible={showAddImage} transparent={true}>
