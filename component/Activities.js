@@ -81,6 +81,8 @@ const Activities = ({ route }) => {
   const [dd_batches, setDd_batches] = useState(null)
   const [batchValue, setBatchValue] = useState(null)
 
+  const [selectedBatch, setSelectedBatch] = useState(null)
+
   const [dynamicSteps, setDynamicSteps] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
   const [isAdd, setIsAdd] = useState(false);
@@ -133,16 +135,18 @@ const Activities = ({ route }) => {
           value: part.name
         }));
 
-      // Find Ethrel separately
-      const ethrelPart = parts
-        .filter((part) => part.name.includes('ethrel'))
-        .map((part) => ({
-          isAvailable: part.isAvailable,
-          label: part.name,
-          value: part.name
-        }));
+      let ethrelPart = [];
 
-      // Add Ethrel at the end
+      if (currentMonthDiff >= 8 && currentMonthDiff <= 12) {
+        ethrelPart = parts
+          .filter((part) => part.name.toLowerCase().includes("ethrel"))
+          .map((part) => ({
+            isAvailable: part.isAvailable,
+            label: part.name,
+            value: part.name
+          }));
+      }
+
       setFerti([...filteredFerti, ...ethrelPart]);
     }
   }, [parts]);
@@ -165,12 +169,12 @@ const Activities = ({ route }) => {
   const handleBilang = (e) => {
     if (
       isNaN(e)
-      || e > (parseInt(farm.plantNumber) - parseInt(farm.ethrel))
+      || e > (parseInt(farm.remainingPlant))
       || e <= 0
     ) {
       setBilangError(true)
     } else {
-      setBilangError(false)
+      setBilangError(false)                                                 
     }
     setBilang(e)
     setQntyPrice(getMult((e / 30000), comps.defQnty))
@@ -359,12 +363,24 @@ const Activities = ({ route }) => {
         let theDamage = ((reportPer / 100) * farm.plantNumber);
         let remainingPlant = plant - theDamage;
 
+        console.log("the remaining plant:", remainingPlant)
+
         if (farm.batches) {
-          selectedBatch = farm.batches.find(b=>b.index === batchValue)
-          
-          theDamage = ((reportPer/100)*selectedBatch.plantSize);
+          selectedBatch = farm.batches.find(b => b.index === batchValue)
+          theDamage = ((reportPer / 100) * selectedBatch.plantSize);
+          const batchRemainingPlant = selectedBatch.plantSize - theDamage;
           remainingPlant = plant - theDamage;
-          batchPer = (theDamage/farm.plantNumber)*100
+          batchPer = (theDamage / farm.plantNumber) * 100;
+
+          const updatedBatches = farm.batches.map(b =>
+            b.index === batchValue ? {
+              ...b,
+              plantSize: batchRemainingPlant,
+              damage: (selectedBatch.damage || 0) + reportPer
+            } : b
+          );
+
+          batch.update(farmDocRef, { batches: updatedBatches });
         }
 
         let failed = false;
@@ -406,19 +422,17 @@ const Activities = ({ route }) => {
           return fr;
         });
 
-        // Add batch update for farm document
         batch.update(farmDocRef, {
           roi: newRoi,
-          remainingPlant: failed ? 0 : remainingPlant,
+          remainingPlant: failed ? 0 : farm.batches ? farm.remainingPlant : remainingPlant,
           damage: (farm.damage || 0) + parseInt(batchPer),
         });
 
-        // Add new activity document to Firestore
         const activityRef = doc(activityColl);
         batch.set(activityRef, {
           type: act,
           createdAt: currDate,
-          label: `${reportTitle} ${selectedBatch && selectedBatch.label}`,
+          label: `${reportTitle} ${farm.batches ? `(Batch ${selectedBatch.index})` : ''}`,
           compId: '',
           desc: reportDesc,
           qnty: reportPer,
@@ -433,6 +447,7 @@ const Activities = ({ route }) => {
       } else {
         const theLabel = ferti.find(obj => obj.value === fertilizer);
         let newHarvest = null
+
         if (theLabel.label.toLowerCase() === "flower inducer (ethrel)" && events) {
           const batches = farm.batches || [];
           const vege_event = events.find(p => p.className === 'vegetative');
@@ -545,9 +560,14 @@ const Activities = ({ route }) => {
             }
           }
 
+          const plant = farm.remainingPlant || farm.plantNumber
+
+          console.log("remaining plant sa a:", plant - parseInt(bilang))
+          
           await updateDoc(doc(db, `farms/${farm.id}`), {
             isEthrel: currDate,
             ethrel: farm.ethrel + parseInt(bilang),
+            remainingPlant: plant - parseInt(bilang),
             batches,
           });
 
@@ -800,7 +820,7 @@ const Activities = ({ route }) => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>Maglagay ng Aktibidades</Text>
-            <Text>Month{currentMonthDiff > 1 && 's'} of Queenpineapple: {currentMonthDiff}</Text>
+            <Text>Kasalukuyang Bilang ng Buwan {currentMonthDiff}</Text>
             <View style={{ display: 'flex', flexDirection: 'row' }}>
               <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Abono:</Text>
               <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
@@ -838,11 +858,12 @@ const Activities = ({ route }) => {
                       };
                     }
                   });
+
                   setFertilizer(item.value)
                   setComps(obj)
                   setApplication(obj.parent.toLowerCase() === 'fertilizer' ? newArray.sort((a, b) => a.label - b.label) : [])
                   setQntyPrice(selectedComp ? selectedComp.qntyPrice : 0)
-                  setBilang((parseInt(farm.plantNumber) - parseInt(farm.ethrel)).toString())
+                  setBilang((parseInt(farm.remainingPlant||0)).toString())
                 }}
               />
             }
@@ -1042,6 +1063,9 @@ const Activities = ({ route }) => {
                     value={batchValue}
                     style={styles.input}
                     onChange={item => {
+                      if (farm.batches){
+                        setSelecteBatch(dd_batches.find(b=>b.index === item.value))
+                      }
                       setBatchValue(item.value)
                     }}
                   />
@@ -1054,7 +1078,7 @@ const Activities = ({ route }) => {
               </View>
               <View style={styles.quantyContainer}>
                 <TextInput
-                  placeholder={(100 - (farm.damage || 0)).toString() + '% remaining plants'}
+                  placeholder={(100 - (selectedBatch ? selectedBatch.damage : (farm.damage || 0))).toString() + '% remaining plants'}
                   keyboardType="numeric"
                   style={styles.input}
                   value={reportPer}
