@@ -78,7 +78,7 @@ const Activities = ({ route }) => {
   const [e] = useCollectionData(eventsQuery)
 
   const [ferti, setFerti] = useState(null)
-  const [dd_batches, setDd_batches] = useState(null)
+  const [dd_batches, setDd_batches] = useState([])
   const [batchValue, setBatchValue] = useState(null)
 
   const [selectedBatch, setSelectedBatch] = useState(null)
@@ -116,14 +116,18 @@ const Activities = ({ route }) => {
 
   useEffect(() => {
     if (farm.batches) {
-      const farmBatches = farm.batches.map(f => ({
-        label: `Batch ${f.index} (${f.plantSize} pcs)`,
-        value: f.index,
-        ...f
-      }));
+      const farmBatches = farm.batches
+        .filter(f => f.plantSize > 0)
+        .map(f => ({
+          label: `Batch ${f.index} (${f.plantSize} pcs)`,
+          value: f.index,
+          ...f
+        }));
+
       setDd_batches(farmBatches);
     }
   }, [farm]);
+
 
   useEffect(() => {
     if (parts) {
@@ -137,7 +141,7 @@ const Activities = ({ route }) => {
 
       let ethrelPart = [];
 
-      if (currentMonthDiff >= 8 && currentMonthDiff <= 12) {
+      if (currentMonthDiff >= 8 && currentMonthDiff <= 12 && parseInt(farm.remainingPlant) != 0) {
         ethrelPart = parts
           .filter((part) => part.name.toLowerCase().includes("ethrel"))
           .map((part) => ({
@@ -149,7 +153,7 @@ const Activities = ({ route }) => {
 
       setFerti([...filteredFerti, ...ethrelPart]);
     }
-  }, [parts]);
+  }, [parts, saving]);
 
   useEffect(() => {
     if (farmData && farmData.length > 0) {
@@ -167,7 +171,6 @@ const Activities = ({ route }) => {
   }
 
   const handleBilang = (e) => {
-    console.log("remainingggg", farm.remainingPlant)
     if (
       isNaN(e)
       || e > (parseInt(farm.remainingPlant) || parseInt(farm.plantNumber))
@@ -245,10 +248,9 @@ const Activities = ({ route }) => {
       return
     }
 
-    const damage = 100 - (farm.damage || 0)
+    const damage = 100 - (selectedBatch ? selectedBatch.damage || 0 : farm.damage || 0)
 
     numericInput = Math.min(numericInput, damage, 100);
-
 
     setReportPer(numericInput.toString());
   };
@@ -366,7 +368,7 @@ const Activities = ({ route }) => {
 
         if (farm.batches) {
           selectedBatch = farm.batches.find(b => b.index === batchValue)
-          theDamage = ((reportPer / 100) * selectedBatch.plantSize);
+          theDamage = ((reportPer / 100) * selectedBatch.plantNumber);
           const batchRemainingPlant = selectedBatch.plantSize - theDamage;
           remainingPlant = plant - theDamage;
           batchPer = (theDamage / farm.plantNumber) * 100;
@@ -375,7 +377,7 @@ const Activities = ({ route }) => {
             b.index === batchValue ? {
               ...b,
               plantSize: batchRemainingPlant,
-              damage: (selectedBatch.damage || 0) + reportPer
+              damage: (selectedBatch.damage || 0) + parseInt(reportPer)
             } : b
           );
 
@@ -395,7 +397,7 @@ const Activities = ({ route }) => {
         }
 
         // Calculate new gross and ROI values
-        const [newGoodSize, newButterBall] = getNewGross(farm.soil.toLowerCase(), remainingPlant);
+        const [newGoodSize, newButterBall] = getNewGross(farm.soil.toLowerCase(), (parseInt(farm.plantNumber) - ((farm.damage / 100) * parseInt(farm.plantNumber))));
         const grossReturn = (newGoodSize * getPinePrice('good size', localPine)) +
           (newButterBall * getPinePrice('butterball', localPine));
         const costTotal = farmRoi.materialTotal + farmRoi.laborTotal + farmRoi.fertilizerTotal;
@@ -530,6 +532,7 @@ const Activities = ({ route }) => {
                   index: batchIndex,
                   harvestDate: e.end_time,
                   plantSize: parseInt(bilang),
+                  plantNumber: parseInt(bilang)
                 });
                 break;
 
@@ -820,7 +823,7 @@ const Activities = ({ route }) => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>Maglagay ng Aktibidades</Text>
-            <Text>Kasalukuyang Bilang ng Buwan {currentMonthDiff}</Text>
+            <Text>Kasalukuyang Bilang ng Buwan: {currentMonthDiff}</Text>
             <View style={{ display: 'flex', flexDirection: 'row' }}>
               <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Abono:</Text>
               <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
@@ -833,6 +836,9 @@ const Activities = ({ route }) => {
                 placeholder="Pumili ng Abono"
                 value={fertilizer}
                 style={styles.input}
+                // itemContainerStyle={item => {
+                //   backgroundColor: item.
+                // }}
                 onChange={item => {
                   const monthApply = [1, 4, 7, 10];
                   const obj = parts?.find(obj => obj.name === item.value)
@@ -1045,7 +1051,7 @@ const Activities = ({ route }) => {
                 onChangeText={(e) => setReportDesc(e)}
                 style={{ ...styles.input, borderColor: bilangError ? 'red' : '#ccc' }}
               />
-              {farm.batches && dd_batches &&
+              {dd_batches.length > 0 &&
                 < View style={styles.quantyContainer}>
                   <View style={{ display: 'flex', flexDirection: 'row' }}>
                     <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Batch:</Text>
@@ -1060,8 +1066,11 @@ const Activities = ({ route }) => {
                     style={styles.input}
                     onChange={item => {
                       if (farm.batches) {
-                        setSelectedBatch(dd_batches.find(b => b.index === item.value))
+                        const sdd_batch = dd_batches.find(b => b.index === item.value)
+                        console.log('marilag', sdd_batch);
+                        setSelectedBatch(sdd_batch)
                       }
+
                       setBatchValue(item.value)
                     }}
                   />
@@ -1074,7 +1083,7 @@ const Activities = ({ route }) => {
               </View>
               <View style={styles.quantyContainer}>
                 <TextInput
-                  placeholder={(100 - (selectedBatch ? selectedBatch.damage : (farm.damage || 0))).toString() + '% remaining plants'}
+                  placeholder={(100 - (selectedBatch ? selectedBatch.damage || 0 : farm.damage || 0)).toString() + '% remaining plants'}
                   keyboardType="numeric"
                   style={styles.input}
                   value={reportPer}
