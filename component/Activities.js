@@ -167,14 +167,15 @@ const Activities = ({ route }) => {
   }
 
   const handleBilang = (e) => {
+    console.log("remainingggg", farm.remainingPlant)
     if (
       isNaN(e)
-      || e > (parseInt(farm.remainingPlant))
+      || e > (parseInt(farm.remainingPlant) || parseInt(farm.plantNumber))
       || e <= 0
     ) {
       setBilangError(true)
     } else {
-      setBilangError(false)                                                 
+      setBilangError(false)
     }
     setBilang(e)
     setQntyPrice(getMult((e / 30000), comps.defQnty))
@@ -362,8 +363,6 @@ const Activities = ({ route }) => {
         const plant = farm.remainingPlant || farm.plantNumber;
         let theDamage = ((reportPer / 100) * farm.plantNumber);
         let remainingPlant = plant - theDamage;
-
-        console.log("the remaining plant:", remainingPlant)
 
         if (farm.batches) {
           selectedBatch = farm.batches.find(b => b.index === batchValue)
@@ -563,7 +562,7 @@ const Activities = ({ route }) => {
           const plant = farm.remainingPlant || farm.plantNumber
 
           console.log("remaining plant sa a:", plant - parseInt(bilang))
-          
+
           await updateDoc(doc(db, `farms/${farm.id}`), {
             isEthrel: currDate,
             ethrel: farm.ethrel + parseInt(bilang),
@@ -674,6 +673,7 @@ const Activities = ({ route }) => {
     labelColor: '#999999',
     labelSize: 13,
     currentStepLabelColor: '#fe7013',
+    labelAlign: 'flex-start'
   };
   const renderStepIndicator = ({ position, stepStatus }) => {
     if (position === 0 && stepStatus === 'finished') {
@@ -863,7 +863,7 @@ const Activities = ({ route }) => {
                   setComps(obj)
                   setApplication(obj.parent.toLowerCase() === 'fertilizer' ? newArray.sort((a, b) => a.label - b.label) : [])
                   setQntyPrice(selectedComp ? selectedComp.qntyPrice : 0)
-                  setBilang((parseInt(farm.remainingPlant||0)).toString())
+                  setBilang((parseInt(farm.remainingPlant || 0)).toString())
                 }}
               />
             }
@@ -894,10 +894,6 @@ const Activities = ({ route }) => {
                 style={{ ...styles.input, marginBottom: 0 }}
                 value={qntyPrice.toString()}
                 onChangeText={(value) => {
-
-                  if (value === "") {
-                    value = "0"
-                  }
                   if (value.startsWith(".")) {
                     value = "0" + value;
                   }
@@ -1063,8 +1059,8 @@ const Activities = ({ route }) => {
                     value={batchValue}
                     style={styles.input}
                     onChange={item => {
-                      if (farm.batches){
-                        setSelecteBatch(dd_batches.find(b=>b.index === item.value))
+                      if (farm.batches) {
+                        setSelectedBatch(dd_batches.find(b => b.index === item.value))
                       }
                       setBatchValue(item.value)
                     }}
