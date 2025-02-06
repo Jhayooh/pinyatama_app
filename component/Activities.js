@@ -397,7 +397,11 @@ const Activities = ({ route }) => {
         }
 
         // Calculate new gross and ROI values
-        const [newGoodSize, newButterBall] = getNewGross(farm.soil.toLowerCase(), (parseInt(farm.plantNumber) - ((farm.damage / 100) * parseInt(farm.plantNumber))));
+        const [newGoodSize, newButterBall] = getNewGross(farm.soil.toLowerCase(), remainingPlant);
+
+        console.log("good size", newGoodSize)
+        console.log("batterball", newButterBall)
+
         const grossReturn = (newGoodSize * getPinePrice('good size', localPine)) +
           (newButterBall * getPinePrice('butterball', localPine));
         const costTotal = farmRoi.materialTotal + farmRoi.laborTotal + farmRoi.fertilizerTotal;
@@ -563,8 +567,6 @@ const Activities = ({ route }) => {
           }
 
           const plant = farm.remainingPlant || farm.plantNumber
-
-          console.log("remaining plant sa a:", plant - parseInt(bilang))
 
           await updateDoc(doc(db, `farms/${farm.id}`), {
             isEthrel: currDate,
