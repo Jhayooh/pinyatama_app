@@ -24,28 +24,22 @@ import dayjs from "dayjs";
 // ];
 
 const title = [
-  { label: 'Crop Monoculture', value: 'Crop Monoculture' },
   { label: 'Diseases', value: 'Diseases' },
   { label: 'Drought', value: 'Drought' },
   { label: 'Excessive Rainfall', value: 'Excessive Rainfall' },
   { label: 'Extreme Temperatures', value: 'Extreme Temperatures' },
   { label: 'Floods', value: 'Floods' },
-  { label: 'Hailstorms', value: 'Hailstorms' },
   { label: 'High Input Costs', value: 'High Input Costs' },
-  { label: 'High Salinity', value: 'High Salinity' },
   { label: 'Improper Harvesting', value: 'Improper Harvesting' },
   { label: 'Improper Irrigation', value: 'Improper Irrigation' },
   { label: 'Incorrect Planting Time', value: 'Incorrect Planting Time' },
   { label: 'Labor Shortages', value: 'Labor Shortages' },
-  { label: 'Market Limitations', value: 'Market Limitations' },
   { label: 'Pests', value: 'Pests' },
   { label: 'Poor Fertilization', value: 'Poor Fertilization' },
   { label: 'Poor Seed Quality', value: 'Poor Seed Quality' },
   { label: 'Soil Erosion', value: 'Soil Erosion' },
   { label: 'Strong Winds', value: 'Strong Winds' },
   { label: 'Typhoon', value: 'Typhoon' },
-  { label: 'Unpredictable Weather Patterns', value: 'Unpredictable Weather Patterns' },
-  { label: 'Weeds', value: 'Weeds' },
 ];
 
 
