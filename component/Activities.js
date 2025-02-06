@@ -141,7 +141,7 @@ const Activities = ({ route }) => {
 
       let ethrelPart = [];
 
-      if (currentMonthDiff >= 8 && currentMonthDiff <= 12 && parseInt(farm.remainingPlant) != 0) {
+      if (currentMonthDiff >= 8 && currentMonthDiff <= 12 && parseInt(farm.remainingPlant ?? farm.plantNumber) > 0) {
         ethrelPart = parts
           .filter((part) => part.name.toLowerCase().includes("ethrel"))
           .map((part) => ({
@@ -171,6 +171,7 @@ const Activities = ({ route }) => {
   }
 
   const handleBilang = (e) => {
+    e = parseInt(e)
     if (
       isNaN(e)
       || e > (parseInt(farm.remainingPlant) || parseInt(farm.plantNumber))
@@ -197,6 +198,8 @@ const Activities = ({ route }) => {
     setReport(false);
     setDate(new Date())
     setApplication([])
+    setBatchValue(null)
+    setReportTitle('')
   };
 
 
@@ -350,10 +353,13 @@ const Activities = ({ route }) => {
   }
 
   const handleSave = async (act) => {
+    console.log("Arjay Macalinao")
     setSaving(true);
     try {
       const currDate = date || new Date();
       if (act === "r") {
+        console.log("1111");
+
         const batch = writeBatch(db); // Initialize batch operation
         const date = new Date();
         const farmDocRef = doc(farmColl, farm.id);
@@ -361,33 +367,44 @@ const Activities = ({ route }) => {
 
         let batchPer = reportPer;
         let selectedBatch;
+        let farmBatchesWithRemaining = [];
+        console.log("2222");
 
-        const plant = farm.remainingPlant || farm.plantNumber;
+        const plant = farm.remainingPlant ?? farm.plantNumber;
         let theDamage = ((reportPer / 100) * farm.plantNumber);
         let remainingPlant = plant - theDamage;
 
         if (farm.batches) {
-          selectedBatch = farm.batches.find(b => b.index === batchValue)
-          theDamage = ((reportPer / 100) * selectedBatch.plantNumber);
-          const batchRemainingPlant = selectedBatch.plantSize - theDamage;
-          remainingPlant = plant - theDamage;
-          batchPer = (theDamage / farm.plantNumber) * 100;
+          farmBatchesWithRemaining = farm.batches.filter(f => (f.damage || 0) > 0);
 
-          const updatedBatches = farm.batches.map(b =>
-            b.index === batchValue ? {
-              ...b,
-              plantSize: batchRemainingPlant,
-              damage: (selectedBatch.damage || 0) + parseInt(reportPer)
-            } : b
-          );
+          if (farmBatchesWithRemaining.length >= 0) {
+            selectedBatch = farm.batches.find(b => b.index === batchValue)
+            theDamage = ((reportPer / 100) * selectedBatch.plantNumber);
+            const batchRemainingPlant = selectedBatch.plantSize - theDamage;
+            remainingPlant = plant - theDamage;
+            batchPer = (theDamage / farm.plantNumber) * 100;
 
-          batch.update(farmDocRef, { batches: updatedBatches });
+            console.log("damage 1:", theDamage);
+            console.log("remaining plant 1:", remainingPlant)
+
+            const updatedBatches = farm.batches.map(b =>
+              b.index === batchValue ? {
+                ...b,
+                plantSize: batchRemainingPlant,
+                damage: (selectedBatch.damage || 0) + parseInt(reportPer)
+              } : b
+            );
+
+            console.log("4444");
+            batch.update(farmDocRef, { batches: updatedBatches });
+          }
         }
 
         let failed = false;
 
-        if (mark || remainingPlant === 0) {
+        if (mark || remainingPlant <= 0) {
           failed = true;
+          console.log("before batch.update")
           batch.update(farmDocRef, {
             crop: true,
             harvest_date: Timestamp.fromDate(date),
@@ -426,18 +443,20 @@ const Activities = ({ route }) => {
           }
           return fr;
         });
+        console.log("before batch.update");
+
 
         batch.update(farmDocRef, {
           roi: newRoi,
           remainingPlant: failed ? 0 : farm.batches ? farm.remainingPlant : remainingPlant,
           damage: (farm.damage || 0) + parseInt(batchPer),
         });
-
+        console.log("before batch.set activity ref")
         const activityRef = doc(activityColl);
         batch.set(activityRef, {
           type: act,
           createdAt: currDate,
-          label: `${reportTitle} ${farm.batches ? `(Batch ${selectedBatch.index})` : ''}`,
+          label: `${reportTitle} ${farmBatchesWithRemaining.length > 0 ? `(Batch ${selectedBatch.index})` : ''}`,
           compId: '',
           desc: reportDesc,
           qnty: reportPer,
@@ -446,7 +465,9 @@ const Activities = ({ route }) => {
         });
 
         // Commit the batched operations
+        console.log('Starting batch commit');
         await batch.commit();
+        console.log('Batch commit finished');
 
         setReportPer('');
       } else {
@@ -566,7 +587,7 @@ const Activities = ({ route }) => {
             }
           }
 
-          const plant = farm.remainingPlant || farm.plantNumber
+          const plant = farm.remainingPlant ?? farm.plantNumber
 
           await updateDoc(doc(db, `farms/${farm.id}`), {
             isEthrel: currDate,
@@ -710,12 +731,34 @@ const Activities = ({ route }) => {
   };
 
   const handleConfirmation = () => {
-    if (!reportTitle || !reportDesc || reportPer === '0' || reportPer === '') {
+    if (!reportTitle) {
       Alert.alert(
-        'Input Needed',
-        'Please fill out missing fields before submitting.'
+        'Pumili ng Sanhi',
+        'Mangyaring pumili ng sanhi.'
       );
       return;
+    }
+
+    if (!reportDesc) {
+      Alert.alert(
+        'Walang Deskripsyon',
+        'Mangyaring mag-lagay ng deskripsyon.'
+      );
+      return;
+    }
+    if (!batchValue) {
+      Alert.alert(
+        'Pumili ng Batch',
+        'Mangyaring pumili ng batch ng tanim na i-rereport.'
+      );
+      return;
+    }
+    if (reportPer === '0' || reportPer === '') {
+      Alert.alert(
+        'Porsyento ng Pinsala',
+        'Mangyaring mag-lagay ng bilang ng porsyento ng pinsala.'
+      );
+      return
     }
 
     if (mark) {
@@ -724,6 +767,7 @@ const Activities = ({ route }) => {
         'This will remove the Farm from the list of active Farms.',
         [
           {
+
             text: 'Cancel',
             onPress: () => console.log('Cancel Pressed'),
             style: 'cancel',
@@ -871,7 +915,7 @@ const Activities = ({ route }) => {
                   setComps(obj)
                   setApplication(obj.parent.toLowerCase() === 'fertilizer' ? newArray.sort((a, b) => a.label - b.label) : [])
                   setQntyPrice(selectedComp ? selectedComp.qntyPrice : 0)
-                  setBilang((parseInt(farm.remainingPlant || 0)).toString())
+                  setBilang((parseInt(farm.remainingPlant ?? farm.plantNumber)).toString())
                 }}
               />
             }
@@ -986,7 +1030,10 @@ const Activities = ({ route }) => {
         visible={report}
         transparent={true}
         animationType='slide'
-        onRequestClose={() => setReport(false)}
+        onRequestClose={() => {
+          setBatchValue(null)
+          setReport(false)
+        }}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
@@ -1017,7 +1064,7 @@ const Activities = ({ route }) => {
                 data={title}
                 labelField="label"
                 valueField="value"
-                placeholder="Pumili"
+                placeholder="Pumili ng Sanhi"
                 searchPlaceholder="Maghanap..."
                 value={reportTitle}
                 onChange={item => {
@@ -1034,12 +1081,6 @@ const Activities = ({ route }) => {
                 selectedStyle={{ borderRadius: 12, }}
                 renderItem={renderItem}
               />
-              {/* <TextInput
-                // label='Title'
-                // placeholder='Title'
-                onChangeText={(e) => setReportTitle(e)}
-                style={{ ...styles.input, borderColor: bilangError ? 'red' : '#ccc' }}
-              /> */}
               <View style={{ display: 'flex', flexDirection: 'row' }}>
                 <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Deskripsyon:</Text>
                 <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
@@ -1053,7 +1094,7 @@ const Activities = ({ route }) => {
                 onChangeText={(e) => setReportDesc(e)}
                 style={{ ...styles.input, borderColor: bilangError ? 'red' : '#ccc' }}
               />
-              {dd_batches.length > 0 &&
+              {
                 < View style={styles.quantyContainer}>
                   <View style={{ display: 'flex', flexDirection: 'row' }}>
                     <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Batch:</Text>
@@ -1069,7 +1110,6 @@ const Activities = ({ route }) => {
                     onChange={item => {
                       if (farm.batches) {
                         const sdd_batch = dd_batches.find(b => b.index === item.value)
-                        console.log('marilag', sdd_batch);
                         setSelectedBatch(sdd_batch)
                       }
 
@@ -1107,7 +1147,13 @@ const Activities = ({ route }) => {
                     year: 'numeric'
                   }).format(new Date())}`}
                   editable={false}
-                  style={{ ...styles.input, width: '80%', borderBottomRightRadius: 0, borderTopRightRadius: 0 }}
+                  style={{
+                    ...styles.input,
+                    width: '80%',
+                    borderBottomRightRadius: 0,
+                    borderTopRightRadius: 0,
+                    color: 'black'
+                  }}
                 />
                 <TouchableOpacity onPress={() => setStartPicker(true)}
                   style={{ ...styles.input, width: '20%', borderBottomLeftRadius: 0, borderTopLeftRadius: 0, paddingHorizontal: 10, paddingVertical: 0, justifyContent: 'center' }}
@@ -1166,7 +1212,7 @@ const Activities = ({ route }) => {
                   style={{ margin: 8 }}
                 />
                 <TouchableOpacity onPress={() => setMark(!mark)} disabled={!handleMark()}>
-                  <Text style={{ fontSize: 15, color: 'black', marginTop: 10, fontFamily: 'serif' }}>Mark as Complete Farm?</Text>
+                  <Text style={{ fontSize: 15, color: 'black', marginTop: 10, fontFamily: 'serif' }}>Mark '{<Text style={{ color: 'red' }}>{farm.title}</Text>}' as Complete Farm?</Text>
                 </TouchableOpacity>
               </View>
             </View>
