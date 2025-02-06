@@ -478,7 +478,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
           />
           <TableData
             component={{
-              name: 'Butterball',
+              name: 'Batterball',
               qntyPrice: butterBall,
               unit: 'pcs',
               price: butterPrice,

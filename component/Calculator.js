@@ -566,7 +566,6 @@ export const Calculator = ({ navigation }) => {
           { ...roiDetails, type: 'p' },
           { ...roiDetails, type: 'a' },
         ],
-        weather: weather.current
       });
       const newFarmId = newFarmRef.id;
 
@@ -1812,28 +1811,28 @@ const styles = StyleSheet.create({
     elevation: 5,
     marginVertical: 8,
   },
-  weatherCurrent: {
+  // weatherCurrent: {
 
-  },
-  weatherCurrentMain: {
-    alignItems: 'center'
-  },
-  weatherCurrDetails: {
-    width: 'auto',
-    gap: 6,
-    padding: 8,
-  },
-  weatherChild: {
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  weatherForecast: {
+  // },
+  // weatherCurrentMain: {
+  //   alignItems: 'center'
+  // },
+  // weatherCurrDetails: {
+  //   width: 'auto',
+  //   gap: 6,
+  //   padding: 8,
+  // },
+  // weatherChild: {
+  //   display: 'flex',
+  //   flexDirection: 'row',
+  //   justifyContent: 'space-between',
+  // },
+  // weatherForecast: {
 
-  },
-  forecastChild: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    flexDirection: 'row'
-  }
+  // },
+  // forecastChild: {
+  //   display: 'flex',
+  //   justifyContent: 'space-between',
+  //   flexDirection: 'row'
+  // }
 })
