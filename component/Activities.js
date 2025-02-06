@@ -442,7 +442,7 @@ const Activities = ({ route }) => {
           desc: reportDesc,
           qnty: reportPer,
           remarks: failed,
-          unit: 'pcs',
+          unit: '%',
         });
 
         // Commit the batched operations

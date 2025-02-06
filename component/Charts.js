@@ -95,7 +95,7 @@ const Charts = ({ farm }) => {
                 text: `${Math.round(getPercentage(roi.grossReturn, (roi.grossReturn + roi.butterBall )))}%(${format(Math.round(roi.grossReturn))})`,
             },
             {
-                name: 'Butterball',
+                name: 'Batterball',
                 value: roi.butterBall,
                 text: `${Math.round(getPercentage( roi.butterBall, (roi.grossReturn + roi.butterBall )))}%(${format(Math.round(roi.butterBall))})`,
             }
