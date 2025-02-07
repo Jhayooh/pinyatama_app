@@ -135,7 +135,7 @@ const Activities = ({ route }) => {
 
       let ethrelPart = [];
 
-      if (currentMonthDiff >= 8 && currentMonthDiff <= 12 && parseInt(farm.remainingPlant ?? farm.plantNumber) > 0) {
+      if (currentMonthDiff >= 8 && currentMonthDiff <= 20 && parseInt(farm.remainingPlant ?? farm.plantNumber) > 0) {
         ethrelPart = parts
           .filter((part) => part.name.toLowerCase().includes("ethrel"))
           .map((part) => ({
@@ -347,12 +347,10 @@ const Activities = ({ route }) => {
   }
 
   const handleSave = async (act) => {
-    console.log("Arjay Macalinao")
     setSaving(true);
     try {
       const currDate = date || new Date();
       if (act === "r") {
-        console.log("1111");
 
         const batch = writeBatch(db); // Initialize batch operation
         const date = new Date();
@@ -362,7 +360,6 @@ const Activities = ({ route }) => {
         let batchPer = reportPer;
         let selectedBatch;
         let farmBatchesWithRemaining = [];
-        console.log("2222");
 
         const plant = farm.remainingPlant ?? farm.plantNumber;
         let theDamage = ((reportPer / 100) * farm.plantNumber);
@@ -378,9 +375,6 @@ const Activities = ({ route }) => {
             remainingPlant = plant - theDamage;
             batchPer = (theDamage / farm.plantNumber) * 100;
 
-            console.log("damage 1:", theDamage);
-            console.log("remaining plant 1:", remainingPlant)
-
             const updatedBatches = farm.batches.map(b =>
               b.index === batchValue ? {
                 ...b,
@@ -389,16 +383,15 @@ const Activities = ({ route }) => {
               } : b
             );
 
-            console.log("4444");
             batch.update(farmDocRef, { batches: updatedBatches });
           }
         }
 
         let failed = false;
 
-        if (mark || remainingPlant <= 0) {
+        if (mark || (farm.damage || 0) + parseInt(batchPer) >= 70) {
           failed = true;
-          console.log("before batch.update")
+
           batch.update(farmDocRef, {
             crop: true,
             harvest_date: Timestamp.fromDate(date),
@@ -409,9 +402,6 @@ const Activities = ({ route }) => {
 
         // Calculate new gross and ROI values
         const [newGoodSize, newButterBall] = getNewGross(farm.soil.toLowerCase(), remainingPlant);
-
-        console.log("good size", newGoodSize)
-        console.log("batterball", newButterBall)
 
         const grossReturn = (newGoodSize * getPinePrice('good size', localPine)) +
           (newButterBall * getPinePrice('butterball', localPine));
@@ -437,15 +427,12 @@ const Activities = ({ route }) => {
           }
           return fr;
         });
-        console.log("before batch.update");
-
 
         batch.update(farmDocRef, {
           roi: newRoi,
           remainingPlant: failed ? 0 : farm.batches ? farm.remainingPlant : remainingPlant,
           damage: (farm.damage || 0) + parseInt(batchPer),
         });
-        console.log("before batch.set activity ref")
         const activityRef = doc(activityColl);
         batch.set(activityRef, {
           type: act,
@@ -716,12 +703,13 @@ const Activities = ({ route }) => {
 
   useEffect(() => {
     if (!handleMark()) {
+      console.log("handle", handleMark())
       setMark(false);
     }
   }, [reportPer]);
 
   const handleMark = () => {
-    return reportPer >= 70 && reportPer <= 100;
+    return reportPer+farm.damage >= 70 && reportPer+farm.damage <= 100;
   };
 
   const handleConfirmation = () => {
@@ -740,7 +728,7 @@ const Activities = ({ route }) => {
       );
       return;
     }
-    if (!batchValue) {
+    if (farm.batches && !batchValue) {
       Alert.alert(
         'Pumili ng Batch',
         'Mangyaring pumili ng batch ng tanim na i-rereport.'
@@ -1088,7 +1076,7 @@ const Activities = ({ route }) => {
                 onChangeText={(e) => setReportDesc(e)}
                 style={{ ...styles.input, borderColor: bilangError ? 'red' : '#ccc' }}
               />
-              {
+              {farm.batches &&
                 < View style={styles.quantyContainer}>
                   <View style={{ display: 'flex', flexDirection: 'row' }}>
                     <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Batch:</Text>
@@ -1199,7 +1187,6 @@ const Activities = ({ route }) => {
                 marginBottom: 10,
               }}>
                 <CheckBox
-                  disabled={!handleMark()}
                   value={mark}
                   onValueChange={setMark}
                   color={mark ? '#f6a30b' : undefined}
