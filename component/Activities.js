@@ -13,6 +13,8 @@ import CheckBox from 'expo-checkbox'
 import { EvilIcons, AntDesign, Entypo } from '@expo/vector-icons';
 import dayjs from "dayjs";
 
+
+
 // const ferti = [
 //   { label: "Ammophos (16-20-0)", value: "Ammophos (16-20-0)" },
 //   { label: "Muriate of Potash (0-0-60)", value: "Muriate of Potash (0-0-60)" },
@@ -351,47 +353,21 @@ const Activities = ({ route }) => {
     try {
       const currDate = date || new Date();
       if (act === "r") {
-
         const batch = writeBatch(db); // Initialize batch operation
         const date = new Date();
         const farmDocRef = doc(farmColl, farm.id);
         const farmRoi = farm.roi.find(r => r.type === 'a');
 
         let batchPer = reportPer;
-        let selectedBatch;
-        let farmBatchesWithRemaining = [];
 
-        const plant = farm.remainingPlant ?? farm.plantNumber;
+        const plant = farm.remainingPlant || farm.plantNumber;
         let theDamage = ((reportPer / 100) * farm.plantNumber);
         let remainingPlant = plant - theDamage;
 
-        if (farm.batches) {
-          farmBatchesWithRemaining = farm.batches.filter(f => (f.damage || 0) > 0);
-
-          if (farmBatchesWithRemaining.length >= 0) {
-            selectedBatch = farm.batches.find(b => b.index === batchValue)
-            theDamage = ((reportPer / 100) * selectedBatch.plantNumber);
-            const batchRemainingPlant = selectedBatch.plantSize - theDamage;
-            remainingPlant = plant - theDamage;
-            batchPer = (theDamage / farm.plantNumber) * 100;
-
-            const updatedBatches = farm.batches.map(b =>
-              b.index === batchValue ? {
-                ...b,
-                plantSize: batchRemainingPlant,
-                damage: (selectedBatch.damage || 0) + parseInt(reportPer)
-              } : b
-            );
-
-            batch.update(farmDocRef, { batches: updatedBatches });
-          }
-        }
-
         let failed = false;
 
-        if (mark || (farm.damage || 0) + parseInt(batchPer) >= 70) {
+        if (mark || remainingPlant === 0) {
           failed = true;
-
           batch.update(farmDocRef, {
             crop: true,
             harvest_date: Timestamp.fromDate(date),
@@ -437,18 +413,16 @@ const Activities = ({ route }) => {
         batch.set(activityRef, {
           type: act,
           createdAt: currDate,
-          label: `${reportTitle} ${farmBatchesWithRemaining.length > 0 ? `(Batch ${selectedBatch.index})` : ''}`,
+          label: reportTitle,
           compId: '',
           desc: reportDesc,
           qnty: reportPer,
           remarks: failed,
-          unit: '%',
+          unit: '%'
         });
 
         // Commit the batched operations
-        console.log('Starting batch commit');
         await batch.commit();
-        console.log('Batch commit finished');
 
         setReportPer('');
       } else {
@@ -477,17 +451,25 @@ const Activities = ({ route }) => {
           if (!ethrelValid(currDate, vege_event.start_time.toDate())) {
             setSaving(false);
             handleModalClose();
+            Alert.alert('Invalid Date', 'Hindi maaaring mag-lagay ng Ethrel sa panahong napili.', [
+              {
+                text: 'Ok',
+                style: 'cancel'
+              }
+            ])
             return;
           }
 
           const eventStages = ["vegetative", "flowering", "fruiting", "harvesting"];
-
+          
           const addAndSetDoc = async (eventData) => {
             const docRef = await addDoc(collection(db, `farms/${farm.id}/events`), eventData);
             await updateDoc(docRef, { id: docRef.id });
             return docRef;
           };
-
+          
+          let endOfVegetative;
+          let endOfFlowering;
           let newHarvest;
 
           for (let stage of eventStages) {
@@ -500,6 +482,7 @@ const Activities = ({ route }) => {
               case "vegetative":
                 e.end_time = Timestamp.fromDate(currDate);
                 e.title = `Batch ${batchIndex} [${bilang}pcs (${plantPercent(bilang, farm.plantNumber)}%)] - ${e.title}`;
+                endOfVegetative = currDate;
                 await addAndSetDoc({
                   ...e,
                   className: e.className + "Actual",
@@ -511,6 +494,7 @@ const Activities = ({ route }) => {
               case "flowering":
                 e.start_time = Timestamp.fromDate(currDate);
                 e.end_time = Timestamp.fromMillis(e.end_time.toMillis() + date_diff);
+                endOfFlowering = e.end_time;
                 await addAndSetDoc({
                   ...e,
                   className: e.className + "Actual",
@@ -575,6 +559,9 @@ const Activities = ({ route }) => {
             ethrel: farm.ethrel + parseInt(bilang),
             remainingPlant: plant - parseInt(bilang),
             batches,
+            endOfVegetative,
+            endOfFlowering,
+            harvest_date: newHarvest,
           });
 
           await addDoc(activityColl, {
@@ -602,15 +589,15 @@ const Activities = ({ route }) => {
           const newCompAct = await addDoc(componentsColl, actComp);
           await updateDoc(newCompAct, { id: newCompAct.id });
 
-          if (events.length > 3 && newHarvest > new Date(farm.harvest_date.toDate())) {
-            await updateDoc(doc(db, `farms/${farm.id}`), {
-              harvest_date: newHarvest,
-            });
-          } else if (events.length <= 3) {
-            await updateDoc(doc(db, `farms/${farm.id}`), {
-              harvest_date: newHarvest,
-            });
-          }
+          // if (events.length > 3 && newHarvest > new Date(farm.harvest_date.toDate())) {
+          //   await updateDoc(doc(db, `farms/${farm.id}`), {
+          //     harvest_date: newHarvest,
+          //   });
+          // } else if (events.length <= 3) {
+          //   await updateDoc(doc(db, `farms/${farm.id}`), {
+          //     harvest_date: newHarvest,
+          //   });
+          // }
 
           setSaving(false);
           handleModalClose();
@@ -709,7 +696,7 @@ const Activities = ({ route }) => {
   }, [reportPer]);
 
   const handleMark = () => {
-    return reportPer+farm.damage >= 70 && reportPer+farm.damage <= 100;
+    return reportPer + farm.damage >= 70 && reportPer + farm.damage <= 100;
   };
 
   const handleConfirmation = () => {
@@ -728,13 +715,7 @@ const Activities = ({ route }) => {
       );
       return;
     }
-    if (farm.batches && !batchValue) {
-      Alert.alert(
-        'Pumili ng Batch',
-        'Mangyaring pumili ng batch ng tanim na i-rereport.'
-      );
-      return;
-    }
+
     if (reportPer === '0' || reportPer === '') {
       Alert.alert(
         'Porsyento ng Pinsala',
@@ -852,6 +833,7 @@ const Activities = ({ route }) => {
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>Maglagay ng Aktibidades</Text>
             <Text>Kasalukuyang Bilang ng Buwan: {currentMonthDiff}</Text>
+            <Text>Bilang ng tanim: {farm.plantNumber}</Text>
             <View style={{ display: 'flex', flexDirection: 'row' }}>
               <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Abono:</Text>
               <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
@@ -872,8 +854,10 @@ const Activities = ({ route }) => {
                   const obj = parts?.find(obj => obj.name === item.value)
                   const apply = components?.filter(c => c.foreignId === obj.id && c.parent.toLowerCase() === 'fertilizer')
                   const currentApp = Math.max(...monthApply.filter(num => num <= currentMonthDiff));
-                  const selectedComp = components.find(c => c.foreignId === obj.id && c.label === currentApp)
-
+                  const selectedComp = components.find(c =>
+                    c.foreignId === obj.id &&
+                    (c.name.includes('ethrel') || c.label === currentApp)
+                  );
                   const newArray = monthApply.map((month) => {
                     const match = apply
                       .find((a) => a.label === month);
@@ -909,11 +893,12 @@ const Activities = ({ route }) => {
                   <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
                 </View>
                 <TextInput
+                  editable={false}
                   placeholder="Bilang ng tanim"
                   keyboardType="numeric"
                   style={{ ...styles.input, borderColor: bilangError ? 'red' : '#ccc' }}
                   value={bilang}
-                  onChangeText={handleBilang}
+                // onChangeText={handleBilang}
                 />
               </View>
             }
@@ -1076,7 +1061,7 @@ const Activities = ({ route }) => {
                 onChangeText={(e) => setReportDesc(e)}
                 style={{ ...styles.input, borderColor: bilangError ? 'red' : '#ccc' }}
               />
-              {farm.batches &&
+              {/* {farm.batches &&
                 < View style={styles.quantyContainer}>
                   <View style={{ display: 'flex', flexDirection: 'row' }}>
                     <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Batch:</Text>
@@ -1100,7 +1085,7 @@ const Activities = ({ route }) => {
                   />
                 </View>
 
-              }
+              } */}
               <View style={{ display: 'flex', flexDirection: 'row' }}>
                 <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>Porsyento ng Pinsala:</Text>
                 <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 15, marginBottom: 5 }}>*</Text>
