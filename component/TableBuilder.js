@@ -303,7 +303,7 @@ export const TableBuilder = ({ components, area, setRoiDetails, pineapple, setCo
           </View>
 
           <View style={{ ...styles.tableHead, marginTop: 12 }}>
-            <Text style={{ fontWeight: 'bold', fontSize: 18 }}>Apply during the 1st and 8th month</Text>
+            <Text style={{ fontWeight: 'bold', fontSize: 18 }}>Apply during the 1st and 7th month</Text>
           </View>
 
           <View style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
