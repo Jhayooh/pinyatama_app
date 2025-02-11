@@ -24,26 +24,25 @@ export default function Profile({ route, navigation }) {
                         <View style={{ flexDirection: 'column', gap: 1, marginBottom: 20 }}>
                             <Text style={styles.supText}>Pangalan ng Bukid</Text>
                             <TextInput
-                                editable
+                                editable={false}
                                 placeholder={farm.title}
-                                style={{ ...styles.textInput, borderColor: 'green' }}
+                                style={{ ...styles.textInput}}
                             />
                         </View>
                         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                             <View style={{ flex: 1, flexDirection: 'column', marginRight: 5, marginBottom: 20 }}>
                                 <Text style={styles.supText}>Pangalan ng Magsasaka</Text>
                                 <TextInput
-                                    editable
+                                    editable={false}
                                     placeholder={farm.farmerName}
-                                    style={{ ...styles.textInput, borderColor: 'green' }}
+                                    style={{ ...styles.textInput }}
                                 />
                             </View>
                             <View style={{ flex: 1, flexDirection: 'column', marginLeft: 5, marginBottom: 20 }}>
                                 <Text style={styles.supText}>Kasarian</Text>
                                 <TextInput
-                                    editable
-                                    placeholder={farm.sex}
-                                    style={{ ...styles.textInput, width: '100%', borderColor: 'green' }}
+                                    editable={false} placeholder={farm.sex}
+                                    style={{ ...styles.textInput, width: '100%' }}
                                 />
                             </View>
                         </View>
@@ -53,7 +52,7 @@ export default function Profile({ route, navigation }) {
                                 <TextInput
                                     editable={false}
                                     placeholder={farm.brgy}
-                                    style={{ ...styles.textInput, width: '100%'}}
+                                    style={{ ...styles.textInput, width: '100%' }}
                                 />
                             </View>
                             <View style={{ flex: 1, flexDirection: 'column', marginLeft: 5, marginBottom: 20 }}>
@@ -71,7 +70,7 @@ export default function Profile({ route, navigation }) {
                                 <TextInput
                                     editable={false}
                                     placeholder={farm.plantNumber}
-                                    style={{ ...styles.textInput, width: '100%'}}
+                                    style={{ ...styles.textInput, width: '100%' }}
                                 />
                             </View>
                             <View style={{ flex: 1, flexDirection: 'column', marginLeft: 5, marginBottom: 20 }}>
@@ -79,7 +78,7 @@ export default function Profile({ route, navigation }) {
                                 <TextInput
                                     editable={false}
                                     placeholder={farm.area}
-                                    style={{ ...styles.textInput, width: '100%'}}
+                                    style={{ ...styles.textInput, width: '100%' }}
                                 />
                             </View>
                         </View>
@@ -89,7 +88,7 @@ export default function Profile({ route, navigation }) {
                                 <TextInput
                                     editable={false}
                                     placeholder={farm.soil}
-                                    style={{ ...styles.textInput}}
+                                    style={{ ...styles.textInput }}
                                 />
                             </View>
                             <View style={{ flex: 1, flexDirection: 'column', marginLeft: 5, marginBottom: 20 }}>
@@ -105,11 +104,11 @@ export default function Profile({ route, navigation }) {
                     </View>
 
                 </View>
-                <View>
+                {/* <View>
                     <TouchableOpacity style={styles.saveButton}>
                         <Text style={styles.save}>I-save</Text>
                     </TouchableOpacity>
-                </View>
+                </View> */}
             </ScrollView>
         </View>
     )
@@ -182,8 +181,8 @@ const styles = StyleSheet.create({
         shadowRadius: 3.84,
         elevation: 5,
         margin: 10,
-        paddingHorizontal:50,
-        marginHorizontal:16,
+        paddingHorizontal: 50,
+        marginHorizontal: 16,
     },
     save: {
         color: '#fff',

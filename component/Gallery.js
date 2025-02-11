@@ -16,11 +16,9 @@ export default function Gallery({ route, }) {
   const [loading, setLoading] = useState(true);
 
   const [filteredFarms, setFilteredFarms] = useState(farms.filter(farm => farm.brgyUID === user.id ))
-  console.log('loguseer', user)
 
   const handleSearch = (text) => {
     setSearch(text);
-    console.log("text:", text)
   };
 
   async function getImage(id) {
@@ -40,7 +38,6 @@ export default function Gallery({ route, }) {
       if (!filteredFarms) return
       const urls = {};
       const defaultImageUrl = '../assets/p.jpg';
-      console.log('immmagggee', defaultImageUrl)
 
       for (const marker of filteredFarms) {
         const url = await getImage(marker.id);
@@ -54,25 +51,6 @@ export default function Gallery({ route, }) {
     }
     fetchImageUrls();
   }, [filteredFarms]);
-
-  // useEffect(() => {
-  //   async function fetchImageUrls() {
-  //     if (!filteredFarms) return;
-  //     const urls = {};
-  //     const defaultImageUrl = '../assets/p.jpg';
-  //     console.log('immmagggee', defaultImageUrl)
-
-  //     for (const marker of filteredFarms) {
-  //       const url = await getImage(marker.id);
-  //       urls[marker.id] = url || defaultImageUrl;
-  //     }
-
-  //     setImageUrls(urls);
-  //   }
-
-  //   fetchImageUrls();
-  // }, [filteredFarms]);
-
 
   return (
     <ImageBackground style={styles.background} >

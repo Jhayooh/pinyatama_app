@@ -37,12 +37,14 @@ import { Dropdown } from 'react-native-element-dropdown';
 import { auth, db, storage } from '../firebase/Config';
 import { TableBuilder } from './TableBuilder';
 
-
 const soilType = [
   { label: 'Loam', value: 'Loam' },
   { label: 'Clay', value: 'Clay' },
   { label: 'Sandy', value: 'Sandy' }
 ]
+
+
+
 
 const npkType = [
   {
@@ -190,6 +192,8 @@ const npkType = [
     ]
   }
 ];
+
+
 
 
 const buttType = [
@@ -502,7 +506,7 @@ export const Calculator = ({ navigation }) => {
     }
   };
 
-  function goBack() {
+  function goBack () {
     navigation.goBack()
   }
 
@@ -523,6 +527,7 @@ export const Calculator = ({ navigation }) => {
 
       // Set data in dataColl
       const dataDocRef = doc(dataColl, fieldId);
+
       batch.set(dataDocRef, {
         fieldId,
         farmName,
@@ -546,6 +551,8 @@ export const Calculator = ({ navigation }) => {
         brgy: brgyCode,
         cropStage,
         start_date,
+        endOfVegetative: floweringDate,
+        endOfFlowering: fruitingDate,
         harvest_date: harvestDate,
         geopoint: userLocation,
         mun: municipality,
@@ -953,6 +960,11 @@ export const Calculator = ({ navigation }) => {
 
     if (!fieldId) {
       Alert.alert('Field ID', 'Maglagay ng Field ID')
+      return
+    }
+
+    if (images.length===0){
+      Alert.alert('Imahe','Maglagay ng imahe ng bukid')
       return
     }
 

@@ -266,13 +266,13 @@ const Charts = ({ farm }) => {
                         flex: 1,
                         borderRadius: 5,
                     }}>
-                        <Text style={{ fontSize: 20, marginVertical: 12, fontWeight: '600', color: 'green' }}>Gross Return (pcs)</Text>
+                        <Text style={{ fontSize: 20, marginVertical: 12, fontWeight: '600', color: 'green' }}>Produksyon ng Pinya (pcs)</Text>
                         {
                             !newRoi && !pineTotal
                                 ? <View style={{ padding: 32, margin: 12 }}>
                                     <ActivityIndicator size={'large'} color={'#F6A30B'} />
                                 </View>
-                                : <DoughnutAndPie data={pineTotal} col={"sum"} title="Gross Return" />
+                                : <DoughnutAndPie data={pineTotal} col={"sum"} title="Produksyon ng Pinya" />
                         }
                     </View>
                 </View>
